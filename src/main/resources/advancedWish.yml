@@ -1,0 +1,36 @@
+# 关于自动重载: 除了此文件之外，其他文件均支持自动重载
+# 您应该避免使用第三方插件进行热重载
+# 因为这会让插件存储玩家缓存，直接在玩家第二次进入服务器时给予抽检的最终结果 (请查看 基础许愿池.yml 内 WAIT-SET 项注释)
+# 除非您想要切换 Redis，否则请不要使用第三方插件进行热重载，而是使用指令 (玩家 -> aw reload / 控制台 -> awc reload)
+#
+# 是否使用 Redis 数据库?
+# Redis 数据库的作用不仅仅在跨服
+# 请查看 基础许愿池.yml 内 WAIT-SET 项注释
+USE-REDIS: true
+
+# Redis 跨服配置
+REDIS:
+  IP: 127.0.0.1
+  PORT: 6379
+
+# 注册的许愿池
+WISH:
+  - "基础许愿池"
+
+# 自动检查是否具有新版本
+UPDATE-CHECKER: true
+
+# 检查周期，当自动更新开启后多少分钟进行一次检查
+CHECK-CYCLE: 60
+
+# 权限
+ADMIN-PERM: "aw.admin"
+
+# 增率 (保底率) 存放路径
+# 如果您想要保底率进行跨服，那么只需要将子服的所有路径全部填写为一样的即可
+# 如果不进行填写那么默认在服务端插件文件夹下的 /PlayerGuaranteed 文件夹内
+GUARANTEED-PATH: ""
+
+# bStats 将统计此插件的使用信息，不会收集隐私信息，请放心开启
+# bStats: https://bstats.org/plugin/bukkit/AdvancedWish/16990
+BSTATS: true

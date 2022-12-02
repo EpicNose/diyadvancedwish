@@ -1,0 +1,14 @@
+name: AdvancedWish
+version: '${project.version}'
+main: me.twomillions.plugin.advancedwish.main
+api-version: 1.13
+authors: [ TwoMillions ]
+softdepend: [ Vault, PlayerPoints, PlaceholderAPI]
+description: 一个简单且高度可定制的许愿(抽奖)插件!
+commands:
+  advancedwish:
+    aliases: [ aw ]
+    description: 提示指令.
+  advancedwishconsole:
+    aliases: [ awc ]
+    description: 控制台指令.

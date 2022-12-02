@@ -1,0 +1,363 @@
+# 自动重载: 这里的一切配置都是可以被自动重载的，这意味这您只需要保存，而不需要重载插件! 保存即刻应用!
+#
+# 注意:
+#  本插件本体不提供任何 Gui 界面
+#  您需要使用其他菜单自行制作 Gui 界面以供玩家更好的抽奖，当然您也可以选择使用指令进行抽奖
+#
+# 使用限制
+CONDITION:
+  # 权限检查，玩家必须含有什么权限
+  # 若不想启用，则填入空，即 ""
+  PERM: ""
+  # 玩家背包内必须含有什么物品
+  # 格式: 物品;数量
+  INVENTORY-HAVE:
+    - ""
+  # 玩家身上必须含有什么药水效果
+  # 格式: 药水;等级 (等级是大于等于)
+  PLAYER-HAVE-EFFECTS:
+    - ""
+  LEVEL: 0 # 等级限制，大于等于，不会扣除等级
+  MONEY: 0 # 这里指的是扣除，如果您不想启用的话则设置为0. 此功能需要用到 Vault 插件
+  POINT: 0 # 这里指的是扣除，如果您不想启用的话则设置为0. 此功能需要用到 PlayerPoints 插件
+
+# 设置奖品
+# 格式: 几率;PRIZE-DO内所执行项;增加的增率 (保底率);是否清零保底率
+#
+# 几率:
+#  此处的几率计算为，A 物品的几率为 5, B 为 20, C 为 75
+#  那么总几率即为 5 + 20 + 75 = 100, 抽到 A 的几率为 5/100 = 1/20
+PRIZE-SET:
+  - "5;A;0;true"
+  - "20;B;1;false"
+  - "75;C;2;false"
+
+# 保底，即当 增率 (保底率) 到多少了触发对应的保底机制
+# 格式: 增率 (保底率);PRIZE-DO内所执行项;增加的增率 (保底率);是否清空保底率
+#
+# 使用技巧:
+#  您可以在这里设置玩家的小保底，或大保底。
+#  假设我想设置小保底为 B:
+#  那么我将在 GUARANTEED 内写入 "对应的增率;B"，并且在此处规定，抽到 B 不会清空保底率 "对应的增率;B;false"
+#  随后我想要设置大保底为 A:
+#  那么我将在 GUARANTEED 内写入 "对应的增率;A" 并且规定抽到此次保底清空保底率 "对应的增率;A;true"
+GUARANTEED:
+  - "30;A;0;true" # 这里是大保底
+  - "15;B;1;false" # 这里是小保底
+
+# 我们应该怎么样写等待时间，这里将以秒为单位 (此任务支持跨服执行)
+# 格式: 等待秒数;执行操作
+#
+# 执行操作类型:
+#  GO-PRIZE-DO - 去到对应的 PRIZE-DO 模块
+#
+# 执行逻辑:
+#  当玩家使用此奖池许愿后，这里将会先进行计划任务
+#  如，在这里写了 3;C3 2;C2 1;C1 那么我们将会
+#  在玩家使用此奖池许愿后 1s 执行 C1, 2s 执行 C2
+#  以此类推。
+#
+# 使用技巧:
+#  这里可以延迟玩家的许愿时间，比如玩家需要等待十分钟
+#  亦或者是五分钟才可以拿到最终的许愿奖品。
+#
+# 注意事项:
+#  如果玩家在许愿后
+#  服务器被关闭 或者 您没有使用此插件自带的重载指令 而是使用了其他第三方插件重载了此插件 (如 Yum Plugman)
+#  那么会发生以下两种情况
+#   1.当您启动了 Redis 数据库，您没有重置 Redis 数据库内容，您没有重启机器，那么计时不会断，依然会在玩家计时到达指定时间段时执行对应的操作。
+#   2.如果您是单端模式，没有启用 Redis 数据库，那么发生以上情况后服务器再次开启后玩家进入，玩家将会跳过所有的操作，直接即刻收到奖励。
+#
+#  当然还需要注意的是，这一切都是您没有更改 PRIZE-DO 名称的前提下
+#  此功能的具体实现原理为:
+#   当服务器关闭后 / 插件被卸载，我们会记录玩家的中奖情况，如果服务器存在 Redis 数据库则不会进行记录
+#   如果服务器是单端，那么我们会将玩家与其对应的 结果操作 (PRIZE-DO) 进行记录，玩家将会跳过所有的操作，直接即刻收到奖励
+#   我们会记录奖励在对应 PRIZE-DO 中的具体编号，并且在玩家进入时直接执行内容，
+#   如果您更改了编号，导致此编号不存在，那么将不会发生任何事情。
+WAIT-SET:
+  - "0;START"
+  - "1;C1"
+  - "2;C2"
+  - "3;C3"
+  - "4;GO-PRIZE-DO"
+
+# 在这里详细规定 WAIT-SET 内的所执行项
+WAIT-DO:
+  C1:
+    # 给予的药水效果
+    # 格式: 药水名称;时间;等级
+    EFFECTS:
+      - "slow;20;5"
+      - "blindness;40;5"
+    # 显示的标题
+    TITLE:
+      MAIN-TITLE: "&6三!" # 主标题
+      SUB-TITLE: "&e此次许愿将在三秒后开奖!" # 副标题
+      FADE-IN: 20 # 淡入 (单位ticks 20ticks = 1s)
+      FADE-OUT: 0 # 淡出
+      STAY: 21 # 显示 (这里我添加了 1ticks 使得衔接更加平滑)
+    # 执行的指令 (使用 <player> 作为玩家名)
+    #  PLAYER 以为玩家身份执行，CONSOLE 为以控制台身份执行
+    COMMANDS:
+      PLAYER:
+        - ""
+      CONSOLE:
+        - ""
+    # 发送的公告
+    # 注意:
+    #  由于公告与信息会进行检查，如果其为空或长度小于等于1则会无视，所以想要发送全空格则多打几个
+    #  例子: "   "
+    ANNOUNCEMENT:
+      - ""
+    # 发送的消息
+    MESSAGE:
+      - ""
+    # 显示的粒子效果
+    #
+    # 格式:
+    #  粒子效果英文;偏移X;偏移Y;偏移Z;颜色
+    #  粒子颜色并非所有粒子都可以自定义，此处需要填写的是 java awr color, 您可以去这里查看颜色列表: https://docs.oracle.com/javase/7/docs/api/java/awt/Color.html
+    #
+    # 注意:
+    #  粒子颜色还有需要注意的，即如果您使用的是音符 (NOTE) 那么则不支持自定义颜色
+    #  因为音符如果自定义颜色，则会导致 offset 偏移失效，全部粒子都在一个点上，所以音符为随机颜色
+    #  如果您不想要颜色则填写 FALSE 如: "FLAME;1;1;1;50;PLAYER;FALSE"
+    #  这对于大小写并不敏感，您甚至可以这样写，并不会有问题: FaLsE
+    PARTICLE:
+      - ""
+    # 音效
+    # 格式: 音效;音量;音高
+    SOUNDS:
+      - "ENTITY_PLAYER_LEVELUP;1;1"
+    # 回复的饱食度与生命值
+    HEALTH: 0
+    HUNGER: 0
+    # 增加的 EXP
+    EXP: 0
+  C2:
+    EFFECTS:
+      - "slow;20;5"
+      - "blindness;40;5"
+    TITLE:
+      MAIN-TITLE: "&6二!"
+      SUB-TITLE: "&e此次许愿将在二秒后开奖!"
+      FADE-IN: 0
+      FADE-OUT: 0
+      STAY: 21
+    COMMANDS:
+      PLAYER:
+        - ""
+      CONSOLE:
+        - ""
+    ANNOUNCEMENT:
+      - ""
+    MESSAGE:
+      - ""
+    PARTICLE:
+      - ""
+    SOUNDS:
+      - "ENTITY_PLAYER_LEVELUP;1;1"
+    HEALTH: 0
+    HUNGER: 0
+    EXP: 0
+  C3:
+    EFFECTS:
+      - "slow;20;5"
+      - "blindness;40;5"
+    TITLE:
+      MAIN-TITLE: "&6一!"
+      SUB-TITLE: "&e此次许愿将在一秒后开奖!"
+      FADE-IN: 0
+      FADE-OUT: 0
+      STAY: 21
+    COMMANDS:
+      PLAYER:
+        - ""
+      CONSOLE:
+        - ""
+    ANNOUNCEMENT:
+      - ""
+    MESSAGE:
+      - ""
+    PARTICLE:
+      - ""
+    SOUNDS:
+      - "ENTITY_PLAYER_LEVELUP;1;1"
+    HEALTH: 0
+    HUNGER: 0
+    EXP: 0
+  START:
+    EFFECTS:
+      - "slow;20;5"
+      - "blindness;40;5"
+    TITLE:
+      MAIN-TITLE: "&7阿门"
+      SUB-TITLE: "&7您虔诚的祈祷..."
+      FADE-IN: 20
+      FADE-OUT: 0
+      STAY: 20
+    COMMANDS:
+      PLAYER:
+        - ""
+      CONSOLE:
+        - ""
+    ANNOUNCEMENT:
+      - ""
+    MESSAGE:
+      - "   "
+      - "&7[&e提示&7] &e您在基础许愿池许愿一次..."
+      - "&7[我] 万福玛利亚，你充满圣宠，主与你同在，你在妇女中受赞颂。你的圣子耶稣，同受赞颂。天主圣母玛利亚，求你现在和我们临终时，为我们罪人，祈求天主。阿门"
+      - "   "
+    PARTICLE:
+      - ""
+    SOUNDS:
+      - "ENTITY_PLAYER_LEVELUP;1;1"
+    HEALTH: 0
+    HUNGER: 0
+    EXP: 0
+
+# 在这里详细规定 PRIZE-SET 内的所执行项
+PRIZE-DO:
+  A:
+    EFFECTS:
+      - "slow;20;5"
+      - "blindness;40;5"
+    TITLE:
+      MAIN-TITLE: "&e这是... 钻石!"
+      SUB-TITLE: "&e恭喜您，您获得了 五个钻石!"
+      FADE-IN: 20
+      FADE-OUT: 20
+      STAY: 20
+    COMMANDS:
+      PLAYER:
+        - ""
+      CONSOLE:
+        - ""
+    ANNOUNCEMENT:
+      - ""
+    MESSAGE:
+      - "   "
+      - "&7[我] &e这是... 钻石!"
+      - "&7[&e提示&7] &e恭喜您，您获得了 五个钻石!"
+      - "   "
+    PARTICLE:
+      - "FLAME;1;1;1;50;PLAYER;FALSE"
+    SOUNDS:
+      - "ENTITY_PLAYER_LEVELUP;1;1"
+    HEALTH: 0
+    HUNGER: 0
+    EXP: 0
+  B:
+    EFFECTS:
+      - "slow;20;5"
+      - "blindness;40;5"
+    TITLE:
+      MAIN-TITLE: "&7这是... 铁锭!"
+      SUB-TITLE: "&e恭喜您，您获得了 十个铁锭!"
+      FADE-IN: 20
+      FADE-OUT: 20
+      STAY: 20
+    COMMANDS:
+      PLAYER:
+        - ""
+      CONSOLE:
+        - ""
+    ANNOUNCEMENT:
+      - ""
+    MESSAGE:
+      - "   "
+      - "&7[我] &7这是... 铁锭!"
+      - "&7[&e提示&7] &e恭喜您，您获得了 十个铁锭!"
+      - "   "
+    PARTICLE:
+      - "FLAME;1;1;1;50;PLAYER;FALSE"
+    SOUNDS:
+      - "ENTITY_IRON_GOLEM_DAMAGE;1;1"
+    HEALTH: 0
+    HUNGER: 0
+    EXP: 0
+  C:
+    EFFECTS:
+      - "slow;20;5"
+      - "blindness;40;5"
+    TITLE:
+      MAIN-TITLE: "&7这是... 金币!"
+      SUB-TITLE: "&e恭喜您，您获得了 一百金币!"
+      FADE-IN: 20
+      FADE-OUT: 20
+      STAY: 20
+    COMMANDS:
+      PLAYER:
+        - ""
+      CONSOLE:
+        - ""
+    ANNOUNCEMENT:
+      - ""
+    MESSAGE:
+      - "   "
+      - "&7[我] &7这是... 金币!"
+      - "&7[&e提示&7] &e恭喜您，您获得了 一百金币!"
+      - "   "
+    PARTICLE:
+      - "FLAME;1;1;1;50;PLAYER;FALSE"
+    SOUNDS:
+      - "ENTITY_IRON_GOLEM_DAMAGE;1;1"
+    HEALTH: 0
+    HUNGER: 0
+    EXP: 0
+
+# 当玩家许愿一次后没有等待最终奖品发放便尝试二次许愿时
+CANT-WISH-AGAIN:
+  TITLE:
+    MAIN-TITLE: "&7虚弱..."
+    SUB-TITLE: "&7我现在无法再次进行许愿..."
+    FADE-IN: 20
+    FADE-OUT: 20
+    STAY: 20
+  MESSAGE:
+    - "   "
+    - "&7[我] &7太虚弱了... 我已经耗尽了力量，目前没有办法再次许愿..."
+    - "   "
+  PARTICLE:
+    - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;FALSE"
+  COMMANDS:
+    PLAYER:
+      - ""
+    CONSOLE:
+      - ""
+  SOUNDS:
+    - "ENTITY_IRON_GOLEM_DAMAGE;1;1"
+
+# 当玩家没有满足许愿条件但是尝试许愿时
+CANT-WISH:
+  TITLE:
+    MAIN-TITLE: "&7不行..."
+    SUB-TITLE: "&7我没有足够的力量向神明祈祷..."
+    FADE-IN: 20
+    FADE-OUT: 20
+    STAY: 20
+  MESSAGE:
+    - "   "
+    - "&7[我] &7不行... 我没有足够的力量向神明祈祷..."
+    - "&7[&e提示&7] &7您没有达到此许愿池许愿的要求。"
+    - "   "
+  PARTICLE:
+    - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;FALSE"
+  COMMANDS:
+    PLAYER:
+      - ""
+    CONSOLE:
+      - ""
+  SOUNDS:
+    - "ENTITY_IRON_GOLEM_DAMAGE;1;1"
+
+# 高级设置，当您试图编辑这里时候，您应该明白您正在做什么
+ADVANCED-SETTINGS:
+  # 许愿券 (如果不想使用此功能则留空)
+  #  当玩家尝试进行一次许愿时，我们会遍历此玩家的背包物品
+  #  如果背包物品内的物品 含有 Lore 且 Lore 的某一行含有 COUPON 项所写的，那么就不会扣除此次许愿需求
+  #  而是扣除指定数量的许愿券，开始此次许愿
+  #
+  # 格式: 扣除的数量;判断是否为许愿券的 Lore (区分大小写)
+  COUPON:
+    - ""
