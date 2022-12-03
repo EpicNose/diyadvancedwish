@@ -35,14 +35,14 @@
 - /aw reload - 重载插件.
 ---
 > 控制台指令
-- /aw list - 查看许愿池列表.
-- /aw makeWish <许愿池> <玩家> - 使指定的玩家对规定的许愿池进行许愿.
-- /aw makeWishForce <许愿池> <玩家> - 强制使指定的玩家对规定的许愿池进行许愿，强制不会触发任何检查.
-- /aw getAmount <许愿池> <玩家> - 获取指定玩家指定许愿池的许愿次数.
-- /aw getGuaranteed <许愿池> <玩家> - 获取指定玩家指定许愿池的保底率.
-- /aw setAmount <许愿池> <玩家> <次数> - 设置指定玩家指定许愿池的许愿次数.
-- /aw setGuaranteed <许愿池> <玩家> <保底率> - 设置指定玩家指定许愿池的保底率.
-- /aw reload - 重载插件.
+- /awc list - 查看许愿池列表.
+- /awc makeWish <许愿池> <玩家> - 使指定的玩家对规定的许愿池进行许愿.
+- /awc makeWishForce <许愿池> <玩家> - 强制使指定的玩家对规定的许愿池进行许愿，强制不会触发任何检查.
+- /awc getAmount <许愿池> <玩家> - 获取指定玩家指定许愿池的许愿次数.
+- /awc getGuaranteed <许愿池> <玩家> - 获取指定玩家指定许愿池的保底率.
+- /awc setAmount <许愿池> <玩家> <次数> - 设置指定玩家指定许愿池的许愿次数.
+- /awc setGuaranteed <许愿池> <玩家> <保底率> - 设置指定玩家指定许愿池的保底率.
+- /awc reload - 重载插件.
 ---
 ## Placeholder API
 - aw_amount_许愿池名 - 获取当前玩家指定许愿池的许愿次数.

@@ -44,7 +44,7 @@ public class PapiManager extends PlaceholderExpansion {
 
         for (String wishName : RegisterManager.getRegisterWish()) {
             if (params.equalsIgnoreCase("amount_" + wishName))
-                return Double.toString(WishManager.getPlayerWishAmount(targetPlayer, wishName));
+                return Integer.toString(WishManager.getPlayerWishAmount(targetPlayer, wishName));
 
             if (params.equalsIgnoreCase("guaranteed_" + wishName))
                 return Double.toString(WishManager.getPlayerWishGuaranteed(targetPlayer, wishName));
@@ -52,7 +52,7 @@ public class PapiManager extends PlaceholderExpansion {
             if (params.startsWith("amount_" + wishName + "_")) {
                 Player targetPlayer2 = Bukkit.getPlayerExact(params.split("_")[2]);
                 if (targetPlayer2 == null) return "&7Unknown";
-                return Double.toString(WishManager.getPlayerWishAmount(targetPlayer, wishName));
+                return Integer.toString(WishManager.getPlayerWishAmount(targetPlayer, wishName));
             }
 
             if (params.startsWith("guaranteed_" + wishName + "_")) {

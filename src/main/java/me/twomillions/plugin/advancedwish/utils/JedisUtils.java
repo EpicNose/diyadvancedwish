@@ -28,29 +28,38 @@ public class JedisUtils {
     }
 
     // 设置 Map
-    public static void set(String key, String field, String value) {
+    public static void setMap(String key, String field, String value) {
         try (Jedis jedis = jedisPool.getResource()) {
             jedis.hset(key, field, value);
         }
     }
 
+    // 删除 Map
+    public static void removeMap(String key, String value) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            jedis.hdel(key, value);
+        }
+    }
+
+    // 获取 List
+    public static List<String> getList(String key) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            return jedis.lrange(key, 0, -1);
+        }
+    }
+
     // 添加 List
-    public static void addList(String key, String value) {
+    public static void pushListValue(String key, String value) {
         try (Jedis jedis = jedisPool.getResource()) {
             // 查重
             if (!getList(key).contains(value)) jedis.lpush(key, value);
         }
     }
 
-    // 删除 List
-    public static void removeList(String key, String value) {
-        getList(key).remove(value);
-    }
-
-    // 获取 List
-    public static List<String> getList(String name) {
+    // 删除 List 内容
+    public static void removeListValue(String key, String value) {
         try (Jedis jedis = jedisPool.getResource()) {
-            return jedis.lrange(name, 0, -1);
+            jedis.lrem(key, 2, value);
         }
     }
 
@@ -63,7 +72,7 @@ public class JedisUtils {
     }
 
     // 获取 Map
-    public static String getOrDefault(String key, String field, String defaultValue) {
+    public static String getOrDefaultMap(String key, String field, String defaultValue) {
         try (Jedis jedis = jedisPool.getResource()) {
             String string = jedis.hget(key, field);
             return string == null ? defaultValue : string;

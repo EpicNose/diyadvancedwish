@@ -44,17 +44,26 @@ public class WishManager {
     // 检查玩家是否在许愿列表，也是检查是否具有许愿
     // 许愿的一切检查都由 PlayerTimestampRunnable 实现自动化
     public static boolean isPlayerInWishList(Player player) {
-        return wishPlayers.contains(player.getUniqueId());
+        UUID uuid = player.getUniqueId();
+
+        if (useRedis) return JedisUtils.getList("wishPlayers").contains(uuid.toString());
+        else return wishPlayers.contains(uuid);
     }
 
     // 添加玩家到许愿列表
     public static void addPlayerToWishList(Player player) {
-        if (!isPlayerInWishList(player)) wishPlayers.add(player.getUniqueId());
+        UUID uuid = player.getUniqueId();
+
+        if (useRedis) JedisUtils.pushListValue("wishPlayers", uuid.toString());
+        else if (!isPlayerInWishList(player)) wishPlayers.add(uuid);
     }
 
     // 从许愿列表删除玩家
     public static void removePlayerWithWishList(Player player) {
-        wishPlayers.remove(player.getUniqueId());
+        UUID uuid = player.getUniqueId();
+
+        if (useRedis) JedisUtils.removeListValue("wishPlayers", uuid.toString());
+        else wishPlayers.remove(uuid);
     }
 
     // 玩家许愿后的最终执行记录 (PrizeDo)
@@ -82,12 +91,18 @@ public class WishManager {
     // 设置应该执行的 Prize Do
     public static void setPlayerWishPrizeDo(Player player, String wishName, String doNode) {
         UUID uuid = player.getUniqueId();
-        playerWishPrizeDo.put(uuid, toPlayerWishPrizeDoString(uuid, wishName, doNode));
+        String playerWishPrizeDoString = toPlayerWishPrizeDoString(uuid, wishName, doNode);
+
+        if (useRedis) JedisUtils.setMap("playerWishPrizeDo", uuid.toString(), playerWishPrizeDoString);
+        else playerWishPrizeDo.put(uuid, playerWishPrizeDoString);
     }
 
     // 清除玩家的 Prize Do
     public static void removePlayerWishPrizeDo(Player player) {
-        playerWishPrizeDo.remove(player.getUniqueId());
+        UUID uuid = player.getUniqueId();
+
+        if (useRedis) JedisUtils.removeMap("playerWishPrizeDo", uuid.toString());
+        else playerWishPrizeDo.remove(uuid);
     }
 
     // 获取玩家的 Prize Do
@@ -168,13 +183,13 @@ public class WishManager {
         String scheduledTask = toPlayerScheduledTaskString(uuid, time, wishName, doNode);
 
         // JedisUtils 内的 addList 方法会自动查重
-        if (useRedis) JedisUtils.addList("playerScheduledTasks", scheduledTask);
+        if (useRedis) JedisUtils.pushListValue("playerScheduledTasks", scheduledTask);
         else if (!playerScheduledTasks.contains(scheduledTask)) playerScheduledTasks.add(scheduledTask);
     }
 
     // 此方法将用于删除玩家对应时间段的对应任务 (计划任务)
     public static void removePlayerScheduledTasks(String wishScheduledTasksString) {
-        if (useRedis) JedisUtils.removeList("playerScheduledTasks", wishScheduledTasksString);
+        if (useRedis) JedisUtils.removeListValue("playerScheduledTasks", wishScheduledTasksString);
         else playerScheduledTasks.remove(wishScheduledTasksString);
     }
 
