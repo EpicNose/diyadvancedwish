@@ -275,7 +275,7 @@ public class WishManager {
         ProbabilityUntilities probabilities = new ProbabilityUntilities();
         getWishPrizeSetList(wishName).forEach(wishItem -> probabilities.addChance(wishItem, getWishPrizeSetProbability(wishItem)));
 
-        String randomElement = probabilities.getRandomElement().toString();;
+        String randomElement = probabilities.getRandomElement().toString();
 
         // 保底率的增加与清空
         setPlayerWishGuaranteed(player, wishName, randomElement, false);
@@ -315,7 +315,7 @@ public class WishManager {
         setPlayerWishPrizeDo(player, wishName, getWishPrizeSetPrizeDo(finalProbabilityWish));
         createPlayerScheduledTasks(player, wishName, finalProbabilityWish);
 
-        // 设置玩家此奖池的抽奖数
+        // 设置玩家此奖池的许愿数
         setPlayerWishAmount(player, wishName, getPlayerWishAmount(player, wishName) + 1);
     }
 
