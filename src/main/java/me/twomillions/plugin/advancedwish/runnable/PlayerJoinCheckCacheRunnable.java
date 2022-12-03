@@ -52,7 +52,7 @@ public class PlayerJoinCheckCacheRunnable {
 
                     Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
                             Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
-                            "注意，为了您的服务器安全，您必须要解决此问题! 您应该寻求开发者的帮助! Mcbbs -> x" );
+                            "注意，为了您的服务器安全，您必须要解决此问题! 您应该寻求开发者的帮助! Mcbbs -> https://www.mcbbs.net/thread-1397853-1-1.html" );
 
                     Bukkit.shutdown();
                 }

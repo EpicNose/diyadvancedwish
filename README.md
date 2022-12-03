@@ -3,7 +3,7 @@
 ## 一个简单且高度可定制的许愿 (抽奖) 插件!
 
 > Mcbbs
-- https://www.mcbbs.net/x.html
+- https://www.mcbbs.net/thread-1397853-1-1.html
 ---
 > bStats
 - https://bstats.org/plugin/bukkit/AdvancedWish/16990
