@@ -6,7 +6,7 @@
 
     <groupId>me.twomillions.plugin</groupId>
     <artifactId>AdvancedWish</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>AdvancedWish</name>
@@ -164,5 +164,13 @@
             <version>2.11.2</version>
             <scope>provided</scope>
         </dependency>
+
+        <!-- Apache commons-jexl -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-jexl3</artifactId>
+            <version>3.2.1</version>
+        </dependency>
+
     </dependencies>
 </project>

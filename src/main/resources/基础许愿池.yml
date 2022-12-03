@@ -27,6 +27,11 @@ CONDITION:
 # 几率:
 #  此处的几率计算为，A 物品的几率为 5, B 为 20, C 为 75
 #  那么总几率即为 5 + 20 + 75 = 100, 抽到 A 的几率为 5/100 = 1/20
+#
+# 更新须知:
+#  自从 0.0.1.1-SNAPSHOT 后 (包括)，这里支持使用 Papi 变量以及算数
+#  例如: "5+1;A;0;true" 或者 "5*2;A;0;true" 或者 "5+%papi%;A;0;true" 等
+#  对应 Issue -> https://gitee.com/A2000000/advanced-wish/issues/I64GIA
 PRIZE-SET:
   - "5;A;0;true"
   - "20;B;1;false"
@@ -45,6 +50,11 @@ PRIZE-SET:
 # 注意事项:
 #  保底率为，等于，而并非是大于等于。
 #  比如下面 A 的保底率为 30，那么只有等于 30，才会触发 A 保底。
+#
+# 更新须知:
+#  自从 0.0.1.1-SNAPSHOT 后 (包括)，这里支持使用 Papi 变量以及算数
+#  例如: "30+1;A;0;true" 或者 "30*2;A;0;true" 或者 "30+%papi%;A;0;true" 等
+#  对应 Issue -> https://gitee.com/A2000000/advanced-wish/issues/I64GIA
 GUARANTEED:
   - "30;A;0;true" # 这里是大保底
   - "15;B;1;false" # 这里是小保底
@@ -138,6 +148,18 @@ WAIT-DO:
     HUNGER: 0
     # 增加的 EXP
     EXP: 0
+    # Action Bar
+    ACTION-BAR:
+      TIME: 0 # time 为 0 或者 message 为空则自动关闭
+      MESSAGE: ""
+    # Boss Bar
+    BOSS-BAR:
+      TIME: 0 # time 为 0 或者 message 为空则自动关闭
+      MESSAGE: ""
+      # 注意，此处严格区分大小写
+      COLOR: RANDOM # PINK / BLUE / RED / GREEN / YELLOW / PURPLE / WHITE / RANDOM (随机)
+      STYLE: RANDOM # SOLID / SEGMENTED_6 / SEGMENTED_10 / SEGMENTED_12 / SEGMENTED_20 / RANDOM (随机)
+
   C2:
     EFFECTS:
       - "slow;20;5"
@@ -164,6 +186,15 @@ WAIT-DO:
     HEALTH: 0
     HUNGER: 0
     EXP: 0
+    ACTION-BAR:
+      TIME: 0
+      MESSAGE: ""
+    BOSS-BAR:
+      TIME: 0
+      MESSAGE: ""
+      COLOR: RANDOM
+      STYLE: RANDOM
+
   C3:
     EFFECTS:
       - "slow;20;5"
@@ -190,6 +221,15 @@ WAIT-DO:
     HEALTH: 0
     HUNGER: 0
     EXP: 0
+    ACTION-BAR:
+      TIME: 0
+      MESSAGE: ""
+    BOSS-BAR:
+      TIME: 0
+      MESSAGE: ""
+      COLOR: RANDOM
+      STYLE: RANDOM
+
   START:
     EFFECTS:
       - "slow;20;5"
@@ -219,6 +259,15 @@ WAIT-DO:
     HEALTH: 0
     HUNGER: 0
     EXP: 0
+    ACTION-BAR:
+      TIME: 5
+      MESSAGE: "&7阿门 &7您虔诚的祈祷..."
+    # Boss Bar
+    BOSS-BAR:
+      TIME: 5
+      MESSAGE: "&7您虔诚的祈祷..."
+      COLOR: RANDOM
+      STYLE: RANDOM
 
 # 在这里详细规定 PRIZE-SET 内的所执行项
 PRIZE-DO:
@@ -251,6 +300,14 @@ PRIZE-DO:
     HEALTH: 0
     HUNGER: 0
     EXP: 0
+    ACTION-BAR:
+      TIME: 2
+      MESSAGE: "&e这是... 钻石!"
+    BOSS-BAR:
+      TIME: 2
+      MESSAGE: "&e这是... 钻石!"
+      COLOR: RANDOM
+      STYLE: RANDOM
   B:
     EFFECTS:
       - "slow;20;5"
@@ -280,6 +337,14 @@ PRIZE-DO:
     HEALTH: 0
     HUNGER: 0
     EXP: 0
+    ACTION-BAR:
+      TIME: 2
+      MESSAGE: "&7这是... 铁锭!"
+    BOSS-BAR:
+      TIME: 2
+      MESSAGE: "&7这是... 铁锭!"
+      COLOR: RANDOM
+      STYLE: RANDOM
   C:
     EFFECTS:
       - "slow;20;5"
@@ -309,6 +374,14 @@ PRIZE-DO:
     HEALTH: 0
     HUNGER: 0
     EXP: 0
+    ACTION-BAR:
+      TIME: 2
+      MESSAGE: "&7这是... 金币!"
+    BOSS-BAR:
+      TIME: 2
+      MESSAGE: "&7这是... 金币!"
+      COLOR: RANDOM
+      STYLE: RANDOM
 
 # 当玩家许愿一次后没有等待最终奖品发放便尝试二次许愿时
 CANT-WISH-AGAIN:
@@ -331,6 +404,17 @@ CANT-WISH-AGAIN:
       - ""
   SOUNDS:
     - "ENTITY_IRON_GOLEM_DAMAGE;1;1"
+  HEALTH: 0
+  HUNGER: 0
+  EXP: 0
+  ACTION-BAR:
+    TIME: 2
+    MESSAGE: "&7虚弱..."
+  BOSS-BAR:
+    TIME: 2
+    MESSAGE: "&7虚弱..."
+    COLOR: RANDOM
+    STYLE: RANDOM
 
 # 当玩家没有满足许愿条件但是尝试许愿时
 CANT-WISH:
@@ -354,6 +438,17 @@ CANT-WISH:
       - ""
   SOUNDS:
     - "ENTITY_IRON_GOLEM_DAMAGE;1;1"
+  HEALTH: 0
+  HUNGER: 0
+  EXP: 0
+  ACTION-BAR:
+    TIME: 2
+    MESSAGE: "&7不行..."
+  BOSS-BAR:
+    TIME: 2
+    MESSAGE: "&7不行..."
+    COLOR: RANDOM
+    STYLE: RANDOM
 
 # 高级设置，当您试图编辑这里时候，您应该明白您正在做什么
 ADVANCED-SETTINGS:

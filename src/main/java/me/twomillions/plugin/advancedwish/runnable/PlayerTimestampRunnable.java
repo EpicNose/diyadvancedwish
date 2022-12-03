@@ -44,7 +44,7 @@ public class PlayerTimestampRunnable {
                     String wishName = WishManager.getPlayerScheduledTaskStringWishName(playerScheduledTask);
                     String doNode = WishManager.getPlayerScheduledTaskStringDoNode(playerScheduledTask);
 
-                    EffectSendManager.sendEffect(wishName, player, null, "/Wish", doNode, wishName);
+                    EffectSendManager.sendEffect(wishName, player, null, "/Wish", doNode);
 
                     WishManager.removePlayerScheduledTasks(playerScheduledTask);
 

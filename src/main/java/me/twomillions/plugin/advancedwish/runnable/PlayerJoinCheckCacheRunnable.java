@@ -39,7 +39,7 @@ public class PlayerJoinCheckCacheRunnable {
                     String wishName = WishManager.getPlayerWishPrizeDoStringWishName(playerWishPrizeDoStringWishName, true);
                     String doNode = WishManager.getPlayerWishPrizeDoStringWishDoNode(playerWishPrizeDoStringWishName, true);
 
-                    EffectSendManager.sendEffect(wishName, player, null, "/Wish", "PRIZE-DO." + doNode, wishName);
+                    EffectSendManager.sendEffect(wishName, player, null, "/Wish", "PRIZE-DO." + doNode);
 
                     Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
                             Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "Advanced Wish 已成功给予遗漏的物品奖励，并且成功删除缓存文件! 玩家名称/文件名称 ->" +

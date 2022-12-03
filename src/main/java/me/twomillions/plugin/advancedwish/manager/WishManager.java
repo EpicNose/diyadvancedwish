@@ -170,7 +170,7 @@ public class WishManager {
 
     // 获取许愿池计划任务的延迟秒数
     public static int getWishScheduledTasksSeconds(String wishScheduledTasksString) {
-        return Integer.parseInt(wishScheduledTasksString.split(";") [0]);
+        return Integer.parseInt(CC.count(wishScheduledTasksString.split(";") [0]).toString());
     }
 
     // 获取许愿池计划任务的执行操作
@@ -213,7 +213,7 @@ public class WishManager {
 
     // 获取奖品的许愿概率 - PrizeSet
     public static int getWishPrizeSetProbability(String wishPrizeSetString) {
-        return Integer.parseInt(wishPrizeSetString.split(";") [0]);
+        return Integer.parseInt(CC.count(wishPrizeSetString.split(";") [0]).toString());
     }
 
     // 获取奖品的 PRIZE-DO 执行项 - PrizeSet
@@ -223,7 +223,7 @@ public class WishManager {
 
     // 获取奖品的增加的保底率 - PrizeSet
     public static double getWishPrizeSetGuaranteed(String wishPrizeSetString) {
-        return Double.parseDouble(wishPrizeSetString.split(";") [2]);
+        return Double.parseDouble(CC.count(wishPrizeSetString.split(";") [2]).toString());
     }
 
     // 获取此奖品是否清零保底率 - PrizeSet
@@ -240,7 +240,7 @@ public class WishManager {
     // 获取 GUARANTEED 保底率
     // 格式: 保底率[0];PRIZE-DO内所执行项[1];增加的保底率[2];是否清空保底率[3]
     public static double getWishGuaranteed(String wishGuaranteedString) {
-        return Double.parseDouble(wishGuaranteedString.split(";") [0]);
+        return Double.parseDouble(CC.count(wishGuaranteedString.split(";") [0]).toString());
     }
 
     // 获取 GUARANTEED PRIZE-DO 内所执行项
@@ -250,7 +250,7 @@ public class WishManager {
 
     // 获取 GUARANTEED PRIZE-DO 增加的保底率
     public static double getWishGuaranteedMinimumRate(String wishGuaranteedString) {
-        return Double.parseDouble(wishGuaranteedString.split(";") [2]);
+        return Double.parseDouble(CC.count(wishGuaranteedString.split(";") [2]).toString());
     }
 
     // 获取 GUARANTEED PRIZE-DO 是否清空保底率
@@ -262,9 +262,10 @@ public class WishManager {
     // 返回的是: wishItemString (几率[0];PRIZE-DO内所执行项[1];增加的增率 (保底率) [2];是否清零保底率[3])
     // 如果触发保底，返回则为: wishGuaranteedString(增率 (保底率);PRIZE-DO内所执行项;增加的增率 (保底率);是否清空保底率)
     public static String getFinalProbabilityWish(Player player, String wishName) {
+
         // 检查保底
         for (String wishGuaranteedString : getWishGuaranteedList(wishName)) {
-            if (getPlayerWishGuaranteed(player, wishName) == getWishGuaranteed(wishGuaranteedString)) {
+            if (getPlayerWishGuaranteed(player, wishName) == getWishGuaranteed(CC.toPapi(player, wishGuaranteedString))) {
                 // 保底率的增加与清空
                 setPlayerWishGuaranteed(player, wishName, wishGuaranteedString, true);
                 return wishGuaranteedString;
@@ -273,7 +274,8 @@ public class WishManager {
 
         // 如果没有保底再随机
         ProbabilityUntilities probabilities = new ProbabilityUntilities();
-        getWishPrizeSetList(wishName).forEach(wishItem -> probabilities.addChance(wishItem, getWishPrizeSetProbability(wishItem)));
+
+        for (String wishItem : getWishPrizeSetList(wishName)) probabilities.addChance(wishItem, getWishPrizeSetProbability(CC.toPapi(player, wishItem)));
 
         String randomElement = probabilities.getRandomElement().toString();
 
@@ -298,13 +300,13 @@ public class WishManager {
     public static void makeWish(Player player, String wishName, boolean force) {
         // 当玩家许愿一次后没有等待最终奖品发放便尝试二次许愿时
         if (isPlayerInWishList(player)) {
-            EffectSendManager.sendEffect(wishName, player, null, "/Wish", "CANT-WISH-AGAIN", null);
+            EffectSendManager.sendEffect(wishName, player, null, "/Wish", "CANT-WISH-AGAIN");
             return;
         }
 
         // 当玩家没有满足许愿条件但是尝试许愿时
         if (!force && !checkWish(player, wishName)) {
-            EffectSendManager.sendEffect(wishName, player, null, "/Wish", "CANT-WISH", null);
+            EffectSendManager.sendEffect(wishName, player, null, "/Wish", "CANT-WISH");
             return;
         }
 

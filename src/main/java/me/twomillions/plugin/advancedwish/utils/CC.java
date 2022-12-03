@@ -1,7 +1,10 @@
 package me.twomillions.plugin.advancedwish.utils;
 
+import me.clip.placeholderapi.PlaceholderAPI;
 import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.manager.RegisterManager;
+import org.apache.commons.jexl3.JexlBuilder;
+import org.apache.commons.jexl3.JexlEngine;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -18,11 +21,10 @@ import java.util.regex.Pattern;
  */
 public class CC {
     private static final Plugin plugin = main.getInstance();
+    private static final JexlEngine jexlEngine = new JexlBuilder().create();
 
-    // 快速分隔
     public static final String CHAT_BAR = ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "------------------------------------------------";
 
-    // 颜色
     public static String translate(String message) {
         return ChatColor.translateAlternateColorCodes('&', message);
     }
@@ -40,6 +42,7 @@ public class CC {
         return CC.translate(message);
     }
 
+    // String 转 Unicode
     public static String stringToUnicode(String string) {
         char[] utfBytes = string.toCharArray();
         StringBuilder unicodeBytes = new StringBuilder();
@@ -53,16 +56,26 @@ public class CC {
         return unicodeBytes.toString();
     }
 
+    // Unicode 转 String
     public static String unicodeToString(String string) {
         Pattern pattern = Pattern.compile("(\\\\u(\\p{XDigit}{4}))");
         Matcher matcher = pattern.matcher(string);
-        char ch;
 
         while (matcher.find()) {
-            ch = (char) Integer.parseInt(matcher.group(2), 16);
+            char ch = (char) Integer.parseInt(matcher.group(2), 16);
             string = string.replace(matcher.group(1), ch + "");
         }
 
         return string;
+    }
+
+    // Papi
+    public static String toPapi(Player player, String string) {
+        return PlaceholderAPI.setPlaceholders(player, string);
+    }
+
+    // 字符串内算数
+    public static Object count(String countString) {
+        return jexlEngine.createExpression(countString).evaluate(null);
     }
 }
