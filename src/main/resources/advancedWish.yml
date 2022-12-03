@@ -6,7 +6,7 @@
 # 是否使用 Redis 数据库?
 # Redis 数据库的作用不仅仅在跨服
 # 请查看 基础许愿池.yml 内 WAIT-SET 项注释
-USE-REDIS: true
+USE-REDIS: false # 默认关闭 Redis 跨服
 
 # Redis 跨服配置
 REDIS:
