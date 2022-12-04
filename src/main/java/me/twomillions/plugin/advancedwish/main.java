@@ -10,6 +10,7 @@ import me.twomillions.plugin.advancedwish.manager.WishManager;
 import me.twomillions.plugin.advancedwish.runnable.PlayerTimestampRunnable;
 import me.twomillions.plugin.advancedwish.runnable.UpdateCheckerRunnable;
 import net.milkbowl.vault.economy.Economy;
+import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.fusesource.jansi.Ansi;
@@ -18,10 +19,11 @@ import redis.clients.jedis.JedisPool;
 public final class main extends JavaPlugin {
     // volatile 防止线程直接共享变量可能会有值更新不可见的问题
     @Getter private volatile static main instance;
-    @Getter private volatile static Economy economy;
     @Getter private volatile static JedisPool jedisPool;
     @Getter private volatile static Boolean useRedis;
+    @Getter @Setter private volatile static Economy economy;
     @Getter @Setter private volatile static String guaranteedPath;
+    @Getter @Setter private volatile static PlayerPointsAPI playerPointsAPI;
 
     @Override
     public void onEnable() {

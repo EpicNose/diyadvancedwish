@@ -413,15 +413,12 @@ public class WishManager {
         if (player.getLevel() < yaml.getInt("LEVEL")) return false;
 
         // 点券检查
-        if (point != 0 && !PlayerPoints.getInstance().getAPI().take(player.getUniqueId(), point)) return false;
+        if (point != 0 && main.getPlayerPointsAPI() != null && !PlayerPoints.getInstance().getAPI().take(player.getUniqueId(), point)) return false;
 
         // 金币检查
-        if (money != 0) {
-            Economy economy = main.getEconomy();
-
-            if (economy.hasAccount(player) && economy.has(player, money)) economy.withdrawPlayer(player, money);
-            else return false;
-        }
+        Economy economy = main.getEconomy();
+        if (money != 0 && economy != null && economy.hasAccount(player) && economy.has(player, money)) economy.withdrawPlayer(player, money);
+        else return false;
 
         // 背包物品检查
         for (String configInventoryHave : yaml.getStringList("INVENTORY-HAVE")) {
