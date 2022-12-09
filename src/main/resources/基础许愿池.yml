@@ -101,9 +101,9 @@ WAIT-DO:
     # 给予的药水效果
     # 格式: 药水名称;时间;等级
     EFFECTS:
-      - "slow;20;5"
-      - "blindness;40;5"
+      - ""
     # 显示的标题
+    # 注意: Title 在 1.7.10 以下无法使用 (因为低版本没有此功能，包括 1.7.10)
     TITLE:
       MAIN-TITLE: "&6三!" # 主标题
       SUB-TITLE: "&e此次许愿将在三秒后开奖!" # 副标题
@@ -149,10 +149,12 @@ WAIT-DO:
     # 增加的 EXP
     EXP: 0
     # Action Bar
+    # 注意: Action Bar 在 1.7.10 以下无法使用 (因为低版本没有此功能，包括 1.7.10)
     ACTION-BAR:
       TIME: 0 # time 为 0 或者 message 为空则自动关闭
       MESSAGE: ""
     # Boss Bar
+    # 注意: Boss Bar 在 1.8 以下无法使用 (包括 1.8)
     BOSS-BAR:
       TIME: 0 # time 为 0 或者 message 为空则自动关闭
       MESSAGE: ""
@@ -162,8 +164,7 @@ WAIT-DO:
 
   C2:
     EFFECTS:
-      - "slow;20;5"
-      - "blindness;40;5"
+      - ""
     TITLE:
       MAIN-TITLE: "&6二!"
       SUB-TITLE: "&e此次许愿将在二秒后开奖!"
@@ -197,8 +198,7 @@ WAIT-DO:
 
   C3:
     EFFECTS:
-      - "slow;20;5"
-      - "blindness;40;5"
+      - ""
     TITLE:
       MAIN-TITLE: "&6一!"
       SUB-TITLE: "&e此次许愿将在一秒后开奖!"
@@ -232,8 +232,8 @@ WAIT-DO:
 
   START:
     EFFECTS:
-      - "slow;20;5"
-      - "blindness;40;5"
+      - "slow;120;5"
+      - "blindness;140;5"
     TITLE:
       MAIN-TITLE: "&7阿门"
       SUB-TITLE: "&7您虔诚的祈祷..."
@@ -260,11 +260,11 @@ WAIT-DO:
     HUNGER: 0
     EXP: 0
     ACTION-BAR:
-      TIME: 5
+      TIME: 3
       MESSAGE: "&7阿门 &7您虔诚的祈祷..."
     # Boss Bar
     BOSS-BAR:
-      TIME: 5
+      TIME: 4
       MESSAGE: "&7您虔诚的祈祷..."
       COLOR: RANDOM
       STYLE: RANDOM
@@ -301,10 +301,10 @@ PRIZE-DO:
     HUNGER: 0
     EXP: 0
     ACTION-BAR:
-      TIME: 2
+      TIME: 1
       MESSAGE: "&e这是... 钻石!"
     BOSS-BAR:
-      TIME: 2
+      TIME: 3
       MESSAGE: "&e这是... 钻石!"
       COLOR: RANDOM
       STYLE: RANDOM
@@ -338,10 +338,10 @@ PRIZE-DO:
     HUNGER: 0
     EXP: 0
     ACTION-BAR:
-      TIME: 2
+      TIME: 1
       MESSAGE: "&7这是... 铁锭!"
     BOSS-BAR:
-      TIME: 2
+      TIME: 3
       MESSAGE: "&7这是... 铁锭!"
       COLOR: RANDOM
       STYLE: RANDOM
@@ -375,10 +375,10 @@ PRIZE-DO:
     HUNGER: 0
     EXP: 0
     ACTION-BAR:
-      TIME: 2
+      TIME: 1
       MESSAGE: "&7这是... 金币!"
     BOSS-BAR:
-      TIME: 2
+      TIME: 3
       MESSAGE: "&7这是... 金币!"
       COLOR: RANDOM
       STYLE: RANDOM
@@ -408,10 +408,10 @@ CANT-WISH-AGAIN:
   HUNGER: 0
   EXP: 0
   ACTION-BAR:
-    TIME: 2
+    TIME: 1
     MESSAGE: "&7虚弱..."
   BOSS-BAR:
-    TIME: 2
+    TIME: 3
     MESSAGE: "&7虚弱..."
     COLOR: RANDOM
     STYLE: RANDOM
@@ -442,10 +442,10 @@ CANT-WISH:
   HUNGER: 0
   EXP: 0
   ACTION-BAR:
-    TIME: 2
+    TIME: 1
     MESSAGE: "&7不行..."
   BOSS-BAR:
-    TIME: 2
+    TIME: 3
     MESSAGE: "&7不行..."
     COLOR: RANDOM
     STYLE: RANDOM

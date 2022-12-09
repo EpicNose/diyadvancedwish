@@ -72,24 +72,6 @@ public class MainCommand implements TabExecutor {
 
                     break;
 
-                case "guaranteed":
-                    if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceAndTranslate(message, player, null)));
-                        return;
-                    }
-
-                    String getGuaranteedWishName = args[1];
-
-                    double wishGuaranteed = WishManager.getPlayerWishGuaranteed(player, getGuaranteedWishName);
-                    player.sendMessage(CC.translate("&6您的 " + getGuaranteedWishName + " 奖池保底率为: " + wishGuaranteed));
-
-                    break;
-            }
-            
-            if (!isAdmin) return;
-
-            // Admin commands
-            switch (subCommand) {
                 case "makewish":
                     if (args.length == 1) {
                         ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceAndTranslate(message, player, null)));
@@ -117,6 +99,24 @@ public class MainCommand implements TabExecutor {
 
                     break;
 
+                case "guaranteed":
+                    if (args.length == 1) {
+                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceAndTranslate(message, player, null)));
+                        return;
+                    }
+
+                    String getGuaranteedWishName = args[1];
+
+                    double wishGuaranteed = WishManager.getPlayerWishGuaranteed(player, getGuaranteedWishName);
+                    player.sendMessage(CC.translate("&6您的 " + getGuaranteedWishName + " 奖池保底率为: " + wishGuaranteed));
+
+                    break;
+            }
+            
+            if (!isAdmin) return;
+
+            // Admin commands
+            switch (subCommand) {
                 case "makewishforce":
                     if (args.length == 1) {
                         ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceAndTranslate(message, player, null)));

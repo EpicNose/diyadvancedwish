@@ -38,6 +38,8 @@ public class RegisterManager {
 
         // PlaceholderAPI
         if (manager.isPluginEnabled("PlaceholderAPI")) {
+            main.setUsingPapi(true);
+
             Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
                     Ansi.ansi().fg(Ansi.Color.GREEN).boldOff().toString() +
                     "检查到服务器存在 PlaceholderAPI 插件，已注册 PlaceholderAPI 变量。");

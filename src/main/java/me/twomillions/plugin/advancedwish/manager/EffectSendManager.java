@@ -52,6 +52,9 @@ public class EffectSendManager {
 
     // 发送标题
     private static void sendTitle(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
+        // 如果是 1.7 服务器则不发送 Title (因为 1.7 没有)
+        if (main.getServerVersion() <= 1.7) return;
+
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
         Yaml yaml = new Yaml(fileName, path);
@@ -66,7 +69,10 @@ public class EffectSendManager {
         int fadeOut = yaml.getInt("FADE-OUT");
         int stay = yaml.getInt("STAY");
 
-        targetPlayer.sendTitle(mainTitle, subTitle, fadeIn, stay, fadeOut);
+        // 在 1.9 中由于此方法无法定义 fadeIn stay fadeOut 所以使用不同的方法
+        // 我没有使用 NMS Spigot API 提供了一种发送标题的方法 旨在跨不同的 Minecraft 版本工作
+        if (main.getServerVersion() == 1.9) targetPlayer.sendTitle(mainTitle, subTitle);
+        else targetPlayer.sendTitle(mainTitle, subTitle, fadeIn, stay, fadeOut);
     }
 
     // 发送粒子效果
@@ -76,34 +82,38 @@ public class EffectSendManager {
         Yaml yaml = new Yaml(fileName, path);
         yaml.setPathPrefix(pathPrefix);
 
-        yaml.getStringList("PARTICLE").forEach(s -> {
-            if (s == null || s.length() <= 1) return;
+        yaml.getStringList("PARTICLE").forEach(particleConfig -> {
+            if (particleConfig == null || particleConfig.length() <= 1) return;
 
-            String[] string = s.toUpperCase(Locale.ROOT).split(";");
+            String[] particleConfigSplit = particleConfig.toUpperCase(Locale.ROOT).split(";");
 
-            ParticleEffect particle = ParticleEffect.valueOf(string[0]);
+            ParticleEffect particleEffect;
+            String particleString = particleConfigSplit[0];
 
-            double x = Double.parseDouble(string[1]);
-            double y = Double.parseDouble(string[2]);
-            double z = Double.parseDouble(string[3]);
-            int amount = Integer.parseInt(string[4]);
+            try { particleEffect = ParticleEffect.valueOf(particleString); }
+            catch (Exception exception) { CC.sendUnknownWarn("粒子效果", fileName, particleString); return; }
 
-            boolean isNote = particle == ParticleEffect.NOTE;
-            boolean allPlayer = !string[5].equals("PLAYER");
-            boolean hasColor = !string[6].equals("FALSE");
+            double x = Double.parseDouble(particleConfigSplit[1]);
+            double y = Double.parseDouble(particleConfigSplit[2]);
+            double z = Double.parseDouble(particleConfigSplit[3]);
+            int amount = Integer.parseInt(particleConfigSplit[4]);
+
+            boolean isNote = particleEffect == ParticleEffect.NOTE;
+            boolean allPlayer = !particleConfigSplit[5].equals("PLAYER");
+            boolean hasColor = !particleConfigSplit[6].equals("FALSE");
 
             if (isNote && hasColor) {
                 Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Exp Booster] " + Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() + "请注意，音符 (Note) 粒子效果并不支持自定义颜色! 已自动切换为随机颜色!");
 
                 if (allPlayer)
-                    new ParticleBuilder(particle, targetPlayer.getLocation())
+                    new ParticleBuilder(particleEffect, targetPlayer.getLocation())
                             .setOffsetX((float) x)
                             .setOffsetY((float) y)
                             .setOffsetZ((float) z)
                             .setAmount(amount)
                             .display();
                 else
-                    new ParticleBuilder(particle, targetPlayer.getLocation())
+                    new ParticleBuilder(particleEffect, targetPlayer.getLocation())
                             .setOffsetX((float) x)
                             .setOffsetY((float) y)
                             .setOffsetZ((float) z)
@@ -114,33 +124,33 @@ public class EffectSendManager {
 
             if (hasColor) {
                 if (allPlayer)
-                    new ParticleBuilder(particle, targetPlayer.getLocation())
+                    new ParticleBuilder(particleEffect, targetPlayer.getLocation())
                             .setOffsetX((float) x)
                             .setOffsetY((float) y)
                             .setOffsetZ((float) z)
                             .setAmount(amount)
-                            .setColor(Color.getColor(string[6]))
+                            .setColor(Color.getColor(particleConfigSplit[6]))
                             .display();
                 else
-                    new ParticleBuilder(particle, targetPlayer.getLocation())
+                    new ParticleBuilder(particleEffect, targetPlayer.getLocation())
                             .setOffsetX((float) x)
                             .setOffsetY((float) y)
                             .setOffsetZ((float) z)
                             .setAmount(amount)
-                            .setColor(Color.getColor(string[6]))
+                            .setColor(Color.getColor(particleConfigSplit[6]))
                             .display(targetPlayer);
                 return;
             }
 
             if (allPlayer)
-                new ParticleBuilder(particle, targetPlayer.getLocation())
+                new ParticleBuilder(particleEffect, targetPlayer.getLocation())
                         .setOffsetX((float) x)
                         .setOffsetY((float) y)
                         .setOffsetZ((float) z)
                         .setAmount(amount)
                         .display();
             else
-                new ParticleBuilder(particle, targetPlayer.getLocation())
+                new ParticleBuilder(particleEffect, targetPlayer.getLocation())
                         .setOffsetX((float) x)
                         .setOffsetY((float) y)
                         .setOffsetZ((float) z)
@@ -156,14 +166,19 @@ public class EffectSendManager {
         Yaml yaml = new Yaml(fileName, path);
         yaml.setPathPrefix(pathPrefix);
 
-        yaml.getStringList("SOUNDS").forEach(s -> {
-            if (s == null || s.length() <= 1) return;
+        yaml.getStringList("SOUNDS").forEach(soundsConfig -> {
+            if (soundsConfig == null || soundsConfig.length() <= 1) return;
 
-            String[] string = s.toUpperCase(Locale.ROOT).split(";");
+            String[] soundsConfigSplit = soundsConfig.toUpperCase(Locale.ROOT).split(";");
 
-            Sound sound = Sound.valueOf(string[0]);
-            int volume = Integer.parseInt(string[1]);
-            int pitch = Integer.parseInt(string[2]);
+            Sound sound;
+            String soundString = soundsConfigSplit[0];
+
+            try { sound = Sound.valueOf(soundString); }
+            catch (Exception exception) { CC.sendUnknownWarn("音效", fileName, soundString); return; }
+
+            int volume = Integer.parseInt(soundsConfigSplit[1]);
+            int pitch = Integer.parseInt(soundsConfigSplit[2]);
 
             targetPlayer.playSound(targetPlayer.getLocation(), sound, volume, pitch);
         });
@@ -176,22 +191,22 @@ public class EffectSendManager {
         Yaml yaml = new Yaml(fileName, path);
         yaml.setPathPrefix(pathPrefix == null ? "COMMANDS" : pathPrefix + ".COMMANDS");
 
-        yaml.getStringList("PLAYER").forEach(c -> {
-            if (c == null || c.length() <= 1) return;
+        yaml.getStringList("PLAYER").forEach(commandConfig -> {
+            if (commandConfig == null || commandConfig.length() <= 1) return;
 
             Bukkit.getScheduler().runTask(plugin, () -> {
-                String cmd = c.replaceAll("<player>", targetPlayer.getName());
-                targetPlayer.performCommand(cmd);
+                String command = commandConfig.replaceAll("<player>", targetPlayer.getName());
+                targetPlayer.performCommand(command);
             });
         });
 
-        yaml.getStringList("CONSOLE").forEach(c -> {
-            if (c == null || c.length() <= 1) return;
+        yaml.getStringList("CONSOLE").forEach(commandConfig -> {
+            if (commandConfig == null || commandConfig.length() <= 1) return;
             ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
 
             Bukkit.getScheduler().runTask(plugin, () -> {
-                String cmd = c.replaceAll("<player>", targetPlayer.getName());
-                Bukkit.dispatchCommand(console, cmd);
+                String command = commandConfig.replaceAll("<player>", targetPlayer.getName());
+                Bukkit.dispatchCommand(console, command);
             });
         });
     }
@@ -203,12 +218,12 @@ public class EffectSendManager {
         Yaml yaml = new Yaml(fileName, path);
         yaml.setPathPrefix(pathPrefix);
 
-        yaml.getStringList("MESSAGE").forEach(m -> {
-            if (m == null || m.length() <= 1) return;
+        yaml.getStringList("MESSAGE").forEach(messageConfig -> {
+            if (messageConfig == null || messageConfig.length() <= 1) return;
 
             Bukkit.getScheduler().runTask(plugin, () -> {
-                String msg = CC.replaceAndTranslate(m, targetPlayer, replacePlayer);
-                targetPlayer.sendMessage(CC.translate(msg));
+                String message = CC.replaceAndTranslate(messageConfig, targetPlayer, replacePlayer);
+                targetPlayer.sendMessage(CC.translate(message));
             });
         });
     }
@@ -220,12 +235,12 @@ public class EffectSendManager {
         Yaml yaml = new Yaml(fileName, path);
         yaml.setPathPrefix(pathPrefix);
 
-        yaml.getStringList("ANNOUNCEMENT").forEach(m -> {
-            if (m == null || m.length() <= 1) return;
+        yaml.getStringList("ANNOUNCEMENT").forEach(announcementConfig -> {
+            if (announcementConfig == null || announcementConfig.length() <= 1) return;
 
             Bukkit.getScheduler().runTask(plugin, () -> {
-                String msg = CC.replaceAndTranslate(m, targetPlayer, replacePlayer);
-                Bukkit.broadcastMessage(CC.translate(msg));
+                String announcement = CC.replaceAndTranslate(announcementConfig, targetPlayer, replacePlayer);
+                Bukkit.broadcastMessage(CC.translate(announcement));
             });
         });
     }
@@ -237,14 +252,19 @@ public class EffectSendManager {
         Yaml yaml = new Yaml(fileName, path);
         yaml.setPathPrefix(pathPrefix);
 
-        yaml.getStringList("EFFECTS").forEach(m -> {
-            if (m == null || m.length() <= 1) return;
+        yaml.getStringList("EFFECTS").forEach(effectsConfig -> {
+            if (effectsConfig == null || effectsConfig.length() <= 1) return;
 
-            String[] e = m.split(";");
+            String[] effectsConfigSplit = effectsConfig.split(";");
 
-            PotionEffectType effectType = PotionEffectType.getByName(e[0]);
-            int duration = Integer.parseInt(e[1]);
-            int amplifier = Integer.parseInt(e[2]);
+            String effectString = effectsConfigSplit[0];
+            PotionEffectType effectType;
+
+            try { effectType = PotionEffectType.getByName(effectString); }
+            catch (Exception e) { CC.sendUnknownWarn("药水效果", fileName, effectString); return; }
+
+            int duration = Integer.parseInt(effectsConfigSplit[1]);
+            int amplifier = Integer.parseInt(effectsConfigSplit[2]);
 
             Bukkit.getScheduler().runTask(plugin, () -> targetPlayer.addPotionEffect(new PotionEffect(effectType, duration, amplifier)));
         });
@@ -286,6 +306,9 @@ public class EffectSendManager {
 
     // 发送 Action Bar
     private static void sendActionBar(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
+        // 如果是 1.7 服务器则不发送 Action Bar (因为 1.7 没有)
+        if (main.getServerVersion() <= 1.7) return;
+
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
         Yaml yaml = new Yaml(fileName, path);
 
@@ -318,6 +341,9 @@ public class EffectSendManager {
 
     // 发送 Boss Bar
     private static void sendBossBar(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
+        // Boss Bar 支持 1.7 / 1.8 会使用到 NMS 所以我选择直接放弃对于 1.7 / 1.8 的 Boss Bar 支持
+        if (main.getServerVersion() <= 1.8) return;
+
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
         Yaml yaml = new Yaml(fileName, path);
 

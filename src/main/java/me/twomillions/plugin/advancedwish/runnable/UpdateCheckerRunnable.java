@@ -24,6 +24,8 @@ public class UpdateCheckerRunnable {
 
     // 异步网页更新检查
     public static void startRunnable() {
+        if (main.isDisabled()) return;
+
         if (!ConfigManager.getAdvancedWishYaml().getBoolean("UPDATE-CHECKER")) return;
         int cycle = ConfigManager.getAdvancedWishYaml().getInt("CHECK-CYCLE");
 

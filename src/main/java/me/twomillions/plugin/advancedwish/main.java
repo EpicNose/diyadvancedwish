@@ -10,24 +10,37 @@ import me.twomillions.plugin.advancedwish.manager.WishManager;
 import me.twomillions.plugin.advancedwish.runnable.PlayerTimestampRunnable;
 import me.twomillions.plugin.advancedwish.runnable.UpdateCheckerRunnable;
 import net.milkbowl.vault.economy.Economy;
+import org.apache.commons.lang.StringUtils;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.fusesource.jansi.Ansi;
 import redis.clients.jedis.JedisPool;
 
+import java.util.Arrays;
+
 public final class main extends JavaPlugin {
     // volatile 防止线程直接共享变量可能会有值更新不可见的问题
     @Getter private volatile static main instance;
     @Getter private volatile static JedisPool jedisPool;
-    @Getter private volatile static Boolean useRedis;
+    @Getter private volatile static boolean useRedis;
+    @Getter private volatile static Double serverVersion;
     @Getter @Setter private volatile static Economy economy;
+    @Getter @Setter private volatile static boolean usingPapi;
     @Getter @Setter private volatile static String guaranteedPath;
     @Getter @Setter private volatile static PlayerPointsAPI playerPointsAPI;
+    @Getter @Setter private volatile static boolean disabled;
 
     @Override
     public void onEnable() {
         instance = this;
+        setDisabled(false);
+
+        // 获取 -> org.bukkit.craftbukkit.v1_7_R4
+        // 分割后为 -> 1_7, 最终为 -> 1.7
+        serverVersion = Double.parseDouble(Arrays.toString(StringUtils.substringsBetween(getServer().getClass().getPackage().getName(), ".v", "_R"))
+                .replace("_", ".").replace("[", "").replace("]", ""));
+
         ConfigManager.createDefaultConfig();
         Yaml advancedWishYaml = ConfigManager.getAdvancedWishYaml();
 
@@ -41,7 +54,7 @@ public final class main extends JavaPlugin {
         if (advancedWishYaml.getBoolean("USE-REDIS")) {
             useRedis = true;
             jedisPool = new JedisPool(advancedWishYaml.getString("REDIS.IP"), advancedWishYaml.getInt("REDIS.PORT"));
-        } else useRedis = false;
+        }
 
         // Redis 的 Ping 命令使用客户端向服务器发送一个 Ping
         // 如果与 Redis 服务器通信正常的话 会返回一个 Pong 否则返回一个连接错误
@@ -91,6 +104,8 @@ public final class main extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        setDisabled(true);
+
         if (useRedis) jedisPool.close();
         else {
             WishManager.getWishPlayers().forEach(uuid -> {

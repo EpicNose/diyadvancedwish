@@ -5,9 +5,11 @@ import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.manager.RegisterManager;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.fusesource.jansi.Ansi;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -71,11 +73,24 @@ public class CC {
 
     // Papi
     public static String toPapi(Player player, String string) {
-        return PlaceholderAPI.setPlaceholders(player, string);
+        if (main.isUsingPapi()) return PlaceholderAPI.setPlaceholders(player, string);
+        else return string;
     }
 
     // 字符串内算数
     public static Object count(String countString) {
         return jexlEngine.createExpression(countString).evaluate(null);
+    }
+
+    // 快捷返回负面信息
+    public static void sendUnknownWarn(String unknown, String fileName, String unknownName) {
+        Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " + Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
+                "您填入了一个未知的" + unknown + "，位于 -> " +
+                Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
+                fileName +
+                Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
+                "，您填入的未知" + unknown + "为 -> " +
+                Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
+                unknownName);
     }
 }

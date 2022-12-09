@@ -29,7 +29,7 @@ import java.util.*;
  */
 public class WishManager {
     private static final Plugin plugin = main.getInstance();
-    private static final Boolean useRedis = main.getUseRedis();
+    private static final Boolean useRedis = main.isUseRedis();
 
     // 检查许愿池内是否含有指定的许愿池
     public static boolean hasWish(String wishName) {
@@ -418,7 +418,7 @@ public class WishManager {
         // 金币检查
         Economy economy = main.getEconomy();
         if (money != 0 && economy != null && economy.hasAccount(player) && economy.has(player, money)) economy.withdrawPlayer(player, money);
-        else return false;
+        else if (economy != null) return false;
 
         // 背包物品检查
         for (String configInventoryHave : yaml.getStringList("INVENTORY-HAVE")) {
