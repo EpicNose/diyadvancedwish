@@ -190,7 +190,7 @@ public class MainCommand implements TabExecutor {
 
                     try {
                         setAmount = Integer.parseInt(args[3]);
-                    } catch (Exception e) {
+                    } catch (Exception exception) {
                         ConfigManager.getMessageYaml().getStringList("MUST-NUMBER").forEach(message -> player.sendMessage(CC.replaceAndTranslate(message, player, null)));
                         return;
                     }
@@ -251,7 +251,7 @@ public class MainCommand implements TabExecutor {
 
                     try {
                         setGuaranteed = Double.parseDouble(args[3]);
-                    } catch (Exception e) {
+                    } catch (Exception exception) {
                         ConfigManager.getMessageYaml().getStringList("MUST-NUMBER").forEach(message -> player.sendMessage(CC.replaceAndTranslate(message, player, null)));
                         return;
                     }

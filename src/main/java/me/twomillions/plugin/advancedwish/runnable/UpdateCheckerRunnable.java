@@ -52,7 +52,7 @@ public class UpdateCheckerRunnable {
 
         try {
             for (Scanner sc = new Scanner(new URL("http://update.twomillions.top/advancedwishupdate.html").openStream()); sc.hasNext();) sb.append(sc.nextLine()).append(' ');
-        } catch (IOException e) {
+        } catch (IOException exception) {
             isLatestVersion = false;
 
             Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +

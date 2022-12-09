@@ -9,14 +9,12 @@ import me.twomillions.plugin.advancedwish.utils.JedisUtils;
 import me.twomillions.plugin.advancedwish.utils.ProbabilityUntilities;
 import net.milkbowl.vault.economy.Economy;
 import org.black_ixx.playerpoints.PlayerPoints;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
-import org.fusesource.jansi.Ansi;
 
 import java.util.*;
 
@@ -29,7 +27,7 @@ import java.util.*;
  */
 public class WishManager {
     private static final Plugin plugin = main.getInstance();
-    private static final Boolean useRedis = main.isUseRedis();
+    private static final boolean useRedis = main.isUsingRedis();
 
     // 检查许愿池内是否含有指定的许愿池
     public static boolean hasWish(String wishName) {
@@ -262,7 +260,6 @@ public class WishManager {
     // 返回的是: wishItemString (几率[0];PRIZE-DO内所执行项[1];增加的增率 (保底率) [2];是否清零保底率[3])
     // 如果触发保底，返回则为: wishGuaranteedString(增率 (保底率);PRIZE-DO内所执行项;增加的增率 (保底率);是否清空保底率)
     public static String getFinalProbabilityWish(Player player, String wishName) {
-
         // 检查保底
         for (String wishGuaranteedString : getWishGuaranteedList(wishName)) {
             if (getPlayerWishGuaranteed(player, wishName) == getWishGuaranteed(CC.toPapi(player, wishGuaranteedString))) {
@@ -290,10 +287,11 @@ public class WishManager {
         if (guaranteed) {
             setPlayerWishGuaranteed(player, wishName, getPlayerWishGuaranteed(player, wishName) + getWishGuaranteedMinimumRate(finalProbabilityWish));
             if (isWishGuaranteedClearGuaranteed(finalProbabilityWish)) setPlayerWishGuaranteed(player, wishName, 0);
-        } else {
-            setPlayerWishGuaranteed(player, wishName, getPlayerWishGuaranteed(player, wishName) + getWishPrizeSetGuaranteed(finalProbabilityWish));
-            if (isWishPrizeSetClearGuaranteed(finalProbabilityWish)) setPlayerWishGuaranteed(player, wishName, 0);
+            return;
         }
+
+        setPlayerWishGuaranteed(player, wishName, getPlayerWishGuaranteed(player, wishName) + getWishPrizeSetGuaranteed(finalProbabilityWish));
+        if (isWishPrizeSetClearGuaranteed(finalProbabilityWish)) setPlayerWishGuaranteed(player, wishName, 0);
     }
 
     // 许下一个愿望
@@ -444,24 +442,29 @@ public class WishManager {
             String[] effect = configPotionEffectsHave.toUpperCase(Locale.ROOT).split(";");
 
             int amplifier = Integer.parseInt(effect[1]);
-            PotionEffectType effectType = PotionEffectType.getByName(effect[0]);
 
-            if (effectType == null) {
-                // 返回负面消息
-                Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                        Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
-                        "发现错误的药水名称! 许愿池文件名称 " +
-                        Ansi.ansi().fg(Ansi.Color.WHITE).boldOff().toString() +
-                        "-> " +
-                        Ansi.ansi().fg(Ansi.Color.BLUE).boldOff().toString() +
-                        wishName);
+            PotionEffectType effectType;
+            String effectString = effect[0];
 
-                return false;
-            }
+            try { effectType = PotionEffectType.getByName(effectString); }
+            catch (Exception exception) { CC.sendUnknownWarn("药水效果", wishName, effectString); return false; }
 
             if (!player.hasPotionEffect(effectType) || player.getPotionEffect(effectType).getAmplifier() < amplifier) return false;
         }
 
         return true;
+    }
+
+    // 保存玩家缓存数据 - 当服务器没有使用 Redis 关服时有玩家许愿未完成的情况下
+    public static void savePlayerCacheData() {
+        WishManager.getWishPlayers().forEach(uuid -> {
+            String playerWishPrizeDo = WishManager.getPlayerWishPrizeDo(uuid, true);
+
+            if (playerWishPrizeDo == null) return;
+
+            Json playerJson = new Json(uuid.toString(), main.getInstance().getDataFolder() + "/ServerShutDownCache");
+
+            playerJson.set("CACHE", playerWishPrizeDo);
+        });
     }
 }

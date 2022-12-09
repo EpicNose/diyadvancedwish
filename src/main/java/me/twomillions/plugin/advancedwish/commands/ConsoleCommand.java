@@ -146,7 +146,7 @@ public class ConsoleCommand implements CommandExecutor {
 
                     try {
                         setAmount = Integer.parseInt(args[3]);
-                    } catch (Exception e) {
+                    } catch (Exception exception) {
                         ConfigManager.getMessageYaml().getStringList("MUST-NUMBER").forEach(message -> sender.sendMessage(CC.replaceAndTranslate(message, null, null)));
                         return;
                     }
@@ -207,7 +207,7 @@ public class ConsoleCommand implements CommandExecutor {
 
                     try {
                         setGuaranteed = Double.parseDouble(args[3]);
-                    } catch (Exception e) {
+                    } catch (Exception exception) {
                         ConfigManager.getMessageYaml().getStringList("MUST-NUMBER").forEach(message -> sender.sendMessage(CC.replaceAndTranslate(message, null, null)));
                         return;
                     }

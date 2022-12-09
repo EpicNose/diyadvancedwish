@@ -1,6 +1,5 @@
 package me.twomillions.plugin.advancedwish;
 
-import de.leonhard.storage.Json;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,25 +20,27 @@ import java.util.Arrays;
 
 public final class main extends JavaPlugin {
     // volatile 防止线程直接共享变量可能会有值更新不可见的问题
-    @Getter private volatile static main instance;
-    @Getter private volatile static JedisPool jedisPool;
-    @Getter private volatile static boolean useRedis;
-    @Getter private volatile static Double serverVersion;
+    @Getter @Setter private volatile static main instance;
+    @Getter @Setter private volatile static JedisPool jedisPool;
+    @Getter @Setter private volatile static Double serverVersion;
+
     @Getter @Setter private volatile static Economy economy;
-    @Getter @Setter private volatile static boolean usingPapi;
     @Getter @Setter private volatile static String guaranteedPath;
     @Getter @Setter private volatile static PlayerPointsAPI playerPointsAPI;
+
     @Getter @Setter private volatile static boolean disabled;
+    @Getter @Setter private volatile static boolean usingPapi;
+    @Getter @Setter private volatile static boolean usingRedis;
 
     @Override
     public void onEnable() {
-        instance = this;
+        setInstance(this);
         setDisabled(false);
 
         // 获取 -> org.bukkit.craftbukkit.v1_7_R4
         // 分割后为 -> 1_7, 最终为 -> 1.7
-        serverVersion = Double.parseDouble(Arrays.toString(StringUtils.substringsBetween(getServer().getClass().getPackage().getName(), ".v", "_R"))
-                .replace("_", ".").replace("[", "").replace("]", ""));
+        setServerVersion(Double.parseDouble(Arrays.toString(StringUtils.substringsBetween(getServer().getClass().getPackage().getName(), ".v", "_R"))
+                .replace("_", ".").replace("[", "").replace("]", "")));
 
         ConfigManager.createDefaultConfig();
         Yaml advancedWishYaml = ConfigManager.getAdvancedWishYaml();
@@ -48,26 +49,26 @@ public final class main extends JavaPlugin {
         String guaranteedConfig = advancedWishYaml.getString("GUARANTEED-PATH");
 
         // 获取保底率的指定路径
-        guaranteedPath = guaranteedConfig.equals("") ? pluginPath + "/PlayerGuaranteed" : guaranteedConfig;
+        setGuaranteedPath(guaranteedConfig.equals("") ? pluginPath + "/PlayerGuaranteed" : guaranteedConfig);
 
         // Redis 跨服
         if (advancedWishYaml.getBoolean("USE-REDIS")) {
-            useRedis = true;
-            jedisPool = new JedisPool(advancedWishYaml.getString("REDIS.IP"), advancedWishYaml.getInt("REDIS.PORT"));
+            setUsingRedis(true);
+            setJedisPool(new JedisPool(advancedWishYaml.getString("REDIS.IP"), advancedWishYaml.getInt("REDIS.PORT")));
         }
 
         // Redis 的 Ping 命令使用客户端向服务器发送一个 Ping
         // 如果与 Redis 服务器通信正常的话 会返回一个 Pong 否则返回一个连接错误
         // 所以这就是确定 Redis 服务与本项目是否连通的依据
         // 使用 try cache 捕获异常来检查连接状态
-        if (useRedis) {
+        if (isUsingRedis()) {
             try {
-                jedisPool.getResource().ping();
+                getJedisPool().getResource().ping();
 
                 Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
                         Ansi.ansi().fg(Ansi.Color.GREEN).boldOff().toString() +
                         "Advanced Wish 已成功建立与 Redis 的连接!");
-            } catch (Exception e) {
+            } catch (Exception exceptionxception) {
                 Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
                         Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
                         "您打开了 Redis 跨服选项，但是 Advanced Wish 未与 Redis 服务正确连接，请检查 Redis 服务器状态，即将关闭服务器!");
@@ -105,18 +106,6 @@ public final class main extends JavaPlugin {
     @Override
     public void onDisable() {
         setDisabled(true);
-
-        if (useRedis) jedisPool.close();
-        else {
-            WishManager.getWishPlayers().forEach(uuid -> {
-                String playerWishPrizeDo = WishManager.getPlayerWishPrizeDo(uuid, true);
-
-                if (playerWishPrizeDo == null) return;
-
-                Json playerJson = new Json(uuid.toString(), main.getInstance().getDataFolder() + "/ServerShutDownCache");
-
-                playerJson.set("CACHE", playerWishPrizeDo);
-            });
-        }
+        if (usingRedis) jedisPool.close(); else WishManager.savePlayerCacheData();
     }
 }

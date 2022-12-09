@@ -25,7 +25,6 @@ import java.util.List;
  */
 public class RegisterManager {
     private static final Plugin plugin = main.getInstance();
-    
     @Getter private static final List<String> registerWish = new ArrayList<>();
 
     // 监听注册

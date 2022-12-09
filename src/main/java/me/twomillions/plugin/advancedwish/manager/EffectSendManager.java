@@ -91,7 +91,7 @@ public class EffectSendManager {
             String particleString = particleConfigSplit[0];
 
             try { particleEffect = ParticleEffect.valueOf(particleString); }
-            catch (Exception exception) { CC.sendUnknownWarn("粒子效果", fileName, particleString); return; }
+            catch (Exception exceptionxception) { CC.sendUnknownWarn("粒子效果", fileName, particleString); return; }
 
             double x = Double.parseDouble(particleConfigSplit[1]);
             double y = Double.parseDouble(particleConfigSplit[2]);
@@ -175,7 +175,7 @@ public class EffectSendManager {
             String soundString = soundsConfigSplit[0];
 
             try { sound = Sound.valueOf(soundString); }
-            catch (Exception exception) { CC.sendUnknownWarn("音效", fileName, soundString); return; }
+            catch (Exception exceptionxception) { CC.sendUnknownWarn("音效", fileName, soundString); return; }
 
             int volume = Integer.parseInt(soundsConfigSplit[1]);
             int pitch = Integer.parseInt(soundsConfigSplit[2]);
@@ -261,7 +261,7 @@ public class EffectSendManager {
             PotionEffectType effectType;
 
             try { effectType = PotionEffectType.getByName(effectString); }
-            catch (Exception e) { CC.sendUnknownWarn("药水效果", fileName, effectString); return; }
+            catch (Exception exception) { CC.sendUnknownWarn("药水效果", fileName, effectString); return; }
 
             int duration = Integer.parseInt(effectsConfigSplit[1]);
             int amplifier = Integer.parseInt(effectsConfigSplit[2]);
