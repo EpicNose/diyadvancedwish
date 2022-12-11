@@ -443,11 +443,13 @@ public class WishManager {
 
             int amplifier = Integer.parseInt(effect[1]);
 
-            PotionEffectType effectType;
             String effectString = effect[0];
+            PotionEffectType effectType = PotionEffectType.getByName(effectString);
 
-            try { effectType = PotionEffectType.getByName(effectString); }
-            catch (Exception exception) { CC.sendUnknownWarn("药水效果", wishName, effectString); return false; }
+            if (effectType == null) {
+                CC.sendUnknownWarn("药水效果", wishName, effectString);
+                return false;
+            }
 
             if (!player.hasPotionEffect(effectType) || player.getPotionEffect(effectType).getAmplifier() < amplifier) return false;
         }

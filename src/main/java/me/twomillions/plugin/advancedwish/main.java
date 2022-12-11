@@ -38,9 +38,10 @@ public final class main extends JavaPlugin {
         setDisabled(false);
 
         // 获取 -> org.bukkit.craftbukkit.v1_7_R4
-        // 分割后为 -> 1_7, 最终为 -> 1.7
+        // 分割后为 -> 1_7, 最终为 -> 107
+        // 1.12.2 -> 101202 1.19.2 -> 101902 这里把 _ 换成 0 是为了放置 1.19 比 1.7 小的问题
         setServerVersion(Double.parseDouble(Arrays.toString(StringUtils.substringsBetween(getServer().getClass().getPackage().getName(), ".v", "_R"))
-                .replace("_", ".").replace("[", "").replace("]", "")));
+                .replace("_", "0").replace("[", "").replace("]", "")));
 
         ConfigManager.createDefaultConfig();
         Yaml advancedWishYaml = ConfigManager.getAdvancedWishYaml();

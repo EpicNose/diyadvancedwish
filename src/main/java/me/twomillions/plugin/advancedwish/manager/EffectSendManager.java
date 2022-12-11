@@ -53,7 +53,7 @@ public class EffectSendManager {
     // 发送标题
     private static void sendTitle(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         // 如果是 1.7 服务器则不发送 Title (因为 1.7 没有)
-        if (main.getServerVersion() <= 1.7) return;
+        if (main.getServerVersion() <= 107) return;
 
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
@@ -71,7 +71,7 @@ public class EffectSendManager {
 
         // 在 1.9 中由于此方法无法定义 fadeIn stay fadeOut 所以使用不同的方法
         // 我没有使用 NMS Spigot API 提供了一种发送标题的方法 旨在跨不同的 Minecraft 版本工作
-        if (main.getServerVersion() == 1.9) targetPlayer.sendTitle(mainTitle, subTitle);
+        if (main.getServerVersion() == 109) targetPlayer.sendTitle(mainTitle, subTitle);
         else targetPlayer.sendTitle(mainTitle, subTitle, fadeIn, stay, fadeOut);
     }
 
@@ -266,6 +266,11 @@ public class EffectSendManager {
             int duration = Integer.parseInt(effectsConfigSplit[1]);
             int amplifier = Integer.parseInt(effectsConfigSplit[2]);
 
+            if (effectType == null) {
+                CC.sendUnknownWarn("药水效果", fileName, effectString);
+                return;
+            }
+
             Bukkit.getScheduler().runTask(plugin, () -> targetPlayer.addPotionEffect(new PotionEffect(effectType, duration, amplifier)));
         });
     }
@@ -307,7 +312,7 @@ public class EffectSendManager {
     // 发送 Action Bar
     private static void sendActionBar(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         // 如果是 1.7 服务器则不发送 Action Bar (因为 1.7 没有)
-        if (main.getServerVersion() <= 1.7) return;
+        if (main.getServerVersion() <= 107) return;
 
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
         Yaml yaml = new Yaml(fileName, path);
@@ -342,7 +347,7 @@ public class EffectSendManager {
     // 发送 Boss Bar
     private static void sendBossBar(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         // Boss Bar 支持 1.7 / 1.8 会使用到 NMS 所以我选择直接放弃对于 1.7 / 1.8 的 Boss Bar 支持
-        if (main.getServerVersion() <= 1.8) return;
+        if (main.getServerVersion() <= 108) return;
 
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
         Yaml yaml = new Yaml(fileName, path);
