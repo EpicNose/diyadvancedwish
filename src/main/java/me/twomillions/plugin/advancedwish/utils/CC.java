@@ -72,13 +72,25 @@ public class CC {
     }
 
     // Papi
-    public static String toPapi(Player player, String string) {
+    public static String toPapi(String string, Player player) {
         if (main.isUsingPapi()) return PlaceholderAPI.setPlaceholders(player, string);
         else return string;
     }
 
     // Papi
+    public static String toPapiAndCount(String string, Player player) {
+        if (main.isUsingPapi()) return count(PlaceholderAPI.setPlaceholders(player, string)).toString();
+        else return string;
+    }
+
+    // Papi
     public static String replaceAndTranslateToPapi(String string, Player player, Player replacePlayer) {
+        if (main.isUsingPapi()) return PlaceholderAPI.setPlaceholders(player, CC.replaceAndTranslate(string, player, replacePlayer));
+        else return string;
+    }
+
+    // Papi
+    public static String replaceAndTranslateToPapiAndCount(String string, Player player, Player replacePlayer) {
         if (main.isUsingPapi()) return PlaceholderAPI.setPlaceholders(player, CC.replaceAndTranslate(string, player, replacePlayer));
         else return string;
     }

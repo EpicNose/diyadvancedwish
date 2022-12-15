@@ -5,6 +5,7 @@ import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.utils.CC;
+import me.twomillions.plugin.advancedwish.utils.ItemUtils;
 import me.twomillions.plugin.advancedwish.utils.JedisUtils;
 import me.twomillions.plugin.advancedwish.utils.ProbabilityUntilities;
 import net.milkbowl.vault.economy.Economy;
@@ -262,7 +263,7 @@ public class WishManager {
     public static String getFinalProbabilityWish(Player player, String wishName) {
         // 检查保底
         for (String wishGuaranteedString : getWishGuaranteedList(wishName)) {
-            if (getPlayerWishGuaranteed(player, wishName) == getWishGuaranteed(CC.toPapi(player, wishGuaranteedString))) {
+            if (getPlayerWishGuaranteed(player, wishName) == getWishGuaranteed(CC.toPapi(wishGuaranteedString, player))) {
                 // 保底率的增加与清空
                 setPlayerWishGuaranteed(player, wishName, wishGuaranteedString, true);
                 return wishGuaranteedString;
@@ -272,7 +273,7 @@ public class WishManager {
         // 如果没有保底再随机
         ProbabilityUntilities probabilities = new ProbabilityUntilities();
 
-        for (String wishItem : getWishPrizeSetList(wishName)) probabilities.addChance(wishItem, getWishPrizeSetProbability(CC.toPapi(player, wishItem)));
+        for (String wishItem : getWishPrizeSetList(wishName)) probabilities.addChance(wishItem, getWishPrizeSetProbability(CC.toPapi(wishItem, player)));
 
         String randomElement = probabilities.getRandomElement().toString();
 
@@ -369,11 +370,13 @@ public class WishManager {
         Yaml yaml = new Yaml(wishName, plugin.getDataFolder() + "/Wish");
         yaml.setPathPrefix("CONDITION");
 
-        String perm = yaml.getString("PERM");
+        String perm = CC.toPapi(yaml.getString("PERM"), player);
 
-        int point = yaml.getInt("POINT");
-        int money = yaml.getInt("MONEY");
+        int level = Integer.parseInt(CC.toPapiAndCount(String.valueOf(yaml.getString("LEVEL")), player));
+        int point = Integer.parseInt(CC.toPapiAndCount(String.valueOf(yaml.getString("POINT")), player));
+        double money = Double.parseDouble(CC.toPapiAndCount(String.valueOf(yaml.getString("MONEY")), player));
 
+        // 许愿券检查
         yaml.setPathPrefix(null);
 
         for (String coupon : yaml.getStringList("ADVANCED-SETTINGS.COUPON")) {
@@ -388,14 +391,16 @@ public class WishManager {
                 if (meta == null || meta.getLore() == null) continue;
 
                 for (String lore : meta.getLore()) {
+                    lore = CC.toPapi(lore, player);
+
                     if (!lore.contains(couponSplit[1])) continue;
 
-                    int amount = itemStack.getAmount();
-                    int checkAmount = Integer.parseInt(couponSplit[0]);
+                    int itemAmount = itemStack.getAmount();
+                    int checkAmount = Integer.parseInt(CC.toPapiAndCount(couponSplit[0], player));
 
-                    if (amount < checkAmount) break;
+                    if (itemAmount < checkAmount) break;
 
-                    itemStack.setAmount(amount - checkAmount);
+                    itemStack.setAmount(itemAmount - checkAmount);
 
                     return true;
                 }
@@ -405,10 +410,10 @@ public class WishManager {
         yaml.setPathPrefix("CONDITION");
 
         // 权限检查
-        if (!perm.equals("")) if (!player.hasPermission(perm)) return false;
+        if (!perm.equals("") && !player.hasPermission(perm)) return false;
 
         // 等级检查
-        if (player.getLevel() < yaml.getInt("LEVEL")) return false;
+        if (player.getLevel() < level) return false;
 
         // 点券检查
         if (point != 0 && main.getPlayerPointsAPI() != null && !PlayerPoints.getInstance().getAPI().take(player.getUniqueId(), point)) return false;
@@ -422,17 +427,19 @@ public class WishManager {
         for (String configInventoryHave : yaml.getStringList("INVENTORY-HAVE")) {
             if (configInventoryHave == null || configInventoryHave.length() <= 1) continue;
 
-            String[] item = configInventoryHave.toUpperCase(Locale.ROOT).split(";");
-            int amount = Integer.parseInt(item[1]);
+            String[] configInventoryHaveSplit = configInventoryHave.toUpperCase(Locale.ROOT).split(";");
 
             int itemAmount = 0;
+            int checkAmount = Integer.parseInt(CC.toPapiAndCount(configInventoryHaveSplit[1], player));
+
+            Material material = ItemUtils.materialValueOf(CC.toPapi(configInventoryHaveSplit[0], player), wishName);
 
             // 数量检查
-            for (ItemStack is : player.getInventory().all(Material.valueOf(item[0])).values()) {
-                if (is != null && is.getType() == Material.valueOf(item[0])) itemAmount = itemAmount + is.getAmount();
+            for (ItemStack itemStack : player.getInventory().all(material).values()) {
+                if (itemStack != null && itemStack.getType() == material) itemAmount = itemAmount + itemStack.getAmount();
             }
 
-            if (!player.getInventory().contains(Material.valueOf(item[0])) || itemAmount < amount) return false;
+            if (!player.getInventory().contains(material) || itemAmount < checkAmount) return false;
         }
 
         // 药水效果检查
@@ -441,10 +448,10 @@ public class WishManager {
 
             String[] effect = configPotionEffectsHave.toUpperCase(Locale.ROOT).split(";");
 
-            int amplifier = Integer.parseInt(effect[1]);
+            int amplifier = Integer.parseInt(CC.toPapiAndCount(effect[1], player));
 
-            String effectString = effect[0];
-            PotionEffectType effectType = PotionEffectType.getByName(effectString);
+            String effectString = CC.toPapi(effect[0], player);
+            PotionEffectType effectType = PotionEffectType.getByName(CC.toPapi(effectString, player));
 
             if (effectType == null) {
                 CC.sendUnknownWarn("药水效果", wishName, effectString);
