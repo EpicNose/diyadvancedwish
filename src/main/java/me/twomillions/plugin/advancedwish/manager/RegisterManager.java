@@ -54,7 +54,7 @@ public class RegisterManager {
         main.getInstance().getCommand("awc").setExecutor(new ConsoleCommand());
     }
 
-    // 注册所有增幅卡
+    // 注册所有许愿池
     public static void registerCard() {
         registerWish.clear();
 

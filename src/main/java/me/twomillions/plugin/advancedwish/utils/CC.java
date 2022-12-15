@@ -77,6 +77,12 @@ public class CC {
         else return string;
     }
 
+    // Papi
+    public static String replaceAndTranslateToPapi(String string, Player player, Player replacePlayer) {
+        if (main.isUsingPapi()) return PlaceholderAPI.setPlaceholders(player, CC.replaceAndTranslate(string, player, replacePlayer));
+        else return string;
+    }
+
     // 字符串内算数
     public static Object count(String countString) {
         return jexlEngine.createExpression(countString).evaluate(null);

@@ -55,6 +55,7 @@
 - 此插件不支持多次连抽，无论如何，多次连抽功能永远不会实现，或正在计划中，因为这是极其不稳定的。
 - 如果您需要许愿 Gui，那么您需要使用第三方的菜单插件制作，此插件不会自带菜单功能 (这是臃肿的，用户需要多学一种 Gui 的写法) 。
 - 我们提供了 DeluxeMenu 的许愿预设，您可以参考此预设进行编写 -> [DeluxeMenu 配套预设](https://gitee.com/A2000000/advanced-wish/tree/main/DeluxeMenu%20%E9%85%8D%E5%A5%97%E8%8F%9C%E5%8D%95)
+- 我们提供了 DragonCore 的许愿预设，您可以参考此预设对龙之核心进行兼容 -> [DragonCore 配套预设](https://gitee.com/A2000000/advanced-wish/tree/main/DragonCore%20%E9%85%8D%E5%A5%97%E7%95%8C%E9%9D%A2)
 - 如果您想要提供更多的菜单预设，比如 TrMenu 那么您可以联系我或发送 Pull Request.
 ---
 > Redis 跨服

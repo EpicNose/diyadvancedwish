@@ -3,6 +3,7 @@
 # 注意:
 #  本插件本体不提供任何 Gui 界面
 #  您需要使用其他菜单自行制作 Gui 界面以供玩家更好的许愿，当然您也可以选择使用指令进行许愿
+#  从 0.0.2.6-SNAPSHOT 后均支持使用 Papi，但只有 PRIZE-SET, GUARANTEED,  WAIT-SET 部分内容支持算数 (具体有标注)
 #
 # 使用限制
 CONDITION:
@@ -32,6 +33,8 @@ CONDITION:
 #  自从 0.0.1.1-SNAPSHOT 后 (包括)，这里支持使用 Papi 变量以及算数
 #  例如: "5+1;A;0;true" 或者 "5*2;A;0;true" 或者 "5+%papi%;A;0;true" 等
 #  对应 Issue -> https://gitee.com/A2000000/advanced-wish/issues/I64GIA
+#
+# 支持的算数部分有: 几率 / 增加的增率 (保底率)
 PRIZE-SET:
   - "5;A;0;true"
   - "20;B;1;false"
@@ -55,6 +58,8 @@ PRIZE-SET:
 #  自从 0.0.1.1-SNAPSHOT 后 (包括)，这里支持使用 Papi 变量以及算数
 #  例如: "30+1;A;0;true" 或者 "30*2;A;0;true" 或者 "30+%papi%;A;0;true" 等
 #  对应 Issue -> https://gitee.com/A2000000/advanced-wish/issues/I64GIA
+#
+# 支持的算数部分有: 增率 (保底率) / 增加的增率 (保底率)
 GUARANTEED:
   - "30;A;0;true" # 这里是大保底
   - "15;B;1;false" # 这里是小保底
@@ -88,6 +93,8 @@ GUARANTEED:
 #   如果服务器是单端，那么我们会将玩家与其对应的 结果操作 (PRIZE-DO) 进行记录，玩家将会跳过所有的操作，直接即刻收到奖励
 #   我们会记录奖励在对应 PRIZE-DO 中的具体编号，并且在玩家进入时直接执行内容，
 #   如果您更改了编号，导致此编号不存在，那么将不会发生任何事情。
+#
+# 支持的算数部分有: 等待秒数
 WAIT-SET:
   - "0;START"
   - "1;C1"
@@ -308,6 +315,7 @@ PRIZE-DO:
       MESSAGE: "&e这是... 钻石!"
       COLOR: RANDOM
       STYLE: RANDOM
+
   B:
     EFFECTS:
       - "slow;20;5"
@@ -345,6 +353,7 @@ PRIZE-DO:
       MESSAGE: "&7这是... 铁锭!"
       COLOR: RANDOM
       STYLE: RANDOM
+
   C:
     EFFECTS:
       - "slow;20;5"

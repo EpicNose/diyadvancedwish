@@ -22,6 +22,7 @@ public final class main extends JavaPlugin {
     // volatile 防止线程直接共享变量可能会有值更新不可见的问题
     @Getter @Setter private volatile static main instance;
     @Getter @Setter private volatile static JedisPool jedisPool;
+    @Getter @Setter private volatile static String redisPassWord;
     @Getter @Setter private volatile static Double serverVersion;
 
     @Getter @Setter private volatile static Economy economy;
@@ -56,6 +57,9 @@ public final class main extends JavaPlugin {
         if (advancedWishYaml.getBoolean("USE-REDIS")) {
             setUsingRedis(true);
             setJedisPool(new JedisPool(advancedWishYaml.getString("REDIS.IP"), advancedWishYaml.getInt("REDIS.PORT")));
+
+            String redisPassWord = advancedWishYaml.getString("REDIS.PASSWORD");
+            if (!redisPassWord.equals("")) setRedisPassWord(redisPassWord);
         }
 
         // Redis 的 Ping 命令使用客户端向服务器发送一个 Ping
@@ -69,7 +73,7 @@ public final class main extends JavaPlugin {
                 Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
                         Ansi.ansi().fg(Ansi.Color.GREEN).boldOff().toString() +
                         "Advanced Wish 已成功建立与 Redis 的连接!");
-            } catch (Exception exceptionxception) {
+            } catch (Exception exception) {
                 Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
                         Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
                         "您打开了 Redis 跨服选项，但是 Advanced Wish 未与 Redis 服务正确连接，请检查 Redis 服务器状态，即将关闭服务器!");

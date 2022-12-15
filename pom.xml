@@ -6,7 +6,7 @@
 
     <groupId>me.twomillions.plugin</groupId>
     <artifactId>AdvancedWish</artifactId>
-    <version>0.0.2.5-SNAPSHOT</version>
+    <version>0.0.2.6-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>AdvancedWish</name>
@@ -44,6 +44,11 @@
                                 <relocation>
                                     <pattern>de.leonhard.storage</pattern>
                                     <shadedPattern>me.twomillions.plugin.advancedwish.storage</shadedPattern>
+                                </relocation>
+
+                                <relocation>
+                                    <pattern>redis.clients.jedis</pattern>
+                                    <shadedPattern>me.twomillions.plugin.advancedwish.jedis</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>

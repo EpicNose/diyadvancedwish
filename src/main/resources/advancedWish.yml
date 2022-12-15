@@ -12,6 +12,7 @@ USE-REDIS: false # 默认关闭 Redis 跨服
 REDIS:
   IP: 127.0.0.1
   PORT: 6379
+  PASSWORD: "" # 没有则不填写
 
 # 注册的许愿池
 WISH:
