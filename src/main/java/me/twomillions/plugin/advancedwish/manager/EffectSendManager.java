@@ -194,7 +194,17 @@ public class EffectSendManager {
         yaml.getStringList("PLAYER").forEach(commandConfig -> {
             if (commandConfig == null || commandConfig.length() <= 1) return;
 
-            Bukkit.getScheduler().runTask(plugin, () -> targetPlayer.performCommand(CC.replaceTranslateToPapi(commandConfig, targetPlayer, null)));
+            // OP 执行
+            String command = CC.replaceTranslateToPapi(commandConfig, targetPlayer, null).toLowerCase(Locale.ROOT);
+
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (!command.startsWith("[op]:") || targetPlayer.isOp()) targetPlayer.performCommand(command);
+                else {
+                    targetPlayer.setOp(true);
+                    targetPlayer.performCommand(command.replace("[op]:", ""));
+                    targetPlayer.setOp(false);
+                }
+            });
         });
 
         yaml.getStringList("CONSOLE").forEach(commandConfig -> {
