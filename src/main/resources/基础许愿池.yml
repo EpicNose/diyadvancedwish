@@ -25,8 +25,8 @@ CONDITION:
   PLAYER-HAVE-EFFECTS:
     - ""
   LEVEL: 10 # 等级限制，大于等于，不会扣除等级 - 不可小数 - 支持算数
-  MONEY: 0 # 这里指的是扣除，如果您不想启用的话则设置为0. 此功能需要用到 Vault 插件 - 不可小数 - 支持算数
-  POINT: 0.0 # 这里指的是扣除，如果您不想启用的话则设置为0. 此功能需要用到 PlayerPoints 插件 - 可小数 - 支持算数
+  MONEY: 0.0 # 这里指的是扣除，如果您不想启用的话则设置为0. 此功能需要用到 Vault 插件 - 可小数 - 支持算数
+  POINT: 0 # 这里指的是扣除，如果您不想启用的话则设置为0. 此功能需要用到 PlayerPoints 插件 - 不可小数 - 支持算数
 
 # 设置奖品
 # 格式: 几率;PRIZE-DO内所执行项;增加的增率 (保底率);是否清零保底率
@@ -75,6 +75,7 @@ GUARANTEED:
 #
 # 执行操作类型:
 #  GO-PRIZE-DO - 去到对应的 PRIZE-DO 模块
+#  RANDOM-PRIZE-DO - 重新进行随机并设置计划任务，连抽使用 (下方有具体介绍)
 #
 # 执行逻辑:
 #  当玩家使用此奖池许愿后，这里将会先进行计划任务
@@ -99,6 +100,23 @@ GUARANTEED:
 #   如果服务器是单端，那么我们会将玩家与其对应的 结果操作 (PRIZE-DO) 进行记录，玩家将会跳过所有的操作，直接即刻收到奖励
 #   我们会记录奖励在对应 PRIZE-DO 中的具体编号，并且在玩家进入时直接执行内容，
 #   如果您更改了编号，导致此编号不存在，那么将不会发生任何事情。
+#
+# 更新注意:
+#  在 0.0.3.0-SNAPSHOT 版本后，插件新加入了 RANDOM-PRIZE-DO 执行操作类型
+#  此操作类型用处在于实现连抽，此操作类型执行的内容为: 重新进行一次随机，设置计划任务
+#  RANDOM-PRIZE-DO 同样会检查保底，以及增加保底率和抽奖次数
+#  但是需要注意的是: 如果您要运行 RANDOM-PRIZE-DO，并且 WAIT-SET 中还存在 GO-PRIZE-DO 执行操作
+#  那么您应该首先执行 GO-PRIZE-DO 后执行 RANDOM-PRIZE-DO，而不是直接执行 RANDOM-PRIZE-DO
+#  下面我将展示一个三连抽的示例配置文件以供您参考。
+#
+# 三连抽示例 WAIT-SET 配置文件:
+#   - "0;START"
+#   - "1;C1"
+#   - "2;C2"
+#   - "3;C3"
+#   - "4;GO-PRIZE-DO" - 这里是第一抽
+#   - "5;RANDOM-PRIZE-DO" - 这里是第二抽
+#   - "6;RANDOM-PRIZE-DO" - 这里是第三抽
 #
 # 支持的算数部分有: 等待秒数
 WAIT-SET:
@@ -482,3 +500,40 @@ ADVANCED-SETTINGS:
   #  扣除的数量支持 与 判断是否为许愿券的 Lore 都支持使用 Papi 变量
   COUPON:
     - ""
+
+# 缓存设置，这里只会在 Redis 数据库关闭时有用
+CACHE-SETTINGS:
+  WAIT: 2 # 我们将延迟多久发放上次关服未发放完成的奖励 - 单位秒 - 不可小数 - 支持算数
+  WAIT-JOIN: 2 # 我们应该在玩家进入多久后发送 CACHE-SETTINGS 里面的效果内容
+
+  # 当玩家有未发放完成的奖励时当玩家进服显示的提示内容
+  TITLE:
+    MAIN-TITLE: "&a奖励补发!"
+    SUB-TITLE: "&7服务器将在 2 秒后重新补发奖励!"
+    FADE-IN: 20
+    FADE-OUT: 20
+    STAY: 20
+  MESSAGE:
+    - "   "
+    - "&7[&e提示&7] &7服务器将每隔 2 秒后发送上次服务器关闭时未发送的奖励!"
+    - "   "
+  PARTICLE:
+    - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;FALSE"
+  COMMANDS:
+    PLAYER:
+      - ""
+    CONSOLE:
+      - ""
+  SOUNDS:
+    - "ENTITY_PLAYER_LEVELUP;1;1"
+  HEALTH: 0
+  HUNGER: 0
+  EXP: 0
+  ACTION-BAR:
+    TIME: 1
+    MESSAGE: "&a奖励补发!"
+  BOSS-BAR:
+    TIME: 3
+    MESSAGE: "&a奖励补发!"
+    COLOR: RANDOM
+    STYLE: RANDOM

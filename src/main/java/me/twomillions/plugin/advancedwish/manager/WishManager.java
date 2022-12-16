@@ -66,7 +66,8 @@ public class WishManager {
     }
 
     // 玩家许愿后的最终执行记录 (PrizeDo)
-    private static final Map<UUID, String> playerWishPrizeDo = new HashMap<>();
+    // 换为 List 来存储多个许愿结果
+    private static final Map<UUID, List<String>> playerWishPrizeDo = new HashMap<>();
 
     // 快速转换为 PlayerWishPrizeDoString 字符串
     // 格式为: UUID[0];许愿池文件名[1];对应节点[2]
@@ -88,37 +89,61 @@ public class WishManager {
     }
 
     // 设置应该执行的 Prize Do
-    public static void setPlayerWishPrizeDo(Player player, String wishName, String doNode) {
+    public static void addPlayerWishPrizeDo(Player player, String wishName, String doNode) {
         UUID uuid = player.getUniqueId();
         String playerWishPrizeDoString = toPlayerWishPrizeDoString(uuid, wishName, doNode);
 
-        if (useRedis) JedisUtils.setMap("playerWishPrizeDo", uuid.toString(), playerWishPrizeDoString);
-        else playerWishPrizeDo.put(uuid, playerWishPrizeDoString);
+        List<String> newPlayerWishPrizeDo;
+        if (playerWishPrizeDo.get(uuid) != null) newPlayerWishPrizeDo = new ArrayList<>(playerWishPrizeDo.get(uuid));
+        else newPlayerWishPrizeDo = new ArrayList<>();
+
+        newPlayerWishPrizeDo.add(playerWishPrizeDoString);
+
+        if (useRedis) JedisUtils.pushListValue("playerWishPrizeDo_" + uuid, playerWishPrizeDoString);
+        else playerWishPrizeDo.put(uuid, newPlayerWishPrizeDo);
     }
 
     // 清除玩家的 Prize Do
-    public static void removePlayerWishPrizeDo(Player player) {
+    public static void removePlayerWishPrizeDo(Player player, String playerWishPrizeDoString) {
         UUID uuid = player.getUniqueId();
 
-        if (useRedis) JedisUtils.removeMap("playerWishPrizeDo", uuid.toString());
+        if (useRedis) JedisUtils.removeListValue("playerWishPrizeDo_" + uuid, playerWishPrizeDoString);
+        else playerWishPrizeDo.get(uuid).remove(playerWishPrizeDoString);
+    }
+
+    // 清除玩家所有的 Prize Do
+    public static void removePlayerAllWishPrizeDo(Player player, String playerWishPrizeDoString) {
+        UUID uuid = player.getUniqueId();
+
+        if (useRedis) JedisUtils.removeListValue("playerWishPrizeDo_" + uuid);
         else playerWishPrizeDo.remove(uuid);
     }
 
     // 获取玩家的 Prize Do
     // save - 是否为保存格式 保存格式: 许愿池文件名[0];对应 Prize Do 节点[1]
-    public static String getPlayerWishPrizeDo(Player player, boolean save) {
-        String playerWishPrizeDoString = playerWishPrizeDo.get(player.getUniqueId());
+    public static List<String> getPlayerWishPrizeDo(Player player, boolean save) {
+        List<String> playerWishPrizeDoList = playerWishPrizeDo.get(player.getUniqueId());
+        List<String> newPlayerWishPrizeDoList = new ArrayList<>();
 
-        if (save) return getPlayerWishPrizeDoStringWishName(playerWishPrizeDoString, false) + ";" + getPlayerWishPrizeDoStringWishDoNode(playerWishPrizeDoString, false);
-        else return playerWishPrizeDoString;
+        for (String playerWishPrizeDoString : playerWishPrizeDoList) {
+            if (save) newPlayerWishPrizeDoList.add(getPlayerWishPrizeDoStringWishName(playerWishPrizeDoString, false) + ";" + getPlayerWishPrizeDoStringWishDoNode(playerWishPrizeDoString, false));
+        }
+
+        if (save) return newPlayerWishPrizeDoList;
+        else return playerWishPrizeDoList;
     }
 
     // 获取玩家的 Prize Do - 多态
-    public static String getPlayerWishPrizeDo(UUID uuid, boolean save) {
-        String playerWishPrizeDoString = playerWishPrizeDo.get(uuid);
+    public static List<String> getPlayerWishPrizeDo(UUID uuid, boolean save) {
+        List<String> playerWishPrizeDoList = playerWishPrizeDo.get(uuid);
+        List<String> newPlayerWishPrizeDoList = new ArrayList<>();
 
-        if (save) return getPlayerWishPrizeDoStringWishName(playerWishPrizeDoString, false) + ";" + getPlayerWishPrizeDoStringWishDoNode(playerWishPrizeDoString, false);
-        else return playerWishPrizeDoString;
+        for (String playerWishPrizeDoString : playerWishPrizeDoList) {
+            if (save) newPlayerWishPrizeDoList.add(getPlayerWishPrizeDoStringWishName(playerWishPrizeDoString, false) + ";" + getPlayerWishPrizeDoStringWishDoNode(playerWishPrizeDoString, false));
+        }
+
+        if (save) return newPlayerWishPrizeDoList;
+        else return playerWishPrizeDoList;
     }
 
     // 玩家计划任务记录
@@ -150,9 +175,20 @@ public class WishManager {
         UUID uuid = player.getUniqueId();
 
         getWishScheduledTasks(wishName).forEach(WishScheduledTask -> {
-            Long time = System.currentTimeMillis() + getWishScheduledTasksSeconds(WishScheduledTask) * 1000L;
             String scheduledTasksPrizeDo = getWishScheduledTasksPrizeDo(WishScheduledTask);
             String wishItemPrizeDo = "PRIZE-DO." + getWishPrizeSetPrizeDo(finalProbabilityWish);
+            Long time = System.currentTimeMillis() + getWishScheduledTasksSeconds(WishScheduledTask) * 1000L;
+
+            // 这里的 RANDOM-PRIZE-DO 是重新进行随机，连抽使用
+            // 在添加中间任务之前将会 getFinalProbabilityWish 添加玩家的保底以及抽奖数
+            // 所以保底在 RANDOM-PRIZE-DO 中依然有使用
+            if (scheduledTasksPrizeDo.equals("RANDOM-PRIZE-DO")) {
+                String randomFinalProbabilityWish = getFinalProbabilityWish(player, wishName);
+                addPlayerWishPrizeDo(player, wishName, getWishPrizeSetPrizeDo(finalProbabilityWish));
+                addPlayerScheduledTasks(uuid, time, wishName, "PRIZE-DO." + getWishPrizeSetPrizeDo(randomFinalProbabilityWish));
+
+                return;
+            }
 
             if (scheduledTasksPrizeDo.equals("GO-PRIZE-DO")) addPlayerScheduledTasks(uuid, time, wishName, wishItemPrizeDo);
             else addPlayerScheduledTasks(uuid, time, wishName, "WAIT-DO." + scheduledTasksPrizeDo);
@@ -263,7 +299,7 @@ public class WishManager {
     public static String getFinalProbabilityWish(Player player, String wishName) {
         // 检查保底
         for (String wishGuaranteedString : getWishGuaranteedList(wishName)) {
-            if (getPlayerWishGuaranteed(player, wishName) == getWishGuaranteed(CC.toPapi(wishGuaranteedString, player))) {
+            if (getPlayerWishGuaranteed(player, wishName) == getWishGuaranteed(CC.replaceTranslateToPapi(wishGuaranteedString, player))) {
                 // 保底率的增加与清空
                 setPlayerWishGuaranteed(player, wishName, wishGuaranteedString, true);
                 return wishGuaranteedString;
@@ -273,12 +309,16 @@ public class WishManager {
         // 如果没有保底再随机
         ProbabilityUntilities probabilities = new ProbabilityUntilities();
 
-        for (String wishItem : getWishPrizeSetList(wishName)) probabilities.addChance(wishItem, getWishPrizeSetProbability(CC.toPapi(wishItem, player)));
+        for (String wishItem : getWishPrizeSetList(wishName)) probabilities.addChance(wishItem, getWishPrizeSetProbability(CC.replaceTranslateToPapi(wishItem, player)));
 
         String randomElement = probabilities.getRandomElement().toString();
 
         // 保底率的增加与清空
         setPlayerWishGuaranteed(player, wishName, randomElement, false);
+
+        // 设置玩家此奖池的许愿数
+        setPlayerWishAmount(player, wishName, getPlayerWishAmount(player, wishName) + 1);
+
         return randomElement;
     }
 
@@ -313,11 +353,8 @@ public class WishManager {
         String finalProbabilityWish = getFinalProbabilityWish(player, wishName);
 
         addPlayerToWishList(player);
-        setPlayerWishPrizeDo(player, wishName, getWishPrizeSetPrizeDo(finalProbabilityWish));
+        addPlayerWishPrizeDo(player, wishName, getWishPrizeSetPrizeDo(finalProbabilityWish));
         createPlayerScheduledTasks(player, wishName, finalProbabilityWish);
-
-        // 设置玩家此奖池的许愿数
-        setPlayerWishAmount(player, wishName, getPlayerWishAmount(player, wishName) + 1);
     }
 
     // 设置玩家指定许愿池保底率
@@ -370,11 +407,11 @@ public class WishManager {
         Yaml yaml = new Yaml(wishName, plugin.getDataFolder() + "/Wish");
         yaml.setPathPrefix("CONDITION");
 
-        String perm = CC.toPapi(yaml.getString("PERM"), player);
+        String perm = CC.replaceTranslateToPapi(yaml.getString("PERM"), player);
 
-        int level = Integer.parseInt(CC.toPapiAndCount(String.valueOf(yaml.getString("LEVEL")), player));
-        int point = Integer.parseInt(CC.toPapiAndCount(String.valueOf(yaml.getString("POINT")), player));
-        double money = Double.parseDouble(CC.toPapiAndCount(String.valueOf(yaml.getString("MONEY")), player));
+        int level = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("LEVEL")), player));
+        int point = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("POINT")), player));
+        double money = Double.parseDouble(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("MONEY")), player));
 
         // 许愿券检查
         yaml.setPathPrefix(null);
@@ -391,12 +428,12 @@ public class WishManager {
                 if (meta == null || meta.getLore() == null) continue;
 
                 for (String lore : meta.getLore()) {
-                    lore = CC.toPapi(lore, player);
+                    lore = CC.replaceTranslateToPapi(lore, player);
 
                     if (!lore.contains(couponSplit[1])) continue;
 
                     int itemAmount = itemStack.getAmount();
-                    int checkAmount = Integer.parseInt(CC.toPapiAndCount(couponSplit[0], player));
+                    int checkAmount = Integer.parseInt(CC.replaceTranslateToPapiCount(couponSplit[0], player));
 
                     if (itemAmount < checkAmount) break;
 
@@ -430,9 +467,9 @@ public class WishManager {
             String[] configInventoryHaveSplit = configInventoryHave.toUpperCase(Locale.ROOT).split(";");
 
             int itemAmount = 0;
-            int checkAmount = Integer.parseInt(CC.toPapiAndCount(configInventoryHaveSplit[1], player));
+            int checkAmount = Integer.parseInt(CC.replaceTranslateToPapiCount(configInventoryHaveSplit[1], player));
 
-            Material material = ItemUtils.materialValueOf(CC.toPapi(configInventoryHaveSplit[0], player), wishName);
+            Material material = ItemUtils.materialValueOf(CC.replaceTranslateToPapi(configInventoryHaveSplit[0], player), wishName);
 
             // 数量检查
             for (ItemStack itemStack : player.getInventory().all(material).values()) {
@@ -448,10 +485,10 @@ public class WishManager {
 
             String[] effect = configPotionEffectsHave.toUpperCase(Locale.ROOT).split(";");
 
-            int amplifier = Integer.parseInt(CC.toPapiAndCount(effect[1], player));
+            int amplifier = Integer.parseInt(CC.replaceTranslateToPapiCount(effect[1], player));
 
-            String effectString = CC.toPapi(effect[0], player);
-            PotionEffectType effectType = PotionEffectType.getByName(CC.toPapi(effectString, player));
+            String effectString = CC.replaceTranslateToPapi(effect[0], player);
+            PotionEffectType effectType = PotionEffectType.getByName(CC.replaceTranslateToPapi(effectString, player));
 
             if (effectType == null) {
                 CC.sendUnknownWarn("药水效果", wishName, effectString);
@@ -467,13 +504,17 @@ public class WishManager {
     // 保存玩家缓存数据 - 当服务器没有使用 Redis 关服时有玩家许愿未完成的情况下
     public static void savePlayerCacheData() {
         WishManager.getWishPlayers().forEach(uuid -> {
-            String playerWishPrizeDo = WishManager.getPlayerWishPrizeDo(uuid, true);
+            List<String> playerWishPrizeDoList = WishManager.getPlayerWishPrizeDo(uuid, true);
+            List<String> newPlayerWishPrizeDoList = new ArrayList<>();
 
-            if (playerWishPrizeDo == null) return;
+            if (playerWishPrizeDoList == null) return;
+
+            // 转换 Unicode 防止乱码
+            for (String playerWishPrizeDoString : playerWishPrizeDoList) newPlayerWishPrizeDoList.add(CC.stringToUnicode(playerWishPrizeDoString));
 
             Json playerJson = new Json(uuid.toString(), main.getInstance().getDataFolder() + "/ServerShutDownCache");
 
-            playerJson.set("CACHE", playerWishPrizeDo);
+            playerJson.set("CACHE", newPlayerWishPrizeDoList);
         });
     }
 }

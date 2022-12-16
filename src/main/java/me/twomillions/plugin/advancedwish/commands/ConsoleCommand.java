@@ -34,7 +34,7 @@ public class ConsoleCommand implements CommandExecutor {
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             if (args.length == 0) {
-                ConfigManager.getMessageYaml().getStringList("COMSOLE-SHOW-COMMAND").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                ConfigManager.getMessageYaml().getStringList("COMSOLE-SHOW-COMMAND").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
                 return;
             }
 
@@ -42,20 +42,20 @@ public class ConsoleCommand implements CommandExecutor {
 
             switch (subCommand) {
                 case "list":
-                    ConfigManager.getMessageYaml().getStringList("LIST").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                    ConfigManager.getMessageYaml().getStringList("LIST").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
 
                     break;
 
                 case "makewish":
                     if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
                         return;
                     }
 
                     String wishName = args[1];
 
                     if (!WishManager.hasWish(wishName)) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NOT-HAVE").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                        ConfigManager.getMessageYaml().getStringList("WISH-NOT-HAVE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
                         return;
                     }
 
@@ -63,26 +63,26 @@ public class ConsoleCommand implements CommandExecutor {
                         Player targetPlayer = Bukkit.getPlayerExact(args[2]);
 
                         if (targetPlayer == null) {
-                            ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                            ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
                             return;
                         }
 
                         WishManager.makeWish(targetPlayer, wishName, false);
-                        ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
-                    } else ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                        ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
+                    } else ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
 
                     break;
 
                 case "makewishforce":
                     if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
                         return;
                     }
 
                     String forceWishName = args[1];
 
                     if (!WishManager.hasWish(forceWishName)) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NOT-HAVE").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                        ConfigManager.getMessageYaml().getStringList("WISH-NOT-HAVE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
                         return;
                     }
 
@@ -90,24 +90,24 @@ public class ConsoleCommand implements CommandExecutor {
                         Player targetPlayer = Bukkit.getPlayerExact(args[2]);
 
                         if (targetPlayer == null) {
-                            ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                            ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
                             return;
                         }
 
                         WishManager.makeWish(targetPlayer, forceWishName, true);
-                        ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
-                    } else ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                        ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
+                    } else ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
 
                     break;
 
                 case "getamount":
                     if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
                         return;
                     }
 
                     if (args.length == 2) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                        ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
                         return;
                     }
 
@@ -115,7 +115,7 @@ public class ConsoleCommand implements CommandExecutor {
                     Player amountGetTargetPlayer = Bukkit.getPlayerExact(args[2]);
 
                     if (amountGetTargetPlayer == null) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                        ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
                         return;
                     }
 
@@ -126,17 +126,17 @@ public class ConsoleCommand implements CommandExecutor {
 
                 case "setamount":
                     if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
                         return;
                     }
 
                     if (args.length == 2) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                        ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
                         return;
                     }
 
                     if (args.length == 3) {
-                        ConfigManager.getMessageYaml().getStringList("AMOUNT-NULL").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                        ConfigManager.getMessageYaml().getStringList("AMOUNT-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
                         return;
                     }
 
@@ -147,28 +147,28 @@ public class ConsoleCommand implements CommandExecutor {
                     try {
                         setAmount = Integer.parseInt(args[3]);
                     } catch (Exception exception) {
-                        ConfigManager.getMessageYaml().getStringList("MUST-NUMBER").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                        ConfigManager.getMessageYaml().getStringList("MUST-NUMBER").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
                         return;
                     }
 
                     if (amountTargetPlayer == null) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                        ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
                         return;
                     }
 
                     WishManager.setPlayerWishAmount(amountTargetPlayer, setAmountWishName, setAmount);
-                    ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                    ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
 
                     break;
 
                 case "getguaranteed":
                     if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
                         return;
                     }
 
                     if (args.length == 2) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                        ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
                         return;
                     }
 
@@ -176,7 +176,7 @@ public class ConsoleCommand implements CommandExecutor {
                     Player guaranteedGetTargetPlayer = Bukkit.getPlayerExact(args[2]);
 
                     if (guaranteedGetTargetPlayer == null) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                        ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
                         return;
                     }
 
@@ -187,17 +187,17 @@ public class ConsoleCommand implements CommandExecutor {
 
                 case "setguaranteed":
                     if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
                         return;
                     }
 
                     if (args.length == 2) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                        ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
                         return;
                     }
 
                     if (args.length == 3) {
-                        ConfigManager.getMessageYaml().getStringList("GUARANTEED-NULL").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                        ConfigManager.getMessageYaml().getStringList("GUARANTEED-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
                         return;
                     }
 
@@ -208,17 +208,17 @@ public class ConsoleCommand implements CommandExecutor {
                     try {
                         setGuaranteed = Double.parseDouble(args[3]);
                     } catch (Exception exception) {
-                        ConfigManager.getMessageYaml().getStringList("MUST-NUMBER").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                        ConfigManager.getMessageYaml().getStringList("MUST-NUMBER").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
                         return;
                     }
 
                     if (targetPlayer == null) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                        ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
                         return;
                     }
 
                     WishManager.setPlayerWishGuaranteed(targetPlayer, setGuaranteedWishName, setGuaranteed);
-                    ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                    ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
 
                     break;
 
@@ -226,7 +226,7 @@ public class ConsoleCommand implements CommandExecutor {
                     RegisterManager.registerCard();
                     main.setGuaranteedPath(ConfigManager.getAdvancedWishYaml().getString("GUARANTEED-PATH"));
 
-                    ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceAndTranslateToPapi(message, null, null)));
+                    ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message, null, null)));
 
                     break;
             }

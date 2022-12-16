@@ -49,8 +49,8 @@ public class PlayerTimestampRunnable {
                     WishManager.removePlayerScheduledTasks(playerScheduledTask);
 
                     if (doNode.contains("PRIZE-DO.")) {
-                        WishManager.removePlayerWishPrizeDo(player);
                         WishManager.removePlayerWithWishList(player);
+                        WishManager.removePlayerWishPrizeDo(player, doNode);
                     }
                 });
 

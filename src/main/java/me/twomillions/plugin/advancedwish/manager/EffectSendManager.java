@@ -60,14 +60,14 @@ public class EffectSendManager {
         Yaml yaml = new Yaml(fileName, path);
         yaml.setPathPrefix(pathPrefix == null ? "TITLE" : pathPrefix + ".TITLE");
 
-        String mainTitle = CC.replaceAndTranslateToPapi(yaml.getString("MAIN-TITLE"), targetPlayer, replacePlayer);
-        String subTitle = CC.replaceAndTranslateToPapi(yaml.getString("SUB-TITLE"), targetPlayer, replacePlayer);
+        String mainTitle = CC.replaceTranslateToPapi(yaml.getString("MAIN-TITLE"), targetPlayer, replacePlayer);
+        String subTitle = CC.replaceTranslateToPapi(yaml.getString("SUB-TITLE"), targetPlayer, replacePlayer);
 
         if (mainTitle.equals("") && subTitle.equals("")) return;
 
-        int fadeIn = Integer.parseInt(CC.replaceAndTranslateToPapiAndCount(String.valueOf(yaml.getString("FADE-IN")), replacePlayer, targetPlayer));
-        int fadeOut = Integer.parseInt(CC.replaceAndTranslateToPapiAndCount(String.valueOf(yaml.getString("FADE-OUT")), replacePlayer, targetPlayer));
-        int stay = Integer.parseInt(CC.replaceAndTranslateToPapiAndCount(String.valueOf(yaml.getString("STAY")), replacePlayer, targetPlayer));
+        int fadeIn = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("FADE-IN")), replacePlayer, targetPlayer));
+        int fadeOut = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("FADE-OUT")), replacePlayer, targetPlayer));
+        int stay = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("STAY")), replacePlayer, targetPlayer));
 
         // 在 1.9 中由于此方法无法定义 fadeIn stay fadeOut 所以使用不同的方法
         // 我没有使用 NMS Spigot API 提供了一种发送标题的方法 旨在跨不同的 Minecraft 版本工作
@@ -88,15 +88,15 @@ public class EffectSendManager {
             String[] particleConfigSplit = particleConfig.toUpperCase(Locale.ROOT).split(";");
 
             ParticleEffect particleEffect;
-            String particleString = CC.toPapi(particleConfigSplit[0], targetPlayer);
+            String particleString = CC.replaceTranslateToPapi(particleConfigSplit[0], targetPlayer);
 
             try { particleEffect = ParticleEffect.valueOf(particleString); }
             catch (Exception exception) { CC.sendUnknownWarn("粒子效果", fileName, particleString); return; }
 
-            double x = Double.parseDouble(CC.replaceAndTranslateToPapiAndCount(particleConfigSplit[1], targetPlayer, null));
-            double y = Double.parseDouble(CC.replaceAndTranslateToPapiAndCount(particleConfigSplit[2], targetPlayer, null));
-            double z = Double.parseDouble(CC.replaceAndTranslateToPapiAndCount(particleConfigSplit[3], targetPlayer, null));
-            int amount = Integer.parseInt(CC.replaceAndTranslateToPapiAndCount(particleConfigSplit[4], targetPlayer, null));
+            double x = Double.parseDouble(CC.replaceTranslateToPapiCount(particleConfigSplit[1], targetPlayer, null));
+            double y = Double.parseDouble(CC.replaceTranslateToPapiCount(particleConfigSplit[2], targetPlayer, null));
+            double z = Double.parseDouble(CC.replaceTranslateToPapiCount(particleConfigSplit[3], targetPlayer, null));
+            int amount = Integer.parseInt(CC.replaceTranslateToPapiCount(particleConfigSplit[4], targetPlayer, null));
 
             boolean isNote = particleEffect == ParticleEffect.NOTE;
             boolean allPlayer = !particleConfigSplit[5].equals("PLAYER");
@@ -172,13 +172,13 @@ public class EffectSendManager {
             String[] soundsConfigSplit = soundsConfig.toUpperCase(Locale.ROOT).split(";");
 
             Sound sound;
-            String soundString = CC.toPapi(soundsConfigSplit[0], targetPlayer);
+            String soundString = CC.replaceTranslateToPapi(soundsConfigSplit[0], targetPlayer);
 
             try { sound = Sound.valueOf(soundString); }
             catch (Exception exception) { CC.sendUnknownWarn("音效", fileName, soundString); return; }
 
-            int volume = Integer.parseInt(CC.replaceAndTranslateToPapiAndCount(soundsConfigSplit[1], targetPlayer, null));
-            int pitch = Integer.parseInt(CC.replaceAndTranslateToPapiAndCount(soundsConfigSplit[2], targetPlayer, null));
+            int volume = Integer.parseInt(CC.replaceTranslateToPapiCount(soundsConfigSplit[1], targetPlayer, null));
+            int pitch = Integer.parseInt(CC.replaceTranslateToPapiCount(soundsConfigSplit[2], targetPlayer, null));
 
             targetPlayer.playSound(targetPlayer.getLocation(), sound, volume, pitch);
         });
@@ -194,14 +194,14 @@ public class EffectSendManager {
         yaml.getStringList("PLAYER").forEach(commandConfig -> {
             if (commandConfig == null || commandConfig.length() <= 1) return;
 
-            Bukkit.getScheduler().runTask(plugin, () -> targetPlayer.performCommand(CC.replaceAndTranslateToPapi(commandConfig, targetPlayer, null)));
+            Bukkit.getScheduler().runTask(plugin, () -> targetPlayer.performCommand(CC.replaceTranslateToPapi(commandConfig, targetPlayer, null)));
         });
 
         yaml.getStringList("CONSOLE").forEach(commandConfig -> {
             if (commandConfig == null || commandConfig.length() <= 1) return;
 
             ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
-            Bukkit.getScheduler().runTask(plugin, () -> Bukkit.dispatchCommand(console, CC.replaceAndTranslateToPapi(commandConfig, targetPlayer, null)));
+            Bukkit.getScheduler().runTask(plugin, () -> Bukkit.dispatchCommand(console, CC.replaceTranslateToPapi(commandConfig, targetPlayer, null)));
         });
     }
 
@@ -216,7 +216,7 @@ public class EffectSendManager {
             if (messageConfig == null || messageConfig.length() <= 1) return;
 
             Bukkit.getScheduler().runTask(plugin, () -> {
-                String message = CC.replaceAndTranslateToPapi(messageConfig, targetPlayer, replacePlayer);
+                String message = CC.replaceTranslateToPapi(messageConfig, targetPlayer, replacePlayer);
                 targetPlayer.sendMessage(CC.translate(message));
             });
         });
@@ -233,7 +233,7 @@ public class EffectSendManager {
             if (announcementConfig == null || announcementConfig.length() <= 1) return;
 
             Bukkit.getScheduler().runTask(plugin, () -> {
-                String announcement = CC.replaceAndTranslateToPapi(announcementConfig, targetPlayer, replacePlayer);
+                String announcement = CC.replaceTranslateToPapi(announcementConfig, targetPlayer, replacePlayer);
                 Bukkit.broadcastMessage(CC.translate(announcement));
             });
         });
@@ -251,14 +251,14 @@ public class EffectSendManager {
 
             String[] effectsConfigSplit = effectsConfig.split(";");
 
-            String effectString = CC.toPapi(effectsConfigSplit[0], targetPlayer);
+            String effectString = CC.replaceTranslateToPapi(effectsConfigSplit[0], targetPlayer);
             PotionEffectType effectType;
 
             try { effectType = PotionEffectType.getByName(effectString); }
             catch (Exception exception) { CC.sendUnknownWarn("药水效果", fileName, effectString); return; }
 
-            int duration = Integer.parseInt(CC.replaceAndTranslateToPapiAndCount(effectsConfigSplit[1], targetPlayer, null));
-            int amplifier = Integer.parseInt(CC.replaceAndTranslateToPapiAndCount(effectsConfigSplit[2], targetPlayer, null));
+            int duration = Integer.parseInt(CC.replaceTranslateToPapiCount(effectsConfigSplit[1], targetPlayer, null));
+            int amplifier = Integer.parseInt(CC.replaceTranslateToPapiCount(effectsConfigSplit[2], targetPlayer, null));
 
             if (effectType == null) {
                 CC.sendUnknownWarn("药水效果", fileName, effectString);
@@ -276,8 +276,8 @@ public class EffectSendManager {
         Yaml yaml = new Yaml(fileName, path);
         yaml.setPathPrefix(pathPrefix);
 
-        int hunger = Integer.parseInt(CC.replaceAndTranslateToPapiAndCount(String.valueOf(yaml.getString("HUNGER")), targetPlayer, null));
-        double health = Double.parseDouble(CC.replaceAndTranslateToPapiAndCount(String.valueOf(yaml.getString("HEALTH")), targetPlayer, null));
+        int hunger = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("HUNGER")), targetPlayer, null));
+        double health = Double.parseDouble(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("HEALTH")), targetPlayer, null));
 
         if (health != 0) {
             double playerHealth = targetPlayer.getHealth();
@@ -297,7 +297,7 @@ public class EffectSendManager {
         Yaml yaml = new Yaml(fileName, path);
         yaml.setPathPrefix(pathPrefix);
 
-        int exp = Integer.parseInt(CC.replaceAndTranslateToPapiAndCount(String.valueOf(yaml.getString("EXP")), targetPlayer, null));
+        int exp = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("EXP")), targetPlayer, null));
 
         if (exp != 0) ExpUtils.changeExp(targetPlayer, exp);
     }
@@ -312,8 +312,8 @@ public class EffectSendManager {
 
         yaml.setPathPrefix(pathPrefix == null ? "ACTION-BAR" : pathPrefix + ".ACTION-BAR");
 
-        String actionBarMessage = CC.replaceAndTranslateToPapi(yaml.getString("MESSAGE"), targetPlayer, replacePlayer);
-        int actionBarTime = Integer.parseInt(CC.replaceAndTranslateToPapiAndCount(String.valueOf(yaml.getString("TIME")), targetPlayer, replacePlayer));
+        String actionBarMessage = CC.replaceTranslateToPapi(yaml.getString("MESSAGE"), targetPlayer, replacePlayer);
+        int actionBarTime = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("TIME")), targetPlayer, replacePlayer));
 
         if (actionBarMessage.equals("") || actionBarTime == 0) return;
 
@@ -331,7 +331,7 @@ public class EffectSendManager {
 
                 time ++;
 
-                TextComponent textComponent = new TextComponent(CC.replaceAndTranslateToPapi(yaml.getString("MESSAGE"), targetPlayer, replacePlayer));
+                TextComponent textComponent = new TextComponent(CC.replaceTranslateToPapi(yaml.getString("MESSAGE"), targetPlayer, replacePlayer));
                 targetPlayer.spigot().sendMessage(ChatMessageType.ACTION_BAR, textComponent);
             }
         }.runTaskTimerAsynchronously(plugin, 0, 20);
@@ -347,8 +347,8 @@ public class EffectSendManager {
 
         yaml.setPathPrefix(pathPrefix == null ? "BOSS-BAR" : pathPrefix + ".BOSS-BAR");
 
-        String bossBarMessage = CC.replaceAndTranslateToPapi(yaml.getString("MESSAGE"), targetPlayer, replacePlayer);
-        double bossBarTime = Double.parseDouble(CC.replaceAndTranslateToPapiAndCount(String.valueOf(yaml.getString("TIME")), targetPlayer, replacePlayer));
+        String bossBarMessage = CC.replaceTranslateToPapi(yaml.getString("MESSAGE"), targetPlayer, replacePlayer);
+        double bossBarTime = Double.parseDouble(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("TIME")), targetPlayer, replacePlayer));
 
         if (bossBarMessage.equals("") || bossBarTime == 0) return;
 
@@ -358,7 +358,7 @@ public class EffectSendManager {
         BarColor bossBarColor = barColorString.equals("RANDOM") ? BossBarRandomUtils.randomColor() : BarColor.valueOf(barColorString);
         BarStyle bossBarStyle = barStyleString.equals("RANDOM") ? BossBarRandomUtils.randomStyle() : BarStyle.valueOf(barStyleString);
 
-        BossBar bossBar = Bukkit.createBossBar(CC.replaceAndTranslateToPapi(bossBarMessage, targetPlayer, replacePlayer), bossBarColor, bossBarStyle);
+        BossBar bossBar = Bukkit.createBossBar(CC.replaceTranslateToPapi(bossBarMessage, targetPlayer, replacePlayer), bossBarColor, bossBarStyle);
 
         bossBar.addPlayer(targetPlayer);
 

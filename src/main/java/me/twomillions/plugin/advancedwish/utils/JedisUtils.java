@@ -76,6 +76,15 @@ public class JedisUtils {
         }
     }
 
+    // 删除 List 内容
+    public static void removeListValue(String key) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            if (redisPassWorld != null) jedis.auth(redisPassWorld);
+
+            jedis.ltrim(key, 1, 0);
+        }
+    }
+
     // 获取普通值
     public static String getOrDefault(String key, String defaultValue) {
         try (Jedis jedis = jedisPool.getResource()) {

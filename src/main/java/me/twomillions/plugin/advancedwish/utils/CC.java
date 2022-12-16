@@ -32,7 +32,7 @@ public class CC {
     }
 
     // 快捷替换方法
-    public static String replaceAndTranslate(String message, Player player, Player replacePlayer) {
+    public static String replaceTranslate(String message, Player player, Player replacePlayer) {
         // replaceAll 区分大小写 所以使用正则 ?i 忽略大小写
         if (message.contains("<version>")) message = message.replaceAll("(?i)<version>", plugin.getDescription().getVersion());
         if (message.contains("<wishlist>")) message = message.replaceAll("(?i)<wishlist>", RegisterManager.getRegisterWish().toString());
@@ -71,27 +71,27 @@ public class CC {
         return string;
     }
 
-    // Papi - replaceAndTranslateToPapi 但是 replacePlayer 为 null
-    public static String toPapi(String string, Player player) {
-        if (main.isUsingPapi()) return replaceAndTranslateToPapi(string, player, null);
+    // Papi - replaceTranslateToPapi 但是 replacePlayer 为 null
+    public static String replaceTranslateToPapi(String string, Player player) {
+        if (main.isUsingPapi()) return replaceTranslateToPapi(string, player, null);
         else return string;
     }
 
-    // Papi - 先 replaceAndTranslateToPapi 后 count 但是 replacePlayer 为 null
-    public static String toPapiAndCount(String string, Player player) {
-        if (main.isUsingPapi()) return count(replaceAndTranslateToPapi(string, player, null)).toString();
+    // Papi - 先 replaceTranslateToPapi 后 count 但是 replacePlayer 为 null
+    public static String replaceTranslateToPapiCount(String string, Player player) {
+        if (main.isUsingPapi()) return count(replaceTranslateToPapi(string, player, null)).toString();
         else return string;
     }
 
-    // Papi - 先 replaceAndTranslate 后转 Papi
-    public static String replaceAndTranslateToPapi(String string, Player player, Player replacePlayer) {
-        if (main.isUsingPapi()) return PlaceholderAPI.setPlaceholders(player, CC.replaceAndTranslate(string, player, replacePlayer));
+    // Papi - 先 replaceTranslate 后转 Papi
+    public static String replaceTranslateToPapi(String string, Player player, Player replacePlayer) {
+        if (main.isUsingPapi()) return PlaceholderAPI.setPlaceholders(player, CC.replaceTranslate(string, player, replacePlayer));
         else return string;
     }
 
-    // Papi - 先 replaceAndTranslate 转 Papi 后进行 count
-    public static String replaceAndTranslateToPapiAndCount(String string, Player player, Player replacePlayer) {
-        if (main.isUsingPapi()) return count(replaceAndTranslateToPapi(string, player, replacePlayer)).toString();
+    // Papi - 先 replaceTranslate 转 Papi 后进行 count
+    public static String replaceTranslateToPapiCount(String string, Player player, Player replacePlayer) {
+        if (main.isUsingPapi()) return count(replaceTranslateToPapi(string, player, replacePlayer)).toString();
         else return string;
     }
 

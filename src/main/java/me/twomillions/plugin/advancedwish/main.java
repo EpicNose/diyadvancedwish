@@ -79,6 +79,7 @@ public final class main extends JavaPlugin {
                         "您打开了 Redis 跨服选项，但是 Advanced Wish 未与 Redis 服务正确连接，请检查 Redis 服务器状态，即将关闭服务器!");
 
                 Bukkit.shutdown();
+                return;
             }
         }
 

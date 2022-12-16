@@ -43,9 +43,9 @@ public class MainCommand implements TabExecutor {
 
             if (args.length == 0) {
                 if (isAdmin)
-                    ConfigManager.getMessageYaml().getStringList("ADMIN-SHOW-COMMAND").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                    ConfigManager.getMessageYaml().getStringList("ADMIN-SHOW-COMMAND").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                 else
-                    ConfigManager.getMessageYaml().getStringList("DEFAULT-SHOW-COMMAND").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                    ConfigManager.getMessageYaml().getStringList("DEFAULT-SHOW-COMMAND").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
 
                 return;
             }
@@ -55,13 +55,13 @@ public class MainCommand implements TabExecutor {
             // Player commands
             switch (subCommand) {
                 case "list":
-                    ConfigManager.getMessageYaml().getStringList("LIST").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                    ConfigManager.getMessageYaml().getStringList("LIST").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
 
                     break;
                     
                 case "amount":
                     if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                         return;
                     }
 
@@ -74,14 +74,14 @@ public class MainCommand implements TabExecutor {
 
                 case "makewish":
                     if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                         return;
                     }
 
                     String wishName = args[1];
 
                     if (!WishManager.hasWish(wishName)) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NOT-HAVE").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("WISH-NOT-HAVE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                         return;
                     }
 
@@ -89,19 +89,19 @@ public class MainCommand implements TabExecutor {
                         Player targetPlayer = Bukkit.getPlayerExact(args[2]);
 
                         if (targetPlayer == null) {
-                            ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                            ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                             return;
                         }
 
                         WishManager.makeWish(targetPlayer, wishName, false);
-                        ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                     } else WishManager.makeWish(player, wishName, false);
 
                     break;
 
                 case "guaranteed":
                     if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                         return;
                     }
 
@@ -119,14 +119,14 @@ public class MainCommand implements TabExecutor {
             switch (subCommand) {
                 case "makewishforce":
                     if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                         return;
                     }
 
                     String forceWishName = args[1];
 
                     if (!WishManager.hasWish(forceWishName)) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NOT-HAVE").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("WISH-NOT-HAVE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                         return;
                     }
 
@@ -134,24 +134,24 @@ public class MainCommand implements TabExecutor {
                         Player targetPlayer = Bukkit.getPlayerExact(args[2]);
 
                         if (targetPlayer == null) {
-                            ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                            ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                             return;
                         }
 
                         WishManager.makeWish(targetPlayer, forceWishName, true);
-                        ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                     } else WishManager.makeWish(player, forceWishName, true);
 
                     break;
 
                 case "getamount":
                     if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                         return;
                     }
 
                     if (args.length == 2) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                         return;
                     }
 
@@ -159,7 +159,7 @@ public class MainCommand implements TabExecutor {
                     Player amountGetTargetPlayer = Bukkit.getPlayerExact(args[2]);
 
                     if (amountGetTargetPlayer == null) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                         return;
                     }
 
@@ -170,17 +170,17 @@ public class MainCommand implements TabExecutor {
 
                 case "setamount":
                     if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                         return;
                     }
 
                     if (args.length == 2) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                         return;
                     }
 
                     if (args.length == 3) {
-                        ConfigManager.getMessageYaml().getStringList("AMOUNT-NULL").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("AMOUNT-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                         return;
                     }
 
@@ -191,28 +191,28 @@ public class MainCommand implements TabExecutor {
                     try {
                         setAmount = Integer.parseInt(args[3]);
                     } catch (Exception exception) {
-                        ConfigManager.getMessageYaml().getStringList("MUST-NUMBER").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("MUST-NUMBER").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                         return;
                     }
 
                     if (amountTargetPlayer == null) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                         return;
                     }
 
                     WishManager.setPlayerWishAmount(amountTargetPlayer, setAmountWishName, setAmount);
-                    ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                    ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
 
                     break;
 
                 case "getguaranteed":
                     if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                         return;
                     }
 
                     if (args.length == 2) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                         return;
                     }
 
@@ -220,7 +220,7 @@ public class MainCommand implements TabExecutor {
                     Player guaranteedGetTargetPlayer = Bukkit.getPlayerExact(args[2]);
 
                     if (guaranteedGetTargetPlayer == null) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                         return;
                     }
 
@@ -231,17 +231,17 @@ public class MainCommand implements TabExecutor {
                     
                 case "setguaranteed":
                     if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                         return;
                     }
 
                     if (args.length == 2) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                         return;
                     }
 
                     if (args.length == 3) {
-                        ConfigManager.getMessageYaml().getStringList("GUARANTEED-NULL").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("GUARANTEED-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                         return;
                     }
 
@@ -252,17 +252,17 @@ public class MainCommand implements TabExecutor {
                     try {
                         setGuaranteed = Double.parseDouble(args[3]);
                     } catch (Exception exception) {
-                        ConfigManager.getMessageYaml().getStringList("MUST-NUMBER").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("MUST-NUMBER").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                         return;
                     }
 
                     if (targetPlayer == null) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                        ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
                         return;
                     }
 
                     WishManager.setPlayerWishGuaranteed(targetPlayer, setGuaranteedWishName, setGuaranteed);
-                    ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                    ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
 
                     break;
 
@@ -270,7 +270,7 @@ public class MainCommand implements TabExecutor {
                     RegisterManager.registerCard();
                     main.setGuaranteedPath(ConfigManager.getAdvancedWishYaml().getString("GUARANTEED-PATH"));
 
-                    ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> player.sendMessage(CC.replaceAndTranslateToPapi(message, player, null)));
+                    ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player, null)));
 
                     break;
             }
