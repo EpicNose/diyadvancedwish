@@ -83,7 +83,15 @@ public class RegisterManager {
 
         if (registeredServiceProvider == null) return;
 
-        main.setEconomy(registeredServiceProvider.getProvider());
+        try { main.setEconomy(registeredServiceProvider.getProvider()); }
+        catch (Exception exception) {
+            Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
+                    Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
+                    "检查到服务器存在 Vault，但 Vault 设置错误，这是最新版吗? 请尝试更新它 -> https://www.spigotmc.org/resources/vault.34315/，服务器即将关闭。");
+
+            Bukkit.shutdown();
+            return;
+        }
 
         Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
                 Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
@@ -94,7 +102,15 @@ public class RegisterManager {
     private static void setupPlayerPoints() {
         if (Bukkit.getPluginManager().getPlugin("PlayerPoints") == null) return;
 
-        main.setPlayerPointsAPI(PlayerPoints.getInstance().getAPI());
+        try { main.setPlayerPointsAPI(PlayerPoints.getInstance().getAPI()); }
+        catch (Exception exception) {
+            Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
+                    Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
+                    "检查到服务器存在 PlayerPoints，但 PlayerPoints 设置错误，这是最新版吗? 请尝试更新它 -> https://www.spigotmc.org/resources/playerpoints.80745/，服务器即将关闭。");
+
+            Bukkit.shutdown();
+            return;
+        }
 
         Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
                 Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +

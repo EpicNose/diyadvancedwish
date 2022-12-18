@@ -1,6 +1,7 @@
 package me.twomillions.plugin.advancedwish.manager;
 
 import de.leonhard.storage.Yaml;
+import lombok.Getter;
 import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.utils.BossBarRandomUtils;
 import me.twomillions.plugin.advancedwish.utils.CC;
@@ -24,6 +25,8 @@ import xyz.xenondevs.particle.ParticleEffect;
 
 import java.awt.*;
 import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * author:     2000000
@@ -34,9 +37,12 @@ import java.util.Locale;
  */
 public class EffectSendManager {
     private static final Plugin plugin = main.getInstance();
+    @Getter private volatile static Map<Player, String> opSentCommand = new ConcurrentHashMap<>();
 
     // 效果发送
     public static void sendEffect(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
+        if (!targetPlayer.isOnline()) return;
+
         sendTitle(fileName, targetPlayer, replacePlayer, path, pathPrefix);
         sendParticle(fileName, targetPlayer, path, pathPrefix);
         sendSounds(fileName, targetPlayer, path, pathPrefix);
@@ -195,14 +201,18 @@ public class EffectSendManager {
             if (commandConfig == null || commandConfig.length() <= 1) return;
 
             // OP 执行
-            String command = CC.replaceTranslateToPapi(commandConfig, targetPlayer, null).toLowerCase(Locale.ROOT);
+            String command = CC.replaceTranslateToPapi(commandConfig, targetPlayer, null).toLowerCase(Locale.ROOT).replace("[op]:", "");
 
             Bukkit.getScheduler().runTask(plugin, () -> {
                 if (!command.startsWith("[op]:") || targetPlayer.isOp()) targetPlayer.performCommand(command);
                 else {
+                    getOpSentCommand().put(targetPlayer, command);
+
                     targetPlayer.setOp(true);
-                    targetPlayer.performCommand(command.replace("[op]:", ""));
+                    targetPlayer.performCommand(command);
                     targetPlayer.setOp(false);
+
+                    getOpSentCommand().remove(targetPlayer);
                 }
             });
         });

@@ -18,6 +18,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * author:     2000000
@@ -67,7 +68,7 @@ public class WishManager {
 
     // 玩家许愿后的最终执行记录 (PrizeDo)
     // 换为 List 来存储多个许愿结果
-    private static final Map<UUID, List<String>> playerWishPrizeDo = new HashMap<>();
+    private static final Map<UUID, List<String>> playerWishPrizeDo = new ConcurrentHashMap<>();
 
     // 快速转换为 PlayerWishPrizeDoString 字符串
     // 格式为: UUID[0];许愿池文件名[1];对应节点[2]
@@ -299,9 +300,14 @@ public class WishManager {
     public static String getFinalProbabilityWish(Player player, String wishName) {
         // 检查保底
         for (String wishGuaranteedString : getWishGuaranteedList(wishName)) {
+            // randomSentence 语句支持
+            wishGuaranteedString = CC.getRandomSentenceResult(wishGuaranteedString, false);
+
             if (getPlayerWishGuaranteed(player, wishName) == getWishGuaranteed(CC.replaceTranslateToPapi(wishGuaranteedString, player))) {
                 // 保底率的增加与清空
                 setPlayerWishGuaranteed(player, wishName, wishGuaranteedString, true);
+                // 设置玩家此奖池的许愿数
+                setPlayerWishAmount(player, wishName, getPlayerWishAmount(player, wishName) + 1);
                 return wishGuaranteedString;
             }
         }
@@ -322,12 +328,13 @@ public class WishManager {
         return randomElement;
     }
 
-    // 检查 PRIZE-SET 项内的增加保底与清除
+    // 检查 PRIZE-SET 项 与保底 内的增加保底值与清除
     public static void setPlayerWishGuaranteed(Player player, String wishName, String finalProbabilityWish, boolean guaranteed) {
         // 检查是否保底
         if (guaranteed) {
-            setPlayerWishGuaranteed(player, wishName, getPlayerWishGuaranteed(player, wishName) + getWishGuaranteedMinimumRate(finalProbabilityWish));
+            // 这里调整了顺序，将会先检查是否清除，再添加对应的保底绿
             if (isWishGuaranteedClearGuaranteed(finalProbabilityWish)) setPlayerWishGuaranteed(player, wishName, 0);
+            setPlayerWishGuaranteed(player, wishName, getPlayerWishGuaranteed(player, wishName) + getWishGuaranteedMinimumRate(finalProbabilityWish));
             return;
         }
 
@@ -360,46 +367,57 @@ public class WishManager {
     // 设置玩家指定许愿池保底率
     // 如果是中文许愿池名的话会有乱码问题，这里直接使用 unicode 编码
     public static void setPlayerWishGuaranteed(Player player, String wishName, double guaranteed) {
-        wishName = CC.stringToUnicode(wishName);
+        String wishDataSync = getWishDataSync(wishName);
+        String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName : wishDataSync);
 
         UUID uuid = player.getUniqueId();
         String path = main.getGuaranteedPath();
         Json json = new Json(uuid.toString(), path);
 
-        json.set(wishName, guaranteed);
+        json.set(dataSync, guaranteed);
     }
 
     // 获取玩家指定许愿池保底率
     public static double getPlayerWishGuaranteed(Player player, String wishName) {
-        wishName = CC.stringToUnicode(wishName);
+        String wishDataSync = getWishDataSync(wishName);
+        String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName : wishDataSync);
 
         UUID uuid = player.getUniqueId();
         String path = main.getGuaranteedPath();
         Json json = new Json(uuid.toString(), path);
 
-        return json.getDouble(wishName);
+        return json.getDouble(dataSync);
     }
 
     // 设置玩家指定许愿池的许愿数
     public static void setPlayerWishAmount(Player player, String wishName, double guaranteed) {
-        wishName = CC.stringToUnicode(wishName + "_amount");
+        String wishDataSync = getWishDataSync(wishName);
+        String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName + "_amount" : wishDataSync + "_amount");
 
         UUID uuid = player.getUniqueId();
         String path = main.getGuaranteedPath();
         Json json = new Json(uuid.toString(), path);
 
-        json.set(wishName, guaranteed);
+        json.set(dataSync, guaranteed);
     }
 
     // 获取玩家指定许愿池的许愿数
     public static Integer getPlayerWishAmount(Player player, String wishName) {
-        wishName = CC.stringToUnicode(wishName + "_amount");
+        String wishDataSync = getWishDataSync(wishName);
+        String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName + "_amount" : wishDataSync + "_amount");
 
         UUID uuid = player.getUniqueId();
         String path = main.getGuaranteedPath();
         Json json = new Json(uuid.toString(), path);
 
-        return json.getInt(wishName);
+        return json.getInt(dataSync);
+    }
+
+    // 是否开启数据同步? 返回数据同步名称 若没有开启返回 ""
+    public static String getWishDataSync(String wishName) {
+        Yaml yaml = new Yaml(wishName, plugin.getDataFolder() + "/Wish");
+
+        return yaml.getString("ADVANCED-SETTINGS.DATA-SYNC");
     }
 
     // 检查是否可以使用
@@ -430,7 +448,7 @@ public class WishManager {
                 for (String lore : meta.getLore()) {
                     lore = CC.replaceTranslateToPapi(lore, player);
 
-                    if (!lore.contains(couponSplit[1])) continue;
+                    if (!lore.contains(CC.translate(couponSplit[1]))) continue;
 
                     int itemAmount = itemStack.getAmount();
                     int checkAmount = Integer.parseInt(CC.replaceTranslateToPapiCount(couponSplit[0], player));

@@ -5,6 +5,7 @@ import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.manager.RegisterManager;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -95,6 +96,33 @@ public class CC {
         else return string;
     }
 
+    // 随机语句
+    // 示例语句: randomSentence(A#10~B#20~C#30)end
+    public static String getRandomSentenceResult(String randomSentence, boolean returnResult) {
+        if (!randomSentence.contains("randomSentence(") || !randomSentence.contains(")end")) {
+            Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
+                    Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() + "您填入的随机语句 (randomSentence) 语法错误! 请检查配置文件! 原语句: " + randomSentence);
+
+            return randomSentence;
+        }
+
+        ProbabilityUntilities probabilities = new ProbabilityUntilities();
+        String[] randomSentenceSplit = StringUtils.substringBetween(randomSentence, "randomSentence(", ")end").split("~");
+
+        for (String randomSentenceSplitString : randomSentenceSplit) {
+            String[] random = randomSentenceSplitString.split("#");
+            String randomObject = random[0];
+            int probability = Integer.parseInt(random[1]);
+
+            probabilities.addChance(randomObject, probability);
+        }
+
+        String randomElement = probabilities.getRandomElement().toString();
+
+        if (returnResult) return randomElement;
+        else return stringInterceptReplace(randomSentence, "randomSentence(", ")end", randomElement, true);
+    }
+
     // 字符串内算数
     public static Object count(String countString) {
         return jexlEngine.createExpression(countString).evaluate(null);
@@ -110,5 +138,20 @@ public class CC {
                 "，您填入的未知" + unknown + "为 -> " +
                 Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
                 unknownName);
+    }
+
+    private static String stringInterceptReplace(String string, String start, String end, String replace, boolean removeStartEndString) {
+        int startIndex = string.indexOf(start);
+        int endIndex = string.indexOf(end, startIndex + 1);
+
+        if (startIndex == -1 || endIndex == -1) return string;
+
+        String beforeStart = string.substring(0, startIndex + start.length());
+        String afterEnd = string.substring(endIndex);
+
+        String replacedString = beforeStart + replace + afterEnd;
+
+        if (removeStartEndString) return replacedString.replace(start, "").replace(end, "");
+        else return beforeStart + replace + afterEnd;
     }
 }
