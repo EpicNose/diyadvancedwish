@@ -332,7 +332,7 @@ public class WishManager {
     public static void setPlayerWishGuaranteed(Player player, String wishName, String finalProbabilityWish, boolean guaranteed) {
         // 检查是否保底
         if (guaranteed) {
-            // 这里调整了顺序，将会先检查是否清除，再添加对应的保底绿
+            // 这里调整了顺序，将会先检查是否清除，再添加对应的保底率
             if (isWishGuaranteedClearGuaranteed(finalProbabilityWish)) setPlayerWishGuaranteed(player, wishName, 0);
             setPlayerWishGuaranteed(player, wishName, getPlayerWishGuaranteed(player, wishName) + getWishGuaranteedMinimumRate(finalProbabilityWish));
             return;
@@ -370,9 +370,7 @@ public class WishManager {
         String wishDataSync = getWishDataSync(wishName);
         String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName : wishDataSync);
 
-        UUID uuid = player.getUniqueId();
-        String path = main.getGuaranteedPath();
-        Json json = new Json(uuid.toString(), path);
+        Json json = new Json(player.getUniqueId().toString(), main.getGuaranteedPath());
 
         json.set(dataSync, guaranteed);
     }
@@ -382,9 +380,7 @@ public class WishManager {
         String wishDataSync = getWishDataSync(wishName);
         String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName : wishDataSync);
 
-        UUID uuid = player.getUniqueId();
-        String path = main.getGuaranteedPath();
-        Json json = new Json(uuid.toString(), path);
+        Json json = new Json(player.getUniqueId().toString(), main.getGuaranteedPath());
 
         return json.getDouble(dataSync);
     }
@@ -394,9 +390,7 @@ public class WishManager {
         String wishDataSync = getWishDataSync(wishName);
         String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName + "_amount" : wishDataSync + "_amount");
 
-        UUID uuid = player.getUniqueId();
-        String path = main.getGuaranteedPath();
-        Json json = new Json(uuid.toString(), path);
+        Json json = new Json(player.getUniqueId().toString(), main.getGuaranteedPath());
 
         json.set(dataSync, guaranteed);
     }
@@ -406,9 +400,7 @@ public class WishManager {
         String wishDataSync = getWishDataSync(wishName);
         String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName + "_amount" : wishDataSync + "_amount");
 
-        UUID uuid = player.getUniqueId();
-        String path = main.getGuaranteedPath();
-        Json json = new Json(uuid.toString(), path);
+        Json json = new Json(player.getUniqueId().toString(), main.getGuaranteedPath());
 
         return json.getInt(dataSync);
     }
