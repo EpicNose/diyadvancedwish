@@ -522,9 +522,15 @@ public class WishManager {
             // 转换 Unicode 防止乱码
             for (String playerWishPrizeDoString : playerWishPrizeDoList) newPlayerWishPrizeDoList.add(CC.stringToUnicode(playerWishPrizeDoString));
 
-            Json playerJson = new Json(uuid.toString(), main.getInstance().getDataFolder() + "/ServerShutDownCache");
+            Json playerJson = new Json(uuid.toString(), main.getInstance().getDataFolder() + "/PlayerCache");
 
             playerJson.set("CACHE", newPlayerWishPrizeDoList);
         });
+    }
+
+    public static void setPlayerCacheOpData(Player player, Boolean doOpCommand) {
+        Json playerJson = new Json(player.getUniqueId().toString(), main.getInstance().getDataFolder() + "/PlayerCache");
+
+        playerJson.set("DO-OP-COMMAND", doOpCommand);
     }
 }

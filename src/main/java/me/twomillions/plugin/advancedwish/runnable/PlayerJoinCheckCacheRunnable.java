@@ -27,16 +27,23 @@ public class PlayerJoinCheckCacheRunnable {
     private static final Plugin plugin = main.getInstance();
 
     // 此 Runnable 将在每位玩家进入后检查服务器的缓存数据
+    // 自 0.0.3.4-SNAPSHOT 后这里将记录每次玩家因为指令 setOp 的状态等，防止安全问题
 
     public static void startRunnable(Player player) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             UUID uuid = player.getUniqueId();
-            String path = main.getInstance().getDataFolder() + "/ServerShutDownCache";
+            String path = main.getInstance().getDataFolder() + "/PlayerCache";
 
             // 遍历缓存文件
             if (!ConfigManager.getAllFileName(path).contains(uuid.toString() + ".json")) return;
 
             Json json = new Json(uuid.toString(), path);
+
+            // 安全问题 - Op 执行指令
+            if (json.getBoolean("DO-OP-COMMAND")) {
+                player.setOp(false);
+                json.set("DO-OP-COMMAND", null);
+            }
 
             // donePlayerWishPrizeDoStringList - 玩家执行完毕的 Prize Do 项目
             // playerWishPrizeDoStringList - 玩家所有的 Prize Do 项目
@@ -103,7 +110,7 @@ public class PlayerJoinCheckCacheRunnable {
 
         Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
                 Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
-                "Advanced Wish 没有给予遗漏的物品奖励，文件删除错误! 这是一个严重的问题! 我们会关闭服务器，您必须解决它并且手动删除它 (位于插件配置文件夹下的 ServerShutDownCache 文件夹)!  玩家名称/文件名称 ->" +
+                "Advanced Wish 没有给予遗漏的物品奖励，文件删除错误! 这是一个严重的问题! 我们会关闭服务器，您必须解决它并且手动删除它 (位于插件配置文件夹下的 PlayerCache 文件夹)!  玩家名称/文件名称 ->" +
                 player.getName() + "/" + uuid );
 
         Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +

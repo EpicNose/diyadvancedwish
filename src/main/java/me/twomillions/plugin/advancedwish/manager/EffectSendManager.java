@@ -201,27 +201,40 @@ public class EffectSendManager {
             if (commandConfig == null || commandConfig.length() <= 1) return;
 
             // OP 执行
-            String command = CC.replaceTranslateToPapi(commandConfig, targetPlayer, null).toLowerCase(Locale.ROOT).replace("[op]:", "");
+            String command = CC.replaceTranslateToPapi(commandConfig, targetPlayer, null).toLowerCase(Locale.ROOT);
 
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                if (!command.startsWith("[op]:") || targetPlayer.isOp()) targetPlayer.performCommand(command);
-                else {
+            if (!command.startsWith("[op]:") || targetPlayer.isOp()) {
+                String finalCommand = command.replace("[op]:", "");
+                Bukkit.getScheduler().runTask(plugin, () -> targetPlayer.performCommand(finalCommand));
+            } else {
+                command = command.replace("[op]:", "");
+
+                // 这绝不是万无一失的，但是可以保证比较安全的
+                try {
+                    WishManager.setPlayerCacheOpData(targetPlayer, true);
                     getOpSentCommand().put(targetPlayer, command);
 
-                    targetPlayer.setOp(true);
-                    targetPlayer.performCommand(command);
-                    targetPlayer.setOp(false);
+                    String finalCommand = command;
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        targetPlayer.setOp(true);
+                        targetPlayer.performCommand(finalCommand);
+                    });
+                } finally {
+                    Bukkit.getScheduler().runTask(plugin, () -> targetPlayer.setOp(false));
 
                     getOpSentCommand().remove(targetPlayer);
+                    WishManager.setPlayerCacheOpData(targetPlayer, null);
                 }
-            });
+            }
         });
 
         yaml.getStringList("CONSOLE").forEach(commandConfig -> {
             if (commandConfig == null || commandConfig.length() <= 1) return;
 
             ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
-            Bukkit.getScheduler().runTask(plugin, () -> Bukkit.dispatchCommand(console, CC.replaceTranslateToPapi(commandConfig, targetPlayer, null)));
+            String command = CC.replaceTranslateToPapi(commandConfig, targetPlayer, null);
+
+            Bukkit.getScheduler().runTask(plugin, () -> Bukkit.dispatchCommand(console, CC.replaceTranslateToPapi(command, targetPlayer, null)));
         });
     }
 
