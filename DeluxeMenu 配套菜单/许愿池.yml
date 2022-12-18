@@ -10,7 +10,7 @@ items:
     data: 0
     slots:
       - 0-26
-    display_name: ""
+    display_name: " "
 
   '敬请期待':
     material: BLACK_STAINED_GLASS_PANE

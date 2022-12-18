@@ -99,22 +99,26 @@ public class CC {
     // 随机语句
     // 示例语句: randomSentence(A#10~B#20~C#30)end
     public static String getRandomSentenceResult(String randomSentence, boolean returnResult) {
-        if (!randomSentence.contains("randomSentence(") || !randomSentence.contains(")end")) {
+        if (!randomSentence.contains("randomSentence(") || !randomSentence.contains(")end")) return randomSentence;
+
+        ProbabilityUntilities probabilities = new ProbabilityUntilities();
+
+        try {
+            String[] randomSentenceSplit = StringUtils.substringBetween(randomSentence, "randomSentence(", ")end").split("~");
+
+            for (String randomSentenceSplitString : randomSentenceSplit) {
+                String[] random = randomSentenceSplitString.split("#");
+                String randomObject = random[0];
+                int probability = Integer.parseInt(random[1]);
+
+                probabilities.addChance(randomObject, probability);
+            }
+
+        } catch (Exception exception) {
             Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
                     Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() + "您填入的随机语句 (randomSentence) 语法错误! 请检查配置文件! 原语句: " + randomSentence);
 
             return randomSentence;
-        }
-
-        ProbabilityUntilities probabilities = new ProbabilityUntilities();
-        String[] randomSentenceSplit = StringUtils.substringBetween(randomSentence, "randomSentence(", ")end").split("~");
-
-        for (String randomSentenceSplitString : randomSentenceSplit) {
-            String[] random = randomSentenceSplitString.split("#");
-            String randomObject = random[0];
-            int probability = Integer.parseInt(random[1]);
-
-            probabilities.addChance(randomObject, probability);
         }
 
         String randomElement = probabilities.getRandomElement().toString();

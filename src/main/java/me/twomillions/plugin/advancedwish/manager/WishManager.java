@@ -264,7 +264,7 @@ public class WishManager {
 
     // 获取此奖品是否清零保底率 - PrizeSet
     public static boolean isWishPrizeSetClearGuaranteed(String wishPrizeSetString) {
-        return Boolean.getBoolean(wishPrizeSetString.split(";") [3]);
+        return Boolean.parseBoolean(wishPrizeSetString.split(";") [3]);
     }
 
     // 获取 GUARANTEED 列表
@@ -338,8 +338,8 @@ public class WishManager {
             return;
         }
 
-        setPlayerWishGuaranteed(player, wishName, getPlayerWishGuaranteed(player, wishName) + getWishPrizeSetGuaranteed(finalProbabilityWish));
         if (isWishPrizeSetClearGuaranteed(finalProbabilityWish)) setPlayerWishGuaranteed(player, wishName, 0);
+        setPlayerWishGuaranteed(player, wishName, getPlayerWishGuaranteed(player, wishName) + getWishPrizeSetGuaranteed(finalProbabilityWish));
     }
 
     // 许下一个愿望
