@@ -9,7 +9,7 @@ import me.twomillions.plugin.advancedwish.utils.ItemUtils;
 import me.twomillions.plugin.advancedwish.utils.JedisUtils;
 import me.twomillions.plugin.advancedwish.utils.ProbabilityUntilities;
 import net.milkbowl.vault.economy.Economy;
-import org.black_ixx.playerpoints.PlayerPoints;
+import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -462,14 +462,6 @@ public class WishManager {
         // 等级检查
         if (player.getLevel() < level) return false;
 
-        // 点券检查
-        if (point != 0 && main.getPlayerPointsAPI() != null && !PlayerPoints.getInstance().getAPI().take(player.getUniqueId(), point)) return false;
-
-        // 金币检查
-        Economy economy = main.getEconomy();
-        if (money != 0 && economy != null && economy.hasAccount(player) && economy.has(player, money)) economy.withdrawPlayer(player, money);
-        else if (economy != null) return false;
-
         // 背包物品检查
         for (String configInventoryHave : yaml.getStringList("INVENTORY-HAVE")) {
             if (configInventoryHave == null || configInventoryHave.length() <= 1) continue;
@@ -507,6 +499,22 @@ public class WishManager {
 
             if (!player.hasPotionEffect(effectType) || player.getPotionEffect(effectType).getAmplifier() < amplifier) return false;
         }
+
+        // 点券检查，扣除点券
+        // 这里不需要任何补偿
+        boolean takePoints = false;
+        PlayerPointsAPI playerPointsAPI = main.getPlayerPointsAPI();
+        if (point != 0 && playerPointsAPI != null && playerPointsAPI.look(player.getUniqueId()) >= point) takePoints = true;
+        else if (point != 0 && playerPointsAPI != null) return false;
+
+        // 金币检查
+        boolean withdrawPlayer = false;
+        Economy economy = main.getEconomy();
+        if (money != 0 && economy != null && economy.hasAccount(player) && economy.has(player, money)) withdrawPlayer = true;
+        else if (money != 0 && economy != null) return false;
+
+        if (takePoints) playerPointsAPI.take(player.getUniqueId(), point);
+        if (withdrawPlayer) economy.withdrawPlayer(player, point);
 
         return true;
     }
