@@ -37,7 +37,7 @@ public class PlayerJoinCheckCacheRunnable {
             // 遍历缓存文件
             if (!ConfigManager.getAllFileName(path).contains(uuid.toString() + ".json")) return;
 
-            Json json = new Json(uuid.toString(), path);
+            Json json = ConfigManager.createJsonConfig(uuid.toString(), path, false);
 
             // 安全问题 - Op 执行指令
             if (json.getBoolean("DO-OP-COMMAND")) {

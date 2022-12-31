@@ -370,7 +370,7 @@ public class WishManager {
         String wishDataSync = getWishDataSync(wishName);
         String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName : wishDataSync);
 
-        Json json = new Json(player.getUniqueId().toString(), main.getGuaranteedPath());
+        Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), false);
 
         json.set(dataSync, guaranteed);
     }
@@ -380,7 +380,7 @@ public class WishManager {
         String wishDataSync = getWishDataSync(wishName);
         String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName : wishDataSync);
 
-        Json json = new Json(player.getUniqueId().toString(), main.getGuaranteedPath());
+         Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), false);
 
         return json.getDouble(dataSync);
     }
@@ -390,7 +390,7 @@ public class WishManager {
         String wishDataSync = getWishDataSync(wishName);
         String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName + "_amount" : wishDataSync + "_amount");
 
-        Json json = new Json(player.getUniqueId().toString(), main.getGuaranteedPath());
+        Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), false);
 
         json.set(dataSync, guaranteed);
     }
@@ -400,7 +400,7 @@ public class WishManager {
         String wishDataSync = getWishDataSync(wishName);
         String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName + "_amount" : wishDataSync + "_amount");
 
-        Json json = new Json(player.getUniqueId().toString(), main.getGuaranteedPath());
+        Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), false);
 
         return json.getInt(dataSync);
     }
@@ -532,14 +532,14 @@ public class WishManager {
             // 转换 Unicode 防止乱码
             for (String playerWishPrizeDoString : playerWishPrizeDoList) newPlayerWishPrizeDoList.add(CC.stringToUnicode(playerWishPrizeDoString));
 
-            Json playerJson = new Json(uuid.toString(), main.getInstance().getDataFolder() + "/PlayerCache");
+            Json playerJson = ConfigManager.createJsonConfig(uuid.toString(), main.getInstance().getDataFolder() + "/PlayerCache", false);
 
             playerJson.set("CACHE", newPlayerWishPrizeDoList);
         });
     }
 
     public static void setPlayerCacheOpData(Player player, Boolean doOpCommand) {
-        Json playerJson = new Json(player.getUniqueId().toString(), main.getInstance().getDataFolder() + "/PlayerCache");
+        Json playerJson = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getInstance().getDataFolder() + "/PlayerCache", false);
 
         playerJson.set("DO-OP-COMMAND", doOpCommand);
     }

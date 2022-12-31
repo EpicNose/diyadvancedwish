@@ -1,5 +1,6 @@
 package me.twomillions.plugin.advancedwish.manager;
 
+import de.leonhard.storage.Json;
 import de.leonhard.storage.SimplixBuilder;
 import de.leonhard.storage.Yaml;
 import de.leonhard.storage.internal.settings.ConfigSettings;
@@ -102,34 +103,25 @@ public class ConfigManager {
     }
 
     // 创建指定配置文件 - Json
-    public static void createJsonConfig(String fileName, String path, boolean inputStreamFromResource) {
-        fileName = fileName + ".json";
-        String dataFolder = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + path;
-
-        File file = new File(dataFolder, fileName);
-        if (file.exists()) return;
-
-        Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " + Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
-                "检测到 " +
-                Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
-                fileName +
-                Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
-                " 配置文件为空，已自动创建并设置为更改部分自动重载。");
+    public static Json createJsonConfig(String fileName, String path, boolean inputStreamFromResource) {
+        Json json;
 
         if (inputStreamFromResource)
-            SimplixBuilder
-                    .fromFile(file)
+            json = SimplixBuilder
+                    .fromPath(fileName, path)
                     .addInputStreamFromResource(fileName)
                     .setDataType(DataType.SORTED)
                     .setConfigSettings(ConfigSettings.PRESERVE_COMMENTS)
                     .setReloadSettings(ReloadSettings.INTELLIGENT)
                     .createJson();
         else
-            SimplixBuilder
-                    .fromFile(file)
+            json = SimplixBuilder
+                    .fromPath(fileName, path)
                     .setDataType(DataType.SORTED)
                     .setConfigSettings(ConfigSettings.PRESERVE_COMMENTS)
                     .setReloadSettings(ReloadSettings.INTELLIGENT)
                     .createJson();
+
+        return json;
     }
 }
