@@ -81,7 +81,13 @@ public class RegisterManager {
 
         RegisteredServiceProvider<Economy> registeredServiceProvider = Bukkit.getServer().getServicesManager().getRegistration(Economy.class);
 
-        if (registeredServiceProvider == null) return;
+        if (registeredServiceProvider == null) {
+            Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
+                    Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
+                    "检查到服务器存在 Vault，但并没有实际插件进行操作? 取消对于 Vault 的设置。");
+
+            return;
+        }
 
         try { main.setEconomy(registeredServiceProvider.getProvider()); }
         catch (Exception exception) {

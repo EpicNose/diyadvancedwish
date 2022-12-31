@@ -514,7 +514,9 @@ public class WishManager {
         else if (money != 0 && economy != null) return false;
 
         if (takePoints) playerPointsAPI.take(player.getUniqueId(), point);
-        if (withdrawPlayer) economy.withdrawPlayer(player, point);
+
+        // 修复 https://gitee.com/A2000000/advanced-wish/issues/I67LOV
+        if (withdrawPlayer) economy.withdrawPlayer(player, money);
 
         return true;
     }
