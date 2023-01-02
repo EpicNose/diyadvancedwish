@@ -61,7 +61,7 @@ public class RegisterManager {
         for (String wishName : ConfigManager.getAdvancedWishYaml().getStringList("WISH")) {
             if (wishName == null || wishName.equals("") || wishName.equals(" ")) return;
 
-            ConfigManager.createYamlConfig(wishName, "/Wish", true);
+            ConfigManager.createYamlConfig(wishName, "/Wish", false, true);
 
             registerWish.add(wishName);
 

@@ -14,6 +14,7 @@ import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.fusesource.jansi.Ansi;
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import java.util.Arrays;
@@ -67,8 +68,9 @@ public final class main extends JavaPlugin {
         // 所以这就是确定 Redis 服务与本项目是否连通的依据
         // 使用 try cache 捕获异常来检查连接状态
         if (isUsingRedis()) {
-            try {
-                getJedisPool().getResource().ping();
+            try (Jedis jedis = jedisPool.getResource()) {
+                if (getRedisPassWord() != null) jedis.auth(getRedisPassWord());
+                jedis.ping();
 
                 Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
                         Ansi.ansi().fg(Ansi.Color.GREEN).boldOff().toString() +

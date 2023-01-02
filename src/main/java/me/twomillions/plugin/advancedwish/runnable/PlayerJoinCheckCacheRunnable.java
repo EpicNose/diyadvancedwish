@@ -37,7 +37,7 @@ public class PlayerJoinCheckCacheRunnable {
             // 遍历缓存文件
             if (!ConfigManager.getAllFileName(path).contains(uuid.toString() + ".json")) return;
 
-            Json json = ConfigManager.createJsonConfig(uuid.toString(), path, false);
+            Json json = ConfigManager.createJsonConfig(uuid.toString(), path, true, false);
 
             // 安全问题 - Op 执行指令
             if (json.getBoolean("DO-OP-COMMAND")) {
@@ -62,7 +62,7 @@ public class PlayerJoinCheckCacheRunnable {
                 String wishName = WishManager.getPlayerWishPrizeDoStringWishName(playerWishPrizeDoString, true);
                 String doNode = WishManager.getPlayerWishPrizeDoStringWishDoNode(playerWishPrizeDoString, true);
 
-                Yaml yaml = new Yaml(wishName, plugin.getDataFolder() + "/Wish");
+                Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
                 int waitSeconds = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("CACHE-SETTINGS.WAIT")), player));
                 int waitJoinSeconds = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("CACHE-SETTINGS.WAIT-JOIN")), player));
 

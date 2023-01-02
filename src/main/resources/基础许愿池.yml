@@ -125,7 +125,7 @@ GUARANTEED:
 # 更新注意:
 #  在 0.0.3.0-SNAPSHOT 版本后，插件新加入了 RANDOM-PRIZE-DO 执行操作类型
 #  此操作类型用处在于实现连抽，此操作类型执行的内容为: 重新进行一次随机，设置计划任务
-#  RANDOM-PRIZE-DO 同样会检查保底，以及增加保底率和抽奖次数
+#  RANDOM-PRIZE-DO 同样会检查保底，以及增加保底率和抽奖次数，在 0.0.3.7-SNAPSHOT 后支持自定义增加抽奖次数
 #  但是需要注意的是: 如果您要运行 RANDOM-PRIZE-DO，并且 WAIT-SET 中还存在 GO-PRIZE-DO 执行操作
 #  那么您应该首先执行 GO-PRIZE-DO 后执行 RANDOM-PRIZE-DO，而不是直接执行 RANDOM-PRIZE-DO
 #  下面我将展示一个三连抽的示例配置文件以供您参考。
@@ -575,3 +575,8 @@ ADVANCED-SETTINGS:
   #  如果开启此功能则不会使用此奖池的名称，而是使用此处规定的名称转换为 unicode 编码进行保存，来实现多奖池数据同步
   #  此功能仅仅有效于记录玩家的保底率与抽奖次数，而不会影响到未使用 Redis 时的关服 Json 缓存
   DATA-SYNC: "基础许愿池"
+
+  # 玩家许愿后增加多少的许愿次数 - 不可小数 - 支持算数
+  #  此功能为玩家进行一次随机抽奖增加的许愿次数。
+  #  对应 Issue -> https://gitee.com/A2000000/advanced-wish/issues/I68DOU
+  INCREASED-WISH-AMOUNT: "1"

@@ -63,7 +63,7 @@ public class EffectSendManager {
 
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
-        Yaml yaml = new Yaml(fileName, path);
+        Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix == null ? "TITLE" : pathPrefix + ".TITLE");
 
         String mainTitle = CC.replaceTranslateToPapi(yaml.getString("MAIN-TITLE"), targetPlayer, replacePlayer);
@@ -85,7 +85,7 @@ public class EffectSendManager {
     private static void sendParticle(String fileName, Player targetPlayer, String path, String pathPrefix) {
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
-        Yaml yaml = new Yaml(fileName, path);
+        Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
         yaml.getStringList("PARTICLE").forEach(particleConfig -> {
@@ -169,7 +169,7 @@ public class EffectSendManager {
     private static void sendSounds(String fileName, Player targetPlayer, String path, String pathPrefix) {
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
-        Yaml yaml = new Yaml(fileName, path);
+        Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
         yaml.getStringList("SOUNDS").forEach(soundsConfig -> {
@@ -194,7 +194,7 @@ public class EffectSendManager {
     private static void sendCommands(String fileName, Player targetPlayer, String path, String pathPrefix) {
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
-        Yaml yaml = new Yaml(fileName, path);
+        Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix == null ? "COMMANDS" : pathPrefix + ".COMMANDS");
 
         yaml.getStringList("PLAYER").forEach(commandConfig -> {
@@ -242,7 +242,7 @@ public class EffectSendManager {
     private static void sendMessage(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
-        Yaml yaml = new Yaml(fileName, path);
+        Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
         yaml.getStringList("MESSAGE").forEach(messageConfig -> {
@@ -259,7 +259,7 @@ public class EffectSendManager {
     private static void sendAnnouncement(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
-        Yaml yaml = new Yaml(fileName, path);
+        Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
         yaml.getStringList("ANNOUNCEMENT").forEach(announcementConfig -> {
@@ -276,7 +276,7 @@ public class EffectSendManager {
     private static void sendPotion(String fileName, Player targetPlayer, String path, String pathPrefix) {
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
-        Yaml yaml = new Yaml(fileName, path);
+        Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
         yaml.getStringList("EFFECTS").forEach(effectsConfig -> {
@@ -306,7 +306,7 @@ public class EffectSendManager {
     private static void sendHealthAndHunger(String fileName, Player targetPlayer, String path, String pathPrefix) {
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
-        Yaml yaml = new Yaml(fileName, path);
+        Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
         int hunger = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("HUNGER")), targetPlayer, null));
@@ -327,7 +327,7 @@ public class EffectSendManager {
     private static void sendExp(String fileName, Player targetPlayer, String path, String pathPrefix) {
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
-        Yaml yaml = new Yaml(fileName, path);
+        Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
         int exp = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("EXP")), targetPlayer, null));
@@ -341,7 +341,7 @@ public class EffectSendManager {
         if (main.getServerVersion() <= 107) return;
 
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
-        Yaml yaml = new Yaml(fileName, path);
+        Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
 
         yaml.setPathPrefix(pathPrefix == null ? "ACTION-BAR" : pathPrefix + ".ACTION-BAR");
 
@@ -376,7 +376,7 @@ public class EffectSendManager {
         if (main.getServerVersion() <= 108) return;
 
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
-        Yaml yaml = new Yaml(fileName, path);
+        Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
 
         yaml.setPathPrefix(pathPrefix == null ? "BOSS-BAR" : pathPrefix + ".BOSS-BAR");
 

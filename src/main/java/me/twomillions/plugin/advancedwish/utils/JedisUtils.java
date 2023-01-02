@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class JedisUtils {
     private static final JedisPool jedisPool = main.getJedisPool();
-    private static final String redisPassWorld = main.getRedisPassWord();
+    private static final String redisPassWord = main.getRedisPassWord();
 
     // 此类快速使用 Jedis 写了几个方法 避免在代码里一直使用 try-with-resources 不美观
 
@@ -24,7 +24,7 @@ public class JedisUtils {
         // try-with-resources 语法糖
         // try 内代码执行结束后会自动调用try括号中对象的close方法来关闭
         try (Jedis jedis = jedisPool.getResource()) {
-            if (redisPassWorld != null) jedis.auth(redisPassWorld);
+            if (redisPassWord != null) jedis.auth(redisPassWord);
 
             jedis.set(key, value);
         }
@@ -33,7 +33,7 @@ public class JedisUtils {
     // 设置 Map
     public static void setMap(String key, String field, String value) {
         try (Jedis jedis = jedisPool.getResource()) {
-            if (redisPassWorld != null) jedis.auth(redisPassWorld);
+            if (redisPassWord != null) jedis.auth(redisPassWord);
 
             jedis.hset(key, field, value);
         }
@@ -42,7 +42,7 @@ public class JedisUtils {
     // 删除 Map
     public static void removeMap(String key, String value) {
         try (Jedis jedis = jedisPool.getResource()) {
-            if (redisPassWorld != null) jedis.auth(redisPassWorld);
+            if (redisPassWord != null) jedis.auth(redisPassWord);
 
             jedis.hdel(key, value);
         }
@@ -51,7 +51,7 @@ public class JedisUtils {
     // 获取 List
     public static List<String> getList(String key) {
         try (Jedis jedis = jedisPool.getResource()) {
-            if (redisPassWorld != null) jedis.auth(redisPassWorld);
+            if (redisPassWord != null) jedis.auth(redisPassWord);
 
             return jedis.lrange(key, 0, -1);
         }
@@ -60,7 +60,7 @@ public class JedisUtils {
     // 添加 List
     public static void pushListValue(String key, String value) {
         try (Jedis jedis = jedisPool.getResource()) {
-            if (redisPassWorld != null) jedis.auth(redisPassWorld);
+            if (redisPassWord != null) jedis.auth(redisPassWord);
 
             // 查重
             if (!getList(key).contains(value)) jedis.lpush(key, value);
@@ -70,7 +70,7 @@ public class JedisUtils {
     // 删除 List 内容
     public static void removeListValue(String key, String value) {
         try (Jedis jedis = jedisPool.getResource()) {
-            if (redisPassWorld != null) jedis.auth(redisPassWorld);
+            if (redisPassWord != null) jedis.auth(redisPassWord);
 
             jedis.lrem(key, 2, value);
         }
@@ -79,7 +79,7 @@ public class JedisUtils {
     // 删除 List 内容
     public static void removeListValue(String key) {
         try (Jedis jedis = jedisPool.getResource()) {
-            if (redisPassWorld != null) jedis.auth(redisPassWorld);
+            if (redisPassWord != null) jedis.auth(redisPassWord);
 
             jedis.ltrim(key, 1, 0);
         }
@@ -88,7 +88,7 @@ public class JedisUtils {
     // 获取普通值
     public static String getOrDefault(String key, String defaultValue) {
         try (Jedis jedis = jedisPool.getResource()) {
-            if (redisPassWorld != null) jedis.auth(redisPassWorld);
+            if (redisPassWord != null) jedis.auth(redisPassWord);
 
             String string = jedis.get(key);
             return string == null ? defaultValue : string;
@@ -98,7 +98,7 @@ public class JedisUtils {
     // 获取 Map
     public static String getOrDefaultMap(String key, String field, String defaultValue) {
         try (Jedis jedis = jedisPool.getResource()) {
-            if (redisPassWorld != null) jedis.auth(redisPassWorld);
+            if (redisPassWord != null) jedis.auth(redisPassWord);
 
             String string = jedis.hget(key, field);
             return string == null ? defaultValue : string;

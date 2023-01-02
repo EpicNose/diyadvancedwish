@@ -200,7 +200,7 @@ public class WishManager {
     // 格式为: 等待秒数[0];执行操作[1]
     // GO-PRIZE-DO - 去到对应的 PRIZE-DO 模块
     public static List<String> getWishScheduledTasks(String wishName) {
-        Yaml yaml = new Yaml(wishName, plugin.getDataFolder() + "/Wish");
+        Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
         return yaml.getStringList("WAIT-SET");
     }
 
@@ -243,7 +243,7 @@ public class WishManager {
     // 获取许愿池奖品 (PRIZE-SET)
     // 格式为: 几率[0];PRIZE-DO内所执行项[1];增加的增率 (保底率) [2];是否清零保底率[3]
     public static List<String> getWishPrizeSetList(String wishName) {
-        Yaml yaml = new Yaml(wishName, plugin.getDataFolder() + "/Wish");
+        Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
         return yaml.getStringList("PRIZE-SET");
     }
 
@@ -269,7 +269,7 @@ public class WishManager {
 
     // 获取 GUARANTEED 列表
     public static List<String> getWishGuaranteedList(String wishName) {
-        Yaml yaml = new Yaml(wishName, plugin.getDataFolder() + "/Wish");
+        Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
         return yaml.getStringList("GUARANTEED");
     }
 
@@ -294,6 +294,18 @@ public class WishManager {
         return Boolean.parseBoolean(wishGuaranteedString.split(";") [3]);
     }
 
+    // 获取指定许愿池的自定义许愿数量增加
+    public static int getWishNeedIncreasedAmount(String wishName) {
+        Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
+        return Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("ADVANCED-SETTINGS.INCREASED-WISH-AMOUNT")), null));
+    }
+
+    // 获取指定许愿池的自定义许愿数量增加 - 多态
+    public static int getWishNeedIncreasedAmount(String wishName, Player player) {
+        Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
+        return Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getOrDefault("ADVANCED-SETTINGS.INCREASED-WISH-AMOUNT", "1")), player));
+    }
+
     // 获取此许愿池的许愿结果
     // 返回的是: wishItemString (几率[0];PRIZE-DO内所执行项[1];增加的增率 (保底率) [2];是否清零保底率[3])
     // 如果触发保底，返回则为: wishGuaranteedString(增率 (保底率);PRIZE-DO内所执行项;增加的增率 (保底率);是否清空保底率)
@@ -307,7 +319,7 @@ public class WishManager {
                 // 保底率的增加与清空
                 setPlayerWishGuaranteed(player, wishName, wishGuaranteedString, true);
                 // 设置玩家此奖池的许愿数
-                setPlayerWishAmount(player, wishName, getPlayerWishAmount(player, wishName) + 1);
+                setPlayerWishAmount(player, wishName, getPlayerWishAmount(player, wishName) + getWishNeedIncreasedAmount(wishName, player));
                 return wishGuaranteedString;
             }
         }
@@ -323,7 +335,7 @@ public class WishManager {
         setPlayerWishGuaranteed(player, wishName, randomElement, false);
 
         // 设置玩家此奖池的许愿数
-        setPlayerWishAmount(player, wishName, getPlayerWishAmount(player, wishName) + 1);
+        setPlayerWishAmount(player, wishName, getPlayerWishAmount(player, wishName) + getWishNeedIncreasedAmount(wishName, player));
 
         return randomElement;
     }
@@ -370,7 +382,7 @@ public class WishManager {
         String wishDataSync = getWishDataSync(wishName);
         String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName : wishDataSync);
 
-        Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), false);
+        Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
 
         json.set(dataSync, guaranteed);
     }
@@ -380,7 +392,7 @@ public class WishManager {
         String wishDataSync = getWishDataSync(wishName);
         String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName : wishDataSync);
 
-         Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), false);
+         Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
 
         return json.getDouble(dataSync);
     }
@@ -390,7 +402,7 @@ public class WishManager {
         String wishDataSync = getWishDataSync(wishName);
         String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName + "_amount" : wishDataSync + "_amount");
 
-        Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), false);
+        Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
 
         json.set(dataSync, guaranteed);
     }
@@ -400,21 +412,21 @@ public class WishManager {
         String wishDataSync = getWishDataSync(wishName);
         String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName + "_amount" : wishDataSync + "_amount");
 
-        Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), false);
+        Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
 
         return json.getInt(dataSync);
     }
 
     // 是否开启数据同步? 返回数据同步名称 若没有开启返回 ""
     public static String getWishDataSync(String wishName) {
-        Yaml yaml = new Yaml(wishName, plugin.getDataFolder() + "/Wish");
+        Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
 
         return yaml.getString("ADVANCED-SETTINGS.DATA-SYNC");
     }
 
     // 检查是否可以使用
     public static boolean checkWish(Player player, String wishName) {
-        Yaml yaml = new Yaml(wishName, plugin.getDataFolder() + "/Wish");
+        Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
         yaml.setPathPrefix("CONDITION");
 
         String perm = CC.replaceTranslateToPapi(yaml.getString("PERM"), player);
@@ -532,14 +544,15 @@ public class WishManager {
             // 转换 Unicode 防止乱码
             for (String playerWishPrizeDoString : playerWishPrizeDoList) newPlayerWishPrizeDoList.add(CC.stringToUnicode(playerWishPrizeDoString));
 
-            Json playerJson = ConfigManager.createJsonConfig(uuid.toString(), main.getInstance().getDataFolder() + "/PlayerCache", false);
+            Json playerJson = ConfigManager.createJsonConfig(uuid.toString(), "/PlayerCache", false, false);
 
             playerJson.set("CACHE", newPlayerWishPrizeDoList);
         });
     }
 
+    // 安全措施，使用 OP 指令的数据缓存
     public static void setPlayerCacheOpData(Player player, Boolean doOpCommand) {
-        Json playerJson = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getInstance().getDataFolder() + "/PlayerCache", false);
+        Json playerJson = ConfigManager.createJsonConfig(player.getUniqueId().toString(), "/PlayerCache", false, false);
 
         playerJson.set("DO-OP-COMMAND", doOpCommand);
     }

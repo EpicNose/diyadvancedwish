@@ -27,8 +27,8 @@ public class ConfigManager {
 
     // 创建默认配置
     public static void createDefaultConfig() {
-        createYamlConfig("advancedWish", null, true);
-        createYamlConfig("message", null, true);
+        createYamlConfig("advancedWish", null, false, true);
+        createYamlConfig("message", null, false, true);
     }
 
     // 获取配置文件
@@ -38,7 +38,7 @@ public class ConfigManager {
 
         if (!file.exists()) {
             Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " + Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() + "运行有误，请检查配置文件是否被误删! 开始重新创建配置文件!");
-            createYamlConfig("advancedWish", null, true);
+            createYamlConfig("advancedWish", null, false, true);
         }
 
         return new Yaml("advancedWish", dataFolder);
@@ -51,10 +51,94 @@ public class ConfigManager {
 
         if (!file.exists()) {
             Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " + Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() + "运行有误，请检查配置文件是否被误删! 开始重新创建配置文件!");
-            createYamlConfig("message", null, true);
+            createYamlConfig("message", null, false, true);
         }
 
         return new Yaml("message", dataFolder);
+    }
+
+    // 创建指定配置文件 - Yaml
+    public static Yaml createYamlConfig(String fileName, String path, boolean originalPath, boolean inputStreamFromResource) {
+        String dataFolder;
+
+        if (path == null) dataFolder = plugin.getDataFolder().toString();
+        else if (!originalPath) dataFolder = plugin.getDataFolder() + path;
+        else dataFolder = path;
+
+        Yaml yaml;
+        File file = new File(dataFolder, fileName + ".yml");
+
+        if (file.exists()) {
+            yaml = new Yaml(fileName, dataFolder);
+            return yaml;
+        }
+
+        Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " + Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
+                "检测到 " +
+                Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
+                fileName +
+                Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
+                " Yaml 文件为空，已自动创建并设置为更改部分自动重载。");
+
+        if (inputStreamFromResource)
+            yaml = SimplixBuilder
+                    .fromFile(file)
+                    .addInputStreamFromResource(fileName + ".yml")
+                    .setDataType(DataType.SORTED)
+                    .setConfigSettings(ConfigSettings.PRESERVE_COMMENTS)
+                    .setReloadSettings(ReloadSettings.INTELLIGENT)
+                    .createYaml();
+        else
+            yaml = SimplixBuilder
+                    .fromFile(file)
+                    .setDataType(DataType.SORTED)
+                    .setConfigSettings(ConfigSettings.PRESERVE_COMMENTS)
+                    .setReloadSettings(ReloadSettings.INTELLIGENT)
+                    .createYaml();
+
+        return yaml;
+    }
+
+    // 创建指定配置文件 - Json
+    public static Json createJsonConfig(String fileName, String path, boolean originalPath, boolean inputStreamFromResource) {
+        String dataFolder;
+
+        if (path == null) dataFolder = plugin.getDataFolder().toString();
+        else if (!originalPath) dataFolder = plugin.getDataFolder() + path;
+        else dataFolder = path;
+
+        Json json;
+        File file = new File(dataFolder, fileName + ".json");
+
+        if (file.exists()) {
+            json = new Json(fileName, dataFolder);
+            return json;
+        }
+
+        Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " + Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
+                "检测到 " +
+                Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
+                fileName +
+                Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
+                " Json 文件为空，已自动创建并设置为更改部分自动重载。");
+
+        if (inputStreamFromResource)
+            json = SimplixBuilder
+                    .fromFile(file)
+                    .addInputStreamFromResource(fileName + ".json")
+                    .setDataType(DataType.SORTED)
+                    .setConfigSettings(ConfigSettings.PRESERVE_COMMENTS)
+                    .setReloadSettings(ReloadSettings.INTELLIGENT)
+                    .createJson();
+        else
+            json = SimplixBuilder
+                    .fromFile(file)
+                    .setDataType(DataType.SORTED)
+                    .setConfigSettings(ConfigSettings.PRESERVE_COMMENTS)
+                    .setReloadSettings(ReloadSettings.INTELLIGENT)
+                    .createJson();
+
+        return json;
     }
 
     // 获取一个文件夹下所有文件的名称 不包括此文件夹下的文件夹
@@ -68,60 +152,5 @@ public class ConfigManager {
         File[] files = file.listFiles();
         if (files != null) for (File f : files) fileNames.add(f.getName());
         return fileNames;
-    }
-
-    // 创建指定配置文件 - Yaml
-    public static void createYamlConfig(String fileName, String path, boolean inputStreamFromResource) {
-        fileName = fileName + ".yml";
-        String dataFolder = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + path;
-
-        File file = new File(dataFolder, fileName);
-        if (file.exists()) return;
-
-        Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " + Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
-                "检测到 " +
-                Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
-                fileName +
-                Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
-                " 配置文件为空，已自动创建并设置为更改部分自动重载。");
-
-        if (inputStreamFromResource)
-            SimplixBuilder
-                    .fromFile(file)
-                    .addInputStreamFromResource(fileName)
-                    .setDataType(DataType.SORTED)
-                    .setConfigSettings(ConfigSettings.PRESERVE_COMMENTS)
-                    .setReloadSettings(ReloadSettings.INTELLIGENT)
-                    .createYaml();
-        else
-            SimplixBuilder
-                    .fromFile(file)
-                    .setDataType(DataType.SORTED)
-                    .setConfigSettings(ConfigSettings.PRESERVE_COMMENTS)
-                    .setReloadSettings(ReloadSettings.INTELLIGENT)
-                    .createYaml();
-    }
-
-    // 创建指定配置文件 - Json
-    public static Json createJsonConfig(String fileName, String path, boolean inputStreamFromResource) {
-        Json json;
-
-        if (inputStreamFromResource)
-            json = SimplixBuilder
-                    .fromPath(fileName, path)
-                    .addInputStreamFromResource(fileName)
-                    .setDataType(DataType.SORTED)
-                    .setConfigSettings(ConfigSettings.PRESERVE_COMMENTS)
-                    .setReloadSettings(ReloadSettings.INTELLIGENT)
-                    .createJson();
-        else
-            json = SimplixBuilder
-                    .fromPath(fileName, path)
-                    .setDataType(DataType.SORTED)
-                    .setConfigSettings(ConfigSettings.PRESERVE_COMMENTS)
-                    .setReloadSettings(ReloadSettings.INTELLIGENT)
-                    .createJson();
-
-        return json;
     }
 }
