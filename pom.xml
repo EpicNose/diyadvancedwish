@@ -52,7 +52,7 @@
                                 </relocation>
 
                                 <relocation>
-                                    <pattern>mongo-java-driver</pattern>
+                                    <pattern>com.mongodb</pattern>
                                     <shadedPattern>me.twomillions.plugin.advancedwish.mongo</shadedPattern>
                                 </relocation>
                             </relocations>
