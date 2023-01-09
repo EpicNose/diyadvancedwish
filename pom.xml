@@ -50,6 +50,11 @@
                                     <pattern>redis.clients.jedis</pattern>
                                     <shadedPattern>me.twomillions.plugin.advancedwish.jedis</shadedPattern>
                                 </relocation>
+
+                                <relocation>
+                                    <pattern>mongo-java-driver</pattern>
+                                    <shadedPattern>me.twomillions.plugin.advancedwish.mongo</shadedPattern>
+                                </relocation>
                             </relocations>
                         </configuration>
                     </execution>
@@ -134,7 +139,7 @@
         <dependency>
             <groupId>xyz.xenondevs</groupId>
             <artifactId>particle</artifactId>
-            <version>1.8.1</version>
+            <version>1.8.3</version>
         </dependency>
 
         <!-- VaultAPI -->
@@ -181,6 +186,13 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-jexl3</artifactId>
             <version>3.2.1</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver -->
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+            <version>3.12.11</version>
         </dependency>
 
     </dependencies>

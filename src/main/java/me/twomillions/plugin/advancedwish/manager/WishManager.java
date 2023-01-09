@@ -3,10 +3,13 @@ package me.twomillions.plugin.advancedwish.manager;
 import de.leonhard.storage.Json;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
+import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
+import me.twomillions.plugin.advancedwish.enums.redis.RedisConnectState;
 import me.twomillions.plugin.advancedwish.main;
+import me.twomillions.plugin.advancedwish.manager.databases.MongoManager;
+import me.twomillions.plugin.advancedwish.manager.databases.RedisManager;
 import me.twomillions.plugin.advancedwish.utils.CC;
 import me.twomillions.plugin.advancedwish.utils.ItemUtils;
-import me.twomillions.plugin.advancedwish.utils.JedisUtils;
 import me.twomillions.plugin.advancedwish.utils.ProbabilityUntilities;
 import net.milkbowl.vault.economy.Economy;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
@@ -29,7 +32,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class WishManager {
     private static final Plugin plugin = main.getInstance();
-    private static final boolean useRedis = main.isUsingRedis();
+    private static final boolean usingRedis = RedisManager.getRedisConnectState() == RedisConnectState.Connected;
+    private static final boolean usingMongo = MongoManager.getMongoConnectState() == MongoConnectState.Connected;
 
     // 检查许愿池内是否含有指定的许愿池
     public static boolean hasWish(String wishName) {
@@ -46,7 +50,7 @@ public class WishManager {
     public static boolean isPlayerInWishList(Player player) {
         UUID uuid = player.getUniqueId();
 
-        if (useRedis) return JedisUtils.getList("wishPlayers").contains(uuid.toString());
+        if (usingRedis) return RedisManager.getList("wishPlayers").contains(uuid.toString());
         else return wishPlayers.contains(uuid);
     }
 
@@ -54,7 +58,7 @@ public class WishManager {
     public static void addPlayerToWishList(Player player) {
         UUID uuid = player.getUniqueId();
 
-        if (useRedis) JedisUtils.pushListValue("wishPlayers", uuid.toString());
+        if (usingRedis) RedisManager.pushListValue("wishPlayers", uuid.toString());
         else if (!isPlayerInWishList(player)) wishPlayers.add(uuid);
     }
 
@@ -62,7 +66,7 @@ public class WishManager {
     public static void removePlayerWithWishList(Player player) {
         UUID uuid = player.getUniqueId();
 
-        if (useRedis) JedisUtils.removeListValue("wishPlayers", uuid.toString());
+        if (usingRedis) RedisManager.removeListValue("wishPlayers", uuid.toString());
         else wishPlayers.remove(uuid);
     }
 
@@ -100,7 +104,7 @@ public class WishManager {
 
         newPlayerWishPrizeDo.add(playerWishPrizeDoString);
 
-        if (useRedis) JedisUtils.pushListValue("playerWishPrizeDo_" + uuid, playerWishPrizeDoString);
+        if (usingRedis) RedisManager.pushListValue("playerWishPrizeDo_" + uuid, playerWishPrizeDoString);
         else playerWishPrizeDo.put(uuid, newPlayerWishPrizeDo);
     }
 
@@ -108,7 +112,7 @@ public class WishManager {
     public static void removePlayerWishPrizeDo(Player player, String playerWishPrizeDoString) {
         UUID uuid = player.getUniqueId();
 
-        if (useRedis) JedisUtils.removeListValue("playerWishPrizeDo_" + uuid, playerWishPrizeDoString);
+        if (usingRedis) RedisManager.removeListValue("playerWishPrizeDo_" + uuid, playerWishPrizeDoString);
         else playerWishPrizeDo.get(uuid).remove(playerWishPrizeDoString);
     }
 
@@ -116,7 +120,7 @@ public class WishManager {
     public static void removePlayerAllWishPrizeDo(Player player, String playerWishPrizeDoString) {
         UUID uuid = player.getUniqueId();
 
-        if (useRedis) JedisUtils.removeListValue("playerWishPrizeDo_" + uuid);
+        if (usingRedis) RedisManager.removeListValue("playerWishPrizeDo_" + uuid);
         else playerWishPrizeDo.remove(uuid);
     }
 
@@ -219,13 +223,13 @@ public class WishManager {
         String scheduledTask = toPlayerScheduledTaskString(uuid, time, wishName, doNode);
 
         // JedisUtils 内的 addList 方法会自动查重
-        if (useRedis) JedisUtils.pushListValue("playerScheduledTasks", scheduledTask);
+        if (usingRedis) RedisManager.pushListValue("playerScheduledTasks", scheduledTask);
         else if (!playerScheduledTasks.contains(scheduledTask)) playerScheduledTasks.add(scheduledTask);
     }
 
     // 此方法将用于删除玩家对应时间段的对应任务 (计划任务)
     public static void removePlayerScheduledTasks(String wishScheduledTasksString) {
-        if (useRedis) JedisUtils.removeListValue("playerScheduledTasks", wishScheduledTasksString);
+        if (usingRedis) RedisManager.removeListValue("playerScheduledTasks", wishScheduledTasksString);
         else playerScheduledTasks.remove(wishScheduledTasksString);
     }
 
@@ -234,7 +238,7 @@ public class WishManager {
         List<String> scheduledTasksList = new ArrayList<>();
 
         // 获取随后使用 startWith 判断对象
-        if (useRedis) JedisUtils.getList("playerScheduledTasks").forEach(schedule -> { if (schedule.startsWith(uuid.toString())) scheduledTasksList.add(schedule); });
+        if (usingRedis) RedisManager.getList("playerScheduledTasks").forEach(schedule -> { if (schedule.startsWith(uuid.toString())) scheduledTasksList.add(schedule); });
         else playerScheduledTasks.forEach(schedule -> { if (schedule.startsWith(uuid.toString())) scheduledTasksList.add(schedule); });
 
         return scheduledTasksList;
@@ -382,6 +386,8 @@ public class WishManager {
         String wishDataSync = getWishDataSync(wishName);
         String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName : wishDataSync);
 
+        if (usingMongo) { MongoManager.updatePlayerGuaranteed(player, dataSync, String.valueOf(guaranteed)); return; }
+
         Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
 
         json.set(dataSync, guaranteed);
@@ -392,25 +398,31 @@ public class WishManager {
         String wishDataSync = getWishDataSync(wishName);
         String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName : wishDataSync);
 
-         Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
+        if (usingMongo) return Double.parseDouble(MongoManager.getOrDefaultPlayerGuaranteed(player, dataSync, "0"));
+
+        Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
 
         return json.getDouble(dataSync);
     }
 
     // 设置玩家指定许愿池的许愿数
-    public static void setPlayerWishAmount(Player player, String wishName, double guaranteed) {
+    public static void setPlayerWishAmount(Player player, String wishName, int amount) {
         String wishDataSync = getWishDataSync(wishName);
         String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName + "_amount" : wishDataSync + "_amount");
 
+        if (usingMongo) { MongoManager.updatePlayerGuaranteed(player, dataSync, String.valueOf(amount)); return; }
+
         Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
 
-        json.set(dataSync, guaranteed);
+        json.set(dataSync, amount);
     }
 
     // 获取玩家指定许愿池的许愿数
     public static Integer getPlayerWishAmount(Player player, String wishName) {
         String wishDataSync = getWishDataSync(wishName);
         String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName + "_amount" : wishDataSync + "_amount");
+
+        if (usingMongo) return Integer.parseInt(MongoManager.getOrDefaultPlayerGuaranteed(player, dataSync, "0"));
 
         Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
 

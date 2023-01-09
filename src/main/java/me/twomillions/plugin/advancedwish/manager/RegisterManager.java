@@ -100,7 +100,7 @@ public class RegisterManager {
         }
 
         Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
+                Ansi.ansi().fg(Ansi.Color.GREEN).boldOff().toString() +
                 "检查到服务器存在 Vault，已成功设置 Vault。");
     }
 
@@ -119,7 +119,7 @@ public class RegisterManager {
         }
 
         Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
+                Ansi.ansi().fg(Ansi.Color.GREEN).boldOff().toString() +
                 "检查到服务器存在 PlayerPoints，已成功设置 PlayerPoints。");
     }
 }

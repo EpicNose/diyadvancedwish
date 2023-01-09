@@ -3,9 +3,11 @@ package me.twomillions.plugin.advancedwish;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import lombok.Setter;
-import me.twomillions.plugin.advancedwish.manager.ConfigManager;
-import me.twomillions.plugin.advancedwish.manager.RegisterManager;
-import me.twomillions.plugin.advancedwish.manager.WishManager;
+import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
+import me.twomillions.plugin.advancedwish.enums.redis.RedisConnectState;
+import me.twomillions.plugin.advancedwish.manager.*;
+import me.twomillions.plugin.advancedwish.manager.databases.MongoManager;
+import me.twomillions.plugin.advancedwish.manager.databases.RedisManager;
 import me.twomillions.plugin.advancedwish.runnable.PlayerTimestampRunnable;
 import me.twomillions.plugin.advancedwish.runnable.UpdateCheckerRunnable;
 import net.milkbowl.vault.economy.Economy;
@@ -14,16 +16,12 @@ import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.fusesource.jansi.Ansi;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
 
 import java.util.Arrays;
 
 public final class main extends JavaPlugin {
     // volatile 防止线程直接共享变量可能会有值更新不可见的问题
     @Getter @Setter private volatile static main instance;
-    @Getter @Setter private volatile static JedisPool jedisPool;
-    @Getter @Setter private volatile static String redisPassWord;
     @Getter @Setter private volatile static Double serverVersion;
 
     @Getter @Setter private volatile static Economy economy;
@@ -32,7 +30,6 @@ public final class main extends JavaPlugin {
 
     @Getter @Setter private volatile static boolean disabled;
     @Getter @Setter private volatile static boolean usingPapi;
-    @Getter @Setter private volatile static boolean usingRedis;
 
     @Override
     public void onEnable() {
@@ -51,39 +48,14 @@ public final class main extends JavaPlugin {
         String pluginPath = main.getInstance().getDataFolder().toString();
         String guaranteedConfig = advancedWishYaml.getString("GUARANTEED-PATH");
 
+        // 设置 Redis
+        if (RedisManager.setupRedis(advancedWishYaml) == RedisConnectState.CannotConnect) return;
+
+        // 设置 Mongo
+        if (MongoManager.setupMongo(advancedWishYaml) == MongoConnectState.CannotConnect) return;
+
         // 获取保底率的指定路径
         setGuaranteedPath(guaranteedConfig.equals("") ? pluginPath + "/PlayerGuaranteed" : guaranteedConfig);
-
-        // Redis 跨服
-        if (advancedWishYaml.getBoolean("USE-REDIS")) {
-            setUsingRedis(true);
-            setJedisPool(new JedisPool(advancedWishYaml.getString("REDIS.IP"), advancedWishYaml.getInt("REDIS.PORT")));
-
-            String redisPassWord = advancedWishYaml.getString("REDIS.PASSWORD");
-            if (!redisPassWord.equals("")) setRedisPassWord(redisPassWord);
-        }
-
-        // Redis 的 Ping 命令使用客户端向服务器发送一个 Ping
-        // 如果与 Redis 服务器通信正常的话 会返回一个 Pong 否则返回一个连接错误
-        // 所以这就是确定 Redis 服务与本项目是否连通的依据
-        // 使用 try cache 捕获异常来检查连接状态
-        if (isUsingRedis()) {
-            try (Jedis jedis = jedisPool.getResource()) {
-                if (getRedisPassWord() != null) jedis.auth(getRedisPassWord());
-                jedis.ping();
-
-                Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                        Ansi.ansi().fg(Ansi.Color.GREEN).boldOff().toString() +
-                        "Advanced Wish 已成功建立与 Redis 的连接!");
-            } catch (Exception exception) {
-                Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                        Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
-                        "您打开了 Redis 跨服选项，但是 Advanced Wish 未与 Redis 服务正确连接，请检查 Redis 服务器状态，即将关闭服务器!");
-
-                Bukkit.shutdown();
-                return;
-            }
-        }
 
         // 注册
         RegisterManager.registerListener();
@@ -114,6 +86,6 @@ public final class main extends JavaPlugin {
     @Override
     public void onDisable() {
         setDisabled(true);
-        if (usingRedis) jedisPool.close(); else WishManager.savePlayerCacheData();
+        if (RedisManager.getRedisConnectState() == RedisConnectState.Connected) RedisManager.getJedisPool().close(); else WishManager.savePlayerCacheData();
     }
 }

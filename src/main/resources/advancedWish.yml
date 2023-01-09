@@ -1,18 +1,33 @@
 # 关于自动重载: 除了此文件之外，其他文件均支持自动重载
 # 您应该避免使用第三方插件进行热重载
 # 因为这会让插件存储玩家缓存，直接在玩家第二次进入服务器时给予抽检的最终结果 (请查看 基础许愿池.yml 内 WAIT-SET 项注释)
-# 除非您想要切换 Redis，否则请不要使用第三方插件进行热重载，而是使用指令 (玩家 -> aw reload / 控制台 -> awc reload)
+# 除非您想要切换 Redis 或者切换 Mongo，否则请不要使用第三方插件进行热重载，而是使用指令 (玩家 -> aw reload / 控制台 -> awc reload)
 #
-# 是否使用 Redis 数据库?
-# Redis 数据库的作用不仅仅在跨服
-# 请查看 基础许愿池.yml 内 WAIT-SET 项注释
-USE-REDIS: false # 默认关闭 Redis 跨服
+# 是否使用 Redis 数据库 (默认关闭 Redis 跨服)
+#  Redis 数据库的作用不仅仅在跨服
+#  请查看 基础许愿池.yml 内 WAIT-SET 项注释
+USE-REDIS: false
 
-# Redis 跨服配置
+# 是否使用 Mongo 数据库 (默认不使用 Mongo)
+#  若开启则会将玩家的数据存储至 Mongo 数据库
+#  若关闭则会以 Json 的形式存储，Json 的存放路径可以在 GUARANTEED-PATH 进行更改
+USE-MONGO: false
+
+# Redis 数据库配置
 REDIS:
   IP: 127.0.0.1
   PORT: 6379
   PASSWORD: "" # 没有则不填写
+
+# Mongo 数据库设置
+MONGO:
+  IP: 127.0.0.1
+  PORT: 27017
+
+  # 使用用户名或密码 (若没有设置用户密码则两个都不填写)
+  AUTH:
+    USER: ""
+    PASSWORD: ""
 
 # 注册的许愿池
 WISH:
