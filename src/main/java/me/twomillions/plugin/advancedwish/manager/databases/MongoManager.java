@@ -52,7 +52,7 @@ public class MongoManager {
             setMongoClientUrlString("mongodb://" + mongoIP + ":" + mongoPort);
         } else {
             setMongoAuthState(MongoAuthState.UsingAuth);
-            setMongoClientUrlString("mongodb://" + mongoUser + ":" + mongoPassword + "@" + mongoIP + ":" + mongoIP);
+            setMongoClientUrlString("mongodb://" + mongoUser + ":" + mongoPassword + "@" + mongoIP + ":" + mongoPort);
 
             Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
                     Ansi.ansi().fg(Ansi.Color.GREEN).boldOff().toString() +
