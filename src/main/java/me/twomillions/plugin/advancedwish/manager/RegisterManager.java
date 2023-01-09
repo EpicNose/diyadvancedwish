@@ -5,6 +5,7 @@ import me.twomillions.plugin.advancedwish.commands.ConsoleCommand;
 import me.twomillions.plugin.advancedwish.commands.MainCommand;
 import me.twomillions.plugin.advancedwish.listener.PlayerListener;
 import me.twomillions.plugin.advancedwish.main;
+import me.twomillions.plugin.advancedwish.runnable.WishLimitResetRunnable;
 import net.milkbowl.vault.economy.Economy;
 import org.black_ixx.playerpoints.PlayerPoints;
 import org.bukkit.Bukkit;
@@ -68,6 +69,19 @@ public class RegisterManager {
             Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
                     Ansi.ansi().fg(Ansi.Color.GREEN).boldOff().toString() +
                     "已成功加载许愿池! 许愿池文件名称 " +
+                    Ansi.ansi().fg(Ansi.Color.WHITE).boldOff().toString() +
+                    "-> " +
+                    Ansi.ansi().fg(Ansi.Color.BLUE).boldOff().toString() +
+                    wishName);
+
+            // 许愿限制
+            if (!WishManager.isEnabledWishLimit(wishName)) return;
+
+            WishLimitResetRunnable.startRunnable(wishName);
+
+            Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
+                    Ansi.ansi().fg(Ansi.Color.GREEN).boldOff().toString() +
+                    "检查到许愿池启用了许愿限制，已成功创建对应异步计划任务! 许愿池文件名称 " +
                     Ansi.ansi().fg(Ansi.Color.WHITE).boldOff().toString() +
                     "-> " +
                     Ansi.ansi().fg(Ansi.Color.BLUE).boldOff().toString() +

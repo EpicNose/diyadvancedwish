@@ -71,9 +71,9 @@ public class EffectSendManager {
 
         if (mainTitle.equals("") && subTitle.equals("")) return;
 
-        int fadeIn = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("FADE-IN")), replacePlayer, targetPlayer));
-        int fadeOut = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("FADE-OUT")), replacePlayer, targetPlayer));
-        int stay = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("STAY")), replacePlayer, targetPlayer));
+        int fadeIn = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("FADE-IN")), targetPlayer, replacePlayer));
+        int fadeOut = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("FADE-OUT")), targetPlayer, replacePlayer));
+        int stay = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("STAY")), targetPlayer, replacePlayer));
 
         // 在 1.9 中由于此方法无法定义 fadeIn stay fadeOut 所以使用不同的方法
         // 我没有使用 NMS Spigot API 提供了一种发送标题的方法 旨在跨不同的 Minecraft 版本工作

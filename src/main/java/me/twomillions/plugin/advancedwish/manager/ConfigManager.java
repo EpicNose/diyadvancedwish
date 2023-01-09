@@ -61,6 +61,8 @@ public class ConfigManager {
     public static Yaml createYamlConfig(String fileName, String path, boolean originalPath, boolean inputStreamFromResource) {
         String dataFolder;
 
+        if (fileName.contains(".yml")) fileName = fileName.split(".yml")[0];
+
         if (path == null) dataFolder = plugin.getDataFolder().toString();
         else if (!originalPath) dataFolder = plugin.getDataFolder() + path;
         else dataFolder = path;
@@ -102,6 +104,8 @@ public class ConfigManager {
     // 创建指定配置文件 - Json
     public static Json createJsonConfig(String fileName, String path, boolean originalPath, boolean inputStreamFromResource) {
         String dataFolder;
+
+        if (fileName.contains(".json")) fileName = fileName.split(".json")[0];
 
         if (path == null) dataFolder = plugin.getDataFolder().toString();
         else if (!originalPath) dataFolder = plugin.getDataFolder() + path;

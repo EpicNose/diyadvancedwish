@@ -1,10 +1,12 @@
 package me.twomillions.plugin.advancedwish.manager;
 
+import com.mongodb.client.model.Filters;
 import de.leonhard.storage.Json;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
 import me.twomillions.plugin.advancedwish.enums.redis.RedisConnectState;
+import me.twomillions.plugin.advancedwish.enums.wish.CheckWishState;
 import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.manager.databases.MongoManager;
 import me.twomillions.plugin.advancedwish.manager.databases.RedisManager;
@@ -366,9 +368,18 @@ public class WishManager {
             return;
         }
 
+        // 许愿状态
+        CheckWishState checkWishState = checkWish(player, wishName);
+
         // 当玩家没有满足许愿条件但是尝试许愿时
-        if (!force && !checkWish(player, wishName)) {
+        if (checkWishState == CheckWishState.RequirementsNotMet && !force) {
             EffectSendManager.sendEffect(wishName, player, null, "/Wish", "CANT-WISH");
+            return;
+        }
+
+        // 开启许愿次数限制并且玩家已经达到了许愿次数极限但是尝试许愿时
+        if (checkWishState == CheckWishState.ReachLimit && !force) {
+            EffectSendManager.sendEffect(wishName, player, null, "/Wish", "ADVANCED-SETTINGS.WISH-LIMIT");
             return;
         }
 
@@ -429,6 +440,40 @@ public class WishManager {
         return json.getInt(dataSync);
     }
 
+    // 设置玩家指定许愿池的限制许愿数
+    public static void setPlayerWishLimitAmount(Player player, String wishName, int amount) {
+        wishName = CC.stringToUnicode(wishName + "_limit_amount");
+
+        if (usingMongo) { MongoManager.updatePlayerGuaranteed(player, wishName, String.valueOf(amount)); return; }
+
+        Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
+
+        json.set(wishName, amount);
+    }
+
+    // 获取玩家指定许愿池的限制许愿数
+    public static Integer getPlayerWishLimitAmount(Player player, String wishName) {
+        wishName = CC.stringToUnicode(wishName + "_limit_amount");
+
+        if (usingMongo) return Integer.parseInt(MongoManager.getOrDefaultPlayerGuaranteed(player, wishName, "0"));
+
+        Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
+
+        return json.getInt(wishName);
+    }
+
+    // 重置指定许愿池的所有玩家的限制许愿数
+    public static void resetWishLimitAmount(String wishName) {
+        wishName = CC.stringToUnicode(wishName + "_limit_amount");
+
+        // Mongo
+        if (usingMongo) { MongoManager.getMongoDatabase().getCollection("PlayerGuaranteed").deleteMany(Filters.gte(wishName, "0")); return; }
+
+        // Json
+        String path = main.getGuaranteedPath();
+        for (String fileName : ConfigManager.getAllFileName(path)) { Json json = ConfigManager.createJsonConfig(fileName, path, true, false); json.remove(wishName); }
+    }
+
     // 是否开启数据同步? 返回数据同步名称 若没有开启返回 ""
     public static String getWishDataSync(String wishName) {
         Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
@@ -436,8 +481,48 @@ public class WishManager {
         return yaml.getString("ADVANCED-SETTINGS.DATA-SYNC");
     }
 
+    // 是否开启许愿池玩家许愿数限制功能
+    public static boolean isEnabledWishLimit(String wishName) {
+        return getWishLimitAmount(wishName) != 0;
+    }
+
+    // 获取指定许愿池 - WISH-LIMIT LIMIT-AMOUNT
+    public static int getWishLimitAmount(String wishName) {
+        Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
+
+        return Integer.parseInt(CC.replaceTranslateToPapiCount(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.LIMIT-AMOUNT"), null));
+    }
+
+    // 获取指定许愿池 - WISH-LIMIT RESET-LIMIT-START
+    public static int getWishResetLimitStart(String wishName) {
+        Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
+
+        return Integer.parseInt(CC.replaceTranslateToPapiCount(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-LIMIT-START"), null));
+    }
+
+    // 获取指定许愿池 - WISH-LIMIT RESET-LIMIT-CYCLE
+    public static int getWishResetLimitCycle(String wishName) {
+        Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
+
+        return Integer.parseInt(CC.replaceTranslateToPapiCount(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-LIMIT-CYCLE"), null));
+    }
+
+    // 获取指定许愿池 - WISH-LIMIT COUPON-LIMIT
+    public static boolean isEnabledCouponLimit(String wishName) {
+        Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
+
+        return Boolean.parseBoolean(CC.replaceTranslateToPapi(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-LIMIT-CYCLE"), null));
+    }
+
+    // 获取指定许愿池 - WISH-LIMIT INCREASED-AMOUNT
+    public static int getWishIncreasedAmount(String wishName) {
+        Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
+
+        return Integer.parseInt(CC.replaceTranslateToPapiCount(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.INCREASED-AMOUNT"), null));
+    }
+
     // 检查是否可以使用
-    public static boolean checkWish(Player player, String wishName) {
+    public static CheckWishState checkWish(Player player, String wishName) {
         Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
         yaml.setPathPrefix("CONDITION");
 
@@ -448,10 +533,11 @@ public class WishManager {
         double money = Double.parseDouble(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("MONEY")), player));
 
         // 许愿券检查
-        yaml.setPathPrefix(null);
+        yaml.setPathPrefix("ADVANCED-SETTINGS");
 
-        for (String coupon : yaml.getStringList("ADVANCED-SETTINGS.COUPON")) {
+        for (String coupon : yaml.getStringList("COUPON")) {
             if (coupon.equals("")) break;
+
             String[] couponSplit = coupon.split(";");
 
             for (ItemStack itemStack : player.getInventory()) {
@@ -471,9 +557,21 @@ public class WishManager {
 
                     if (itemAmount < checkAmount) break;
 
+                    // 如果开启了许愿次数限制，并且开启了许愿券增加许愿次数
+                    if (isEnabledWishLimit(wishName) && isEnabledCouponLimit(wishName)) {
+                        int wishLimitAmount = getWishLimitAmount(wishName);
+                        int playerWishLimitAmount = getPlayerWishLimitAmount(player, wishName) + getWishIncreasedAmount(wishName);
+
+                        // 如果增加许愿次数但增加后的许愿次数到达极限，那么返回并不增加限制次数
+                        if (playerWishLimitAmount > wishLimitAmount) return CheckWishState.ReachLimit;
+
+                        // 增加限制次数
+                        setPlayerWishLimitAmount(player, wishName, playerWishLimitAmount);
+                    }
+
                     itemStack.setAmount(itemAmount - checkAmount);
 
-                    return true;
+                    return CheckWishState.Allow;
                 }
             }
         }
@@ -481,10 +579,10 @@ public class WishManager {
         yaml.setPathPrefix("CONDITION");
 
         // 权限检查
-        if (!perm.equals("") && !player.hasPermission(perm)) return false;
+        if (!perm.equals("") && !player.hasPermission(perm)) return CheckWishState.RequirementsNotMet;
 
         // 等级检查
-        if (player.getLevel() < level) return false;
+        if (player.getLevel() < level) return CheckWishState.RequirementsNotMet;
 
         // 背包物品检查
         for (String configInventoryHave : yaml.getStringList("INVENTORY-HAVE")) {
@@ -502,7 +600,7 @@ public class WishManager {
                 if (itemStack != null && itemStack.getType() == material) itemAmount = itemAmount + itemStack.getAmount();
             }
 
-            if (!player.getInventory().contains(material) || itemAmount < checkAmount) return false;
+            if (!player.getInventory().contains(material) || itemAmount < checkAmount) return CheckWishState.RequirementsNotMet;
         }
 
         // 药水效果检查
@@ -518,10 +616,10 @@ public class WishManager {
 
             if (effectType == null) {
                 CC.sendUnknownWarn("药水效果", wishName, effectString);
-                return false;
+                return CheckWishState.RequirementsNotMet;
             }
 
-            if (!player.hasPotionEffect(effectType) || player.getPotionEffect(effectType).getAmplifier() < amplifier) return false;
+            if (!player.hasPotionEffect(effectType) || player.getPotionEffect(effectType).getAmplifier() < amplifier) return CheckWishState.RequirementsNotMet;
         }
 
         // 点券检查，扣除点券
@@ -529,20 +627,33 @@ public class WishManager {
         boolean takePoints = false;
         PlayerPointsAPI playerPointsAPI = main.getPlayerPointsAPI();
         if (point != 0 && playerPointsAPI != null && playerPointsAPI.look(player.getUniqueId()) >= point) takePoints = true;
-        else if (point != 0 && playerPointsAPI != null) return false;
+        else if (point != 0 && playerPointsAPI != null) return CheckWishState.RequirementsNotMet;
 
         // 金币检查
         boolean withdrawPlayer = false;
         Economy economy = main.getEconomy();
         if (money != 0 && economy != null && economy.hasAccount(player) && economy.has(player, money)) withdrawPlayer = true;
-        else if (money != 0 && economy != null) return false;
+        else if (money != 0 && economy != null) return CheckWishState.RequirementsNotMet;
 
+        // 如果开启了许愿次数限制
+        if (isEnabledWishLimit(wishName)) {
+            int wishLimitAmount = getWishLimitAmount(wishName);
+            int playerWishLimitAmount = getPlayerWishLimitAmount(player, wishName) + getWishIncreasedAmount(wishName);
+
+            // 如果增加许愿次数但增加后的许愿次数到达极限，那么返回并不增加限制次数
+            if (playerWishLimitAmount > wishLimitAmount) return CheckWishState.ReachLimit;
+
+            // 增加限制次数
+            setPlayerWishLimitAmount(player, wishName, playerWishLimitAmount);
+        }
+
+        // 扣除点券
         if (takePoints) playerPointsAPI.take(player.getUniqueId(), point);
 
         // 修复 https://gitee.com/A2000000/advanced-wish/issues/I67LOV
         if (withdrawPlayer) economy.withdrawPlayer(player, money);
 
-        return true;
+        return CheckWishState.Allow;
     }
 
     // 保存玩家缓存数据 - 当服务器没有使用 Redis 关服时有玩家许愿未完成的情况下
@@ -556,16 +667,16 @@ public class WishManager {
             // 转换 Unicode 防止乱码
             for (String playerWishPrizeDoString : playerWishPrizeDoList) newPlayerWishPrizeDoList.add(CC.stringToUnicode(playerWishPrizeDoString));
 
-            Json playerJson = ConfigManager.createJsonConfig(uuid.toString(), "/PlayerCache", false, false);
+            Json playerCacheJson = ConfigManager.createJsonConfig(uuid.toString(), "/PlayerCache", false, false);
 
-            playerJson.set("CACHE", newPlayerWishPrizeDoList);
+            playerCacheJson.set("CACHE", newPlayerWishPrizeDoList);
         });
     }
 
     // 安全措施，使用 OP 指令的数据缓存
     public static void setPlayerCacheOpData(Player player, Boolean doOpCommand) {
-        Json playerJson = ConfigManager.createJsonConfig(player.getUniqueId().toString(), "/PlayerCache", false, false);
+        Json playerCacheJson = ConfigManager.createJsonConfig(player.getUniqueId().toString(), "/PlayerCache", false, false);
 
-        playerJson.set("DO-OP-COMMAND", doOpCommand);
+        playerCacheJson.set("DO-OP-COMMAND", doOpCommand);
     }
 }

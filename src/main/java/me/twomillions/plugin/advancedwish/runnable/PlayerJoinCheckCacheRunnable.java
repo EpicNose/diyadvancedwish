@@ -35,7 +35,7 @@ public class PlayerJoinCheckCacheRunnable {
             String path = main.getInstance().getDataFolder() + "/PlayerCache";
 
             // 遍历缓存文件
-            if (!ConfigManager.getAllFileName(path).contains(uuid.toString() + ".json")) return;
+            if (!ConfigManager.getAllFileName(path).contains(uuid + ".json")) return;
 
             Json json = ConfigManager.createJsonConfig(uuid.toString(), path, true, false);
 
@@ -70,7 +70,7 @@ public class PlayerJoinCheckCacheRunnable {
                 // 这里是异步，所以直接使用 Thread.sleep 更加方便
                 if (!configCacheSettingsSent) {
                     try { Thread.sleep(waitJoinSeconds * 1000L); }
-                    catch (Exception ignore) { };
+                    catch (Exception ignore) { }
 
                     configCacheSettingsSent = true;
                     EffectSendManager.sendEffect(wishName, player, null, "/Wish", "CACHE-SETTINGS");
@@ -78,7 +78,7 @@ public class PlayerJoinCheckCacheRunnable {
 
                 // 奖励发送的延迟
                 try { Thread.sleep(waitSeconds * 1000L); }
-                catch (Exception ignore) { };
+                catch (Exception ignore) { }
 
                 // 如果玩家离线则直接记录以及执行的项目写入缓存文件
                 if (!player.isOnline()) break;

@@ -7,8 +7,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.UUID;
-
 /**
  * author:     2000000
  * project:    AdvancedWish
@@ -33,9 +31,7 @@ public class PlayerTimestampRunnable {
                     return;
                 }
 
-                UUID uuid = player.getUniqueId();
-
-                WishManager.getPlayerScheduledTasks(uuid).forEach(playerScheduledTask -> {
+                WishManager.getPlayerScheduledTasks(player.getUniqueId()).forEach(playerScheduledTask -> {
                     long currentTimeMillis = System.currentTimeMillis();
                     long time = Long.parseLong(WishManager.getPlayerScheduledTaskStringTime(playerScheduledTask));
 
@@ -48,13 +44,12 @@ public class PlayerTimestampRunnable {
 
                     WishManager.removePlayerScheduledTasks(playerScheduledTask);
 
-                    if (doNode.contains("PRIZE-DO.")) {
-                        WishManager.removePlayerWithWishList(player);
-                        WishManager.removePlayerWishPrizeDo(player, doNode);
-                    }
+                    if (doNode.contains("PRIZE-DO.")) { WishManager.removePlayerWishPrizeDo(player, doNode); return; }
                 });
 
+                // 修复多抽在第一抽就把玩家移除 WishList 的问题
+                if (WishManager.getPlayerScheduledTasks(player.getUniqueId()).size() <= 0 && WishManager.isPlayerInWishList(player)) { WishManager.removePlayerWithWishList(player); }
             }
-        }.runTaskTimerAsynchronously(main.getInstance(), 0, 2);
+        }.runTaskTimerAsynchronously(plugin, 0, 2);
     }
 }
