@@ -1,8 +1,8 @@
-package me.twomillions.plugin.advancedwish.runnable;
+package me.twomillions.plugin.advancedwish.tasks;
 
 import me.twomillions.plugin.advancedwish.main;
-import me.twomillions.plugin.advancedwish.manager.EffectSendManager;
-import me.twomillions.plugin.advancedwish.manager.WishManager;
+import me.twomillions.plugin.advancedwish.managers.EffectSendManager;
+import me.twomillions.plugin.advancedwish.managers.WishManager;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -10,19 +10,19 @@ import org.bukkit.scheduler.BukkitRunnable;
 /**
  * author:     2000000
  * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.runnable
+ * package:        me.twomillions.plugin.advancedwish.tasks
  * className:      TimestampRunnable
  * date:    2022/11/24 16:49
  */
-public class PlayerTimestampRunnable {
+public class PlayerTimestampTask {
     private static final Plugin plugin = main.getInstance();
 
-    // 此 Runnable 将在每位玩家进入后开启
+    // 此 Task 将在每位玩家进入后开启
     // 这可能不会造成滞后，因为这是异步的，尽管它执行间隔会非常快
     // 主要作用用于时间戳各种检查与执行
     // 格式: UUID[0];时间戳[1];许愿池文件名[2];执行节点[3]
 
-    public static void startRunnable(Player player) {
+    public static void startTask(Player player) {
         new BukkitRunnable() {
             @Override
             public void run() {

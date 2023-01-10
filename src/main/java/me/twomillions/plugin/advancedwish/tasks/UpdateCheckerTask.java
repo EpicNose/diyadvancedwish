@@ -1,8 +1,8 @@
-package me.twomillions.plugin.advancedwish.runnable;
+package me.twomillions.plugin.advancedwish.tasks;
 
 import lombok.Getter;
 import me.twomillions.plugin.advancedwish.main;
-import me.twomillions.plugin.advancedwish.manager.ConfigManager;
+import me.twomillions.plugin.advancedwish.managers.ConfigManager;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.fusesource.jansi.Ansi;
@@ -14,16 +14,17 @@ import java.util.Scanner;
 /**
  * author:     2000000
  * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.runnable
+ * package:        me.twomillions.plugin.advancedwish.tasks
  * className:      UpdateCheckerRunnable
  * date:    2022/11/24 16:49
  */
-public class UpdateCheckerRunnable {
+public class UpdateCheckerTask {
     private static final Plugin plugin = main.getInstance();
     @Getter private static boolean isLatestVersion = true;
 
-    // 异步网页更新检查
-    public static void startRunnable() {
+    // 此 Task 用于检查插件更新
+
+    public static void startTask() {
         if (main.isDisabled()) return;
 
         if (!ConfigManager.getAdvancedWishYaml().getBoolean("UPDATE-CHECKER")) return;
@@ -48,10 +49,10 @@ public class UpdateCheckerRunnable {
 
     // 获取网页内容
     private static String getURLString() {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
 
         try {
-            for (Scanner sc = new Scanner(new URL("http://update.twomillions.top/advancedwishupdate.html").openStream()); sc.hasNext();) sb.append(sc.nextLine()).append(' ');
+            for (Scanner sc = new Scanner(new URL("http://update.twomillions.top/advancedwishupdate.html").openStream()); sc.hasNext();) stringBuilder.append(sc.nextLine()).append(' ');
         } catch (IOException exception) {
             isLatestVersion = false;
 
@@ -59,6 +60,6 @@ public class UpdateCheckerRunnable {
                     Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() + "Advanced Wish 更新检查错误... 请务必手动检查插件是否为最新版。 下载链接: https://gitee.com/A2000000/advanced-wish/releases/");
         }
 
-        return sb.toString();
+        return stringBuilder.toString();
     }
 }

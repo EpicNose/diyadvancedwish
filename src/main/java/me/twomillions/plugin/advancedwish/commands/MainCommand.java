@@ -1,9 +1,10 @@
 package me.twomillions.plugin.advancedwish.commands;
 
 import me.twomillions.plugin.advancedwish.main;
-import me.twomillions.plugin.advancedwish.manager.ConfigManager;
-import me.twomillions.plugin.advancedwish.manager.RegisterManager;
-import me.twomillions.plugin.advancedwish.manager.WishManager;
+import me.twomillions.plugin.advancedwish.managers.ConfigManager;
+import me.twomillions.plugin.advancedwish.managers.RegisterManager;
+import me.twomillions.plugin.advancedwish.managers.WishManager;
+import me.twomillions.plugin.advancedwish.tasks.WishLimitResetTask;
 import me.twomillions.plugin.advancedwish.utils.CC;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -364,6 +365,7 @@ public class MainCommand implements TabExecutor {
                     break;
 
                 case "reload":
+                    WishLimitResetTask.cancelAllWishLimitResetTasks();
                     RegisterManager.registerCard();
                     main.setGuaranteedPath(ConfigManager.getAdvancedWishYaml().getString("GUARANTEED-PATH"));
 

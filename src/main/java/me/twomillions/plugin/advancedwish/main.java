@@ -5,13 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
 import me.twomillions.plugin.advancedwish.enums.redis.RedisConnectState;
-import me.twomillions.plugin.advancedwish.manager.ConfigManager;
-import me.twomillions.plugin.advancedwish.manager.RegisterManager;
-import me.twomillions.plugin.advancedwish.manager.WishManager;
-import me.twomillions.plugin.advancedwish.manager.databases.MongoManager;
-import me.twomillions.plugin.advancedwish.manager.databases.RedisManager;
-import me.twomillions.plugin.advancedwish.runnable.PlayerTimestampRunnable;
-import me.twomillions.plugin.advancedwish.runnable.UpdateCheckerRunnable;
+import me.twomillions.plugin.advancedwish.managers.ConfigManager;
+import me.twomillions.plugin.advancedwish.managers.RegisterManager;
+import me.twomillions.plugin.advancedwish.managers.WishManager;
+import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
+import me.twomillions.plugin.advancedwish.managers.databases.RedisManager;
+import me.twomillions.plugin.advancedwish.tasks.PlayerTimestampTask;
+import me.twomillions.plugin.advancedwish.tasks.UpdateCheckerTask;
 import net.milkbowl.vault.economy.Economy;
 import org.apache.commons.lang.StringUtils;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
@@ -71,12 +71,12 @@ public final class main extends JavaPlugin {
         }
 
         // 网页更新
-        UpdateCheckerRunnable.startRunnable();
+        UpdateCheckerTask.startTask();
 
         // 这里是热重载
         // 如果玩家没有使用插件的指令进行热重载，那么会导致 PlayerTimestampRunnable 停止
         // 所以这里检查服内是否有此玩家，如果有的话那么就为所有玩家启动 PlayerTimestampRunnable
-        if (Bukkit.getOnlinePlayers().size() != 0) Bukkit.getOnlinePlayers().forEach(PlayerTimestampRunnable::startRunnable);
+        if (Bukkit.getOnlinePlayers().size() != 0) Bukkit.getOnlinePlayers().forEach(PlayerTimestampTask::startTask);
 
         Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
                 Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +

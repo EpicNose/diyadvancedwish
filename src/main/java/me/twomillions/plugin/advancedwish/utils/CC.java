@@ -2,7 +2,7 @@ package me.twomillions.plugin.advancedwish.utils;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.twomillions.plugin.advancedwish.main;
-import me.twomillions.plugin.advancedwish.manager.RegisterManager;
+import me.twomillions.plugin.advancedwish.managers.RegisterManager;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.lang.StringUtils;

@@ -1,4 +1,4 @@
-package me.twomillions.plugin.advancedwish.manager.databases;
+package me.twomillions.plugin.advancedwish.managers.databases;
 
 import de.leonhard.storage.Yaml;
 import lombok.Getter;

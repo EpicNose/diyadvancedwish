@@ -1,4 +1,4 @@
-package me.twomillions.plugin.advancedwish.manager;
+package me.twomillions.plugin.advancedwish.managers;
 
 import de.leonhard.storage.Json;
 import de.leonhard.storage.SimplixBuilder;
@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * author:     2000000
  * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.manager
+ * package:        me.twomillions.plugin.advancedwish.managers
  * className:      ConfigManager
  * date:    2022/11/21 12:41
  */
@@ -36,12 +36,9 @@ public class ConfigManager {
         String dataFolder = plugin.getDataFolder().toString();
         File file = new File(dataFolder, "advancedWish.yml");
 
-        if (!file.exists()) {
-            Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " + Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() + "运行有误，请检查配置文件是否被误删! 开始重新创建配置文件!");
-            createYamlConfig("advancedWish", null, false, true);
-        }
+        if (!file.exists()) Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " + Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() + "运行有误，请检查配置文件是否被误删! 开始重新创建配置文件!");
 
-        return new Yaml("advancedWish", dataFolder);
+        return createYamlConfig("advancedWish", null, false, true);
     }
 
     // 获取 message 配置文件
@@ -49,12 +46,9 @@ public class ConfigManager {
         String dataFolder = plugin.getDataFolder().toString();
         File file = new File(dataFolder, "message.yml");
 
-        if (!file.exists()) {
-            Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " + Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() + "运行有误，请检查配置文件是否被误删! 开始重新创建配置文件!");
-            createYamlConfig("message", null, false, true);
-        }
+        if (!file.exists()) Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " + Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() + "运行有误，请检查配置文件是否被误删! 开始重新创建配置文件!");
 
-        return new Yaml("message", dataFolder);
+        return createYamlConfig("message", null, false, true);
     }
 
     // 创建指定配置文件 - Yaml
@@ -67,38 +61,32 @@ public class ConfigManager {
         else if (!originalPath) dataFolder = plugin.getDataFolder() + path;
         else dataFolder = path;
 
-        Yaml yaml;
         File file = new File(dataFolder, fileName + ".yml");
 
-        if (file.exists()) {
-            yaml = new Yaml(fileName, dataFolder);
-            return yaml;
+        if (!file.exists()) {
+            Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " + Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
+                    "检测到 " +
+                    Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
+                    fileName +
+                    Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
+                    " Yaml 文件为空，已自动创建并设置为更改部分自动重载。");
         }
 
-        Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " + Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
-                "检测到 " +
-                Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
-                fileName +
-                Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
-                " Yaml 文件为空，已自动创建并设置为更改部分自动重载。");
-
         if (inputStreamFromResource)
-            yaml = SimplixBuilder
+            return SimplixBuilder
                     .fromFile(file)
                     .addInputStreamFromResource(fileName + ".yml")
                     .setDataType(DataType.SORTED)
                     .setConfigSettings(ConfigSettings.PRESERVE_COMMENTS)
-                    .setReloadSettings(ReloadSettings.INTELLIGENT)
+                    .setReloadSettings(ReloadSettings.AUTOMATICALLY)
                     .createYaml();
         else
-            yaml = SimplixBuilder
+            return SimplixBuilder
                     .fromFile(file)
                     .setDataType(DataType.SORTED)
                     .setConfigSettings(ConfigSettings.PRESERVE_COMMENTS)
-                    .setReloadSettings(ReloadSettings.INTELLIGENT)
+                    .setReloadSettings(ReloadSettings.AUTOMATICALLY)
                     .createYaml();
-
-        return yaml;
     }
 
     // 创建指定配置文件 - Json
@@ -111,38 +99,32 @@ public class ConfigManager {
         else if (!originalPath) dataFolder = plugin.getDataFolder() + path;
         else dataFolder = path;
 
-        Json json;
         File file = new File(dataFolder, fileName + ".json");
 
-        if (file.exists()) {
-            json = new Json(fileName, dataFolder);
-            return json;
+        if (!file.exists()) {
+            Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " + Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
+                    "检测到 " +
+                    Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
+                    fileName +
+                    Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
+                    " Json 文件为空，已自动创建并设置为更改部分自动重载。");
         }
 
-        Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " + Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
-                "检测到 " +
-                Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
-                fileName +
-                Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
-                " Json 文件为空，已自动创建并设置为更改部分自动重载。");
-
         if (inputStreamFromResource)
-            json = SimplixBuilder
+            return SimplixBuilder
                     .fromFile(file)
                     .addInputStreamFromResource(fileName + ".json")
                     .setDataType(DataType.SORTED)
                     .setConfigSettings(ConfigSettings.PRESERVE_COMMENTS)
-                    .setReloadSettings(ReloadSettings.INTELLIGENT)
+                    .setReloadSettings(ReloadSettings.AUTOMATICALLY)
                     .createJson();
         else
-            json = SimplixBuilder
+            return SimplixBuilder
                     .fromFile(file)
                     .setDataType(DataType.SORTED)
                     .setConfigSettings(ConfigSettings.PRESERVE_COMMENTS)
-                    .setReloadSettings(ReloadSettings.INTELLIGENT)
+                    .setReloadSettings(ReloadSettings.AUTOMATICALLY)
                     .createJson();
-
-        return json;
     }
 
     // 获取一个文件夹下所有文件的名称 不包括此文件夹下的文件夹

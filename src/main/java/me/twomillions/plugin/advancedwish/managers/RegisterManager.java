@@ -1,11 +1,11 @@
-package me.twomillions.plugin.advancedwish.manager;
+package me.twomillions.plugin.advancedwish.managers;
 
 import lombok.Getter;
 import me.twomillions.plugin.advancedwish.commands.ConsoleCommand;
 import me.twomillions.plugin.advancedwish.commands.MainCommand;
 import me.twomillions.plugin.advancedwish.listener.PlayerListener;
 import me.twomillions.plugin.advancedwish.main;
-import me.twomillions.plugin.advancedwish.runnable.WishLimitResetRunnable;
+import me.twomillions.plugin.advancedwish.tasks.WishLimitResetTask;
 import net.milkbowl.vault.economy.Economy;
 import org.black_ixx.playerpoints.PlayerPoints;
 import org.bukkit.Bukkit;
@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * author:     2000000
  * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.manager
+ * package:        me.twomillions.plugin.advancedwish.managers
  * className:      RegisterManager
  * date:    2022/11/24 19:01
  */
@@ -77,7 +77,7 @@ public class RegisterManager {
             // 许愿限制
             if (!WishManager.isEnabledWishLimit(wishName)) return;
 
-            WishLimitResetRunnable.startRunnable(wishName);
+            WishLimitResetTask.startTask(wishName);
 
             Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
                     Ansi.ansi().fg(Ansi.Color.GREEN).boldOff().toString() +

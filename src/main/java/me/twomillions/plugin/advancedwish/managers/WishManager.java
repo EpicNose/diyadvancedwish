@@ -1,4 +1,4 @@
-package me.twomillions.plugin.advancedwish.manager;
+package me.twomillions.plugin.advancedwish.managers;
 
 import com.mongodb.client.model.Filters;
 import de.leonhard.storage.Json;
@@ -8,8 +8,8 @@ import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
 import me.twomillions.plugin.advancedwish.enums.redis.RedisConnectState;
 import me.twomillions.plugin.advancedwish.enums.wish.CheckWishState;
 import me.twomillions.plugin.advancedwish.main;
-import me.twomillions.plugin.advancedwish.manager.databases.MongoManager;
-import me.twomillions.plugin.advancedwish.manager.databases.RedisManager;
+import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
+import me.twomillions.plugin.advancedwish.managers.databases.RedisManager;
 import me.twomillions.plugin.advancedwish.utils.CC;
 import me.twomillions.plugin.advancedwish.utils.ItemUtils;
 import me.twomillions.plugin.advancedwish.utils.ProbabilityUntilities;
@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * author:     2000000
  * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.manager
+ * package:        me.twomillions.plugin.advancedwish.managers
  * className:      WishManager
  * date:    2022/11/24 16:53
  */
@@ -373,7 +373,7 @@ public class WishManager {
 
         // 开启许愿次数限制并且玩家已经达到了许愿次数极限但是尝试许愿时
         if (checkWishState == CheckWishState.ReachLimit && !force) {
-            EffectSendManager.sendEffect(wishName, player, null, "/Wish", "ADVANCED-SETTINGS.WISH-LIMIT");
+            EffectSendManager.sendEffect(wishName, player, null, "/Wish", "ADVANCED-SETTINGS.WISH-LIMIT.REACH-LIMIT");
             return;
         }
 
@@ -516,6 +516,20 @@ public class WishManager {
         Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
 
         return Integer.parseInt(CC.replaceTranslateToPapiCount(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.INCREASED-AMOUNT")));
+    }
+
+    // 获取指定许愿池 - WISH-LIMIT RESET-COMPLETE-SEND
+    public static boolean isEnabledResetCompleteSend(String wishName) {
+        Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
+
+        return Boolean.parseBoolean(CC.replaceTranslateToPapi(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-COMPLETE-SEND")));
+    }
+
+    // 获取指定许愿池 - WISH-LIMIT RESET-COMPLETE-SEND-CONSOLE
+    public static boolean isEnabledResetCompleteSendConsole(String wishName) {
+        Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
+
+        return Boolean.parseBoolean(CC.replaceTranslateToPapi(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-COMPLETE-SEND-CONSOLE")));
     }
 
     // 检查是否可以使用

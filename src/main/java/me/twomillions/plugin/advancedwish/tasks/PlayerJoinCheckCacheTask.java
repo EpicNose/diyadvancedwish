@@ -1,11 +1,11 @@
-package me.twomillions.plugin.advancedwish.runnable;
+package me.twomillions.plugin.advancedwish.tasks;
 
 import de.leonhard.storage.Json;
 import de.leonhard.storage.Yaml;
 import me.twomillions.plugin.advancedwish.main;
-import me.twomillions.plugin.advancedwish.manager.ConfigManager;
-import me.twomillions.plugin.advancedwish.manager.EffectSendManager;
-import me.twomillions.plugin.advancedwish.manager.WishManager;
+import me.twomillions.plugin.advancedwish.managers.ConfigManager;
+import me.twomillions.plugin.advancedwish.managers.EffectSendManager;
+import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.utils.CC;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -19,17 +19,17 @@ import java.util.UUID;
 /**
  * author:     2000000
  * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.runnable
+ * package:        me.twomillions.plugin.advancedwish.tasks
  * className:      PlayerJoinCheckCacheRunnable
  * date:    2022/11/24 20:09
  */
-public class PlayerJoinCheckCacheRunnable {
+public class PlayerJoinCheckCacheTask {
     private static final Plugin plugin = main.getInstance();
 
-    // 此 Runnable 将在每位玩家进入后检查服务器的缓存数据
+    // 此 Task 将在每位玩家进入后检查服务器的缓存数据
     // 自 0.0.3.4-SNAPSHOT 后这里将记录每次玩家因为指令 setOp 的状态等，防止安全问题
 
-    public static void startRunnable(Player player) {
+    public static void startTask(Player player) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             UUID uuid = player.getUniqueId();
             String path = main.getInstance().getDataFolder() + "/PlayerCache";

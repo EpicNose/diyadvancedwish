@@ -1,4 +1,4 @@
-package me.twomillions.plugin.advancedwish.manager;
+package me.twomillions.plugin.advancedwish.managers;
 
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * author:     2000000
  * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.manager
+ * package:        me.twomillions.plugin.advancedwish.managers
  * className:      EffectSendManager
  * date:    2022/11/24 20:27
  */

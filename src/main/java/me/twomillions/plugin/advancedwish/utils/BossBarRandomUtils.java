@@ -6,7 +6,7 @@ import org.bukkit.boss.BarStyle;
 /**
  * author:     2000000
  * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.manager
+ * package:        me.twomillions.plugin.advancedwish.managers
  * className:      BarColorRandomUtils
  * date:    2022/12/3 19:27
  */

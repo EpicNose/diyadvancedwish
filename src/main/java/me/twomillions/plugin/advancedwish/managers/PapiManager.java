@@ -1,4 +1,4 @@
-package me.twomillions.plugin.advancedwish.manager;
+package me.twomillions.plugin.advancedwish.managers;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.twomillions.plugin.advancedwish.main;
@@ -13,7 +13,7 @@ import java.util.Locale;
 /**
  * author:     2000000
  * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.manager
+ * package:        me.twomillions.plugin.advancedwish.managers
  * className:      PapiManager
  * date:    2022/12/2 13:16
  */
