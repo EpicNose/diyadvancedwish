@@ -19,6 +19,7 @@
 - /aw makeWish <许愿池> - 对规定的许愿池进行许愿.
 - /aw amount <许愿池> - 获取指定许愿池的许愿次数.
 - /aw guaranteed <许愿池> - 获取指定许愿池的保底率.
+- /aw limitAmount <许愿池> - 获取指定许愿池的限制许愿次数.
 ---
 > 主要指令 - 管理员
 - /aw list - 查看许愿池列表.
@@ -28,10 +29,14 @@
 - /aw makeWishForce <许愿池> <玩家> - 强制使指定的玩家对规定的许愿池进行许愿，强制不会触发任何检查.
 - /aw amount <许愿池> - 获取指定许愿池的许愿次数.
 - /aw guaranteed <许愿池> - 获取指定许愿池的保底率.
+- /aw limitAmount <许愿池> - 获取指定许愿池的限制许愿次数.
 - /aw getAmount <许愿池> <玩家> - 获取指定玩家指定许愿池的许愿次数.
 - /aw getGuaranteed <许愿池> <玩家> - 获取指定玩家指定许愿池的保底率.
+- /aw getLimitAmount <许愿池> <玩家> - 获取指定玩家指定许愿池的限制许愿次数."
 - /aw setAmount <许愿池> <玩家> <次数> - 设置指定玩家指定许愿池的许愿次数.
 - /aw setGuaranteed <许愿池> <玩家> <保底率> - 设置指定玩家指定许愿池的保底率.
+- /aw setLimitAmount <许愿池> <玩家> <次数> - 设置指定玩家指定许愿池的限制许愿次数."
+- /aw resetLimitAmount <许愿池> - 重置所有玩家指定许愿池的限制许愿次数."
 - /aw reload - 重载插件.
 ---
 > 控制台指令
@@ -40,15 +45,20 @@
 - /awc makeWishForce <许愿池> <玩家> - 强制使指定的玩家对规定的许愿池进行许愿，强制不会触发任何检查.
 - /awc getAmount <许愿池> <玩家> - 获取指定玩家指定许愿池的许愿次数.
 - /awc getGuaranteed <许愿池> <玩家> - 获取指定玩家指定许愿池的保底率.
+- /awc getLimitAmount <许愿池> <玩家> - 获取指定玩家指定许愿池的限制许愿次数."
 - /awc setAmount <许愿池> <玩家> <次数> - 设置指定玩家指定许愿池的许愿次数.
 - /awc setGuaranteed <许愿池> <玩家> <保底率> - 设置指定玩家指定许愿池的保底率.
+- /awc setLimitAmount <许愿池> <玩家> <次数> - 设置指定玩家指定许愿池的限制许愿次数."
+- /awc resetLimitAmount <许愿池> - 重置所有玩家指定许愿池的限制许愿次数."
 - /awc reload - 重载插件.
 ---
 ## Placeholder API
 - aw_amount_许愿池名 - 获取当前玩家指定许愿池的许愿次数.
 - aw_guaranteed_许愿池名 - 获取当前玩家指定许愿池的保底率.
+- aw_limit_amount_许愿池名 - 获取当前玩家指定许愿池的限制许愿次数.
 - aw_amount_许愿池名_玩家名 - 获取指定玩家指定许愿池的许愿次数.
 - aw_guaranteed_许愿池名_玩家名 - 获取指定玩家指定许愿池的保底率.
+- aw_limit_amount_许愿池名_玩家名 - 获取指定玩家指定许愿池的限制许愿次数.
 ---
 ## 注意事项
 > 注意

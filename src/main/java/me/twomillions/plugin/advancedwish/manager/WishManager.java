@@ -301,12 +301,6 @@ public class WishManager {
     }
 
     // 获取指定许愿池的自定义许愿数量增加
-    public static int getWishNeedIncreasedAmount(String wishName) {
-        Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
-        return Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("ADVANCED-SETTINGS.INCREASED-WISH-AMOUNT")), null));
-    }
-
-    // 获取指定许愿池的自定义许愿数量增加 - 多态
     public static int getWishNeedIncreasedAmount(String wishName, Player player) {
         Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
         return Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getOrDefault("ADVANCED-SETTINGS.INCREASED-WISH-AMOUNT", "1")), player));
@@ -455,6 +449,9 @@ public class WishManager {
     public static Integer getPlayerWishLimitAmount(Player player, String wishName) {
         wishName = CC.stringToUnicode(wishName + "_limit_amount");
 
+        // 如果没有开启就不用查询浪费资源
+        if (!isEnabledWishLimit(wishName)) return 0;
+
         if (usingMongo) return Integer.parseInt(MongoManager.getOrDefaultPlayerGuaranteed(player, wishName, "0"));
 
         Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
@@ -490,35 +487,35 @@ public class WishManager {
     public static int getWishLimitAmount(String wishName) {
         Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
 
-        return Integer.parseInt(CC.replaceTranslateToPapiCount(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.LIMIT-AMOUNT"), null));
+        return Integer.parseInt(CC.replaceTranslateToPapiCount(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.LIMIT-AMOUNT")));
     }
 
     // 获取指定许愿池 - WISH-LIMIT RESET-LIMIT-START
     public static int getWishResetLimitStart(String wishName) {
         Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
 
-        return Integer.parseInt(CC.replaceTranslateToPapiCount(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-LIMIT-START"), null));
+        return Integer.parseInt(CC.replaceTranslateToPapiCount(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-LIMIT-START")));
     }
 
     // 获取指定许愿池 - WISH-LIMIT RESET-LIMIT-CYCLE
     public static int getWishResetLimitCycle(String wishName) {
         Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
 
-        return Integer.parseInt(CC.replaceTranslateToPapiCount(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-LIMIT-CYCLE"), null));
+        return Integer.parseInt(CC.replaceTranslateToPapiCount(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-LIMIT-CYCLE")));
     }
 
     // 获取指定许愿池 - WISH-LIMIT COUPON-LIMIT
     public static boolean isEnabledCouponLimit(String wishName) {
         Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
 
-        return Boolean.parseBoolean(CC.replaceTranslateToPapi(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-LIMIT-CYCLE"), null));
+        return Boolean.parseBoolean(CC.replaceTranslateToPapi(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-LIMIT-CYCLE")));
     }
 
     // 获取指定许愿池 - WISH-LIMIT INCREASED-AMOUNT
     public static int getWishIncreasedAmount(String wishName) {
         Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
 
-        return Integer.parseInt(CC.replaceTranslateToPapiCount(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.INCREASED-AMOUNT"), null));
+        return Integer.parseInt(CC.replaceTranslateToPapiCount(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.INCREASED-AMOUNT")));
     }
 
     // 检查是否可以使用

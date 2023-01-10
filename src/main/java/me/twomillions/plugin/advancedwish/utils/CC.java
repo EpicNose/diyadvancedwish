@@ -72,21 +72,33 @@ public class CC {
         return string;
     }
 
+    // Papi - replaceTranslateToPapi 但是 replacePlayer 为 null Player 为 null
+    public static String replaceTranslateToPapi(String string) {
+        if (main.isUsingPapi()) return replaceTranslateToPapi(string, null, null);
+        else return string;
+    }
+
     // Papi - replaceTranslateToPapi 但是 replacePlayer 为 null
     public static String replaceTranslateToPapi(String string, Player player) {
         if (main.isUsingPapi()) return replaceTranslateToPapi(string, player, null);
         else return string;
     }
 
-    // Papi - 先 replaceTranslateToPapi 后 count 但是 replacePlayer 为 null
-    public static String replaceTranslateToPapiCount(String string, Player player) {
-        if (main.isUsingPapi()) return count(replaceTranslateToPapi(string, player, null)).toString();
-        else return string;
-    }
-
     // Papi - 先 replaceTranslate 后转 Papi
     public static String replaceTranslateToPapi(String string, Player player, Player replacePlayer) {
         if (main.isUsingPapi()) return PlaceholderAPI.setPlaceholders(player, CC.replaceTranslate(string, player, replacePlayer));
+        else return string;
+    }
+
+    // Papi - 先 replaceTranslateToPapi 后 count 但是 replacePlayer 为 null Player 为 null
+    public static String replaceTranslateToPapiCount(String string) {
+        if (main.isUsingPapi()) return count(replaceTranslateToPapi(string, null, null)).toString();
+        else return string;
+    }
+
+    // Papi - 先 replaceTranslateToPapi 后 count 但是 replacePlayer 为 null
+    public static String replaceTranslateToPapiCount(String string, Player player) {
+        if (main.isUsingPapi()) return count(replaceTranslateToPapi(string, player, null)).toString();
         else return string;
     }
 

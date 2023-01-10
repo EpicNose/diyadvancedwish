@@ -44,14 +44,14 @@ public class EffectSendManager {
         if (!targetPlayer.isOnline()) return;
 
         sendTitle(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        sendParticle(fileName, targetPlayer, path, pathPrefix);
-        sendSounds(fileName, targetPlayer, path, pathPrefix);
-        sendCommands(fileName, targetPlayer, path, pathPrefix);
+        sendParticle(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+        sendSounds(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+        sendCommands(fileName, targetPlayer, replacePlayer, path, pathPrefix);
         sendMessage(fileName, targetPlayer, replacePlayer, path, pathPrefix);
         sendAnnouncement(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        sendPotion(fileName, targetPlayer, path, pathPrefix);
-        sendHealthAndHunger(fileName, targetPlayer, path, pathPrefix);
-        sendExp(fileName, targetPlayer, path, pathPrefix);
+        sendPotion(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+        sendHealthAndHunger(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+        sendExp(fileName, targetPlayer, replacePlayer, path, pathPrefix);
         sendActionBar(fileName, targetPlayer, replacePlayer, path, pathPrefix);
         sendBossBar(fileName, targetPlayer, replacePlayer, path, pathPrefix);
     }
@@ -82,7 +82,7 @@ public class EffectSendManager {
     }
 
     // 发送粒子效果
-    private static void sendParticle(String fileName, Player targetPlayer, String path, String pathPrefix) {
+    private static void sendParticle(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
         Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
@@ -99,10 +99,10 @@ public class EffectSendManager {
             try { particleEffect = ParticleEffect.valueOf(particleString); }
             catch (Exception exception) { CC.sendUnknownWarn("粒子效果", fileName, particleString); return; }
 
-            double x = Double.parseDouble(CC.replaceTranslateToPapiCount(particleConfigSplit[1], targetPlayer, null));
-            double y = Double.parseDouble(CC.replaceTranslateToPapiCount(particleConfigSplit[2], targetPlayer, null));
-            double z = Double.parseDouble(CC.replaceTranslateToPapiCount(particleConfigSplit[3], targetPlayer, null));
-            int amount = Integer.parseInt(CC.replaceTranslateToPapiCount(particleConfigSplit[4], targetPlayer, null));
+            double x = Double.parseDouble(CC.replaceTranslateToPapiCount(particleConfigSplit[1], targetPlayer, replacePlayer));
+            double y = Double.parseDouble(CC.replaceTranslateToPapiCount(particleConfigSplit[2], targetPlayer, replacePlayer));
+            double z = Double.parseDouble(CC.replaceTranslateToPapiCount(particleConfigSplit[3], targetPlayer, replacePlayer));
+            int amount = Integer.parseInt(CC.replaceTranslateToPapiCount(particleConfigSplit[4], targetPlayer, replacePlayer));
 
             boolean isNote = particleEffect == ParticleEffect.NOTE;
             boolean allPlayer = !particleConfigSplit[5].equals("PLAYER");
@@ -166,7 +166,7 @@ public class EffectSendManager {
     }
 
     // 发送音效
-    private static void sendSounds(String fileName, Player targetPlayer, String path, String pathPrefix) {
+    private static void sendSounds(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
         Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
@@ -183,15 +183,15 @@ public class EffectSendManager {
             try { sound = Sound.valueOf(soundString); }
             catch (Exception exception) { CC.sendUnknownWarn("音效", fileName, soundString); return; }
 
-            int volume = Integer.parseInt(CC.replaceTranslateToPapiCount(soundsConfigSplit[1], targetPlayer, null));
-            int pitch = Integer.parseInt(CC.replaceTranslateToPapiCount(soundsConfigSplit[2], targetPlayer, null));
+            int volume = Integer.parseInt(CC.replaceTranslateToPapiCount(soundsConfigSplit[1], targetPlayer, replacePlayer));
+            int pitch = Integer.parseInt(CC.replaceTranslateToPapiCount(soundsConfigSplit[2], targetPlayer, replacePlayer));
 
             targetPlayer.playSound(targetPlayer.getLocation(), sound, volume, pitch);
         });
     }
 
     // 发送指令
-    private static void sendCommands(String fileName, Player targetPlayer, String path, String pathPrefix) {
+    private static void sendCommands(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
         Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
@@ -201,7 +201,7 @@ public class EffectSendManager {
             if (commandConfig == null || commandConfig.length() <= 1) return;
 
             // OP 执行
-            String command = CC.replaceTranslateToPapi(commandConfig, targetPlayer, null).toLowerCase(Locale.ROOT);
+            String command = CC.replaceTranslateToPapi(commandConfig, targetPlayer).toLowerCase(Locale.ROOT);
 
             if (!command.startsWith("[op]:") || targetPlayer.isOp()) {
                 String finalCommand = command.replace("[op]:", "");
@@ -232,9 +232,9 @@ public class EffectSendManager {
             if (commandConfig == null || commandConfig.length() <= 1) return;
 
             ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
-            String command = CC.replaceTranslateToPapi(commandConfig, targetPlayer, null);
+            String command = CC.replaceTranslateToPapi(commandConfig, targetPlayer);
 
-            Bukkit.getScheduler().runTask(plugin, () -> Bukkit.dispatchCommand(console, CC.replaceTranslateToPapi(command, targetPlayer, null)));
+            Bukkit.getScheduler().runTask(plugin, () -> Bukkit.dispatchCommand(console, CC.replaceTranslateToPapi(command, targetPlayer)));
         });
     }
 
@@ -273,7 +273,7 @@ public class EffectSendManager {
     }
 
     // 发送药水效果
-    private static void sendPotion(String fileName, Player targetPlayer, String path, String pathPrefix) {
+    private static void sendPotion(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
         Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
@@ -290,8 +290,8 @@ public class EffectSendManager {
             try { effectType = PotionEffectType.getByName(effectString); }
             catch (Exception exception) { CC.sendUnknownWarn("药水效果", fileName, effectString); return; }
 
-            int duration = Integer.parseInt(CC.replaceTranslateToPapiCount(effectsConfigSplit[1], targetPlayer, null));
-            int amplifier = Integer.parseInt(CC.replaceTranslateToPapiCount(effectsConfigSplit[2], targetPlayer, null));
+            int duration = Integer.parseInt(CC.replaceTranslateToPapiCount(effectsConfigSplit[1], targetPlayer, replacePlayer));
+            int amplifier = Integer.parseInt(CC.replaceTranslateToPapiCount(effectsConfigSplit[2], targetPlayer, replacePlayer));
 
             if (effectType == null) {
                 CC.sendUnknownWarn("药水效果", fileName, effectString);
@@ -303,14 +303,14 @@ public class EffectSendManager {
     }
 
     // 回复血量以及饱食度
-    private static void sendHealthAndHunger(String fileName, Player targetPlayer, String path, String pathPrefix) {
+    private static void sendHealthAndHunger(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
         Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
-        int hunger = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("HUNGER")), targetPlayer, null));
-        double health = Double.parseDouble(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("HEALTH")), targetPlayer, null));
+        int hunger = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("HUNGER")), targetPlayer, replacePlayer));
+        double health = Double.parseDouble(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("HEALTH")), targetPlayer, replacePlayer));
 
         if (health != 0) {
             double playerHealth = targetPlayer.getHealth();
@@ -324,13 +324,13 @@ public class EffectSendManager {
     }
 
     // 给予EXP
-    private static void sendExp(String fileName, Player targetPlayer, String path, String pathPrefix) {
+    private static void sendExp(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
         Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
-        int exp = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("EXP")), targetPlayer, null));
+        int exp = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("EXP")), targetPlayer, replacePlayer));
 
         if (exp != 0) ExpUtils.changeExp(targetPlayer, exp);
     }

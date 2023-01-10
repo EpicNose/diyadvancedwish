@@ -13,12 +13,16 @@ ADMIN-SHOW-COMMAND:
   - "<CHAT_BAR>"
   - "&e • &6/aw amount <许愿池> &7- &7&o获取指定许愿池的许愿次数."
   - "&e • &6/aw guaranteed <许愿池> &7- &7&o获取指定许愿池的保底率."
+  - "&e • &6/aw limitAmount <许愿池> &7- &7&o获取指定许愿池的限制许愿次数."
   - "<CHAT_BAR>"
   - "&e • &6/aw getAmount <许愿池> <玩家> &7- &7&o获取指定玩家指定许愿池的许愿次数."
   - "&e • &6/aw getGuaranteed <许愿池> <玩家> &7- &7&o获取指定玩家指定许愿池的保底率."
+  - "&e • &6/aw getLimitAmount <许愿池> <玩家> &7- &7&o获取指定玩家指定许愿池的限制许愿次数."
   - "<CHAT_BAR>"
   - "&e • &6/aw setAmount <许愿池> <玩家> <次数> &7- &7&o设置指定玩家指定许愿池的许愿次数."
   - "&e • &6/aw setGuaranteed <许愿池> <玩家> <保底率> &7- &7&o设置指定玩家指定许愿池的保底率."
+  - "&e • &6/aw setLimitAmount <许愿池> <玩家> <次数> &7- &7&o设置指定玩家指定许愿池的限制许愿次数."
+  - "&e • &6/aw resetLimitAmount <许愿池> &7- &7&o重置所有玩家指定许愿池的限制许愿次数."
   - "<CHAT_BAR>"
   - "&e • &6/aw reload &7- &7&o重载插件."
   - "<CHAT_BAR>"
@@ -32,11 +36,14 @@ COMSOLE-SHOW-COMMAND:
   - "&e • &6/awc makeWish <许愿池> <玩家> &7- &7&o使指定的玩家对规定的许愿池进行许愿."
   - "&e • &6/awc makeWishForce <许愿池> <玩家> &7- &7&o强制使指定的玩家对规定的许愿池进行许愿，强制不会触发任何检查."
   - "<CHAT_BAR>"
-  - "&e • &6/aw getAmount <许愿池> <玩家> &7- &7&o获取指定玩家指定许愿池的许愿次数."
-  - "&e • &6/aw getGuaranteed <许愿池> <玩家> &7- &7&o获取指定玩家指定许愿池的保底率."
+  - "&e • &6/awc getAmount <许愿池> <玩家> &7- &7&o获取指定玩家指定许愿池的许愿次数."
+  - "&e • &6/awc getGuaranteed <许愿池> <玩家> &7- &7&o获取指定玩家指定许愿池的保底率."
+  - "&e • &6/awc getLimitAmount <许愿池> <玩家> &7- &7&o获取指定玩家指定许愿池的限制许愿次数."
   - "<CHAT_BAR>"
-  - "&e • &6/aw setAmount <许愿池> <玩家> <次数> &7- &7&o设置指定玩家指定许愿池的许愿次数."
-  - "&e • &6/aw setGuaranteed <许愿池> <玩家> <保底率> &7- &7&o设置指定玩家指定许愿池的保底率."
+  - "&e • &6/awc setAmount <许愿池> <玩家> <次数> &7- &7&o设置指定玩家指定许愿池的许愿次数."
+  - "&e • &6/awc setGuaranteed <许愿池> <玩家> <保底率> &7- &7&o设置指定玩家指定许愿池的保底率."
+  - "&e • &6/awc setLimitAmount <许愿池> <玩家> <次数> &7- &7&o设置指定玩家指定许愿池的限制许愿次数."
+  - "&e • &6/awc resetLimitAmount <许愿池> &7- &7&o重置所有玩家指定许愿池的限制许愿次数."
   - "<CHAT_BAR>"
   - "&e • &6/awc reload &7- &7&o重载插件."
   - "<CHAT_BAR>"
@@ -51,6 +58,7 @@ DEFAULT-SHOW-COMMAND:
   - "<CHAT_BAR>"
   - "&e • &6/aw amount <许愿池> &7- &7&o获取指定许愿池的许愿次数."
   - "&e • &6/aw guaranteed <许愿池> &7- &7&o获取指定许愿池的保底率."
+  - "&e • &6/aw limitAmount <许愿池> &7- &7&o获取指定许愿池的限制许愿次数."
   - "<CHAT_BAR>"
 
 LIST:
@@ -80,4 +88,7 @@ DONE:
   - "&a完成!"
 
 MUST-NUMBER:
-  - "您传入的参数必须是一个数字! 请检查!"
+  - "&c您传入的参数必须是一个数字! 请检查!"
+
+WISH-NOT-ENABLED-LIMIT:
+  - "&c您无法进行此操作, 此许愿池并没有许愿次数限制!"

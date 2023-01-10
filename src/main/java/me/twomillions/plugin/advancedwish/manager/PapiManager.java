@@ -43,12 +43,12 @@ public class PapiManager extends PlaceholderExpansion {
         if (targetPlayer == null) return "&7Unknown";
 
         for (String wishName : RegisterManager.getRegisterWish()) {
-            if (params.equalsIgnoreCase("amount_" + wishName))
-                return Integer.toString(WishManager.getPlayerWishAmount(targetPlayer, wishName));
+            // 返回自己的
+            if (params.equalsIgnoreCase("amount_" + wishName)) return Integer.toString(WishManager.getPlayerWishAmount(targetPlayer, wishName));
+            if (params.equalsIgnoreCase("guaranteed_" + wishName)) return Double.toString(WishManager.getPlayerWishGuaranteed(targetPlayer, wishName));
+            if (params.equalsIgnoreCase("limit_amount_" + wishName)) return Integer.toString(WishManager.getPlayerWishLimitAmount(targetPlayer, wishName));
 
-            if (params.equalsIgnoreCase("guaranteed_" + wishName))
-                return Double.toString(WishManager.getPlayerWishGuaranteed(targetPlayer, wishName));
-
+            // 其他玩家查询
             if (params.startsWith("amount_" + wishName + "_")) {
                 Player targetPlayer2 = Bukkit.getPlayerExact(params.split("_")[2]);
                 if (targetPlayer2 == null) return "&7Unknown";
@@ -59,6 +59,12 @@ public class PapiManager extends PlaceholderExpansion {
                 Player targetPlayer2 = Bukkit.getPlayerExact(params.split("_")[2]);
                 if (targetPlayer2 == null) return "&7Unknown";
                 return Double.toString(WishManager.getPlayerWishGuaranteed(targetPlayer, wishName));
+            }
+
+            if (params.startsWith("limit_amount_" + wishName + "_")) {
+                Player targetPlayer2 = Bukkit.getPlayerExact(params.split("_")[2]);
+                if (targetPlayer2 == null) return "&7Unknown";
+                return Integer.toString(WishManager.getPlayerWishLimitAmount(targetPlayer, wishName));
             }
         }
 
