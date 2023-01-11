@@ -169,7 +169,7 @@ public class MongoManager {
             Set<String> jsonKeySet = json.keySet();
             jsonKeySetAmount = jsonKeySetAmount + jsonKeySet.size();
 
-            for (String key : jsonKeySet) updatePlayerGuaranteed(fileName, key, json.get(key).toString());
+            for (String key : jsonKeySet) updatePlayerGuaranteed(fileName.split(".json")[0], key, json.get(key).toString());
         }
 
         CC.sendConsoleMessage("&a已成功迁移 Json 数据至 Mongo 数据库，此次迁移总玩家数: &e" + fileNameList.size() + "&a，迁移数据数: &e" + jsonKeySetAmount + "&a，即将关闭服务器，已迁移的 Json 不会被删除，请手动关闭迁移选项!");
