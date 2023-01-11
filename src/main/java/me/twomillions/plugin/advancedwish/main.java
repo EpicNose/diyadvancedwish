@@ -13,9 +13,7 @@ import me.twomillions.plugin.advancedwish.managers.databases.RedisManager;
 import me.twomillions.plugin.advancedwish.tasks.PlayerTimestampTask;
 import me.twomillions.plugin.advancedwish.tasks.UpdateCheckerTask;
 import me.twomillions.plugin.advancedwish.utils.CC;
-import net.milkbowl.vault.economy.Economy;
 import org.apache.commons.lang.StringUtils;
-import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -25,13 +23,9 @@ public final class main extends JavaPlugin {
     // volatile 防止线程直接共享变量可能会有值更新不可见的问题
     @Getter @Setter private volatile static main instance;
     @Getter @Setter private volatile static Double serverVersion;
-
-    @Getter @Setter private volatile static Economy economy;
     @Getter @Setter private volatile static String guaranteedPath;
-    @Getter @Setter private volatile static PlayerPointsAPI playerPointsAPI;
 
     @Getter @Setter private volatile static boolean disabled;
-    @Getter @Setter private volatile static boolean usingPapi;
 
     @Override
     public void onEnable() {

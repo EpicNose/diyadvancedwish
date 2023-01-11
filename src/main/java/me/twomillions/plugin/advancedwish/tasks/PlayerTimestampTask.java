@@ -37,19 +37,18 @@ public class PlayerTimestampTask {
 
                     if (time > currentTimeMillis) return;
 
-                    String wishName = WishManager.getPlayerScheduledTaskStringWishName(playerScheduledTask);
                     String doNode = WishManager.getPlayerScheduledTaskStringDoNode(playerScheduledTask);
-
-                    EffectSendManager.sendEffect(wishName, player, null, "/Wish", doNode);
+                    String wishName = WishManager.getPlayerScheduledTaskStringWishName(playerScheduledTask);
 
                     WishManager.removePlayerScheduledTasks(playerScheduledTask);
+                    if (doNode.contains("PRIZE-DO.")) WishManager.removePlayerWishPrizeDo(player, doNode);
 
-                    if (doNode.contains("PRIZE-DO.")) { WishManager.removePlayerWishPrizeDo(player, doNode); return; }
+                    EffectSendManager.sendEffect(wishName, player, null, "/Wish", doNode);
                 });
 
                 // 修复多抽在第一抽就把玩家移除 WishList 的问题
-                if (WishManager.getPlayerScheduledTasks(player.getUniqueId()).size() <= 0 && WishManager.isPlayerInWishList(player)) { WishManager.removePlayerWithWishList(player); }
+                if (WishManager.getPlayerScheduledTasks(player.getUniqueId()).size() <= 0 && WishManager.isPlayerInWishList(player)) WishManager.removePlayerWithWishList(player);
             }
-        }.runTaskTimerAsynchronously(plugin, 0, 2);
+        }.runTaskTimerAsynchronously(plugin, 0, 1);
     }
 }

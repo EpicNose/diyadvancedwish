@@ -636,13 +636,13 @@ public class WishManager {
         // 点券检查，扣除点券
         // 这里不需要任何补偿
         boolean takePoints = false;
-        PlayerPointsAPI playerPointsAPI = main.getPlayerPointsAPI();
+        PlayerPointsAPI playerPointsAPI = RegisterManager.getPlayerPointsAPI();
         if (point != 0 && playerPointsAPI != null && playerPointsAPI.look(player.getUniqueId()) >= point) takePoints = true;
         else if (point != 0 && playerPointsAPI != null) return CheckWishState.RequirementsNotMet;
 
         // 金币检查
         boolean withdrawPlayer = false;
-        Economy economy = main.getEconomy();
+        Economy economy = RegisterManager.getEconomy();
         if (money != 0 && economy != null && economy.hasAccount(player) && economy.has(player, money)) withdrawPlayer = true;
         else if (money != 0 && economy != null) return CheckWishState.RequirementsNotMet;
 

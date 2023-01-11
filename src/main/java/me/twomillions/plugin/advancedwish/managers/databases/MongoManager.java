@@ -97,6 +97,24 @@ public class MongoManager {
         return foundString;
     }
 
+    // 查询玩家数据 - 若为空则设置并返回为 value - 多态 UUID
+    public static String getOrDefaultPlayerGuaranteed(String uuid, String foundKey, String value) {
+        MongoCollection<Document> playerGuaranteed = getMongoDatabase().getCollection("PlayerGuaranteed");
+
+        Document playerDocument = new Document("uuid", uuid);
+        Document foundDocument = playerGuaranteed.find(playerDocument).first();
+
+        // 如果没有找到则插入并返回 value
+        if (foundDocument == null) { playerDocument.append(foundKey, value); playerGuaranteed.insertOne(playerDocument); return value; }
+
+        // 如果获取的值为 null，则更新并且返回 value
+        String foundString = foundDocument.getString(foundKey);
+
+        if (foundString == null) { updatePlayerGuaranteed(uuid, foundKey, value); foundString = value; }
+
+        return foundString;
+    }
+
     // 更新玩家数据
     public static void updatePlayerGuaranteed(Player player, String foundKey, String value) {
         String playerUUID = player.getUniqueId().toString();
@@ -104,6 +122,19 @@ public class MongoManager {
         MongoCollection<Document> playerGuaranteed = getMongoDatabase().getCollection("PlayerGuaranteed");
 
         Document playerDocument = new Document("uuid", playerUUID);
+
+        Document keyDocument = new Document(foundKey, value);
+        Document updateDocument = new Document("$set", keyDocument);
+        UpdateOptions updateOptions = new UpdateOptions().upsert(true);
+
+        playerGuaranteed.updateOne(playerDocument, updateDocument, updateOptions);
+    }
+
+    // 更新玩家数据 - 多态 UUID
+    public static void updatePlayerGuaranteed(String uuid, String foundKey, String value) {
+        MongoCollection<Document> playerGuaranteed = getMongoDatabase().getCollection("PlayerGuaranteed");
+
+        Document playerDocument = new Document("uuid", uuid);
 
         Document keyDocument = new Document(foundKey, value);
         Document updateDocument = new Document("$set", keyDocument);

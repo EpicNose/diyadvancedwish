@@ -4,7 +4,6 @@ import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.managers.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.RegisterManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
-import me.twomillions.plugin.advancedwish.tasks.WishLimitResetTask;
 import me.twomillions.plugin.advancedwish.utils.CC;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -308,9 +307,7 @@ public class ConsoleCommand implements CommandExecutor {
                     break;
 
                 case "reload":
-                    WishLimitResetTask.cancelAllWishLimitResetTasks();
-                    RegisterManager.registerCard();
-                    main.setGuaranteedPath(ConfigManager.getAdvancedWishYaml().getString("GUARANTEED-PATH"));
+                    RegisterManager.reload();
 
                     ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
 
