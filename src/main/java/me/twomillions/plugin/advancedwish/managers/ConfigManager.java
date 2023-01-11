@@ -57,12 +57,16 @@ public class ConfigManager {
         if (fileName.contains(".yml")) fileName = fileName.split(".yml")[0];
 
         if (path == null) dataFolder = plugin.getDataFolder().toString();
-        else if (!originalPath) dataFolder = plugin.getDataFolder() + path;
-        else dataFolder = path;
+        else {
+            if (!originalPath) dataFolder = plugin.getDataFolder() + path;
+            else dataFolder = path;
+        }
 
         File file = new File(dataFolder, fileName + ".yml");
 
-        if (!file.exists()) CC.sendConsoleMessage("&c检测到 &e" + fileName + " &cYaml 文件为空，已自动创建并设置为更改部分自动重载。");
+        // 如果这个文件已经是存在的状态，那么如果 inputStreamFromResource 为 true 则改为 false
+        if (file.exists()) { if (inputStreamFromResource) inputStreamFromResource = false; }
+        else CC.sendConsoleMessage("&c检测到 &e" + fileName + " &cYaml 文件不存在，已自动创建并设置为更改部分自动重载。");
 
         if (inputStreamFromResource)
             return SimplixBuilder
@@ -88,12 +92,16 @@ public class ConfigManager {
         if (fileName.contains(".json")) fileName = fileName.split(".json")[0];
 
         if (path == null) dataFolder = plugin.getDataFolder().toString();
-        else if (!originalPath) dataFolder = plugin.getDataFolder() + path;
-        else dataFolder = path;
+        else {
+            if (!originalPath) dataFolder = plugin.getDataFolder() + path;
+            else dataFolder = path;
+        }
 
         File file = new File(dataFolder, fileName + ".json");
 
-        if (!file.exists()) CC.sendConsoleMessage("&c检测到 &e" + fileName + " &cJson 文件为空，已自动创建并设置为更改部分自动重载。");
+        // 如果这个文件已经是存在的状态，那么如果 inputStreamFromResource 为 true 则改为 false
+        if (file.exists()) { if (inputStreamFromResource) inputStreamFromResource = false; }
+        else CC.sendConsoleMessage("&c检测到 &e" + fileName + " &cJson 文件不存在，已自动创建并设置为更改部分自动重载。");
 
         if (inputStreamFromResource)
             return SimplixBuilder

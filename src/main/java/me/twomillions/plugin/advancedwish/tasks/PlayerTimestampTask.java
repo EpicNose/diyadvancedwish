@@ -26,10 +26,7 @@ public class PlayerTimestampTask {
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (!player.isOnline()) {
-                    cancel();
-                    return;
-                }
+                if (!player.isOnline()) { cancel(); return; }
 
                 WishManager.getPlayerScheduledTasks(player.getUniqueId()).forEach(playerScheduledTask -> {
                     long currentTimeMillis = System.currentTimeMillis();

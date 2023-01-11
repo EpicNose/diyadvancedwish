@@ -60,13 +60,13 @@ public class RegisterManager {
     }
 
     // 注册所有许愿池
-    public static void registerCard() {
+    public static void registerWish() {
         registerWish.clear();
 
         for (String wishName : ConfigManager.getAdvancedWishYaml().getStringList("WISH")) {
             if (wishName == null || wishName.equals("") || wishName.equals(" ")) return;
 
-            ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
+            ConfigManager.createYamlConfig(wishName, "/Wish", false, true);
 
             registerWish.add(wishName);
 
@@ -91,7 +91,7 @@ public class RegisterManager {
 
         try { setEconomy(registeredServiceProvider.getProvider()); }
         catch (Exception exception) {
-            CC.sendConsoleMessage("&c检查到服务器存在 Vault，但 Vault 设置错误，这是最新版吗? 请尝试更新它 -> https://www.spigotmc.org/resources/vault.34315/，服务器即将关闭。");
+            CC.sendConsoleMessage("&c检查到服务器存在 Vault，但 Vault 设置错误，这是最新版吗? 请尝试更新它: https://www.spigotmc.org/resources/vault.34315/，服务器即将关闭。");
             Bukkit.shutdown();
             return;
         }
@@ -105,7 +105,7 @@ public class RegisterManager {
 
         try { setPlayerPointsAPI(PlayerPoints.getInstance().getAPI()); }
         catch (Exception exception) {
-            CC.sendConsoleMessage("&c检查到服务器存在 PlayerPoints，但 PlayerPoints 设置错误，这是最新版吗? 请尝试更新它 -> https://www.spigotmc.org/resources/playerpoints.80745/，服务器即将关闭。");
+            CC.sendConsoleMessage("&c检查到服务器存在 PlayerPoints，但 PlayerPoints 设置错误，这是最新版吗? 请尝试更新它: https://www.spigotmc.org/resources/playerpoints.80745/，服务器即将关闭。");
             Bukkit.shutdown();
             return;
         }
@@ -115,13 +115,22 @@ public class RegisterManager {
 
     // Reload 方法
     public static void reload() {
-        if (isUsingPapi()) Bukkit.getScheduler().runTask(plugin, () -> { new PapiManager().unregister(); new PapiManager().register(); });
+        // 取消任务
+        WishLimitResetTask.cancelAllWishLimitResetTasks();
 
+        // 设置玩家数据地址
+        String guaranteedConfig = ConfigManager.getAdvancedWishYaml().getString("GUARANTEED-PATH");
+        main.setGuaranteedPath(guaranteedConfig.equals("") ? main.getInstance().getDataFolder() + "/PlayerGuaranteed" : guaranteedConfig);
+
+        // 低版本 Papi 没有 unregister 方法，捕获异常以取消 Papi 重载
+        try { if (isUsingPapi()) Bukkit.getScheduler().runTask(plugin, () -> { new PapiManager().unregister(); new PapiManager().register(); }); }
+        catch (Exception exception) { CC.sendConsoleMessage("&cPlaceholder 重载异常，这是最新版吗? 请尝试更新它: https://www.spigotmc.org/resources/placeholderapi.6245/，已取消 Placeholder 重载。"); }
+
+        // 设置 Vault 以及 PlayerPoints
         setupEconomy();
         setupPlayerPoints();
 
-        WishLimitResetTask.cancelAllWishLimitResetTasks();
-        RegisterManager.registerCard();
-        main.setGuaranteedPath(ConfigManager.getAdvancedWishYaml().getString("GUARANTEED-PATH"));
+        // 注册许愿池
+        RegisterManager.registerWish();
     }
 }

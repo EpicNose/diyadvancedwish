@@ -55,7 +55,7 @@ public final class main extends JavaPlugin {
 
         // 注册
         RegisterManager.registerListener();
-        RegisterManager.registerCard();
+        RegisterManager.registerWish();
         RegisterManager.registerCommands();
 
         // bStats
@@ -72,7 +72,7 @@ public final class main extends JavaPlugin {
         // 所以这里检查服内是否有此玩家，如果有的话那么就为所有玩家启动 PlayerTimestampRunnable
         if (Bukkit.getOnlinePlayers().size() != 0) Bukkit.getOnlinePlayers().forEach(PlayerTimestampTask::startTask);
 
-        CC.sendConsoleMessage("&bAdvanced Wish 插件已成功加载! 感谢您使用此插件! 版本: " + this.getDescription().getVersion() + ", 作者: 2000000。");
+        CC.sendConsoleMessage("&eAdvanced Wish 插件已成功加载! 感谢您使用此插件! 版本: " + this.getDescription().getVersion() + ", 作者: 2000000。");
     }
 
     @Override
