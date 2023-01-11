@@ -6,13 +6,13 @@ import me.twomillions.plugin.advancedwish.commands.MainCommand;
 import me.twomillions.plugin.advancedwish.listener.PlayerListener;
 import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.tasks.WishLimitResetTask;
+import me.twomillions.plugin.advancedwish.utils.CC;
 import net.milkbowl.vault.economy.Economy;
 import org.black_ixx.playerpoints.PlayerPoints;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
-import org.fusesource.jansi.Ansi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,9 +40,7 @@ public class RegisterManager {
         if (manager.isPluginEnabled("PlaceholderAPI")) {
             main.setUsingPapi(true);
 
-            Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                    Ansi.ansi().fg(Ansi.Color.GREEN).boldOff().toString() +
-                    "检查到服务器存在 PlaceholderAPI 插件，已注册 PlaceholderAPI 变量。");
+            CC.sendConsoleMessage("&a检查到服务器存在 PlaceholderAPI 插件，已注册 PlaceholderAPI 变量。");
 
             new PapiManager().register();
         }
@@ -66,26 +64,14 @@ public class RegisterManager {
 
             registerWish.add(wishName);
 
-            Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                    Ansi.ansi().fg(Ansi.Color.GREEN).boldOff().toString() +
-                    "已成功加载许愿池! 许愿池文件名称 " +
-                    Ansi.ansi().fg(Ansi.Color.WHITE).boldOff().toString() +
-                    "-> " +
-                    Ansi.ansi().fg(Ansi.Color.BLUE).boldOff().toString() +
-                    wishName);
+            CC.sendConsoleMessage("&a已成功加载许愿池! 许愿池文件名称: &e" + wishName);
 
             // 许愿限制
             if (!WishManager.isEnabledWishLimit(wishName)) return;
 
             WishLimitResetTask.startTask(wishName);
 
-            Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                    Ansi.ansi().fg(Ansi.Color.GREEN).boldOff().toString() +
-                    "检查到许愿池启用了许愿限制，已成功创建对应异步计划任务! 许愿池文件名称 " +
-                    Ansi.ansi().fg(Ansi.Color.WHITE).boldOff().toString() +
-                    "-> " +
-                    Ansi.ansi().fg(Ansi.Color.BLUE).boldOff().toString() +
-                    wishName);
+            CC.sendConsoleMessage("&a检查到许愿池启用了许愿限制，已成功创建对应异步计划任务! 许愿池文件名称: &e" + wishName);
         }
     }
 
@@ -95,27 +81,16 @@ public class RegisterManager {
 
         RegisteredServiceProvider<Economy> registeredServiceProvider = Bukkit.getServer().getServicesManager().getRegistration(Economy.class);
 
-        if (registeredServiceProvider == null) {
-            Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                    Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
-                    "检查到服务器存在 Vault，但并没有实际插件进行操作? 取消对于 Vault 的设置。");
-
-            return;
-        }
+        if (registeredServiceProvider == null) { CC.sendConsoleMessage("&c检查到服务器存在 Vault，但并没有实际插件进行操作? 取消对于 Vault 的设置。"); return; }
 
         try { main.setEconomy(registeredServiceProvider.getProvider()); }
         catch (Exception exception) {
-            Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                    Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
-                    "检查到服务器存在 Vault，但 Vault 设置错误，这是最新版吗? 请尝试更新它 -> https://www.spigotmc.org/resources/vault.34315/，服务器即将关闭。");
-
+            CC.sendConsoleMessage("&c检查到服务器存在 Vault，但 Vault 设置错误，这是最新版吗? 请尝试更新它 -> https://www.spigotmc.org/resources/vault.34315/，服务器即将关闭。");
             Bukkit.shutdown();
             return;
         }
 
-        Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                Ansi.ansi().fg(Ansi.Color.GREEN).boldOff().toString() +
-                "检查到服务器存在 Vault，已成功设置 Vault。");
+        CC.sendConsoleMessage("&a检查到服务器存在 Vault，已成功设置 Vault。");
     }
 
     // 设置 PlayerPoints
@@ -124,16 +99,11 @@ public class RegisterManager {
 
         try { main.setPlayerPointsAPI(PlayerPoints.getInstance().getAPI()); }
         catch (Exception exception) {
-            Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                    Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
-                    "检查到服务器存在 PlayerPoints，但 PlayerPoints 设置错误，这是最新版吗? 请尝试更新它 -> https://www.spigotmc.org/resources/playerpoints.80745/，服务器即将关闭。");
-
+            CC.sendConsoleMessage("&c检查到服务器存在 PlayerPoints，但 PlayerPoints 设置错误，这是最新版吗? 请尝试更新它 -> https://www.spigotmc.org/resources/playerpoints.80745/，服务器即将关闭。");
             Bukkit.shutdown();
             return;
         }
 
-        Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                Ansi.ansi().fg(Ansi.Color.GREEN).boldOff().toString() +
-                "检查到服务器存在 PlayerPoints，已成功设置 PlayerPoints。");
+        CC.sendConsoleMessage("&a检查到服务器存在 PlayerPoints，已成功设置 PlayerPoints。");
     }
 }

@@ -11,10 +11,10 @@ import lombok.Getter;
 import lombok.Setter;
 import me.twomillions.plugin.advancedwish.enums.mongo.MongoAuthState;
 import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
+import me.twomillions.plugin.advancedwish.utils.CC;
 import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.fusesource.jansi.Ansi;
 
 /**
  * author:     2000000
@@ -54,9 +54,7 @@ public class MongoManager {
             setMongoAuthState(MongoAuthState.UsingAuth);
             setMongoClientUrlString("mongodb://" + mongoUser + ":" + mongoPassword + "@" + mongoIP + ":" + mongoPort);
 
-            Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                    Ansi.ansi().fg(Ansi.Color.GREEN).boldOff().toString() +
-                    "Advanced Wish 检查到 Mongo 开启身份验证，已设置身份验证信息!");
+            CC.sendConsoleMessage("&aAdvanced Wish 检查到 Mongo 开启身份验证，已设置身份验证信息!");
         }
 
         // Mongo 连接状态检查
@@ -65,15 +63,11 @@ public class MongoManager {
             setMongoClient(new MongoClient(getMongoClientUrl()));
             setMongoDatabase(getMongoClient().getDatabase("AdvancedWish"));
 
-            Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                    Ansi.ansi().fg(Ansi.Color.GREEN).boldOff().toString() +
-                    "Advanced Wish 已成功建立与 Mongo 的连接!");
+            CC.sendConsoleMessage("&aAdvanced Wish 已成功建立与 Mongo 的连接!");
 
             setMongoConnectState(MongoConnectState.Connected);
         } catch (Exception exception) {
-            Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                    Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
-                    "您打开了 Mongo 数据库选项，但是 Advanced Wish 未与 Mongo 数据库正确连接，请检查 Mongo 服务状态，即将关闭服务器!");
+            CC.sendConsoleMessage("&c您打开了 Mongo 数据库选项，但是 Advanced Wish 未与 Mongo 数据库正确连接，请检查 Mongo 服务状态，即将关闭服务器!");
 
             setMongoConnectState(MongoConnectState.CannotConnect);
 

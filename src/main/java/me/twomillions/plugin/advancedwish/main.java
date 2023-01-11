@@ -12,12 +12,12 @@ import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
 import me.twomillions.plugin.advancedwish.managers.databases.RedisManager;
 import me.twomillions.plugin.advancedwish.tasks.PlayerTimestampTask;
 import me.twomillions.plugin.advancedwish.tasks.UpdateCheckerTask;
+import me.twomillions.plugin.advancedwish.utils.CC;
 import net.milkbowl.vault.economy.Economy;
 import org.apache.commons.lang.StringUtils;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.fusesource.jansi.Ansi;
 
 import java.util.Arrays;
 
@@ -78,11 +78,7 @@ public final class main extends JavaPlugin {
         // 所以这里检查服内是否有此玩家，如果有的话那么就为所有玩家启动 PlayerTimestampRunnable
         if (Bukkit.getOnlinePlayers().size() != 0) Bukkit.getOnlinePlayers().forEach(PlayerTimestampTask::startTask);
 
-        Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
-                "Advanced Wish 插件已成功加载! 感谢您使用此插件! 版本: " +
-                main.getInstance().getDescription().getVersion() +
-                ", 作者: 2000000。");
+        CC.sendConsoleMessage("&bAdvanced Wish 插件已成功加载! 感谢您使用此插件! 版本: " + this.getDescription().getVersion() + ", 作者: 2000000。");
     }
 
     @Override

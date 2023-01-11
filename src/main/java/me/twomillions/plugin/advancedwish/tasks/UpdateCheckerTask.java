@@ -3,9 +3,9 @@ package me.twomillions.plugin.advancedwish.tasks;
 import lombok.Getter;
 import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.managers.ConfigManager;
+import me.twomillions.plugin.advancedwish.utils.CC;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
-import org.fusesource.jansi.Ansi;
 
 import java.io.IOException;
 import java.net.URL;
@@ -36,13 +36,11 @@ public class UpdateCheckerTask {
             if (urlString.contains(plugin.getDescription().getVersion())) {
                 isLatestVersion = true;
 
-                Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                        Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "自动更新检查完成，您目前正在使用最新版的 Advanced Wish! 版本: " + plugin.getDescription().getVersion());
+                CC.sendConsoleMessage("&a自动更新检查完成，您目前正在使用最新版的 Advanced Wish! 版本: " + plugin.getDescription().getVersion());
             } else if (!urlString.equals("")) {
                 isLatestVersion = false;
 
-                Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                        Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() + "您目前正在使用过时的 Advanced Wish! 请更新以避免服务器出现问题! 下载链接: https://gitee.com/A2000000/advanced-wish/releases/");
+                CC.sendConsoleMessage("&c您目前正在使用过时的 Advanced Wish! 请更新以避免服务器出现问题! 下载链接: https://gitee.com/A2000000/advanced-wish/releases/");
             }
         }, 0, (long) cycle * 1200); // 一分钟等于 1200 ticks
     }
@@ -56,8 +54,7 @@ public class UpdateCheckerTask {
         } catch (IOException exception) {
             isLatestVersion = false;
 
-            Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                    Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() + "Advanced Wish 更新检查错误... 请务必手动检查插件是否为最新版。 下载链接: https://gitee.com/A2000000/advanced-wish/releases/");
+            CC.sendConsoleMessage("&cAdvanced Wish 更新检查错误... 请务必手动检查插件是否为最新版。 下载链接: https://gitee.com/A2000000/advanced-wish/releases/");
         }
 
         return stringBuilder.toString();

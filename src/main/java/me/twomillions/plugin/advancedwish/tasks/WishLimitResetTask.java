@@ -6,10 +6,10 @@ import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.managers.EffectSendManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
+import me.twomillions.plugin.advancedwish.utils.CC;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
-import org.fusesource.jansi.Ansi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,11 +46,7 @@ public class WishLimitResetTask {
 
             // 控制台发送提示信息
             if (WishManager.isEnabledResetCompleteSendConsole(wishName)) {
-                Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                        Ansi.ansi().fg(Ansi.Color.GREEN).boldOff().toString() + "Advanced Wish 已清除 " +
-                        Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + wishName +
-                        Ansi.ansi().fg(Ansi.Color.GREEN).boldOff().toString() + " 许愿池玩家限制许愿次数! 存储方式: " +
-                        Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + storeMode);
+                CC.sendConsoleMessage("&aAdvanced Wish 已清除 &e" + wishName + " &a许愿池玩家限制许愿次数! 存储方式: &e" + storeMode);
             }
         }, wishResetLimitStart, wishResetLimitCycle);
 

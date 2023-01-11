@@ -3,10 +3,10 @@ package me.twomillions.plugin.advancedwish.managers.databases;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import lombok.Setter;
-import me.twomillions.plugin.advancedwish.enums.redis.RedisConnectState;
 import me.twomillions.plugin.advancedwish.enums.redis.RedisAuthState;
+import me.twomillions.plugin.advancedwish.enums.redis.RedisConnectState;
+import me.twomillions.plugin.advancedwish.utils.CC;
 import org.bukkit.Bukkit;
-import org.fusesource.jansi.Ansi;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -44,9 +44,7 @@ public class RedisManager {
             setRedisPassword(redisPassword);
             setRedisAuthState(RedisAuthState.UsingAuth);
 
-            Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                    Ansi.ansi().fg(Ansi.Color.GREEN).boldOff().toString() +
-                    "Advanced Wish 检查到 Redis 使用密码，已设置连接密码!");
+            CC.sendConsoleMessage("&aAdvanced Wish 检查到 Redis 使用密码，已设置连接密码!");
         }
 
         // Redis 连接状态检查
@@ -56,15 +54,11 @@ public class RedisManager {
             if (getRedisAuthState() == RedisAuthState.UsingAuth) jedis.auth(getRedisPassword());
             jedis.ping();
 
-            Bukkit.getLogger().info(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                    Ansi.ansi().fg(Ansi.Color.GREEN).boldOff().toString() +
-                    "Advanced Wish 已成功建立与 Redis 的连接!");
+            CC.sendConsoleMessage("&aAdvanced Wish 已成功建立与 Redis 的连接!");
 
             setRedisConnectState(RedisConnectState.Connected);
         } catch (Exception exception) {
-            Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                    Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
-                    "您打开了 Redis 数据库选项，但是 Advanced Wish 未与 Redis 数据库正确连接，请检查 Redis 服务状态，即将关闭服务器!");
+            CC.sendConsoleMessage("&c您打开了 Redis 数据库选项，但是 Advanced Wish 未与 Redis 数据库正确连接，请检查 Redis 服务状态，即将关闭服务器!");
 
             setRedisConnectState(RedisConnectState.CannotConnect);
 

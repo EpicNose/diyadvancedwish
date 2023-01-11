@@ -19,7 +19,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.fusesource.jansi.Ansi;
 import xyz.xenondevs.particle.ParticleBuilder;
 import xyz.xenondevs.particle.ParticleEffect;
 
@@ -109,7 +108,7 @@ public class EffectSendManager {
             boolean hasColor = !particleConfigSplit[6].equals("FALSE");
 
             if (isNote && hasColor) {
-                Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Exp Booster] " + Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() + "请注意，音符 (Note) 粒子效果并不支持自定义颜色! 已自动切换为随机颜色!");
+                CC.sendConsoleMessage("&c请注意，音符 (Note) 粒子效果并不支持自定义颜色! 已自动切换为随机颜色!");
 
                 if (allPlayer)
                     new ParticleBuilder(particleEffect, targetPlayer.getLocation())

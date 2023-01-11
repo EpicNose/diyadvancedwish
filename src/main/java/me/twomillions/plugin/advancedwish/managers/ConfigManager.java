@@ -7,9 +7,8 @@ import de.leonhard.storage.internal.settings.ConfigSettings;
 import de.leonhard.storage.internal.settings.DataType;
 import de.leonhard.storage.internal.settings.ReloadSettings;
 import me.twomillions.plugin.advancedwish.main;
-import org.bukkit.Bukkit;
+import me.twomillions.plugin.advancedwish.utils.CC;
 import org.bukkit.plugin.Plugin;
-import org.fusesource.jansi.Ansi;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -36,7 +35,7 @@ public class ConfigManager {
         String dataFolder = plugin.getDataFolder().toString();
         File file = new File(dataFolder, "advancedWish.yml");
 
-        if (!file.exists()) Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " + Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() + "运行有误，请检查配置文件是否被误删! 开始重新创建配置文件!");
+        if (!file.exists()) CC.sendConsoleMessage("&c运行有误，请检查配置文件是否被误删! 开始重新创建配置文件!");
 
         return createYamlConfig("advancedWish", null, false, true);
     }
@@ -46,7 +45,7 @@ public class ConfigManager {
         String dataFolder = plugin.getDataFolder().toString();
         File file = new File(dataFolder, "message.yml");
 
-        if (!file.exists()) Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " + Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() + "运行有误，请检查配置文件是否被误删! 开始重新创建配置文件!");
+        if (!file.exists()) CC.sendConsoleMessage("&c运行有误，请检查配置文件是否被误删! 开始重新创建配置文件!");
 
         return createYamlConfig("message", null, false, true);
     }
@@ -63,14 +62,7 @@ public class ConfigManager {
 
         File file = new File(dataFolder, fileName + ".yml");
 
-        if (!file.exists()) {
-            Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " + Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
-                    "检测到 " +
-                    Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
-                    fileName +
-                    Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
-                    " Yaml 文件为空，已自动创建并设置为更改部分自动重载。");
-        }
+        if (!file.exists()) CC.sendConsoleMessage("&c检测到 &e" + fileName + " &cYaml 文件为空，已自动创建并设置为更改部分自动重载。");
 
         if (inputStreamFromResource)
             return SimplixBuilder
@@ -101,14 +93,7 @@ public class ConfigManager {
 
         File file = new File(dataFolder, fileName + ".json");
 
-        if (!file.exists()) {
-            Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " + Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
-                    "检测到 " +
-                    Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
-                    fileName +
-                    Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
-                    " Json 文件为空，已自动创建并设置为更改部分自动重载。");
-        }
+        if (!file.exists()) CC.sendConsoleMessage("&c检测到 &e" + fileName + " &cJson 文件为空，已自动创建并设置为更改部分自动重载。");
 
         if (inputStreamFromResource)
             return SimplixBuilder

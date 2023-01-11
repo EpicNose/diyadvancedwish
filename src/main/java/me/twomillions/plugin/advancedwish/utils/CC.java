@@ -10,7 +10,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import org.fusesource.jansi.Ansi;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,6 +29,11 @@ public class CC {
 
     public static String translate(String message) {
         return ChatColor.translateAlternateColorCodes('&', message);
+    }
+
+    // 控制台发送消息
+    public static void sendConsoleMessage(String message) {
+        Bukkit.getConsoleSender().sendMessage(translate("&e[Advanced Wish] " + message));
     }
 
     // 快捷替换方法
@@ -127,8 +131,7 @@ public class CC {
             }
 
         } catch (Exception exception) {
-            Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " +
-                    Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() + "您填入的随机语句 (randomSentence) 语法错误! 请检查配置文件! 原语句: " + randomSentence);
+            CC.sendConsoleMessage("&c您填入的随机语句 (randomSentence) 语法错误! 请检查配置文件! 原语句: &e" + randomSentence);
 
             return randomSentence;
         }
@@ -146,14 +149,7 @@ public class CC {
 
     // 快捷返回负面信息
     public static void sendUnknownWarn(String unknown, String fileName, String unknownName) {
-        Bukkit.getLogger().warning(Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() + "[Advanced Wish] " + Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
-                "您填入了一个未知的" + unknown + "，位于 -> " +
-                Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
-                fileName +
-                Ansi.ansi().fg(Ansi.Color.RED).boldOff().toString() +
-                "，您填入的未知" + unknown + "为 -> " +
-                Ansi.ansi().fg(Ansi.Color.YELLOW).boldOff().toString() +
-                unknownName);
+        CC.sendConsoleMessage("&c您填入了一个未知的" + unknown + "，位于: &e" + fileName + "&c，您填入的未知" + unknown + "为: &e" + unknownName);
     }
 
     private static String stringInterceptReplace(String string, String start, String end, String replace, boolean removeStartEndString) {
