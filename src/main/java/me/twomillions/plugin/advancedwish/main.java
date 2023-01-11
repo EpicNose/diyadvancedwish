@@ -3,6 +3,7 @@ package me.twomillions.plugin.advancedwish;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import lombok.Setter;
+import me.twomillions.plugin.advancedwish.enums.mongo.JsonTransformationMongoState;
 import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
 import me.twomillions.plugin.advancedwish.enums.redis.RedisConnectState;
 import me.twomillions.plugin.advancedwish.managers.ConfigManager;
@@ -52,6 +53,9 @@ public final class main extends JavaPlugin {
 
         // 获取保底率的指定路径
         setGuaranteedPath(guaranteedConfig.equals("") ? pluginPath + "/PlayerGuaranteed" : guaranteedConfig);
+
+        // 迁移检查
+        if (MongoManager.playerGuaranteedJsonToMongo(advancedWishYaml) != JsonTransformationMongoState.TurnOff) { Bukkit.shutdown(); return; }
 
         // 注册
         RegisterManager.registerListener();

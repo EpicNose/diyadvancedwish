@@ -6,15 +6,22 @@ import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
+import de.leonhard.storage.Json;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import lombok.Setter;
+import me.twomillions.plugin.advancedwish.enums.mongo.JsonTransformationMongoState;
 import me.twomillions.plugin.advancedwish.enums.mongo.MongoAuthState;
 import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
+import me.twomillions.plugin.advancedwish.main;
+import me.twomillions.plugin.advancedwish.managers.ConfigManager;
 import me.twomillions.plugin.advancedwish.utils.CC;
 import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * author:     2000000
@@ -141,5 +148,32 @@ public class MongoManager {
         UpdateOptions updateOptions = new UpdateOptions().upsert(true);
 
         playerGuaranteed.updateOne(playerDocument, updateDocument, updateOptions);
+    }
+
+    // Json 转换为 Mongo 数据
+    public static JsonTransformationMongoState playerGuaranteedJsonToMongo(Yaml yaml) {
+        if (!yaml.getBoolean("TRANSFORMATION-JSON-TO-MONGO")) return JsonTransformationMongoState.TurnOff;
+        if (MongoManager.getMongoConnectState() != MongoConnectState.Connected) { CC.sendConsoleMessage("&c您开启了数据迁移选项，但 Mongo 数据库并没有成功连接，请检查配置文件，服务器即将关闭。"); return JsonTransformationMongoState.Failed; }
+
+        String path = main.getGuaranteedPath();
+        List<String> fileNameList = ConfigManager.getAllFileName(path);
+
+        // 若 Json 文件个数为 0 则返回失败
+        if (fileNameList.size() <= 0) { CC.sendConsoleMessage("&c未发现需要进行迁移的 Json 数据，结束此次迁移，服务器即将关闭。"); return JsonTransformationMongoState.Failed; }
+
+        // 获取所有 key，遍历进行更新
+        int jsonKeySetAmount = 0;
+        for (String fileName : fileNameList) {
+            Json json = ConfigManager.createJsonConfig(fileName, path, true, false);
+
+            Set<String> jsonKeySet = json.keySet();
+            jsonKeySetAmount = jsonKeySetAmount + jsonKeySet.size();
+
+            for (String key : jsonKeySet) updatePlayerGuaranteed(fileName, key, json.get(key).toString());
+        }
+
+        CC.sendConsoleMessage("&a已成功迁移 Json 数据至 Mongo 数据库，此次迁移总玩家数: &e" + fileNameList.size() + " &a，迁移数据数: &e" + jsonKeySetAmount + " &a，即将关闭服务器，已转移的 Json 不会被删除，请手动关闭转移选项!");
+
+        return JsonTransformationMongoState.Completed;
     }
 }
