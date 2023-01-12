@@ -247,10 +247,10 @@ public class EffectSendManager {
         yaml.getStringList("MESSAGE").forEach(messageConfig -> {
             if (messageConfig == null || messageConfig.length() <= 1) return;
 
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                String message = CC.replaceTranslateToPapi(messageConfig, targetPlayer, replacePlayer);
-                targetPlayer.sendMessage(CC.translate(message));
-            });
+            // https://www.spigotmc.org/threads/is-sendmessage-thread-safe-like-this.372767/
+            // Messaging is one of the few things that can be done async safely.
+            // 消息传递是为数不多的可以异步安全完成的事情之一。 By SpigotMc Moderator - SteelPhoenix
+            targetPlayer.sendMessage(CC.replaceTranslateToPapi(messageConfig, targetPlayer, replacePlayer));
         });
     }
 
@@ -264,10 +264,7 @@ public class EffectSendManager {
         yaml.getStringList("ANNOUNCEMENT").forEach(announcementConfig -> {
             if (announcementConfig == null || announcementConfig.length() <= 1) return;
 
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                String announcement = CC.replaceTranslateToPapi(announcementConfig, targetPlayer, replacePlayer);
-                Bukkit.broadcastMessage(CC.translate(announcement));
-            });
+            Bukkit.getScheduler().runTask(plugin, () -> Bukkit.broadcastMessage(CC.replaceTranslateToPapi(announcementConfig, targetPlayer, replacePlayer)));
         });
     }
 

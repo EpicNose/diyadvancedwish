@@ -28,7 +28,8 @@ public class PlayerTimestampTask {
             public void run() {
                 if (!player.isOnline()) { cancel(); return; }
 
-                WishManager.getPlayerScheduledTasks(player.getUniqueId()).forEach(playerScheduledTask -> {
+                // 不在 forEach 中增删数据以修复 ConcurrentModificationException
+                for (String playerScheduledTask : WishManager.getPlayerScheduledTasks(player.getUniqueId())) {
                     long currentTimeMillis = System.currentTimeMillis();
                     long time = Long.parseLong(WishManager.getPlayerScheduledTaskStringTime(playerScheduledTask));
 
@@ -41,7 +42,7 @@ public class PlayerTimestampTask {
                     if (doNode.contains("PRIZE-DO.")) WishManager.removePlayerWishPrizeDo(player, doNode);
 
                     EffectSendManager.sendEffect(wishName, player, null, "/Wish", doNode);
-                });
+                }
 
                 // 修复多抽在第一抽就把玩家移除 WishList 的问题
                 if (WishManager.getPlayerScheduledTasks(player.getUniqueId()).size() <= 0 && WishManager.isPlayerInWishList(player)) WishManager.removePlayerWithWishList(player);

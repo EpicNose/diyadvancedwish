@@ -184,10 +184,10 @@ public class WishManager {
     public static void createPlayerScheduledTasks(Player player, String wishName, String finalProbabilityWish) {
         UUID uuid = player.getUniqueId();
 
-        getWishScheduledTasks(wishName).forEach(WishScheduledTask -> {
-            String scheduledTasksPrizeDo = getWishScheduledTasksPrizeDo(WishScheduledTask);
+        for (String wishScheduledTask : getWishScheduledTasks(wishName)) {
+            String scheduledTasksPrizeDo = getWishScheduledTasksPrizeDo(wishScheduledTask);
             String wishItemPrizeDo = "PRIZE-DO." + getWishPrizeSetPrizeDo(finalProbabilityWish);
-            Long time = System.currentTimeMillis() + getWishScheduledTasksSeconds(WishScheduledTask) * 1000L;
+            Long time = System.currentTimeMillis() + getWishScheduledTasksSeconds(wishScheduledTask) * 1000L;
 
             // 这里的 RANDOM-PRIZE-DO 是重新进行随机，连抽使用
             // 在添加中间任务之前将会 getFinalProbabilityWish 添加玩家的保底以及抽奖数
@@ -202,7 +202,7 @@ public class WishManager {
 
             if (scheduledTasksPrizeDo.equals("GO-PRIZE-DO")) addPlayerScheduledTasks(uuid, time, wishName, wishItemPrizeDo);
             else addPlayerScheduledTasks(uuid, time, wishName, "WAIT-DO." + scheduledTasksPrizeDo);
-        });
+        }
     }
 
     // 获取指定许愿池内的计划任务
@@ -258,8 +258,9 @@ public class WishManager {
         List<String> scheduledTasksList = new ArrayList<>();
 
         // 获取随后使用 startWith 判断对象
-        if (usingRedis) RedisManager.getList("playerScheduledTasks").forEach(schedule -> { if (schedule.startsWith(uuid.toString())) scheduledTasksList.add(schedule); });
-        else playerScheduledTasks.forEach(schedule -> { if (schedule.startsWith(uuid.toString())) scheduledTasksList.add(schedule); });
+        // 不在 forEach 中增删数据以修复 ConcurrentModificationException
+        if (usingRedis) for (String scheduledTask : RedisManager.getList("playerScheduledTasks")) { if (scheduledTask.startsWith(uuid.toString())) scheduledTasksList.add(scheduledTask); }
+        else for (String scheduledTask : playerScheduledTasks) { if (scheduledTask.startsWith(uuid.toString())) scheduledTasksList.add(scheduledTask); }
 
         return scheduledTasksList;
     }
@@ -694,7 +695,7 @@ public class WishManager {
 
     // 保存玩家缓存数据 - 当服务器没有使用 Redis 关服时有玩家许愿未完成的情况下
     public static void savePlayerCacheData() {
-        WishManager.getWishPlayers().forEach(uuid -> {
+        for (UUID uuid : WishManager.getWishPlayers()) {
             List<String> playerWishPrizeDoList = WishManager.getPlayerWishPrizeDo(uuid, true);
             List<String> newPlayerWishPrizeDoList = new ArrayList<>();
 
@@ -706,7 +707,7 @@ public class WishManager {
             Json playerCacheJson = ConfigManager.createJsonConfig(uuid.toString(), "/PlayerCache", false, false);
 
             playerCacheJson.set("CACHE", newPlayerWishPrizeDoList);
-        });
+        }
     }
 
     // 安全措施，使用 OP 指令的数据缓存
