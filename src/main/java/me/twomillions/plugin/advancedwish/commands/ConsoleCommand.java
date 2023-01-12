@@ -1,9 +1,12 @@
 package me.twomillions.plugin.advancedwish.commands;
 
+import de.leonhard.storage.Yaml;
+import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
 import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.managers.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.RegisterManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
+import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
 import me.twomillions.plugin.advancedwish.utils.CC;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -13,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -33,8 +37,10 @@ public class ConsoleCommand implements CommandExecutor {
         }
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            Yaml messageYaml = ConfigManager.getMessageYaml();
+            
             if (args.length == 0) {
-                ConfigManager.getMessageYaml().getStringList("COMSOLE-SHOW-COMMAND").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                messageYaml.getStringList("COMSOLE-SHOW-COMMAND").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                 return;
             }
 
@@ -42,20 +48,20 @@ public class ConsoleCommand implements CommandExecutor {
 
             switch (subCommand) {
                 case "list":
-                    ConfigManager.getMessageYaml().getStringList("LIST").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                    messageYaml.getStringList("LIST").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
 
-                    break;
+                    return;
 
                 case "makewish":
                     if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
                     String wishName = args[1];
 
                     if (!WishManager.hasWish(wishName)) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NOT-HAVE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("WISH-NOT-HAVE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
@@ -63,26 +69,26 @@ public class ConsoleCommand implements CommandExecutor {
                         Player targetPlayer = Bukkit.getPlayerExact(args[2]);
 
                         if (targetPlayer == null) {
-                            ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                            messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                             return;
                         }
 
                         WishManager.makeWish(targetPlayer, wishName, false);
-                        ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
-                    } else ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                    } else messageYaml.getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
 
-                    break;
+                    return;
 
                 case "makewishforce":
                     if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
                     String forceWishName = args[1];
 
                     if (!WishManager.hasWish(forceWishName)) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NOT-HAVE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("WISH-NOT-HAVE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
@@ -90,24 +96,24 @@ public class ConsoleCommand implements CommandExecutor {
                         Player targetPlayer = Bukkit.getPlayerExact(args[2]);
 
                         if (targetPlayer == null) {
-                            ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                            messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                             return;
                         }
 
                         WishManager.makeWish(targetPlayer, forceWishName, true);
-                        ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
-                    } else ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                    } else messageYaml.getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
 
-                    break;
+                    return;
 
                 case "getamount":
                     if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
                     if (args.length == 2) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
@@ -115,28 +121,28 @@ public class ConsoleCommand implements CommandExecutor {
                     Player amountGetTargetPlayer = Bukkit.getPlayerExact(args[2]);
 
                     if (amountGetTargetPlayer == null) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
                     int wishAmount = WishManager.getPlayerWishAmount(amountGetTargetPlayer, getAmountWishName);
                     sender.sendMessage(CC.translate("&6此玩家的 " + getAmountWishName + " 奖池许愿数为: " + wishAmount));
 
-                    break;
+                    return;
 
                 case "setamount":
                     if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
                     if (args.length == 2) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
                     if (args.length == 3) {
-                        ConfigManager.getMessageYaml().getStringList("AMOUNT-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("AMOUNT-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
@@ -147,28 +153,28 @@ public class ConsoleCommand implements CommandExecutor {
                     try {
                         setAmount = Integer.parseInt(args[3]);
                     } catch (Exception exception) {
-                        ConfigManager.getMessageYaml().getStringList("MUST-NUMBER").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("MUST-NUMBER").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
                     if (amountTargetPlayer == null) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
                     WishManager.setPlayerWishAmount(amountTargetPlayer, setAmountWishName, setAmount);
-                    ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                    messageYaml.getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
 
-                    break;
+                    return;
 
                 case "getguaranteed":
                     if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
                     if (args.length == 2) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
@@ -176,28 +182,28 @@ public class ConsoleCommand implements CommandExecutor {
                     Player guaranteedGetTargetPlayer = Bukkit.getPlayerExact(args[2]);
 
                     if (guaranteedGetTargetPlayer == null) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
                     double guaranteedAmount = WishManager.getPlayerWishGuaranteed(guaranteedGetTargetPlayer, getGuaranteedWishName);
                     sender.sendMessage(CC.translate("&6此玩家的 " + getGuaranteedWishName + " 奖池保底率为: " + guaranteedAmount));
 
-                    break;
+                    return;
 
                 case "setguaranteed":
                     if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
                     if (args.length == 2) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
                     if (args.length == 3) {
-                        ConfigManager.getMessageYaml().getStringList("GUARANTEED-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("GUARANTEED-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
@@ -208,28 +214,28 @@ public class ConsoleCommand implements CommandExecutor {
                     try {
                         setGuaranteed = Double.parseDouble(args[3]);
                     } catch (Exception exception) {
-                        ConfigManager.getMessageYaml().getStringList("MUST-NUMBER").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("MUST-NUMBER").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
                     if (targetPlayer == null) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
                     WishManager.setPlayerWishGuaranteed(targetPlayer, setGuaranteedWishName, setGuaranteed);
-                    ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                    messageYaml.getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
 
-                    break;
+                    return;
 
                 case "getlimitamount":
                     if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
                     if (args.length == 2) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
@@ -237,28 +243,28 @@ public class ConsoleCommand implements CommandExecutor {
                     Player limitAmountGetTargetPlayer = Bukkit.getPlayerExact(args[2]);
 
                     if (limitAmountGetTargetPlayer == null) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
                     int limitAmount = WishManager.getPlayerWishLimitAmount(limitAmountGetTargetPlayer, getLimitAmountWishName);
                     sender.sendMessage(CC.translate("&6此玩家的 " + getLimitAmountWishName + " 奖池保底率为: " + limitAmount));
 
-                    break;
+                    return;
 
                 case "setlimitamount":
                     if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
                     if (args.length == 2) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
                     if (args.length == 3) {
-                        ConfigManager.getMessageYaml().getStringList("AMOUNT-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("AMOUNT-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
@@ -269,49 +275,143 @@ public class ConsoleCommand implements CommandExecutor {
                     try {
                         setLimitAmount = Integer.parseInt(args[3]);
                     } catch (Exception exception) {
-                        ConfigManager.getMessageYaml().getStringList("MUST-NUMBER").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("MUST-NUMBER").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
                     if (limitAmountTargetPlayer == null) {
-                        ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
                     if (!WishManager.isEnabledWishLimit(setLimitAmountWishName)) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NOT-ENABLED-LIMIT").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("WISH-NOT-ENABLED-LIMIT").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
                     WishManager.setPlayerWishLimitAmount(limitAmountTargetPlayer, setLimitAmountWishName, setLimitAmount);
-                    ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                    messageYaml.getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
 
-                    break;
+                    return;
 
                 case "resetlimitamount":
                     if (args.length == 1) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
                     String resetLimitAmountWishName = args[1];
 
                     if (!WishManager.isEnabledWishLimit(resetLimitAmountWishName)) {
-                        ConfigManager.getMessageYaml().getStringList("WISH-NOT-ENABLED-LIMIT").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        messageYaml.getStringList("WISH-NOT-ENABLED-LIMIT").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
                         return;
                     }
 
                     WishManager.resetWishLimitAmount(resetLimitAmountWishName);
-                    ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                    messageYaml.getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
 
-                    break;
+                    return;
+
+                case "querywish":
+                    if (args.length == 1) {
+                        messageYaml.getStringList("WISH-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        return;
+                    }
+
+                    if (args.length == 2) {
+                        messageYaml.getStringList("PLAYER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        return;
+                    }
+
+                    if (args.length == 3) {
+                        messageYaml.getStringList("QUERY-WISH.START-NUMBER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        return;
+                    }
+
+                    if (args.length == 4) {
+                        messageYaml.getStringList("QUERY-WISH.END-NUMBER-NULL").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        return;
+                    }
+
+                    String queryWishName = args[1];
+
+                    Player queryPlayer = Bukkit.getPlayer(args[2]);
+                    String queryPlayerUUID = queryPlayer == null ? Bukkit.getOfflinePlayer(args[2]).getUniqueId().toString():
+                            queryPlayer.isOnline() ? queryPlayer.getUniqueId().toString() : Bukkit.getOfflinePlayer(args[2]).getUniqueId().toString();
+
+                    int startNumber;
+                    int endNumber;
+
+                    try {
+                        startNumber = Integer.parseInt(args[3]);
+                        endNumber = Integer.parseInt(args[4]);
+                    } catch (Exception exception) {
+                        messageYaml.getStringList("MUST-NUMBER").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        return;
+                    }
+
+                    if (!WishManager.isEnabledRecordWish(queryWishName)) {
+                        messageYaml.getStringList("WISH-NOT-ENABLED-LIMIT").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                        return;
+                    }
+
+                    List<String> logs = MongoManager.getMongoConnectState() == MongoConnectState.Connected ?
+                            MongoManager.getPlayerWishLog(queryPlayerUUID, startNumber, endNumber) :
+                            ConfigManager.getPlayerWishLog(queryPlayerUUID, startNumber, endNumber);
+
+                    int allLogsSize = MongoManager.getMongoConnectState() == MongoConnectState.Connected ?
+                            MongoManager.getWishLogsSize(queryPlayerUUID) : ConfigManager.getWishLogsSize(queryPlayerUUID);
+
+                    if (logs.size() <= 0 || allLogsSize <= 0)
+                    { for (String queryPrefix : messageYaml.getStringList("QUERY-WISH.LOGS-NULL")) sender.sendMessage(CC.replaceTranslateToPapi(queryPrefix)); return; }
+
+                    // 头消息
+                    for (String queryPrefix : messageYaml.getStringList("QUERY-WISH.PREFIX")) {
+                        if (queryPrefix.contains("<size>")) queryPrefix = queryPrefix.replaceAll("<size>", String.valueOf(logs.size()));
+                        if (queryPrefix.contains("<allSize>")) queryPrefix = queryPrefix.replaceAll("<allSize>", String.valueOf(allLogsSize));
+
+                        sender.sendMessage(CC.replaceTranslateToPapi(queryPrefix));
+                    }
+
+                    // 日志消息
+                    for (String queryLog : logs) {
+                        String[] queryLogSplit = queryLog.split(";");
+
+                        String queryLogTime = queryLogSplit[0].replace("-", " ");
+                        String queryLogPlayerName = queryLogSplit[1];
+                        String queryLogWishName = CC.unicodeToString(queryLogSplit[3]);
+                        String queryLogPrizeDo = queryLogSplit[4];
+
+                        for (String queryQuery : messageYaml.getStringList("QUERY-WISH.QUERY")) {
+                            queryQuery = CC.replaceTranslateToPapi(queryQuery);
+
+                            if (queryQuery.contains("<targetPlayer>")) queryQuery = queryQuery.replaceAll("<targetPlayer>", queryLogPlayerName);
+                            if (queryQuery.contains("<targetPlayerUUID>")) queryQuery = queryQuery.replaceAll("<targetPlayerUUID>", queryPlayerUUID);
+                            if (queryQuery.contains("<time>")) queryQuery = queryQuery.replaceAll("<time>", queryLogTime);
+                            if (queryQuery.contains("<wish>")) queryQuery = queryQuery.replaceAll("<wish>", queryLogWishName);
+                            if (queryQuery.contains("<prizeDo>")) queryQuery = queryQuery.replaceAll("<prizeDo>", queryLogPrizeDo);
+                            if (queryQuery.contains("<size>")) queryQuery = queryQuery.replaceAll("<size>", String.valueOf(logs.size()));
+
+                            sender.sendMessage(queryQuery);
+                        }
+                    }
+
+                    // 尾消息
+                    for (String querySuffix : messageYaml.getStringList("QUERY-WISH.SUFFIX")) {
+                        if (querySuffix.contains("<size>")) querySuffix = querySuffix.replaceAll("<size>", String.valueOf(logs.size()));
+                        if (querySuffix.contains("<allSize>")) querySuffix = querySuffix.replaceAll("<allSize>", String.valueOf(allLogsSize));
+
+                        sender.sendMessage(CC.replaceTranslateToPapi(querySuffix));
+                    }
+
+                    return;
 
                 case "reload":
                     RegisterManager.reload();
 
-                    ConfigManager.getMessageYaml().getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
+                    messageYaml.getStringList("DONE").forEach(message -> sender.sendMessage(CC.replaceTranslateToPapi(message)));
 
-                    break;
+                    return;
             }
         });
 

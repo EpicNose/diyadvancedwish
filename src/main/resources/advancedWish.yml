@@ -9,8 +9,8 @@
 USE-REDIS: false
 
 # 是否使用 Mongo 数据库 (默认不使用 Mongo)
-#  若开启则会将玩家的数据存储至 Mongo 数据库
-#  若关闭则会以 Json 的形式存储，Json 的存放路径可以在 GUARANTEED-PATH 进行更改
+#  若开启则会将玩家的数据与日志存储至 Mongo 数据库
+#  若关闭则会以 Json 的形式存储，Json 的存放路径可以在 GUARANTEED-PATH / LOGS-PATH 进行更改
 #  我们支持将 Json 数据迁移至 Mongo 数据库，请查看 TRANSFORMATION-JSON-TO-MONGO 选项
 USE-MONGO: false
 
@@ -33,6 +33,7 @@ MONGO:
 # 数据转换
 #  注意: 此功能的用处在于将 Json 数据迁移至 Mongo，不支持 Mongo 迁移至 Json
 #  在开启此功能前请先打开 USE-MONGO 选项，并且配置好 Mongo 数据库设置，迁移完成后服务器将会自动关闭，不会删除 Json 文件，关闭后您需要手动关闭此选项
+#  读取的 Json 路径为 GUARANTEED-PATH / LOGS-PATH 规定的路径
 TRANSFORMATION-JSON-TO-MONGO: false
 
 # 注册的许愿池
@@ -45,13 +46,18 @@ UPDATE-CHECKER: true
 # 检查周期，当自动更新开启后多少分钟进行一次检查
 CHECK-CYCLE: 60
 
-# 权限
+# 管理员指令权限
 ADMIN-PERM: "aw.admin"
 
-# 增率 (保底率) 存放路径
-# 如果您想要保底率进行跨服，那么只需要将子服的所有路径全部填写为一样的即可
-# 如果不进行填写那么默认在服务端插件文件夹下的 /PlayerGuaranteed 文件夹内
+# 增率 (保底率) 存放路径 (Json)
+#  如果您想要保底率进行跨服，并且不使用 Mongo，那么只需要将子服的所有此路径全部填写为一样的即可
+#  如果不进行填写那么默认在服务端插件文件夹下的 /PlayerGuaranteed 文件夹内
 GUARANTEED-PATH: ""
+
+# 玩家日志存放路径 (Json)
+#  如果您想要日志进行跨服，并且不适用 Mongo，那么只需要将子服的所有此路径全部填写为一样的即可
+#  如果不进行填写那么默认在服务端插件文件夹下的 /PlayerLogs 文件夹内
+LOGS-PATH: ""
 
 # bStats 将统计此插件的使用信息，不会收集隐私信息，请放心开启
 # bStats: https://bstats.org/plugin/bukkit/AdvancedWish/16990

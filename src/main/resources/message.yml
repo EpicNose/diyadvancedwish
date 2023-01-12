@@ -24,6 +24,8 @@ ADMIN-SHOW-COMMAND:
   - "&e • &6/aw setLimitAmount <许愿池> <玩家> <次数> &7- &7&o设置指定玩家指定许愿池的限制许愿次数."
   - "&e • &6/aw resetLimitAmount <许愿池> &7- &7&o重置所有玩家指定许愿池的限制许愿次数."
   - "<CHAT_BAR>"
+  - "&e • &6/aw queryWish <许愿池> <玩家> <开始条数> <结束条数> &7- &7&o查询指定玩家指定许愿池的指定条数日志."
+  - "<CHAT_BAR>"
   - "&e • &6/aw reload &7- &7&o重载插件."
   - "<CHAT_BAR>"
 
@@ -44,6 +46,8 @@ COMSOLE-SHOW-COMMAND:
   - "&e • &6/awc setGuaranteed <许愿池> <玩家> <保底率> &7- &7&o设置指定玩家指定许愿池的保底率."
   - "&e • &6/awc setLimitAmount <许愿池> <玩家> <次数> &7- &7&o设置指定玩家指定许愿池的限制许愿次数."
   - "&e • &6/awc resetLimitAmount <许愿池> &7- &7&o重置所有玩家指定许愿池的限制许愿次数."
+  - "<CHAT_BAR>"
+  - "&e • &6/awc queryWish <许愿池> <玩家> <开始条数> <结束条数> &7- &7&o查询指定玩家指定许愿池的指定条数日志."
   - "<CHAT_BAR>"
   - "&e • &6/awc reload &7- &7&o重载插件."
   - "<CHAT_BAR>"
@@ -92,3 +96,29 @@ MUST-NUMBER:
 
 WISH-NOT-ENABLED-LIMIT:
   - "&c您无法进行此操作, 此许愿池并没有许愿次数限制!"
+
+QUERY-WISH:
+  PREFIX:
+    - "<CHAT_BAR>"
+    - "&6&lAdvanced Wish &8- &7版本: <version> &8- &f抽奖查询"
+    - "<CHAT_BAR>"
+
+  QUERY:
+    - "&e • &6<targetPlayer> (<targetPlayerUUID>) &7在 &e<time> &7进行了抽奖, 奖池为: &e<wish>&7, 最终执行任务为: &e<prizeDo>&7."
+
+  SUFFIX:
+    - "<CHAT_BAR>"
+    - "&e • &7查询完成, 此次查询日志条数: &e<size> &7条! 此玩家日志总条数: &e<allSize> &7条!"
+    - "<CHAT_BAR>"
+
+  START-NUMBER-NULL:
+    - "&c您必须要规定开始条数才可以!"
+
+  END-NUMBER-NULL:
+    - "&c您必须要规定结束条数才可以!"
+
+  QUERY-NOT-ENABLED:
+    - "&c您无法进行此操作, 此许愿池并没有开启日志记录选项!"
+
+  LOGS-NULL:
+    - "&c没有查询到对应的日志记录, 此玩家没有抽奖? 开始条数或结束条数填写错误?"

@@ -38,13 +38,12 @@ public class CC {
 
     // 快捷替换方法
     public static String replaceTranslate(String message, Player player, Player replacePlayer) {
-        // replaceAll 区分大小写 所以使用正则 ?i 忽略大小写
-        if (message.contains("<version>")) message = message.replaceAll("(?i)<version>", plugin.getDescription().getVersion());
-        if (message.contains("<wishlist>")) message = message.replaceAll("(?i)<wishlist>", RegisterManager.getRegisterWish().toString());
+        if (message.contains("<version>")) message = message.replaceAll("<version>", plugin.getDescription().getVersion());
+        if (message.contains("<wishlist>")) message = message.replaceAll("<wishlist>", RegisterManager.getRegisterWish().toString());
 
-        if (message.contains("<player>") && player != null) message = message.replaceAll("(?i)<player>", player.getName());
-        if (message.contains("<rplayer>") && replacePlayer != null) message = message.replaceAll("(?i)<rplayer>", replacePlayer.getName());
-        if (message.contains("<CHAT_BAR>")) message = message.replaceAll("(?i)<CHAT_BAR>", CHAT_BAR);
+        if (message.contains("<player>") && player != null) message = message.replaceAll("<player>", player.getName());
+        if (message.contains("<rplayer>") && replacePlayer != null) message = message.replaceAll("<rplayer>", replacePlayer.getName());
+        if (message.contains("<CHAT_BAR>")) message = message.replaceAll("<CHAT_BAR>", CHAT_BAR);
 
         return CC.translate(message);
     }

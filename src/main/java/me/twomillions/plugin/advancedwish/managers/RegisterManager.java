@@ -123,8 +123,10 @@ public class RegisterManager {
         main.setGuaranteedPath(guaranteedConfig.equals("") ? main.getInstance().getDataFolder() + "/PlayerGuaranteed" : guaranteedConfig);
 
         // 低版本 Papi 没有 unregister 方法，捕获异常以取消 Papi 重载
-        try { if (isUsingPapi()) Bukkit.getScheduler().runTask(plugin, () -> { new PapiManager().unregister(); new PapiManager().register(); }); }
-        catch (Exception exception) { CC.sendConsoleMessage("&cPlaceholder 重载异常，这是最新版吗? 请尝试更新它: https://www.spigotmc.org/resources/placeholderapi.6245/，已取消 Placeholder 重载。"); }
+        if (isUsingPapi()) Bukkit.getScheduler().runTask(plugin, () -> {
+            try { new PapiManager().unregister(); new PapiManager().register(); }
+            catch (Exception exception) { CC.sendConsoleMessage("&cPlaceholder 重载异常，这是最新版吗? 请尝试更新它: https://www.spigotmc.org/resources/placeholderapi.6245/，已取消 Placeholder 重载。"); }
+        });
 
         // 设置 Vault 以及 PlayerPoints
         setupEconomy();

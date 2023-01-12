@@ -679,3 +679,9 @@ ADVANCED-SETTINGS:
         MESSAGE: "&6重置次数..!"
         COLOR: RANDOM
         STYLE: RANDOM
+
+  # 抽奖日志记录
+  #  具体实现原理: 当玩家许愿后创建对应计划任务时，我们会将此次抽奖的详细信息以 Json 或 Mongo 的形式进行记录。
+  #  若开启了 Mongo 数据库则记录在 Mongo 数据库内，反之则记录在 Json 文件内，Json 路径可在 advancedWish.yml 中 LOGS-PATH 项规定。
+  #  记录的日志文件是近乎不可读的，所以您需要在游戏内或者控制台使用指令获取详细日志。
+  RECORD-WISH: true

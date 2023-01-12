@@ -4,6 +4,7 @@ import com.mongodb.client.model.Filters;
 import de.leonhard.storage.Json;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
+import me.twomillions.plugin.advancedwish.enums.mongo.MongoCollections;
 import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
 import me.twomillions.plugin.advancedwish.enums.redis.RedisConnectState;
 import me.twomillions.plugin.advancedwish.enums.wish.CheckWishState;
@@ -15,6 +16,7 @@ import me.twomillions.plugin.advancedwish.utils.ItemUtils;
 import me.twomillions.plugin.advancedwish.utils.ProbabilityUntilities;
 import net.milkbowl.vault.economy.Economy;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -22,6 +24,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -224,6 +227,21 @@ public class WishManager {
     public static void addPlayerScheduledTasks(UUID uuid, Long time, String wishName, String doNode) {
         String scheduledTask = toPlayerScheduledTaskString(uuid, time, wishName, doNode);
 
+        // 日志记录
+        if (doNode.startsWith("PRIZE-DO") && isEnabledRecordWish(wishName)) {
+            String logTime = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss").format(time);
+
+            // 如果这个玩家在线则直接获取 若不在线则获取 offlinePlayer
+            Player player = Bukkit.getPlayer(uuid);
+            String playerName = player == null ? Bukkit.getOfflinePlayer(uuid).getName(): player.isOnline() ? player.getName() : Bukkit.getOfflinePlayer(uuid).getName();
+
+            String prizeDoString = doNode.split("\\.")[1];
+
+            String finalLogString = logTime + ";" + playerName + ";" + uuid + ";" + CC.stringToUnicode(wishName) + ";" + prizeDoString + ";";
+
+            if (MongoManager.getMongoConnectState() == MongoConnectState.Connected) MongoManager.addPlayerWishLog(uuid.toString(), finalLogString); else ConfigManager.addPlayerWishLog(uuid.toString(), finalLogString);
+        }
+
         // JedisUtils 内的 addList 方法会自动查重
         if (usingRedis) RedisManager.pushListValue("playerScheduledTasks", scheduledTask);
         else if (!playerScheduledTasks.contains(scheduledTask)) playerScheduledTasks.add(scheduledTask);
@@ -391,7 +409,7 @@ public class WishManager {
         String wishDataSync = getWishDataSync(wishName);
         String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName : wishDataSync);
 
-        if (usingMongo) { MongoManager.updatePlayerGuaranteed(player, dataSync, String.valueOf(guaranteed)); return; }
+        if (usingMongo) { MongoManager.update(player, dataSync, String.valueOf(guaranteed), MongoCollections.PlayerGuaranteed); return; }
 
         Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
 
@@ -403,7 +421,7 @@ public class WishManager {
         String wishDataSync = getWishDataSync(wishName);
         String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName : wishDataSync);
 
-        if (usingMongo) return Double.parseDouble(MongoManager.getOrDefaultPlayerGuaranteed(player, dataSync, "0"));
+        if (usingMongo) return Double.parseDouble(MongoManager.getOrDefault(player, dataSync, "0", MongoCollections.PlayerGuaranteed).toString());
 
         Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
 
@@ -415,7 +433,7 @@ public class WishManager {
         String wishDataSync = getWishDataSync(wishName);
         String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName + "_amount" : wishDataSync + "_amount");
 
-        if (usingMongo) { MongoManager.updatePlayerGuaranteed(player, dataSync, String.valueOf(amount)); return; }
+        if (usingMongo) { MongoManager.update(player, dataSync, String.valueOf(amount), MongoCollections.PlayerGuaranteed); return; }
 
         Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
 
@@ -427,7 +445,7 @@ public class WishManager {
         String wishDataSync = getWishDataSync(wishName);
         String dataSync = CC.stringToUnicode(wishDataSync.equals("") ? wishName + "_amount" : wishDataSync + "_amount");
 
-        if (usingMongo) return Integer.parseInt(MongoManager.getOrDefaultPlayerGuaranteed(player, dataSync, "0"));
+        if (usingMongo) return Integer.parseInt(MongoManager.getOrDefault(player, dataSync, "0", MongoCollections.PlayerGuaranteed).toString());
 
         Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
 
@@ -438,7 +456,7 @@ public class WishManager {
     public static void setPlayerWishLimitAmount(Player player, String wishName, int amount) {
         wishName = CC.stringToUnicode(wishName + "_limit_amount");
 
-        if (usingMongo) { MongoManager.updatePlayerGuaranteed(player, wishName, String.valueOf(amount)); return; }
+        if (usingMongo) { MongoManager.update(player, wishName, String.valueOf(amount), MongoCollections.PlayerGuaranteed); return; }
 
         Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
 
@@ -452,7 +470,7 @@ public class WishManager {
         // 如果没有开启就不用查询浪费资源
         if (!isEnabledWishLimit(wishName)) return 0;
 
-        if (usingMongo) return Integer.parseInt(MongoManager.getOrDefaultPlayerGuaranteed(player, wishName, "0"));
+        if (usingMongo) return Integer.parseInt(MongoManager.getOrDefault(player, wishName, "0", MongoCollections.PlayerGuaranteed).toString());
 
         Json json = ConfigManager.createJsonConfig(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
 
@@ -530,6 +548,13 @@ public class WishManager {
         Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
 
         return Boolean.parseBoolean(CC.replaceTranslateToPapi(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-COMPLETE-SEND-CONSOLE")));
+    }
+
+    // 获取指定许愿池 - RECORD-WISH
+    public static boolean isEnabledRecordWish(String wishName) {
+        Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
+
+        return Boolean.parseBoolean(CC.replaceTranslateToPapi(yaml.getString("ADVANCED-SETTINGS.RECORD-WISH")));
     }
 
     // 检查是否可以使用

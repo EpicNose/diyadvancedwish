@@ -23,6 +23,7 @@ import java.util.Arrays;
 public final class main extends JavaPlugin {
     // volatile 防止线程直接共享变量可能会有值更新不可见的问题
     @Getter @Setter private volatile static main instance;
+    @Getter @Setter private volatile static String logsPath;
     @Getter @Setter private volatile static Double serverVersion;
     @Getter @Setter private volatile static String guaranteedPath;
 
@@ -43,6 +44,8 @@ public final class main extends JavaPlugin {
         Yaml advancedWishYaml = ConfigManager.getAdvancedWishYaml();
 
         String pluginPath = main.getInstance().getDataFolder().toString();
+
+        String logsConfig = advancedWishYaml.getString("LOGS-PATH");
         String guaranteedConfig = advancedWishYaml.getString("GUARANTEED-PATH");
 
         // 设置 Redis
@@ -51,7 +54,8 @@ public final class main extends JavaPlugin {
         // 设置 Mongo
         if (MongoManager.setupMongo(advancedWishYaml) == MongoConnectState.CannotConnect) return;
 
-        // 获取保底率的指定路径
+        // 获取保底率与日志文件的指定路径
+        setLogsPath(logsConfig.equals("") ? pluginPath + "/PlayerLogs" : logsConfig);
         setGuaranteedPath(guaranteedConfig.equals("") ? pluginPath + "/PlayerGuaranteed" : guaranteedConfig);
 
         // 迁移检查

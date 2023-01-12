@@ -8,6 +8,7 @@ import de.leonhard.storage.internal.settings.DataType;
 import de.leonhard.storage.internal.settings.ReloadSettings;
 import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.utils.CC;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.io.File;
@@ -118,6 +119,72 @@ public class ConfigManager {
                     .setConfigSettings(ConfigSettings.PRESERVE_COMMENTS)
                     .setReloadSettings(ReloadSettings.AUTOMATICALLY)
                     .createJson();
+    }
+
+    // 添加玩家许愿日志
+    public static void addPlayerWishLog(Player player, String logString) {
+        Json json = createJsonConfig(player.getUniqueId().toString(), main.getLogsPath(), true, false);
+        List<String> logs = json.getStringList("logs"); logs.add(logString); json.set("logs", logs);
+    }
+
+    // 添加玩家许愿日志 - 多态 UUID
+    public static void addPlayerWishLog(String uuid, String logString) {
+        Json json = createJsonConfig(uuid, main.getLogsPath(), true, false);
+        List<String> logs = json.getStringList("logs"); logs.add(logString); json.set("logs", logs);
+    }
+
+    // 获取玩家许愿日志
+    public static List<String> getPlayerWishLog(Player player, int findMin, int findMax) {
+        Json json = createJsonConfig(player.getUniqueId().toString(), main.getLogsPath(), true, false);
+
+        List<String> returnLogs = new ArrayList<>();
+        List<String> getLogs = json.getStringList("logs");
+
+        // 从 0 开始，所以 +1
+        int query = 1;
+
+        for (String log : getLogs) {
+            if (query > findMax) break;
+            if (query < findMin) { query ++; continue; }
+
+            returnLogs.add(log); query ++;
+        }
+
+        return returnLogs;
+    }
+
+    // 获取玩家许愿日志 - 多态 UUID
+    public static List<String> getPlayerWishLog(String uuid, int findMin, int findMax) {
+        Json json = createJsonConfig(uuid, main.getLogsPath(), true, false);
+
+        List<String> returnLogs = new ArrayList<>();
+        List<String> getLogs = json.getStringList("logs");
+
+        // 从 0 开始，所以 +1
+        int query = 1;
+
+        for (String log : getLogs) {
+            if (query > findMax) break;
+            if (query < findMin) { query ++; continue; }
+
+            returnLogs.add(log); query ++;
+        }
+
+        return returnLogs;
+    }
+
+    // 获取玩家所有日志条目数
+    public static int getWishLogsSize(Player player) {
+        Json json = createJsonConfig(player.getUniqueId().toString(), main.getLogsPath(), true, false);
+
+        return json.getStringList("logs").size();
+    }
+
+    // 获取玩家所有日志条目数
+    public static int getWishLogsSize(String uuid) {
+        Json json = createJsonConfig(uuid, main.getLogsPath(), true, false);
+
+        return json.getStringList("logs").size();
     }
 
     // 获取一个文件夹下所有文件的名称 不包括此文件夹下的文件夹
