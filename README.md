@@ -37,6 +37,7 @@
 - /aw setGuaranteed <许愿池> <玩家> <保底率> - 设置指定玩家指定许愿池的保底率.
 - /aw setLimitAmount <许愿池> <玩家> <次数> - 设置指定玩家指定许愿池的限制许愿次数.
 - /aw resetLimitAmount <许愿池> - 重置所有玩家指定许愿池的限制许愿次数.
+- /aw queryWish <许愿池> <玩家> <开始条数> <结束条数> - 查询指定玩家指定许愿池的指定条数日志.
 - /aw reload - 重载插件.
 ---
 > 控制台指令
@@ -50,6 +51,7 @@
 - /awc setGuaranteed <许愿池> <玩家> <保底率> - 设置指定玩家指定许愿池的保底率.
 - /awc setLimitAmount <许愿池> <玩家> <次数> - 设置指定玩家指定许愿池的限制许愿次数.
 - /awc resetLimitAmount <许愿池> - 重置所有玩家指定许愿池的限制许愿次数.
+- /awc queryWish <许愿池> <玩家> <开始条数> <结束条数> - 查询指定玩家指定许愿池的指定条数日志.
 - /awc reload - 重载插件.
 ---
 ## Placeholder API

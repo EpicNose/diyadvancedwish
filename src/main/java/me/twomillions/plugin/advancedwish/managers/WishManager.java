@@ -197,7 +197,7 @@ public class WishManager {
                 addPlayerWishPrizeDo(player, wishName, getWishPrizeSetPrizeDo(finalProbabilityWish));
                 addPlayerScheduledTasks(uuid, time, wishName, "PRIZE-DO." + getWishPrizeSetPrizeDo(randomFinalProbabilityWish));
 
-                return;
+                continue;
             }
 
             if (scheduledTasksPrizeDo.equals("GO-PRIZE-DO")) addPlayerScheduledTasks(uuid, time, wishName, wishItemPrizeDo);
@@ -466,10 +466,10 @@ public class WishManager {
 
     // 获取玩家指定许愿池的限制许愿数
     public static Integer getPlayerWishLimitAmount(Player player, String wishName) {
-        wishName = CC.stringToUnicode(wishName + "_limit_amount");
-
         // 如果没有开启就不用查询浪费资源
         if (!isEnabledWishLimit(wishName)) return 0;
+
+        wishName = CC.stringToUnicode(wishName + "_limit_amount");
 
         if (usingMongo) return Integer.parseInt(MongoManager.getOrDefault(player, wishName, "0", MongoCollections.PlayerGuaranteed).toString());
 
