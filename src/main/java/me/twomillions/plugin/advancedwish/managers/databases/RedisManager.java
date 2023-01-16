@@ -49,7 +49,7 @@ public class RedisManager {
 
         // Redis 连接状态检查
         // Redis 的 Ping 命令使用客户端向服务器发送一个 Ping，如果与 Redis 服务器通信正常的话 会返回一个 Pong 否则返回一个连接错误
-        // 所以这就是确定 Redis 服务与本项目是否连通的依据，使用 try cache 捕获异常来检查连接状态
+        // 所以这就是确定 Redis 服务与本项目是否连通的依据，使用 try catch 捕获异常来检查连接状态
         try (Jedis jedis = jedisPool.getResource()) {
             if (getRedisAuthState() == RedisAuthState.UsingAuth) jedis.auth(getRedisPassword());
             jedis.ping();
