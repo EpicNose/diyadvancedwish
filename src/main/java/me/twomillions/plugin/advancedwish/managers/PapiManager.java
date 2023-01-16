@@ -50,19 +50,19 @@ public class PapiManager extends PlaceholderExpansion {
 
             // 其他玩家查询
             if (params.startsWith("amount_" + wishName + "_")) {
-                Player targetPlayer2 = Bukkit.getPlayerExact(params.split("_")[2]);
+                Player targetPlayer2 = Bukkit.getPlayerExact(params.replace("amount_" + wishName + "_", ""));
                 if (targetPlayer2 == null) return "&7Unknown";
                 return Integer.toString(WishManager.getPlayerWishAmount(targetPlayer, wishName));
             }
 
             if (params.startsWith("guaranteed_" + wishName + "_")) {
-                Player targetPlayer2 = Bukkit.getPlayerExact(params.split("_")[2]);
+                Player targetPlayer2 = Bukkit.getPlayerExact(params.replace("guaranteed_" + wishName + "_", ""));
                 if (targetPlayer2 == null) return "&7Unknown";
                 return Double.toString(WishManager.getPlayerWishGuaranteed(targetPlayer, wishName));
             }
 
             if (params.startsWith("limit_amount_" + wishName + "_")) {
-                Player targetPlayer2 = Bukkit.getPlayerExact(params.split("_")[2]);
+                Player targetPlayer2 = Bukkit.getPlayerExact(params.replace("limit_amount_" + wishName + "_", ""));
                 if (targetPlayer2 == null) return "&7Unknown";
                 return Integer.toString(WishManager.getPlayerWishLimitAmount(targetPlayer, wishName));
             }

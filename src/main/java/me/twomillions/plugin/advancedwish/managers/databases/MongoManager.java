@@ -259,8 +259,7 @@ public class MongoManager {
                 Set<String> jsonKeySet = json.keySet();
                 jsonKeySetAmount = jsonKeySetAmount + jsonKeySet.size();
 
-                for (String key : jsonKeySet)
-                    update(guaranteedFileName.split(".json")[0], key, json.get(key), MongoCollections.PlayerGuaranteed);
+                for (String key : jsonKeySet) update(guaranteedFileName.split(".json")[0], key, json.get(key), MongoCollections.PlayerGuaranteed);
             }
         } else CC.sendConsoleMessage("&c未发现需要进行迁移的玩家许愿 Json 数据，跳过玩家许愿数据迁移。");
 
@@ -271,8 +270,7 @@ public class MongoManager {
                 Set<String> jsonKeySet = json.keySet();
                 jsonKeySetAmount = jsonKeySetAmount + jsonKeySet.size();
 
-                for (String key : jsonKeySet)
-                    update(logsFileName.split(".json")[0], key, json.get(key), MongoCollections.PlayerLogs);
+                for (String key : jsonKeySet) update(logsFileName.split(".json")[0], key, json.get(key), MongoCollections.PlayerLogs);
             }
         } else CC.sendConsoleMessage("&c未发现需要进行迁移的玩家许愿日志 Json 数据，跳过玩家许愿日志数据迁移。");
 

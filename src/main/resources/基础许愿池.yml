@@ -451,6 +451,8 @@ PRIZE-DO:
 
 # 当玩家许愿一次后没有等待最终奖品发放便尝试二次许愿时
 CANT-WISH-AGAIN:
+  EFFECTS:
+    - ""
   TITLE:
     MAIN-TITLE: "&7虚弱..."
     SUB-TITLE: "&7我现在无法再次进行许愿..."
@@ -484,6 +486,8 @@ CANT-WISH-AGAIN:
 
 # 当玩家没有满足许愿条件但是尝试许愿时
 CANT-WISH:
+  EFFECTS:
+    - ""
   TITLE:
     MAIN-TITLE: "&7不行..."
     SUB-TITLE: "&7我没有足够的力量向神明祈祷..."
@@ -522,6 +526,8 @@ CACHE-SETTINGS:
   WAIT-JOIN: 2 # 我们应该在玩家进入多久后发送 CACHE-SETTINGS 里面的效果内容
 
   # 当玩家有未发放完成的奖励时当玩家进服显示的提示内容
+  EFFECTS:
+    - ""
   TITLE:
     MAIN-TITLE: "&a奖励补发!"
     SUB-TITLE: "&7服务器将在 2 秒后重新补发奖励!"
@@ -610,6 +616,8 @@ ADVANCED-SETTINGS:
 
     # 当玩家到达许愿次数限制后尝试许愿的效果
     REACH-LIMIT:
+      EFFECTS:
+        - ""
       TITLE:
         MAIN-TITLE: "&7虚弱..."
         SUB-TITLE: "&7我现在无法再次进行许愿..."
@@ -649,6 +657,8 @@ ADVANCED-SETTINGS:
     #  那么就会一次性发送非常多的效果，玩家视角混乱不堪，您可以为不同的许愿池设置不同的重置时间，将其间隔增加几秒。
     #  这样就会整齐一些，这个许愿池发送完毕发送另一个，看起来十分舒适整洁。
     RESET-COMPLETE:
+      EFFECTS:
+        - ""
       TITLE:
         MAIN-TITLE: "&6重置次数..!"
         SUB-TITLE: "&7基础许愿池限制已重置!"
