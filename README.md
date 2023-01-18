@@ -13,7 +13,10 @@
 ---
 > 此插件的配置文件较多，但是非常简单，您可以通过查看 Wiki 来快速了解插件内容 -> https://gitee.com/A2000000/advanced-wish/wikis#
 ---
-## 指令
+## 开源协议
+- 此项目使用 WTFPL (Do What The Fuck You Want To Public License) 开源协议，中文翻译: 你他妈的想干嘛就干嘛公共许可证。 字面意思，您可以使用 Advanced Wish 做任何事情，不受限制。
+---
+## 指令介绍
 > 主要指令 - 普通用户
 - /aw list - 查看许愿池列表.
 - /aw makeWish <许愿池> - 对规定的许愿池进行许愿.
