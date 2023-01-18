@@ -2,18 +2,19 @@
 
 ## 一个简单且高度可定制的许愿 (抽奖) 插件!
 
+> Gitee
+- https://gitee.com/A2000000/advanced-wish
+---
 > Mcbbs
 - https://www.mcbbs.net/thread-1397853-1-1.html
 ---
 > bStats
 - https://bstats.org/plugin/bukkit/AdvancedWish/16990
 ---
-> Gitee
-- https://gitee.com/A2000000/advanced-wish
----
-> 此插件的配置文件较多，但是非常简单，您可以通过查看 Wiki 来快速了解插件内容 -> https://gitee.com/A2000000/advanced-wish/wikis#
+> 此插件的配置文件较多，但是非常简单，您可以通过查看配置文件内注释来了解此插件的各种信息。
 ---
 ## 开源协议
+> WTFPL
 - 此项目使用 WTFPL (Do What The Fuck You Want To Public License) 开源协议，中文翻译: 你他妈的想干嘛就干嘛公共许可证。 字面意思，您可以使用 Advanced Wish 做任何事情，不受限制。
 ---
 ## 指令介绍
@@ -66,15 +67,14 @@
 - aw_limit_amount_许愿池名_玩家名 - 获取指定玩家指定许愿池的限制许愿次数.
 ---
 ## 注意事项
-> 注意
-- 此插件在 0.0.3.0-SNAPSHOT 后已经支持连抽，如果您是低版本，那么您需要重新生成配置文件来保证连抽正常使用。
-- 如果您需要许愿 Gui，那么您需要使用第三方的菜单插件制作，此插件不会自带菜单功能 (这是臃肿的，用户需要多学一种 Gui 的写法) 。
-- 我们提供了 DeluxeMenu 的许愿预设，您可以参考此预设进行编写 -> [DeluxeMenu 配套预设](https://gitee.com/A2000000/advanced-wish/tree/main/DeluxeMenu%20%E9%85%8D%E5%A5%97%E8%8F%9C%E5%8D%95)
-- 我们提供了 DragonCore 的许愿预设，您可以参考此预设对龙之核心进行兼容 -> [DragonCore 配套预设](https://gitee.com/A2000000/advanced-wish/tree/main/DragonCore%20%E9%85%8D%E5%A5%97%E7%95%8C%E9%9D%A2)
-- 如果您想要提供更多的菜单预设，比如 TrMenu 那么您可以联系我或发送 Pull Request.
----
 > Redis 跨服
 - 如果您想要了解 Redis 在此插件的具体作用，那么您可以去看默认许愿池配置文件内的 WAIT-SET 项注释，那里写的非常清除。
+---
+> 可视化界面
+- 此插件不自带界面功能，您需要使用第三方的菜单插件制作。
+- 我们提供了 DeluxeMenu 界面预设，您可以参考此预设进行编写: [DeluxeMenu 预设](https://gitee.com/A2000000/advanced-wish/tree/main/DeluxeMenu%20%E9%85%8D%E5%A5%97%E8%8F%9C%E5%8D%95)
+- 我们提供了 DragonCore 界面预设，您可以参考此预设对龙之核心进行兼容: [DragonCore 预设](https://gitee.com/A2000000/advanced-wish/tree/main/DragonCore%20%E9%85%8D%E5%A5%97%E7%95%8C%E9%9D%A2)
+- Mcbbs 用户 [如初235137](https://www.mcbbs.net/home.php?mod=space&uid=4803002&do=thread&view=me&from=space) 提供的 DragonCore 界面预设，您可以参考此设置对龙之核心进行兼容: [如初235137 DragonCore 预设](https://www.mcbbs.net/thread-1416886-1-1.html)
 ---
 ## 兼容性
 > 目前支持的经济插件
