@@ -215,12 +215,12 @@ public class WishManager {
 
     // 获取许愿池计划任务的延迟秒数
     public static int getWishScheduledTasksSeconds(String wishScheduledTasksString) {
-        return Integer.parseInt(CC.count(wishScheduledTasksString.split(";") [0]).toString());
+        return Integer.parseInt(CC.count(CC.getRandomSentenceResult(wishScheduledTasksString.split(";") [0])).toString());
     }
 
     // 获取许愿池计划任务的执行操作
     public static String getWishScheduledTasksPrizeDo(String wishScheduledTasksString) {
-        return wishScheduledTasksString.split(";") [1];
+        return CC.getRandomSentenceResult(wishScheduledTasksString.split(";") [1]);
     }
 
     // 此方法将用于添加玩家对应时间段的对应任务 (计划任务)
@@ -272,24 +272,24 @@ public class WishManager {
         return yaml.getStringList("PRIZE-SET");
     }
 
-    // 获取奖品的许愿概率 - PrizeSet
-    public static int getWishPrizeSetProbability(String wishPrizeSetString) {
-        return Integer.parseInt(CC.count(wishPrizeSetString.split(";") [0]).toString());
+    // 获取奖品的 PRIZE-DO / GUARANTEED 执行项
+    public static String getWishPrizeSetPrizeDo(String wishPrizeSetStringOrWishGuaranteedString) {
+        return CC.getRandomSentenceResult(wishPrizeSetStringOrWishGuaranteedString.split(";") [1]);
     }
 
-    // 获取奖品的 PRIZE-DO 执行项 - PrizeSet
-    public static String getWishPrizeSetPrizeDo(String wishPrizeSetString) {
-        return wishPrizeSetString.split(";") [1];
+    // 获取奖品的许愿概率 - PrizeSet
+    public static int getWishPrizeSetProbability(String wishPrizeSetString) {
+        return Integer.parseInt(CC.count(CC.getRandomSentenceResult(wishPrizeSetString.split(";") [0])).toString());
     }
 
     // 获取奖品的增加的保底率 - PrizeSet
     public static double getWishPrizeSetGuaranteed(String wishPrizeSetString) {
-        return Double.parseDouble(CC.count(wishPrizeSetString.split(";") [2]).toString());
+        return Double.parseDouble(CC.count(CC.getRandomSentenceResult(wishPrizeSetString.split(";") [2])).toString());
     }
 
     // 获取此奖品是否清零保底率 - PrizeSet
     public static boolean isWishPrizeSetClearGuaranteed(String wishPrizeSetString) {
-        return Boolean.parseBoolean(wishPrizeSetString.split(";") [3]);
+        return Boolean.parseBoolean(CC.getRandomSentenceResult(wishPrizeSetString.split(";") [3]));
     }
 
     // 获取 GUARANTEED 列表
@@ -301,22 +301,17 @@ public class WishManager {
     // 获取 GUARANTEED 保底率
     // 格式: 保底率[0];PRIZE-DO内所执行项[1];增加的保底率[2];是否清空保底率[3]
     public static double getWishGuaranteed(String wishGuaranteedString) {
-        return Double.parseDouble(CC.count(wishGuaranteedString.split(";") [0]).toString());
-    }
-
-    // 获取 GUARANTEED PRIZE-DO 内所执行项
-    public static String getWishGuaranteedPrizeDo(String wishGuaranteedString) {
-        return wishGuaranteedString.split(";") [1];
+        return Double.parseDouble(CC.count(CC.getRandomSentenceResult(wishGuaranteedString.split(";") [0])).toString());
     }
 
     // 获取 GUARANTEED PRIZE-DO 增加的保底率
     public static double getWishGuaranteedMinimumRate(String wishGuaranteedString) {
-        return Double.parseDouble(CC.count(wishGuaranteedString.split(";") [2]).toString());
+        return Double.parseDouble(CC.count(CC.getRandomSentenceResult(wishGuaranteedString.split(";") [2])).toString());
     }
 
     // 获取 GUARANTEED PRIZE-DO 是否清空保底率
     public static boolean isWishGuaranteedClearGuaranteed(String wishGuaranteedString) {
-        return Boolean.parseBoolean(wishGuaranteedString.split(";") [3]);
+        return Boolean.parseBoolean(CC.getRandomSentenceResult(wishGuaranteedString.split(";") [3]));
     }
 
     // 获取指定许愿池的自定义许愿数量增加
@@ -331,9 +326,6 @@ public class WishManager {
     public static String getFinalProbabilityWish(Player player, String wishName) {
         // 检查保底
         for (String wishGuaranteedString : getWishGuaranteedList(wishName)) {
-            // randomSentence 语句支持
-            wishGuaranteedString = CC.getRandomSentenceResult(wishGuaranteedString, false);
-
             if (getPlayerWishGuaranteed(player, wishName) == getWishGuaranteed(CC.replaceTranslateToPapi(wishGuaranteedString, player))) {
                 // 保底率的增加与清空
                 setPlayerWishGuaranteed(player, wishName, wishGuaranteedString, true);

@@ -108,7 +108,7 @@ public class CC {
 
     // 随机语句
     // 示例语句: randomSentence(A#10~B#20~C#30)end
-    public static String getRandomSentenceResult(String randomSentence, boolean returnResult) {
+    public static String getRandomSentenceResult(String randomSentence) {
         if (!randomSentence.contains("randomSentence(") || !randomSentence.contains(")end")) return randomSentence;
 
         ProbabilityUntilities probabilities = new ProbabilityUntilities();
@@ -118,7 +118,8 @@ public class CC {
 
             for (String randomSentenceSplitString : randomSentenceSplit) {
                 String[] random = randomSentenceSplitString.split("#");
-                String randomObject = random[0];
+
+                Object randomObject = random[0];
                 int probability = Integer.parseInt(random[1]);
 
                 probabilities.addChance(randomObject, probability);
@@ -132,8 +133,7 @@ public class CC {
 
         String randomElement = probabilities.getRandomElement().toString();
 
-        if (returnResult) return randomElement;
-        else return stringInterceptReplace(randomSentence, "randomSentence(", ")end", randomElement, true);
+        return stringInterceptReplace(randomSentence, "randomSentence(", ")end", randomElement, true);
     }
 
     // 字符串内算数

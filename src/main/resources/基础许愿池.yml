@@ -46,6 +46,14 @@ CONDITION:
 #  自从 0.0.3.2-SNAPSHOT 后 (包括)，我们将会先检查是否清空保底率，再去添加您指定的保底率。
 #  比如: "30;A;5;true"，那么将会先清除玩家的保底率，随后为玩家添加 5 点的保底率。
 #
+# randomSentence 语句:
+#  randomSentence 语句是在 0.0.3.2-SNAPSHOT 版本后新加入的随机语句。
+#  它由 "randomSentence(" 开头，由 ")end" 结尾，括号内则为随机内容，示例: randomSentence(A#10~B#20~C#30)end
+#  在示例语句中，随机内容为 A#10~B#20~C#30，这意味着，我们将随机 A B C 三个内容，A 的概率为 10，B 为 20，C 为 30
+#  而总概率则为 A 的概率 + B 的概率 + C 的概率，则为 60。这个语句可以无限随机，如: randomSentence(A#10~B#20~C#30~D#40~E#50)end
+#  您可以用 randomSentence 语句来进行保底的随机，奖品的二次随机，等等一系列复杂的操作。
+#
+# 支持 randomSentence 语句的部分有: 全部
 # 支持的算数部分有: 几率 / 增加的增率 (保底率)
 PRIZE-SET:
   - "5;A;0;true"
@@ -80,15 +88,8 @@ PRIZE-SET:
 #  自从 0.0.3.2-SNAPSHOT 后 (包括)，我们将会先检查是否清空保底率，再去添加您指定的保底率。
 #  比如: "30;A;5;true"，那么将会先清除玩家的保底率，随后为玩家添加 5 点的保底率。
 #
-# randomSentence 语句:
-#  randomSentence 语句是在 0.0.3.2-SNAPSHOT 版本后新加入的随机语句。
-#  它由 "randomSentence(" 开头，由 ")end" 结尾，括号内则为随机内容，示例: randomSentence(A#10~B#20~C#30)end
-#  在示例语句中，随机内容为 A#10~B#20~C#30，这意味着，我们将随机 A B C 三个内容，A 的概率为 10，B 为 20，C 为 30
-#  而总概率则为 A 的概率 + B 的概率 + C 的概率，则为 60。这个语句可以无限随机，如: randomSentence(A#10~B#20~C#30~D#40~E#50)end
-#  您可以用 randomSentence 语句来进行保底的随机。
-#
+# 支持 randomSentence 语句的部分有: 全部
 # 支持的算数部分有: 增率 (保底率) / 增加的增率 (保底率)
-# 支持 randomSentence 语句的部分有: PRIZE-DO内所执行项
 GUARANTEED:
   - "30;randomSentence(A#50~B#10)end;0;true" # 这里是大保底，有 1/6 的几率歪到 B，5/6 的几率是 A
   - "15;B;1;false" # 这里是小保底
@@ -143,6 +144,7 @@ GUARANTEED:
 #   - "6;RANDOM-PRIZE-DO" - 这里是第三抽
 #
 # 支持的算数部分有: 等待秒数
+# 支持 randomSentence 语句的部分有: 全部
 WAIT-SET:
   - "0;START"
   - "1;C1"
