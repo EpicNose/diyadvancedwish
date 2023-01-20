@@ -33,7 +33,7 @@ public class PlayerTimestampTask {
                     long currentTimeMillis = System.currentTimeMillis();
                     long time = Long.parseLong(WishManager.getPlayerScheduledTaskStringTime(playerScheduledTask));
 
-                    if (time > currentTimeMillis) return;
+                    if (time > currentTimeMillis) continue;
 
                     String doNode = WishManager.getPlayerScheduledTaskStringDoNode(playerScheduledTask);
                     String wishName = WishManager.getPlayerScheduledTaskStringWishName(playerScheduledTask);
