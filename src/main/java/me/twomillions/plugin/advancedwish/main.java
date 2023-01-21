@@ -41,7 +41,12 @@ public final class main extends JavaPlugin {
                 .replace("_", "0").replace("[", "").replace("]", "")));
 
         ConfigManager.createDefaultConfig();
+
+        Yaml messageYaml = ConfigManager.getMessageYaml();
         Yaml advancedWishYaml = ConfigManager.getAdvancedWishYaml();
+
+        // 版本检查
+        if (!ConfigManager.checkLastVersion(messageYaml) || !ConfigManager.checkLastVersion(advancedWishYaml)) return;
 
         String pluginPath = main.getInstance().getDataFolder().toString();
 
@@ -80,7 +85,7 @@ public final class main extends JavaPlugin {
         // 所以这里检查服内是否有此玩家，如果有的话那么就为所有玩家启动 PlayerTimestampRunnable
         if (Bukkit.getOnlinePlayers().size() != 0) Bukkit.getOnlinePlayers().forEach(PlayerTimestampTask::startTask);
 
-        CC.sendConsoleMessage("&eAdvanced Wish 插件已成功加载! 感谢您使用此插件! 版本: " + this.getDescription().getVersion() + ", 作者: 2000000。");
+        CC.sendConsoleMessage("&aAdvanced Wish 插件已成功加载! 感谢您使用此插件! 版本: &e" + this.getDescription().getVersion() + "&a, 作者: &e2000000&a。");
     }
 
     @Override

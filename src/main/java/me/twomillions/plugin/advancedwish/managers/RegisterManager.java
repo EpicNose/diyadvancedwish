@@ -1,5 +1,6 @@
 package me.twomillions.plugin.advancedwish.managers;
 
+import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import lombok.Setter;
 import me.twomillions.plugin.advancedwish.commands.ConsoleCommand;
@@ -46,7 +47,7 @@ public class RegisterManager {
         if (manager.isPluginEnabled("PlaceholderAPI")) {
             setUsingPapi(true);
 
-            CC.sendConsoleMessage("&a检查到服务器存在 PlaceholderAPI 插件，已注册 PlaceholderAPI 变量。");
+            CC.sendConsoleMessage("&a检查到服务器存在 &ePlaceholderAPI&a，已注册 &ePlaceholderAPI&a 变量。");
 
             new PapiManager().register();
         }
@@ -66,7 +67,9 @@ public class RegisterManager {
         for (String wishName : ConfigManager.getAdvancedWishYaml().getStringList("WISH")) {
             if (wishName == null || wishName.equals("") || wishName.equals(" ")) return;
 
-            ConfigManager.createYamlConfig(wishName, "/Wish", false, true);
+            Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, true);
+
+            if (!ConfigManager.checkLastVersion(yaml)) return;
 
             registerWish.add(wishName);
 
@@ -87,16 +90,16 @@ public class RegisterManager {
 
         RegisteredServiceProvider<Economy> registeredServiceProvider = Bukkit.getServer().getServicesManager().getRegistration(Economy.class);
 
-        if (registeredServiceProvider == null) { CC.sendConsoleMessage("&c检查到服务器存在 Vault，但并没有实际插件进行操作? 取消对于 Vault 的设置。"); return; }
+        if (registeredServiceProvider == null) { CC.sendConsoleMessage("&c检查到服务器存在 &eVault&c，但并没有实际插件进行操作? 取消对于 &eVault&c 的设置。"); return; }
 
         try { setEconomy(registeredServiceProvider.getProvider()); }
         catch (Exception exception) {
-            CC.sendConsoleMessage("&c检查到服务器存在 Vault，但 Vault 设置错误，这是最新版吗? 请尝试更新它: https://www.spigotmc.org/resources/vault.34315/，服务器即将关闭。");
+            CC.sendConsoleMessage("&c检查到服务器存在 &eVault&c，但 &eVault&c 设置错误，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/vault.34315/&c，服务器即将关闭。");
             Bukkit.shutdown();
             return;
         }
 
-        CC.sendConsoleMessage("&a检查到服务器存在 Vault，已成功设置 Vault。");
+        CC.sendConsoleMessage("&a检查到服务器存在 &eVault&a，已成功设置 &eVault&a。");
     }
 
     // 设置 PlayerPoints
@@ -105,12 +108,12 @@ public class RegisterManager {
 
         try { setPlayerPointsAPI(PlayerPoints.getInstance().getAPI()); }
         catch (Exception exception) {
-            CC.sendConsoleMessage("&c检查到服务器存在 PlayerPoints，但 PlayerPoints 设置错误，这是最新版吗? 请尝试更新它: https://www.spigotmc.org/resources/playerpoints.80745/，服务器即将关闭。");
+            CC.sendConsoleMessage("&c检查到服务器存在 &ePlayerPoints&c，但 &ePlayerPoints&c 设置错误，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/playerpoints.80745/&c，服务器即将关闭。");
             Bukkit.shutdown();
             return;
         }
 
-        CC.sendConsoleMessage("&a检查到服务器存在 PlayerPoints，已成功设置 PlayerPoints。");
+        CC.sendConsoleMessage("&a检查到服务器存在 &ePlayerPoints&a，已成功设置 &ePlayerPoints&a。");
     }
 
     // Reload 方法
@@ -125,7 +128,7 @@ public class RegisterManager {
         // 低版本 Papi 没有 unregister 方法，捕获异常以取消 Papi 重载
         if (isUsingPapi()) Bukkit.getScheduler().runTask(plugin, () -> {
             try { new PapiManager().unregister(); new PapiManager().register(); }
-            catch (Exception exception) { CC.sendConsoleMessage("&cPlaceholder 重载异常，这是最新版吗? 请尝试更新它: https://www.spigotmc.org/resources/placeholderapi.6245/，已取消 Placeholder 重载。"); }
+            catch (Exception exception) { CC.sendConsoleMessage("&ePlaceholder&c 重载异常，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/placeholderapi.6245/&c，已取消 &ePlaceholder&c 重载。"); }
         });
 
         // 设置 Vault 以及 PlayerPoints

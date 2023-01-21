@@ -8,6 +8,7 @@ import de.leonhard.storage.internal.settings.DataType;
 import de.leonhard.storage.internal.settings.ReloadSettings;
 import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.utils.CC;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -27,8 +28,8 @@ public class ConfigManager {
 
     // 创建默认配置
     public static void createDefaultConfig() {
-        createYamlConfig("advancedWish", null, false, true);
         createYamlConfig("message", null, false, true);
+        createYamlConfig("advancedWish", null, false, true);
     }
 
     // 获取配置文件
@@ -49,6 +50,29 @@ public class ConfigManager {
         if (!file.exists()) CC.sendConsoleMessage("&c运行有误，请检查配置文件是否被误删! 开始重新创建配置文件!");
 
         return createYamlConfig("message", null, false, true);
+    }
+
+    // 获取配置文件版本
+    public static int getConfigVersion(Yaml yaml) {
+        return yaml.getInt("CONFIG-VERSION");
+    }
+
+    // 获取最新的配置文件版本
+    public static int getLastConfigVersion() {
+        return Integer.parseInt(plugin.getDescription().getVersion().replace(".", "").split("-") [0]);
+    }
+
+    // 检查配置文件版本是否为最新版
+    public static boolean isLastConfigVersion(Yaml yaml) {
+        return getConfigVersion(yaml) == getLastConfigVersion();
+    }
+
+    // 检查配置文件版本，若为旧版本则发送提示信息并关闭服务器
+    public static boolean checkLastVersion(Yaml yaml) {
+        String yamlFileName = yaml.getFile().getName().replace(".yml", "");
+
+        if (isLastConfigVersion(yaml)) { CC.sendConsoleMessage("&a检查到 &e" + yamlFileName + " &aYaml 文件为最新版! 已通过更新验证!"); return true; }
+        else { CC.sendConsoleMessage("&c检查到 &e" + yamlFileName + " &cYaml 文件不是最新版! 即将关闭服务器，请重新生成配置文件补全以防止错误!"); Bukkit.shutdown(); return false; }
     }
 
     // 创建指定配置文件 - Yaml
