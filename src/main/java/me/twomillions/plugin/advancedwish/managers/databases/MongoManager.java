@@ -10,10 +10,7 @@ import de.leonhard.storage.Json;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import lombok.Setter;
-import me.twomillions.plugin.advancedwish.enums.mongo.JsonTransformationMongoState;
-import me.twomillions.plugin.advancedwish.enums.mongo.MongoAuthState;
-import me.twomillions.plugin.advancedwish.enums.mongo.MongoCollections;
-import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
+import me.twomillions.plugin.advancedwish.enums.mongo.*;
 import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.managers.ConfigManager;
 import me.twomillions.plugin.advancedwish.utils.CC;
@@ -41,6 +38,7 @@ public class MongoManager {
 
     @Getter @Setter private volatile static MongoAuthState mongoAuthState;
     @Getter @Setter private volatile static MongoConnectState mongoConnectState;
+    @Getter @Setter private volatile static MongoCustomUrlState mongoCustomUrlState;
 
     // 设置 Mongo
     public static MongoConnectState setupMongo(Yaml yaml) {
@@ -56,14 +54,21 @@ public class MongoManager {
         String mongoUser = yaml.getString("MONGO.AUTH.USER");
         String mongoPassword = yaml.getString("MONGO.AUTH.PASSWORD");
 
-        if (mongoUser.equals("") || mongoPassword.equals("")) {
-            setMongoAuthState(MongoAuthState.TurnOff);
-            setMongoClientUrlString("mongodb://" + mongoIP + ":" + mongoPort);
-        } else {
-            setMongoAuthState(MongoAuthState.UsingAuth);
-            setMongoClientUrlString("mongodb://" + mongoUser + ":" + mongoPassword + "@" + mongoIP + ":" + mongoPort);
+        // Custom Url
+        setMongoCustomUrlState(yaml.getString("MONGO.CUSTOM-URL").equals("") ? MongoCustomUrlState.TurnOff : MongoCustomUrlState.TurnOn);
 
-            CC.sendConsoleMessage("&aAdvanced Wish 检查到 Mongo 开启身份验证，已设置身份验证信息!");
+        // 设置连接 Url
+        if (getMongoCustomUrlState() == MongoCustomUrlState.TurnOn) setMongoClientUrlString(yaml.getString("MONGO.CUSTOM-URL"));
+        else {
+            if (mongoUser.equals("") || mongoPassword.equals("")) {
+                setMongoAuthState(MongoAuthState.TurnOff);
+                setMongoClientUrlString("mongodb://" + mongoIP + ":" + mongoPort + "/AdvancedWish");
+            } else {
+                setMongoAuthState(MongoAuthState.UsingAuth);
+                setMongoClientUrlString("mongodb://" + mongoUser + ":" + mongoPassword + "@" + mongoIP + ":" + mongoPort + "/AdvancedWish");
+
+                CC.sendConsoleMessage("&aAdvanced Wish 检查到 Mongo 开启身份验证，已设置身份验证信息!");
+            }
         }
 
         // Mongo 连接状态检查

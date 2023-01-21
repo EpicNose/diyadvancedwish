@@ -30,6 +30,11 @@ MONGO:
     USER: ""
     PASSWORD: ""
 
+  # 自定义 Mongo 连接 URL
+  #  如果启用则需要自己写连接 URL，上面的指定内容全部作废，AdvancedWish 数据库名: AdvancedWish
+  #  实例: mongodb://USER:PWD@IP:PORT/AdvancedWish - 使用用户密码登陆指定服务器的 AdvancedWish 数据库
+  CUSTOM-URL: ""
+
 # 数据转换
 #  注意: 此功能的用处在于将 Json 数据迁移至 Mongo，不支持 Mongo 迁移至 Json
 #  在开启此功能前请先打开 USE-MONGO 选项，并且配置好 Mongo 数据库设置，迁移完成后服务器将会自动关闭，不会删除 Json 文件，关闭后您需要手动关闭此选项
