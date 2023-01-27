@@ -13,7 +13,7 @@ import lombok.Setter;
 import me.twomillions.plugin.advancedwish.enums.mongo.*;
 import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.managers.ConfigManager;
-import me.twomillions.plugin.advancedwish.utils.CC;
+import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -67,7 +67,7 @@ public class MongoManager {
                 setMongoAuthState(MongoAuthState.UsingAuth);
                 setMongoClientUrlString("mongodb://" + mongoUser + ":" + mongoPassword + "@" + mongoIP + ":" + mongoPort + "/AdvancedWish");
 
-                CC.sendConsoleMessage("&aAdvanced Wish 检查到 Mongo 开启身份验证，已设置身份验证信息!");
+                QuickUtils.sendConsoleMessage("&aAdvanced Wish 检查到 Mongo 开启身份验证，已设置身份验证信息!");
             }
         }
 
@@ -77,11 +77,11 @@ public class MongoManager {
             setMongoClient(new MongoClient(getMongoClientUrl()));
             setMongoDatabase(getMongoClient().getDatabase("AdvancedWish"));
 
-            CC.sendConsoleMessage("&aAdvanced Wish 已成功建立与 Mongo 的连接!");
+            QuickUtils.sendConsoleMessage("&aAdvanced Wish 已成功建立与 Mongo 的连接!");
 
             setMongoConnectState(MongoConnectState.Connected);
         } catch (Exception exception) {
-            CC.sendConsoleMessage("&c您打开了 Mongo 数据库选项，但是 Advanced Wish 未与 Mongo 数据库正确连接，请检查 Mongo 服务状态，即将关闭服务器!");
+            QuickUtils.sendConsoleMessage("&c您打开了 Mongo 数据库选项，但是 Advanced Wish 未与 Mongo 数据库正确连接，请检查 Mongo 服务状态，即将关闭服务器!");
 
             setMongoConnectState(MongoConnectState.CannotConnect);
 
@@ -240,7 +240,7 @@ public class MongoManager {
     // Json 转换为 Mongo 数据
     public static JsonTransformationMongoState playerGuaranteedJsonToMongo(Yaml yaml) {
         if (!yaml.getBoolean("TRANSFORMATION-JSON-TO-MONGO")) return JsonTransformationMongoState.TurnOff;
-        if (MongoManager.getMongoConnectState() != MongoConnectState.Connected) { CC.sendConsoleMessage("&c您开启了数据迁移选项，但 Mongo 数据库并没有成功连接，请检查配置文件，服务器即将关闭。"); return JsonTransformationMongoState.Failed; }
+        if (MongoManager.getMongoConnectState() != MongoConnectState.Connected) { QuickUtils.sendConsoleMessage("&c您开启了数据迁移选项，但 Mongo 数据库并没有成功连接，请检查配置文件，服务器即将关闭。"); return JsonTransformationMongoState.Failed; }
 
         String logsPath = main.getLogsPath();
         String guaranteedPath = main.getGuaranteedPath();
@@ -252,7 +252,7 @@ public class MongoManager {
         boolean notTransformationGuaranteed = guaranteedFileNames.size() <= 0;
 
         // 若 Json 文件个数为 0 则返回失败
-        if (notTransformationLogs && notTransformationGuaranteed) { CC.sendConsoleMessage("&c未发现需要进行迁移的 Json 数据，结束此次迁移，服务器即将关闭。"); return JsonTransformationMongoState.Failed; }
+        if (notTransformationLogs && notTransformationGuaranteed) { QuickUtils.sendConsoleMessage("&c未发现需要进行迁移的 Json 数据，结束此次迁移，服务器即将关闭。"); return JsonTransformationMongoState.Failed; }
 
         // 获取所有 key，遍历进行更新
         int jsonKeySetAmount = 0;
@@ -266,7 +266,7 @@ public class MongoManager {
 
                 for (String key : jsonKeySet) update(guaranteedFileName.split(".json")[0], key, json.get(key), MongoCollections.PlayerGuaranteed);
             }
-        } else CC.sendConsoleMessage("&c未发现需要进行迁移的玩家许愿 Json 数据，跳过玩家许愿数据迁移。");
+        } else QuickUtils.sendConsoleMessage("&c未发现需要进行迁移的玩家许愿 Json 数据，跳过玩家许愿数据迁移。");
 
         if (!notTransformationLogs) {
             for (String logsFileName : logsFileNames) {
@@ -277,9 +277,9 @@ public class MongoManager {
 
                 for (String key : jsonKeySet) update(logsFileName.split(".json")[0], key, json.get(key), MongoCollections.PlayerLogs);
             }
-        } else CC.sendConsoleMessage("&c未发现需要进行迁移的玩家许愿日志 Json 数据，跳过玩家许愿日志数据迁移。");
+        } else QuickUtils.sendConsoleMessage("&c未发现需要进行迁移的玩家许愿日志 Json 数据，跳过玩家许愿日志数据迁移。");
 
-        CC.sendConsoleMessage("&a已成功迁移 Json 数据至 Mongo 数据库，此次迁移总文件数: &e" + guaranteedFileNames.size() + logsFileNames.size() + "&a，迁移数据数: &e" + jsonKeySetAmount + "&a，即将关闭服务器，已迁移的 Json 不会被删除，请手动关闭迁移选项!");
+        QuickUtils.sendConsoleMessage("&a已成功迁移 Json 数据至 Mongo 数据库，此次迁移总文件数: &e" + guaranteedFileNames.size() + logsFileNames.size() + "&a，迁移数据数: &e" + jsonKeySetAmount + "&a，即将关闭服务器，已迁移的 Json 不会被删除，请手动关闭迁移选项!");
 
         return JsonTransformationMongoState.Completed;
     }

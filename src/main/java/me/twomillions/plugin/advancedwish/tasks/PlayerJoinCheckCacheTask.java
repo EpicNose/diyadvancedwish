@@ -6,7 +6,7 @@ import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.managers.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.EffectSendManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
-import me.twomillions.plugin.advancedwish.utils.CC;
+import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -56,14 +56,14 @@ public class PlayerJoinCheckCacheTask {
 
             // 遍历缓存执行项
             for (String playerWishPrizeDoString : playerWishPrizeDoStringList) {
-                playerWishPrizeDoString = CC.unicodeToString(playerWishPrizeDoString);
+                playerWishPrizeDoString = QuickUtils.unicodeToString(playerWishPrizeDoString);
 
                 String wishName = WishManager.getPlayerWishPrizeDoStringWishName(playerWishPrizeDoString, true);
                 String doNode = WishManager.getPlayerWishPrizeDoStringWishDoNode(playerWishPrizeDoString, true);
 
                 Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
-                int waitSeconds = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("CACHE-SETTINGS.WAIT")), player));
-                int waitJoinSeconds = Integer.parseInt(CC.replaceTranslateToPapiCount(String.valueOf(yaml.getString("CACHE-SETTINGS.WAIT-JOIN")), player));
+                int waitSeconds = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getString("CACHE-SETTINGS.WAIT")), player));
+                int waitJoinSeconds = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getString("CACHE-SETTINGS.WAIT-JOIN")), player));
 
                 // 玩家进入的消息提示与延迟
                 // 这里是异步，所以直接使用 Thread.sleep 更加方便
@@ -84,10 +84,10 @@ public class PlayerJoinCheckCacheTask {
 
                 EffectSendManager.sendEffect(wishName, player, null, "/Wish", "PRIZE-DO." + doNode);
 
-                CC.sendConsoleMessage("&aAdvanced Wish 已成功给予遗漏的物品奖励，并且成功重新写入缓存文件! 玩家名称/文件名称: " + player.getName() + "/" + uuid);
+                QuickUtils.sendConsoleMessage("&aAdvanced Wish 已成功给予遗漏的物品奖励，并且成功重新写入缓存文件! 玩家名称/文件名称: " + player.getName() + "/" + uuid);
 
                 // 将已经完成的项目写入到 donePlayerWishPrizeDoStringList
-                donePlayerWishPrizeDoStringList.add(CC.stringToUnicode(playerWishPrizeDoString));
+                donePlayerWishPrizeDoStringList.add(QuickUtils.stringToUnicode(playerWishPrizeDoString));
             }
 
             // 删除已经执行完毕的内容并且写入缓存
@@ -105,10 +105,10 @@ public class PlayerJoinCheckCacheTask {
         // 如果 playerWishPrizeDoStringList 内仍然有未执行完毕的内容那么就不删除文件
         if (playerWishPrizeDoStringList.size() != 0 || json.getFile().delete()) return true;
 
-        CC.sendConsoleMessage("&cAdvanced Wish 没有给予遗漏的物品奖励，文件删除错误! 这是一个严重的问题! 我们会关闭服务器，您必须解决它并且手动删除它 (位于插件配置文件夹下的 PlayerCache 文件夹)! 玩家名称/文件名称: "
+        QuickUtils.sendConsoleMessage("&cAdvanced Wish 没有给予遗漏的物品奖励，文件删除错误! 这是一个严重的问题! 我们会关闭服务器，您必须解决它并且手动删除它 (位于插件配置文件夹下的 PlayerCache 文件夹)! 玩家名称/文件名称: "
                 + player.getName() + "/" + uuid);
 
-        CC.sendConsoleMessage("&c注意，为了您的服务器安全，您必须要解决此问题! 您应该寻求开发者的帮助! Mcbbs -> https://www.mcbbs.net/thread-1397853-1-1.html");
+        QuickUtils.sendConsoleMessage("&c注意，为了您的服务器安全，您必须要解决此问题! 您应该寻求开发者的帮助! Mcbbs -> https://www.mcbbs.net/thread-1397853-1-1.html");
 
         Bukkit.shutdown();
 

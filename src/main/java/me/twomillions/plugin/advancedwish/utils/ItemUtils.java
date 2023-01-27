@@ -15,7 +15,7 @@ public class ItemUtils {
         Material material;
 
         try { material = Material.valueOf(materialString); }
-        catch (Exception exception) { CC.sendUnknownWarn("物品", fileName, materialString); return Material.AIR; }
+        catch (Exception exception) { QuickUtils.sendUnknownWarn("物品", fileName, materialString); return Material.AIR; }
 
         return material;
     }

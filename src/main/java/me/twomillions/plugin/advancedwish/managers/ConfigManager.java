@@ -7,7 +7,7 @@ import de.leonhard.storage.internal.settings.ConfigSettings;
 import de.leonhard.storage.internal.settings.DataType;
 import de.leonhard.storage.internal.settings.ReloadSettings;
 import me.twomillions.plugin.advancedwish.main;
-import me.twomillions.plugin.advancedwish.utils.CC;
+import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -37,7 +37,7 @@ public class ConfigManager {
         String dataFolder = plugin.getDataFolder().toString();
         File file = new File(dataFolder, "advancedWish.yml");
 
-        if (!file.exists()) CC.sendConsoleMessage("&c运行有误，请检查配置文件是否被误删! 开始重新创建配置文件!");
+        if (!file.exists()) QuickUtils.sendConsoleMessage("&c运行有误，请检查配置文件是否被误删! 开始重新创建配置文件!");
 
         return createYamlConfig("advancedWish", null, false, true);
     }
@@ -47,7 +47,7 @@ public class ConfigManager {
         String dataFolder = plugin.getDataFolder().toString();
         File file = new File(dataFolder, "message.yml");
 
-        if (!file.exists()) CC.sendConsoleMessage("&c运行有误，请检查配置文件是否被误删! 开始重新创建配置文件!");
+        if (!file.exists()) QuickUtils.sendConsoleMessage("&c运行有误，请检查配置文件是否被误删! 开始重新创建配置文件!");
 
         return createYamlConfig("message", null, false, true);
     }
@@ -71,8 +71,8 @@ public class ConfigManager {
     public static boolean checkLastVersion(Yaml yaml) {
         String yamlFileName = yaml.getFile().getName().replace(".yml", "");
 
-        if (isLastConfigVersion(yaml)) { CC.sendConsoleMessage("&a检查到 &e" + yamlFileName + " &aYaml 文件为最新版! 已通过更新验证!"); return true; }
-        else { CC.sendConsoleMessage("&c检查到 &e" + yamlFileName + " &cYaml 文件不是最新版! 即将关闭服务器，请重新生成配置文件补全以防止错误!"); Bukkit.shutdown(); return false; }
+        if (isLastConfigVersion(yaml)) { QuickUtils.sendConsoleMessage("&a检查到 &e" + yamlFileName + " &aYaml 文件为最新版! 已通过更新验证!"); return true; }
+        else { QuickUtils.sendConsoleMessage("&c检查到 &e" + yamlFileName + " &cYaml 文件不是最新版! 即将关闭服务器，请重新生成配置文件补全以防止错误!"); Bukkit.shutdown(); return false; }
     }
 
     // 创建指定配置文件 - Yaml
@@ -91,7 +91,7 @@ public class ConfigManager {
 
         // 如果这个文件已经是存在的状态，那么如果 inputStreamFromResource 为 true 则改为 false
         if (file.exists()) { if (inputStreamFromResource) inputStreamFromResource = false; }
-        else CC.sendConsoleMessage("&c检测到 &e" + fileName + " &cYaml 文件不存在，已自动创建并设置为更改部分自动重载。");
+        else QuickUtils.sendConsoleMessage("&c检测到 &e" + fileName + " &cYaml 文件不存在，已自动创建并设置为更改部分自动重载。");
 
         if (inputStreamFromResource)
             return SimplixBuilder
@@ -126,7 +126,7 @@ public class ConfigManager {
 
         // 如果这个文件已经是存在的状态，那么如果 inputStreamFromResource 为 true 则改为 false
         if (file.exists()) { if (inputStreamFromResource) inputStreamFromResource = false; }
-        else CC.sendConsoleMessage("&c检测到 &e" + fileName + " &cJson 文件不存在，已自动创建并设置为更改部分自动重载。");
+        else QuickUtils.sendConsoleMessage("&c检测到 &e" + fileName + " &cJson 文件不存在，已自动创建并设置为更改部分自动重载。");
 
         if (inputStreamFromResource)
             return SimplixBuilder

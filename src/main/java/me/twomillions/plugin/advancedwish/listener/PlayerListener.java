@@ -4,7 +4,7 @@ import me.twomillions.plugin.advancedwish.managers.EffectSendManager;
 import me.twomillions.plugin.advancedwish.tasks.PlayerJoinCheckCacheTask;
 import me.twomillions.plugin.advancedwish.tasks.PlayerTimestampTask;
 import me.twomillions.plugin.advancedwish.tasks.UpdateCheckerTask;
-import me.twomillions.plugin.advancedwish.utils.CC;
+import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -32,7 +32,7 @@ public class PlayerListener implements Listener {
         PlayerTimestampTask.startTask(player);
 
         // 及时更新
-        if (!UpdateCheckerTask.isLatestVersion() && player.isOp()) player.sendMessage(CC.translate(
+        if (!UpdateCheckerTask.isLatestVersion() && player.isOp()) player.sendMessage(QuickUtils.translate(
                 "&7[&6&lAdvanced Wish&7] &c您看起来在使用过时的 Advanced Wish 版本! 您应该获取更新以防止未知问题出现! 下载链接: https://gitee.com/A2000000/advanced-wish/releases"
         ));
     }

@@ -6,7 +6,7 @@ import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.managers.EffectSendManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
-import me.twomillions.plugin.advancedwish.utils.CC;
+import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -46,7 +46,7 @@ public class WishLimitResetTask {
 
             // 控制台发送提示信息
             if (WishManager.isEnabledResetCompleteSendConsole(wishName)) {
-                CC.sendConsoleMessage("&aAdvanced Wish 已清除 &e" + wishName + " &a许愿池玩家限制许愿次数! 存储方式: &e" + storeMode);
+                QuickUtils.sendConsoleMessage("&aAdvanced Wish 已清除 &e" + wishName + " &a许愿池玩家限制许愿次数! 存储方式: &e" + storeMode);
             }
         }, wishResetLimitStart, wishResetLimitCycle);
 

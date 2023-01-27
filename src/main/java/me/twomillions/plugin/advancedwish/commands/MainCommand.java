@@ -7,7 +7,7 @@ import me.twomillions.plugin.advancedwish.managers.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.RegisterManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
-import me.twomillions.plugin.advancedwish.utils.CC;
+import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -35,7 +35,7 @@ public class MainCommand implements TabExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage(" ");
-            sender.sendMessage(CC.translate("&e此服务器正在使用 Advanced Wish 插件。 版本: " + plugin.getDescription().getVersion() + ", 作者: 2000000。"));
+            sender.sendMessage(QuickUtils.translate("&e此服务器正在使用 Advanced Wish 插件。 版本: " + plugin.getDescription().getVersion() + ", 作者: 2000000。"));
             sender.sendMessage(" ");
             return false;
         }
@@ -50,9 +50,9 @@ public class MainCommand implements TabExecutor {
 
             if (args.length == 0) {
                 if (isAdmin)
-                    messageYaml.getStringList("ADMIN-SHOW-COMMAND").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                    messageYaml.getStringList("ADMIN-SHOW-COMMAND").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                 else
-                    messageYaml.getStringList("DEFAULT-SHOW-COMMAND").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                    messageYaml.getStringList("DEFAULT-SHOW-COMMAND").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
 
                 return;
             }
@@ -62,59 +62,59 @@ public class MainCommand implements TabExecutor {
             // Player commands
             switch (subCommand) {
                 case "list":
-                    messageYaml.getStringList("LIST").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                    messageYaml.getStringList("LIST").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
 
                     return;
 
                 case "amount":
                     if (args.length == 1) {
-                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     String getAmountWishName = args[1];
 
                     int amount = WishManager.getPlayerWishAmount(player, getAmountWishName);
-                    player.sendMessage(CC.translate("&6您的 " + getAmountWishName + " 奖池许愿数为: " + amount));
+                    player.sendMessage(QuickUtils.translate("&6您的 " + getAmountWishName + " 奖池许愿数为: " + amount));
 
                     return;
 
                 case "guaranteed":
                     if (args.length == 1) {
-                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     String getGuaranteedWishName = args[1];
 
                     double guaranteed = WishManager.getPlayerWishGuaranteed(player, getGuaranteedWishName);
-                    player.sendMessage(CC.translate("&6您的 " + getGuaranteedWishName + " 奖池保底率为: " + guaranteed));
+                    player.sendMessage(QuickUtils.translate("&6您的 " + getGuaranteedWishName + " 奖池保底率为: " + guaranteed));
 
                     return;
 
                 case "limitamount":
                     if (args.length == 1) {
-                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     String getLimitAmountWishName = args[1];
 
                     int limitAmountGuaranteed = WishManager.getPlayerWishLimitAmount(player, getLimitAmountWishName);
-                    player.sendMessage(CC.translate("&6您的 " + getLimitAmountWishName + " 抽奖限制次数为: " + limitAmountGuaranteed));
+                    player.sendMessage(QuickUtils.translate("&6您的 " + getLimitAmountWishName + " 抽奖限制次数为: " + limitAmountGuaranteed));
 
                     return;
 
                 case "makewish":
                     if (args.length == 1) {
-                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     String wishName = args[1];
 
                     if (!WishManager.hasWish(wishName)) {
-                        messageYaml.getStringList("WISH-NOT-HAVE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("WISH-NOT-HAVE").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
@@ -122,12 +122,12 @@ public class MainCommand implements TabExecutor {
                         Player targetPlayer = Bukkit.getPlayerExact(args[2]);
 
                         if (targetPlayer == null) {
-                            messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                            messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                             return;
                         }
 
                         WishManager.makeWish(targetPlayer, wishName, false);
-                        messageYaml.getStringList("DONE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("DONE").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                     } else WishManager.makeWish(player, wishName, false);
 
                     return;
@@ -139,14 +139,14 @@ public class MainCommand implements TabExecutor {
             switch (subCommand) {
                 case "makewishforce":
                     if (args.length == 1) {
-                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     String forceWishName = args[1];
 
                     if (!WishManager.hasWish(forceWishName)) {
-                        messageYaml.getStringList("WISH-NOT-HAVE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("WISH-NOT-HAVE").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
@@ -154,24 +154,24 @@ public class MainCommand implements TabExecutor {
                         Player targetPlayer = Bukkit.getPlayerExact(args[2]);
 
                         if (targetPlayer == null) {
-                            messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                            messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                             return;
                         }
 
                         WishManager.makeWish(targetPlayer, forceWishName, true);
-                        messageYaml.getStringList("DONE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("DONE").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                     } else WishManager.makeWish(player, forceWishName, true);
 
                     return;
 
                 case "getamount":
                     if (args.length == 1) {
-                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     if (args.length == 2) {
-                        messageYaml.getStringList("PLAYER-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("PLAYER-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
@@ -179,28 +179,28 @@ public class MainCommand implements TabExecutor {
                     Player amountGetTargetPlayer = Bukkit.getPlayerExact(args[2]);
 
                     if (amountGetTargetPlayer == null) {
-                        messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     int amount = WishManager.getPlayerWishAmount(amountGetTargetPlayer, getAmountWishName);
-                    player.sendMessage(CC.translate("&6此玩家的 " + getAmountWishName + " 奖池许愿数为: " + amount));
+                    player.sendMessage(QuickUtils.translate("&6此玩家的 " + getAmountWishName + " 奖池许愿数为: " + amount));
 
                     return;
 
                 case "setamount":
                     if (args.length == 1) {
-                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     if (args.length == 2) {
-                        messageYaml.getStringList("PLAYER-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("PLAYER-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     if (args.length == 3) {
-                        messageYaml.getStringList("AMOUNT-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("AMOUNT-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
@@ -211,28 +211,28 @@ public class MainCommand implements TabExecutor {
                     try {
                         setAmount = Integer.parseInt(args[3]);
                     } catch (Exception exception) {
-                        messageYaml.getStringList("MUST-NUMBER").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("MUST-NUMBER").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     if (amountTargetPlayer == null) {
-                        messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     WishManager.setPlayerWishAmount(amountTargetPlayer, setAmountWishName, setAmount);
-                    messageYaml.getStringList("DONE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                    messageYaml.getStringList("DONE").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
 
                     return;
 
                 case "getguaranteed":
                     if (args.length == 1) {
-                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     if (args.length == 2) {
-                        messageYaml.getStringList("PLAYER-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("PLAYER-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
@@ -240,28 +240,28 @@ public class MainCommand implements TabExecutor {
                     Player guaranteedGetTargetPlayer = Bukkit.getPlayerExact(args[2]);
 
                     if (guaranteedGetTargetPlayer == null) {
-                        messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     double guaranteedAmount = WishManager.getPlayerWishGuaranteed(guaranteedGetTargetPlayer, getGuaranteedWishName);
-                    player.sendMessage(CC.translate("&6此玩家的 " + getGuaranteedWishName + " 奖池保底率为: " + guaranteedAmount));
+                    player.sendMessage(QuickUtils.translate("&6此玩家的 " + getGuaranteedWishName + " 奖池保底率为: " + guaranteedAmount));
 
                     return;
 
                 case "setguaranteed":
                     if (args.length == 1) {
-                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     if (args.length == 2) {
-                        messageYaml.getStringList("PLAYER-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("PLAYER-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     if (args.length == 3) {
-                        messageYaml.getStringList("GUARANTEED-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("GUARANTEED-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
@@ -272,28 +272,28 @@ public class MainCommand implements TabExecutor {
                     try {
                         setGuaranteed = Double.parseDouble(args[3]);
                     } catch (Exception exception) {
-                        messageYaml.getStringList("MUST-NUMBER").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("MUST-NUMBER").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     if (targetPlayer == null) {
-                        messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     WishManager.setPlayerWishGuaranteed(targetPlayer, setGuaranteedWishName, setGuaranteed);
-                    messageYaml.getStringList("DONE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                    messageYaml.getStringList("DONE").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
 
                     return;
 
                 case "getlimitamount":
                     if (args.length == 1) {
-                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     if (args.length == 2) {
-                        messageYaml.getStringList("PLAYER-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("PLAYER-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
@@ -301,28 +301,28 @@ public class MainCommand implements TabExecutor {
                     Player limitAmountGetTargetPlayer = Bukkit.getPlayerExact(args[2]);
 
                     if (limitAmountGetTargetPlayer == null) {
-                        messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     int limitAmount = WishManager.getPlayerWishLimitAmount(limitAmountGetTargetPlayer, getLimitAmountWishName);
-                    player.sendMessage(CC.translate("&6此玩家的 " + getLimitAmountWishName + " 奖池保底率为: " + limitAmount));
+                    player.sendMessage(QuickUtils.translate("&6此玩家的 " + getLimitAmountWishName + " 奖池保底率为: " + limitAmount));
 
                     return;
 
                 case "setlimitamount":
                     if (args.length == 1) {
-                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     if (args.length == 2) {
-                        messageYaml.getStringList("PLAYER-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("PLAYER-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     if (args.length == 3) {
-                        messageYaml.getStringList("AMOUNT-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("AMOUNT-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
@@ -333,61 +333,61 @@ public class MainCommand implements TabExecutor {
                     try {
                         setLimitAmount = Integer.parseInt(args[3]);
                     } catch (Exception exception) {
-                        messageYaml.getStringList("MUST-NUMBER").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("MUST-NUMBER").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     if (limitAmountTargetPlayer == null) {
-                        messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("PLAYER-OFFLINE").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     if (!WishManager.isEnabledWishLimit(setLimitAmountWishName)) {
-                        messageYaml.getStringList("WISH-NOT-ENABLED-LIMIT").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("WISH-NOT-ENABLED-LIMIT").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     WishManager.setPlayerWishLimitAmount(limitAmountTargetPlayer, setLimitAmountWishName, setLimitAmount);
-                    messageYaml.getStringList("DONE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                    messageYaml.getStringList("DONE").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
 
                     return;
 
                 case "resetlimitamount":
                     if (args.length == 1) {
-                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     String resetLimitAmountWishName = args[1];
 
                     if (!WishManager.isEnabledWishLimit(resetLimitAmountWishName)) {
-                        messageYaml.getStringList("WISH-NOT-ENABLED-LIMIT").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("WISH-NOT-ENABLED-LIMIT").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     WishManager.resetWishLimitAmount(resetLimitAmountWishName);
-                    messageYaml.getStringList("DONE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                    messageYaml.getStringList("DONE").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
 
                     return;
 
                 case "querywish":
                     if (args.length == 1) {
-                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("WISH-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     if (args.length == 2) {
-                        messageYaml.getStringList("PLAYER-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("PLAYER-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     if (args.length == 3) {
-                        messageYaml.getStringList("QUERY-WISH.START-NUMBER-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("QUERY-WISH.START-NUMBER-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     if (args.length == 4) {
-                        messageYaml.getStringList("QUERY-WISH.END-NUMBER-NULL").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("QUERY-WISH.END-NUMBER-NULL").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
@@ -404,12 +404,12 @@ public class MainCommand implements TabExecutor {
                         startNumber = Integer.parseInt(args[3]);
                         endNumber = Integer.parseInt(args[4]);
                     } catch (Exception exception) {
-                        messageYaml.getStringList("MUST-NUMBER").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("MUST-NUMBER").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
                     if (!WishManager.isEnabledRecordWish(queryWishName)) {
-                        messageYaml.getStringList("WISH-NOT-ENABLED-LIMIT").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                        messageYaml.getStringList("WISH-NOT-ENABLED-LIMIT").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
                         return;
                     }
 
@@ -422,14 +422,14 @@ public class MainCommand implements TabExecutor {
                             MongoManager.getWishLogsSize(queryPlayerUUID) : ConfigManager.getWishLogsSize(queryPlayerUUID);
 
                     if (logs.size() <= 0 || allLogsSize <= 0)
-                    { for (String queryPrefix : messageYaml.getStringList("QUERY-WISH.LOGS-NULL")) player.sendMessage(CC.replaceTranslateToPapi(queryPrefix, player)); return; }
+                    { for (String queryPrefix : messageYaml.getStringList("QUERY-WISH.LOGS-NULL")) player.sendMessage(QuickUtils.replaceTranslateToPapi(queryPrefix, player)); return; }
 
                     // 头消息
                     for (String queryPrefix : messageYaml.getStringList("QUERY-WISH.PREFIX")) {
                         if (queryPrefix.contains("<size>")) queryPrefix = queryPrefix.replaceAll("<size>", String.valueOf(logs.size()));
                         if (queryPrefix.contains("<allSize>")) queryPrefix = queryPrefix.replaceAll("<allSize>", String.valueOf(allLogsSize));
 
-                        player.sendMessage(CC.replaceTranslateToPapi(queryPrefix, player));
+                        player.sendMessage(QuickUtils.replaceTranslateToPapi(queryPrefix, player));
                     }
 
                     // 日志消息
@@ -438,11 +438,11 @@ public class MainCommand implements TabExecutor {
 
                         String queryLogTime = queryLogSplit[0].replace("-", " ");
                         String queryLogPlayerName = queryLogSplit[1];
-                        String queryLogWishName = CC.unicodeToString(queryLogSplit[3]);
+                        String queryLogWishName = QuickUtils.unicodeToString(queryLogSplit[3]);
                         String queryLogPrizeDo = queryLogSplit[4];
 
                         for (String queryQuery : messageYaml.getStringList("QUERY-WISH.QUERY")) {
-                            queryQuery = CC.replaceTranslateToPapi(queryQuery, player);
+                            queryQuery = QuickUtils.replaceTranslateToPapi(queryQuery, player);
 
                             if (queryQuery.contains("<targetPlayer>")) queryQuery = queryQuery.replaceAll("<targetPlayer>", queryLogPlayerName);
                             if (queryQuery.contains("<targetPlayerUUID>")) queryQuery = queryQuery.replaceAll("<targetPlayerUUID>", queryPlayerUUID);
@@ -460,7 +460,7 @@ public class MainCommand implements TabExecutor {
                         if (querySuffix.contains("<size>")) querySuffix = querySuffix.replaceAll("<size>", String.valueOf(logs.size()));
                         if (querySuffix.contains("<allSize>")) querySuffix = querySuffix.replaceAll("<allSize>", String.valueOf(allLogsSize));
 
-                        player.sendMessage(CC.replaceTranslateToPapi(querySuffix, player));
+                        player.sendMessage(QuickUtils.replaceTranslateToPapi(querySuffix, player));
                     }
 
                     return;
@@ -468,7 +468,7 @@ public class MainCommand implements TabExecutor {
                 case "reload":
                     RegisterManager.reload();
 
-                    messageYaml.getStringList("DONE").forEach(message -> player.sendMessage(CC.replaceTranslateToPapi(message, player)));
+                    messageYaml.getStringList("DONE").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
 
                     return;
             }

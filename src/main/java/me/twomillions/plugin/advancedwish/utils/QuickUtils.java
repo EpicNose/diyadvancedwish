@@ -5,7 +5,7 @@ import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.managers.RegisterManager;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -18,10 +18,10 @@ import java.util.regex.Pattern;
  * author:     2000000
  * project:    AdvancedWish
  * package:        me.twomillions.plugin.advancedwish.utils
- * className:      CC
+ * className:      QuickUtils
  * date:    2022/11/21 12:39
  */
-public class CC {
+public class QuickUtils {
     private static final Plugin plugin = main.getInstance();
     private static final JexlEngine jexlEngine = new JexlBuilder().create();
 
@@ -45,7 +45,7 @@ public class CC {
         if (message.contains("<rplayer>") && replacePlayer != null) message = message.replaceAll("<rplayer>", replacePlayer.getName());
         if (message.contains("<CHAT_BAR>")) message = message.replaceAll("<CHAT_BAR>", CHAT_BAR);
 
-        return CC.translate(message);
+        return translate(message);
     }
 
     // String 转 Unicode
@@ -77,8 +77,8 @@ public class CC {
 
     // Papi - 先 replaceTranslate 后转 Papi
     public static String replaceTranslateToPapi(String string, Player player, Player replacePlayer) {
-        if (RegisterManager.isUsingPapi()) return PlaceholderAPI.setPlaceholders(player, CC.replaceTranslate(string, player, replacePlayer));
-        else return CC.replaceTranslate(string, player, replacePlayer);
+        if (RegisterManager.isUsingPapi()) return PlaceholderAPI.setPlaceholders(player, replaceTranslate(string, player, replacePlayer));
+        else return replaceTranslate(string, player, replacePlayer);
     }
 
     // Papi - replaceTranslateToPapi 但是 replacePlayer 为 null Player 为 null
@@ -126,7 +126,7 @@ public class CC {
             }
 
         } catch (Exception exception) {
-            CC.sendConsoleMessage("&c您填入的随机语句 (randomSentence) 语法错误! 请检查配置文件! 原语句: &e" + randomSentence);
+            sendConsoleMessage("&c您填入的随机语句 (randomSentence) 语法错误! 请检查配置文件! 原语句: &e" + randomSentence);
 
             return randomSentence;
         }
@@ -143,7 +143,7 @@ public class CC {
 
     // 快捷返回负面信息
     public static void sendUnknownWarn(String unknown, String fileName, String unknownName) {
-        CC.sendConsoleMessage("&c您填入了一个未知的" + unknown + "，位于: &e" + fileName + "&c，您填入的未知" + unknown + "为: &e" + unknownName);
+        sendConsoleMessage("&c您填入了一个未知的" + unknown + "，位于: &e" + fileName + "&c，您填入的未知" + unknown + "为: &e" + unknownName);
     }
 
     private static String stringInterceptReplace(String string, String start, String end, String replace, boolean removeStartEndString) {

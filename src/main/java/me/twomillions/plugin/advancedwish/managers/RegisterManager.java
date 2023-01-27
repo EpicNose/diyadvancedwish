@@ -8,7 +8,7 @@ import me.twomillions.plugin.advancedwish.commands.MainCommand;
 import me.twomillions.plugin.advancedwish.listener.PlayerListener;
 import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.tasks.WishLimitResetTask;
-import me.twomillions.plugin.advancedwish.utils.CC;
+import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import net.milkbowl.vault.economy.Economy;
 import org.black_ixx.playerpoints.PlayerPoints;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
@@ -47,7 +47,7 @@ public class RegisterManager {
         if (manager.isPluginEnabled("PlaceholderAPI")) {
             setUsingPapi(true);
 
-            CC.sendConsoleMessage("&a检查到服务器存在 &ePlaceholderAPI&a，已注册 &ePlaceholderAPI&a 变量。");
+            QuickUtils.sendConsoleMessage("&a检查到服务器存在 &ePlaceholderAPI&a，已注册 &ePlaceholderAPI&a 变量。");
 
             new PapiManager().register();
         }
@@ -73,14 +73,14 @@ public class RegisterManager {
 
             registerWish.add(wishName);
 
-            CC.sendConsoleMessage("&a已成功加载许愿池! 许愿池文件名称: &e" + wishName);
+            QuickUtils.sendConsoleMessage("&a已成功加载许愿池! 许愿池文件名称: &e" + wishName);
 
             // 许愿限制
             if (!WishManager.isEnabledWishLimit(wishName)) continue;
 
             WishLimitResetTask.startTask(wishName);
 
-            CC.sendConsoleMessage("&a检查到许愿池启用了许愿限制，已成功创建对应异步计划任务! 许愿池文件名称: &e" + wishName);
+            QuickUtils.sendConsoleMessage("&a检查到许愿池启用了许愿限制，已成功创建对应异步计划任务! 许愿池文件名称: &e" + wishName);
         }
     }
 
@@ -90,16 +90,16 @@ public class RegisterManager {
 
         RegisteredServiceProvider<Economy> registeredServiceProvider = Bukkit.getServer().getServicesManager().getRegistration(Economy.class);
 
-        if (registeredServiceProvider == null) { CC.sendConsoleMessage("&c检查到服务器存在 &eVault&c，但并没有实际插件进行操作? 取消对于 &eVault&c 的设置。"); return; }
+        if (registeredServiceProvider == null) { QuickUtils.sendConsoleMessage("&c检查到服务器存在 &eVault&c，但并没有实际插件进行操作? 取消对于 &eVault&c 的设置。"); return; }
 
         try { setEconomy(registeredServiceProvider.getProvider()); }
         catch (Exception exception) {
-            CC.sendConsoleMessage("&c检查到服务器存在 &eVault&c，但 &eVault&c 设置错误，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/vault.34315/&c，服务器即将关闭。");
+            QuickUtils.sendConsoleMessage("&c检查到服务器存在 &eVault&c，但 &eVault&c 设置错误，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/vault.34315/&c，服务器即将关闭。");
             Bukkit.shutdown();
             return;
         }
 
-        CC.sendConsoleMessage("&a检查到服务器存在 &eVault&a，已成功设置 &eVault&a。");
+        QuickUtils.sendConsoleMessage("&a检查到服务器存在 &eVault&a，已成功设置 &eVault&a。");
     }
 
     // 设置 PlayerPoints
@@ -108,12 +108,12 @@ public class RegisterManager {
 
         try { setPlayerPointsAPI(PlayerPoints.getInstance().getAPI()); }
         catch (Exception exception) {
-            CC.sendConsoleMessage("&c检查到服务器存在 &ePlayerPoints&c，但 &ePlayerPoints&c 设置错误，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/playerpoints.80745/&c，服务器即将关闭。");
+            QuickUtils.sendConsoleMessage("&c检查到服务器存在 &ePlayerPoints&c，但 &ePlayerPoints&c 设置错误，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/playerpoints.80745/&c，服务器即将关闭。");
             Bukkit.shutdown();
             return;
         }
 
-        CC.sendConsoleMessage("&a检查到服务器存在 &ePlayerPoints&a，已成功设置 &ePlayerPoints&a。");
+        QuickUtils.sendConsoleMessage("&a检查到服务器存在 &ePlayerPoints&a，已成功设置 &ePlayerPoints&a。");
     }
 
     // Reload 方法
@@ -128,7 +128,7 @@ public class RegisterManager {
         // 低版本 Papi 没有 unregister 方法，捕获异常以取消 Papi 重载
         if (isUsingPapi()) Bukkit.getScheduler().runTask(plugin, () -> {
             try { new PapiManager().unregister(); new PapiManager().register(); }
-            catch (Exception exception) { CC.sendConsoleMessage("&ePlaceholder&c 重载异常，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/placeholderapi.6245/&c，已取消 &ePlaceholder&c 重载。"); }
+            catch (Exception exception) { QuickUtils.sendConsoleMessage("&ePlaceholder&c 重载异常，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/placeholderapi.6245/&c，已取消 &ePlaceholder&c 重载。"); }
         });
 
         // 设置 Vault 以及 PlayerPoints
