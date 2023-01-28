@@ -83,3 +83,9 @@
 > 目前支持的数据保存形式
 - 目前 Advanced Wish 支持使用 [MongoDB](https://www.mongodb.com/) 来存储插件数据，如果不开启则使用 Json 来存储玩家数据。
 ---
+## 开发者 API
+> 触发事件
+- 目前 Advanced Wish 提供了两个触发事件，分别为 EffectSendEvent PlayerWishEvent.
+- EffectSendEvent 将会在发送效果时触发，可获得对应的文件名，目标玩家，路径等等，cancel 则取消发送效果。
+- PlayerWishEvent 将会在玩家许愿时触发，可获得对应的许愿状态，目标玩家等等，若成功许愿 cancel 此事件将会取消许愿，若失败则取消发送效果。
+---
