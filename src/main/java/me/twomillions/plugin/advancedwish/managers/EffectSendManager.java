@@ -2,10 +2,11 @@ package me.twomillions.plugin.advancedwish.managers;
 
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
+import me.twomillions.plugin.advancedwish.api.EffectSendEvent;
 import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.utils.BossBarRandomUtils;
-import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import me.twomillions.plugin.advancedwish.utils.ExpUtils;
+import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
@@ -42,17 +43,26 @@ public class EffectSendManager {
     public static void sendEffect(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         if (!targetPlayer.isOnline()) return;
 
-        sendTitle(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        sendParticle(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        sendSounds(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        sendCommands(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        sendMessage(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        sendAnnouncement(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        sendPotion(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        sendHealthAndHunger(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        sendExp(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        sendActionBar(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        sendBossBar(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            EffectSendEvent effectSendEvent = QuickUtils.callEffectSendEvent(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+
+            // isCancelled
+            if (effectSendEvent.isCancelled()) return;
+
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                sendTitle(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+                sendParticle(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+                sendSounds(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+                sendCommands(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+                sendMessage(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+                sendAnnouncement(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+                sendPotion(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+                sendHealthAndHunger(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+                sendExp(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+                sendActionBar(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+                sendBossBar(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+            });
+        });
     }
 
     // 发送标题

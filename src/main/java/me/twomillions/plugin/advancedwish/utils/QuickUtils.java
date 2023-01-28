@@ -1,6 +1,9 @@
 package me.twomillions.plugin.advancedwish.utils;
 
 import me.clip.placeholderapi.PlaceholderAPI;
+import me.twomillions.plugin.advancedwish.api.EffectSendEvent;
+import me.twomillions.plugin.advancedwish.api.PlayerWishEvent;
+import me.twomillions.plugin.advancedwish.enums.wish.PlayerWishState;
 import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.managers.RegisterManager;
 import org.apache.commons.jexl3.JexlBuilder;
@@ -144,6 +147,22 @@ public class QuickUtils {
     // 快捷返回负面信息
     public static void sendUnknownWarn(String unknown, String fileName, String unknownName) {
         sendConsoleMessage("&c您填入了一个未知的" + unknown + "，位于: &e" + fileName + "&c，您填入的未知" + unknown + "为: &e" + unknownName);
+    }
+
+    // call PlayerWishEvent 并且返回
+    public static PlayerWishEvent callPlayerWishEvent(Player player, PlayerWishState playerWishState) {
+        PlayerWishEvent playerWishEvent = new PlayerWishEvent(player, playerWishState);
+        Bukkit.getPluginManager().callEvent(playerWishEvent);
+
+        return playerWishEvent;
+    }
+
+    // call EffectSendEvent 并且返回
+    public static EffectSendEvent callEffectSendEvent(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
+        EffectSendEvent effectSendEvent = new EffectSendEvent(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+        Bukkit.getPluginManager().callEvent(effectSendEvent);
+
+        return effectSendEvent;
     }
 
     private static String stringInterceptReplace(String string, String start, String end, String replace, boolean removeStartEndString) {

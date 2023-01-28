@@ -4,16 +4,17 @@ import com.mongodb.client.model.Filters;
 import de.leonhard.storage.Json;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
+import me.twomillions.plugin.advancedwish.api.PlayerWishEvent;
 import me.twomillions.plugin.advancedwish.enums.mongo.MongoCollections;
 import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
 import me.twomillions.plugin.advancedwish.enums.redis.RedisConnectState;
-import me.twomillions.plugin.advancedwish.enums.wish.CheckWishState;
+import me.twomillions.plugin.advancedwish.enums.wish.PlayerWishState;
 import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
 import me.twomillions.plugin.advancedwish.managers.databases.RedisManager;
-import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import me.twomillions.plugin.advancedwish.utils.ItemUtils;
 import me.twomillions.plugin.advancedwish.utils.ProbabilityUntilities;
+import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import net.milkbowl.vault.economy.Economy;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.Bukkit;
@@ -367,33 +368,64 @@ public class WishManager {
 
     // 许下一个愿望
     public static void makeWish(Player player, String wishName, boolean force) {
+        // 许愿状态
+        PlayerWishState playerWishState = checkWish(player, wishName);
+
         // 当玩家许愿一次后没有等待最终奖品发放便尝试二次许愿时
-        if (isPlayerInWishList(player)) {
-            EffectSendManager.sendEffect(wishName, player, null, "/Wish", "CANT-WISH-AGAIN");
+        if (playerWishState == PlayerWishState.InProgress) {
+            // 触发事件
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                // 如果 cancel 则不发送效果
+                if (!QuickUtils.callPlayerWishEvent(player, PlayerWishState.InProgress).isCancelled()) {
+                    Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> EffectSendManager.sendEffect(wishName, player, null, "/Wish", "CANT-WISH-AGAIN"));
+                }
+            });
+
             return;
         }
 
-        // 许愿状态
-        CheckWishState checkWishState = checkWish(player, wishName);
-
         // 当玩家没有满足许愿条件但是尝试许愿时
-        if (checkWishState == CheckWishState.RequirementsNotMet && !force) {
-            EffectSendManager.sendEffect(wishName, player, null, "/Wish", "CANT-WISH");
+        if (playerWishState == PlayerWishState.RequirementsNotMet && !force) {
+            // 触发事件
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                // 如果 cancel 则不发送效果
+                if (!QuickUtils.callPlayerWishEvent(player, PlayerWishState.RequirementsNotMet).isCancelled()) {
+                    Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> EffectSendManager.sendEffect(wishName, player, null, "/Wish", "CANT-WISH"));
+                }
+            });
+
             return;
         }
 
         // 开启许愿次数限制并且玩家已经达到了许愿次数极限但是尝试许愿时
-        if (checkWishState == CheckWishState.ReachLimit && !force) {
-            EffectSendManager.sendEffect(wishName, player, null, "/Wish", "ADVANCED-SETTINGS.WISH-LIMIT.REACH-LIMIT");
+        if (playerWishState == PlayerWishState.ReachLimit && !force) {
+            // 触发事件
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                // 如果 cancel 则不发送效果
+                if (!QuickUtils.callPlayerWishEvent(player, PlayerWishState.ReachLimit).isCancelled()) {
+                    Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> EffectSendManager.sendEffect(wishName, player, null, "/Wish", "ADVANCED-SETTINGS.WISH-LIMIT.REACH-LIMIT"));
+                }
+            });
+
             return;
         }
 
-        // 设置与为玩家开启计划任务
-        String finalProbabilityWish = getFinalProbabilityWish(player, wishName);
+        // 触发事件
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            PlayerWishEvent playerWishEvent = QuickUtils.callPlayerWishEvent(player, PlayerWishState.Allow);
 
-        addPlayerToWishList(player);
-        addPlayerWishPrizeDo(player, wishName, getWishPrizeSetPrizeDo(finalProbabilityWish));
-        createPlayerScheduledTasks(player, wishName, finalProbabilityWish);
+            // isCancelled
+            if (playerWishEvent.isCancelled()) return;
+
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                // 设置与为玩家开启计划任务
+                String finalProbabilityWish = getFinalProbabilityWish(player, wishName);
+
+                addPlayerToWishList(player);
+                addPlayerWishPrizeDo(player, wishName, getWishPrizeSetPrizeDo(finalProbabilityWish));
+                createPlayerScheduledTasks(player, wishName, finalProbabilityWish);
+            });
+        });
     }
 
     // 设置玩家指定许愿池保底率
@@ -551,7 +583,10 @@ public class WishManager {
     }
 
     // 检查是否可以使用
-    public static CheckWishState checkWish(Player player, String wishName) {
+    public static PlayerWishState checkWish(Player player, String wishName) {
+        // 检查玩家是否正在许愿
+        if (isPlayerInWishList(player)) return PlayerWishState.InProgress;
+
         Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
         yaml.setPathPrefix("CONDITION");
 
@@ -592,7 +627,7 @@ public class WishManager {
                         int playerWishLimitAmount = getPlayerWishLimitAmount(player, wishName) + getWishIncreasedAmount(wishName);
 
                         // 如果增加许愿次数但增加后的许愿次数到达极限，那么返回并不增加限制次数
-                        if (playerWishLimitAmount > wishLimitAmount) return CheckWishState.ReachLimit;
+                        if (playerWishLimitAmount > wishLimitAmount) return PlayerWishState.ReachLimit;
 
                         // 增加限制次数
                         setPlayerWishLimitAmount(player, wishName, playerWishLimitAmount);
@@ -600,7 +635,7 @@ public class WishManager {
 
                     itemStack.setAmount(itemAmount - checkAmount);
 
-                    return CheckWishState.Allow;
+                    return PlayerWishState.Allow;
                 }
             }
         }
@@ -608,10 +643,10 @@ public class WishManager {
         yaml.setPathPrefix("CONDITION");
 
         // 权限检查
-        if (!perm.equals("") && !player.hasPermission(perm)) return CheckWishState.RequirementsNotMet;
+        if (!perm.equals("") && !player.hasPermission(perm)) return PlayerWishState.RequirementsNotMet;
 
         // 等级检查
-        if (player.getLevel() < level) return CheckWishState.RequirementsNotMet;
+        if (player.getLevel() < level) return PlayerWishState.RequirementsNotMet;
 
         // 背包物品检查
         for (String configInventoryHave : yaml.getStringList("INVENTORY-HAVE")) {
@@ -629,7 +664,7 @@ public class WishManager {
                 if (itemStack != null && itemStack.getType() == material) itemAmount = itemAmount + itemStack.getAmount();
             }
 
-            if (!player.getInventory().contains(material) || itemAmount < checkAmount) return CheckWishState.RequirementsNotMet;
+            if (!player.getInventory().contains(material) || itemAmount < checkAmount) return PlayerWishState.RequirementsNotMet;
         }
 
         // 药水效果检查
@@ -645,10 +680,10 @@ public class WishManager {
 
             if (effectType == null) {
                 QuickUtils.sendUnknownWarn("药水效果", wishName, effectString);
-                return CheckWishState.RequirementsNotMet;
+                return PlayerWishState.RequirementsNotMet;
             }
 
-            if (!player.hasPotionEffect(effectType) || player.getPotionEffect(effectType).getAmplifier() < amplifier) return CheckWishState.RequirementsNotMet;
+            if (!player.hasPotionEffect(effectType) || player.getPotionEffect(effectType).getAmplifier() < amplifier) return PlayerWishState.RequirementsNotMet;
         }
 
         // 点券检查，扣除点券
@@ -656,13 +691,13 @@ public class WishManager {
         boolean takePoints = false;
         PlayerPointsAPI playerPointsAPI = RegisterManager.getPlayerPointsAPI();
         if (point != 0 && playerPointsAPI != null && playerPointsAPI.look(player.getUniqueId()) >= point) takePoints = true;
-        else if (point != 0 && playerPointsAPI != null) return CheckWishState.RequirementsNotMet;
+        else if (point != 0 && playerPointsAPI != null) return PlayerWishState.RequirementsNotMet;
 
         // 金币检查
         boolean withdrawPlayer = false;
         Economy economy = RegisterManager.getEconomy();
         if (money != 0 && economy != null && economy.hasAccount(player) && economy.has(player, money)) withdrawPlayer = true;
-        else if (money != 0 && economy != null) return CheckWishState.RequirementsNotMet;
+        else if (money != 0 && economy != null) return PlayerWishState.RequirementsNotMet;
 
         // 如果开启了许愿次数限制
         if (isEnabledWishLimit(wishName)) {
@@ -670,7 +705,7 @@ public class WishManager {
             int playerWishLimitAmount = getPlayerWishLimitAmount(player, wishName) + getWishIncreasedAmount(wishName);
 
             // 如果增加许愿次数但增加后的许愿次数到达极限，那么返回并不增加限制次数
-            if (playerWishLimitAmount > wishLimitAmount) return CheckWishState.ReachLimit;
+            if (playerWishLimitAmount > wishLimitAmount) return PlayerWishState.ReachLimit;
 
             // 增加限制次数
             setPlayerWishLimitAmount(player, wishName, playerWishLimitAmount);
@@ -682,7 +717,7 @@ public class WishManager {
         // 修复 https://gitee.com/A2000000/advanced-wish/issues/I67LOV
         if (withdrawPlayer) economy.withdrawPlayer(player, money);
 
-        return CheckWishState.Allow;
+        return PlayerWishState.Allow;
     }
 
     // 保存玩家缓存数据 - 当服务器没有使用 Redis 关服时有玩家许愿未完成的情况下
