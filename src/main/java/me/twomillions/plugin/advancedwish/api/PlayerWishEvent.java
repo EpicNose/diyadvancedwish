@@ -20,14 +20,18 @@ public class PlayerWishEvent extends Event {
     // 玩家许愿事件
 
     @Getter private final Player player;
+    @Getter private final String wishName;
+    @Getter private final boolean isForce;
     @Getter private final PlayerWishState playerWishState;
 
     @Getter @Setter private boolean isCancelled;
 
     private static final HandlerList HANDLERS = new HandlerList();
 
-    public PlayerWishEvent(Player player, PlayerWishState playerWishState) {
+    public PlayerWishEvent(Player player, PlayerWishState playerWishState, String wishName, boolean isForce) {
         this.player = player;
+        this.wishName = wishName;
+        this.isForce = isForce;
         this.playerWishState = playerWishState;
         this.isCancelled = playerWishState != PlayerWishState.Allow;
     }

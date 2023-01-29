@@ -58,9 +58,7 @@ public class ConfigManager {
     }
 
     // 获取最新的配置文件版本
-    public static int getLastConfigVersion() {
-        return Integer.parseInt(plugin.getDescription().getVersion().replace(".", "").split("-") [0]);
-    }
+    public static int getLastConfigVersion() { return 43; }
 
     // 检查配置文件版本是否为最新版
     public static boolean isLastConfigVersion(Yaml yaml) {

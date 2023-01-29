@@ -376,7 +376,7 @@ public class WishManager {
             // 触发事件
             Bukkit.getScheduler().runTask(plugin, () -> {
                 // 如果 cancel 则不发送效果
-                if (!QuickUtils.callPlayerWishEvent(player, PlayerWishState.InProgress).isCancelled()) {
+                if (!QuickUtils.callPlayerWishEvent(player, PlayerWishState.InProgress, wishName, force).isCancelled()) {
                     Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> EffectSendManager.sendEffect(wishName, player, null, "/Wish", "CANT-WISH-AGAIN"));
                 }
             });
@@ -389,7 +389,7 @@ public class WishManager {
             // 触发事件
             Bukkit.getScheduler().runTask(plugin, () -> {
                 // 如果 cancel 则不发送效果
-                if (!QuickUtils.callPlayerWishEvent(player, PlayerWishState.RequirementsNotMet).isCancelled()) {
+                if (!QuickUtils.callPlayerWishEvent(player, PlayerWishState.RequirementsNotMet, wishName, false).isCancelled()) {
                     Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> EffectSendManager.sendEffect(wishName, player, null, "/Wish", "CANT-WISH"));
                 }
             });
@@ -402,7 +402,7 @@ public class WishManager {
             // 触发事件
             Bukkit.getScheduler().runTask(plugin, () -> {
                 // 如果 cancel 则不发送效果
-                if (!QuickUtils.callPlayerWishEvent(player, PlayerWishState.ReachLimit).isCancelled()) {
+                if (!QuickUtils.callPlayerWishEvent(player, PlayerWishState.ReachLimit, wishName, false).isCancelled()) {
                     Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> EffectSendManager.sendEffect(wishName, player, null, "/Wish", "ADVANCED-SETTINGS.WISH-LIMIT.REACH-LIMIT"));
                 }
             });
@@ -412,7 +412,7 @@ public class WishManager {
 
         // 触发事件
         Bukkit.getScheduler().runTask(plugin, () -> {
-            PlayerWishEvent playerWishEvent = QuickUtils.callPlayerWishEvent(player, PlayerWishState.Allow);
+            PlayerWishEvent playerWishEvent = QuickUtils.callPlayerWishEvent(player, PlayerWishState.Allow, wishName, force);
 
             // isCancelled
             if (playerWishEvent.isCancelled()) return;

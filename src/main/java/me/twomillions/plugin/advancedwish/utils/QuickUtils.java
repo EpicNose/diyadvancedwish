@@ -150,8 +150,8 @@ public class QuickUtils {
     }
 
     // call PlayerWishEvent 并且返回
-    public static PlayerWishEvent callPlayerWishEvent(Player player, PlayerWishState playerWishState) {
-        PlayerWishEvent playerWishEvent = new PlayerWishEvent(player, playerWishState);
+    public static PlayerWishEvent callPlayerWishEvent(Player player, PlayerWishState playerWishState, String wishName, boolean isForce) {
+        PlayerWishEvent playerWishEvent = new PlayerWishEvent(player, playerWishState, wishName, isForce);
         Bukkit.getPluginManager().callEvent(playerWishEvent);
 
         return playerWishEvent;
