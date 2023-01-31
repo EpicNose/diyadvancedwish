@@ -45,7 +45,7 @@ public class PlayerTimestampTask {
                 }
 
                 // 修复多抽在第一抽就把玩家移除 WishList 的问题
-                if (WishManager.getPlayerScheduledTasks(player.getUniqueId()).size() <= 0 && WishManager.isPlayerInWishList(player)) WishManager.removePlayerWithWishList(player);
+                if (WishManager.getPlayerScheduledTasks(player.getUniqueId()).size() == 0 && WishManager.isPlayerInWishList(player)) WishManager.removePlayerWithWishList(player);
             }
         }.runTaskTimerAsynchronously(plugin, 0, 1);
     }

@@ -34,7 +34,10 @@ public class PlayerJoinCheckCacheTask {
             String path = main.getInstance().getDataFolder() + "/PlayerCache";
 
             // 遍历缓存文件
-            if (!ConfigManager.getAllFileName(path).contains(uuid + ".json")) return;
+            boolean hasCache = ConfigManager.getAllFileName(path).contains(uuid + ".json");
+
+            // isCancelled
+            if (QuickUtils.callPlayerJoinCheckCacheEvent(player, path, hasCache).isCancelled() || !hasCache) return;
 
             Json json = ConfigManager.createJsonConfig(uuid.toString(), path, true, false);
 

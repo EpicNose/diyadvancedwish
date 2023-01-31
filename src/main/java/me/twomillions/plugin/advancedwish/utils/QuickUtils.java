@@ -2,7 +2,9 @@ package me.twomillions.plugin.advancedwish.utils;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.twomillions.plugin.advancedwish.api.EffectSendEvent;
+import me.twomillions.plugin.advancedwish.api.PlayerJoinCheckCacheEvent;
 import me.twomillions.plugin.advancedwish.api.PlayerWishEvent;
+import me.twomillions.plugin.advancedwish.api.WishLimitResetEvent;
 import me.twomillions.plugin.advancedwish.enums.wish.PlayerWishState;
 import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.managers.RegisterManager;
@@ -163,6 +165,27 @@ public class QuickUtils {
         Bukkit.getPluginManager().callEvent(effectSendEvent);
 
         return effectSendEvent;
+    }
+
+    // call wishLimitResetEvent 并且返回
+    public static WishLimitResetEvent callWishLimitResetEvent(String wishName, String storeMode, int wishResetLimitStart, int wishResetLimitCycle
+            , boolean isEnabledResetCompleteSend, boolean isEnabledResetCompleteSendConsole) {
+
+        WishLimitResetEvent wishLimitResetEvent = new WishLimitResetEvent(wishName, storeMode
+                , wishResetLimitStart, wishResetLimitCycle
+                , isEnabledResetCompleteSend, isEnabledResetCompleteSendConsole);
+
+        Bukkit.getPluginManager().callEvent(wishLimitResetEvent);
+
+        return wishLimitResetEvent;
+    }
+
+    // call PlayerJoinCheckCacheEvent 并且返回
+    public static PlayerJoinCheckCacheEvent callPlayerJoinCheckCacheEvent(Player player, String path, boolean hasCache) {
+        PlayerJoinCheckCacheEvent playerJoinCheckCacheEvent = new PlayerJoinCheckCacheEvent(player, path, hasCache);
+        Bukkit.getPluginManager().callEvent(playerJoinCheckCacheEvent);
+
+        return playerJoinCheckCacheEvent;
     }
 
     private static String stringInterceptReplace(String string, String start, String end, String replace, boolean removeStartEndString) {
