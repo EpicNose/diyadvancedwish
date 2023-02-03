@@ -2,7 +2,7 @@ package me.twomillions.plugin.advancedwish.commands;
 
 import de.leonhard.storage.Yaml;
 import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
-import me.twomillions.plugin.advancedwish.main;
+import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.managers.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.RegisterManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
@@ -26,7 +26,7 @@ import java.util.Locale;
  * @date 2022/12/1 18:05
  */
 public class MainCommand implements TabExecutor {
-    private static final Plugin plugin = main.getInstance();
+    private static final Plugin plugin = Main.getInstance();
 
     /**
      * 主指令实现
@@ -49,10 +49,8 @@ public class MainCommand implements TabExecutor {
             boolean isAdmin = player.hasPermission(advancedWishYaml.getString("ADMIN-PERM"));
 
             if (args.length == 0) {
-                if (isAdmin)
-                    messageYaml.getStringList("ADMIN-SHOW-COMMAND").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
-                else
-                    messageYaml.getStringList("DEFAULT-SHOW-COMMAND").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
+                if (isAdmin) messageYaml.getStringList("ADMIN-SHOW-COMMAND").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
+                else messageYaml.getStringList("DEFAULT-SHOW-COMMAND").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
 
                 return;
             }

@@ -24,5 +24,10 @@ public enum PlayerWishState {
     /**
      * ReachLimit - 到达许愿限制
      */
-    ReachLimit
+    ReachLimit,
+
+    /**
+     * LoadingCache - 正在加载缓存数据
+     */
+    LoadingCache
 }

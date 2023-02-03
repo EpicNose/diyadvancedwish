@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
  * @author 2000000
  * @date 2023/1/31 19:00
  */
-public class AsyncPlayerJoinCheckCacheEvent extends Event {
+public class AsyncPlayerCheckCacheEvent extends Event {
     @Getter private final Player player;
     @Getter private final String path;
     @Getter private final boolean hasCache;
@@ -21,13 +21,13 @@ public class AsyncPlayerJoinCheckCacheEvent extends Event {
     private static final HandlerList HANDLERS = new HandlerList();
 
     /**
-     * AsyncPlayerJoinCheckCacheEvent 异步玩家缓存检查事件
+     * AsyncPlayerCheckCacheEvent 异步玩家缓存检查事件
      *
      * @param player player
      * @param path path
      * @param hasCache hasCache
      */
-    public AsyncPlayerJoinCheckCacheEvent(Player player, String path, boolean hasCache) {
+    public AsyncPlayerCheckCacheEvent(Player player, String path, boolean hasCache) {
         super(true);
 
         this.player = player;

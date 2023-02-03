@@ -41,7 +41,7 @@ public class RedisManager {
         // Redis 登陆设置
         String redisPassword = yaml.getString("REDIS.PASSWORD");
 
-        if (redisPassword.equals("")) setRedisAuthState(RedisAuthState.TurnOff);
+        if ("".equals(redisPassword)) setRedisAuthState(RedisAuthState.TurnOff);
         else {
             setRedisPassword(redisPassword);
             setRedisAuthState(RedisAuthState.UsingAuth);

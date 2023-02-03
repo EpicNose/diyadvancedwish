@@ -1,7 +1,7 @@
 package me.twomillions.plugin.advancedwish.listener;
 
 import me.twomillions.plugin.advancedwish.managers.EffectSendManager;
-import me.twomillions.plugin.advancedwish.tasks.PlayerJoinCheckCacheTask;
+import me.twomillions.plugin.advancedwish.tasks.PlayerCheckCacheTask;
 import me.twomillions.plugin.advancedwish.tasks.PlayerTimestampTask;
 import me.twomillions.plugin.advancedwish.tasks.UpdateCheckerTask;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
@@ -29,7 +29,7 @@ public class PlayerListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
-        PlayerJoinCheckCacheTask.startTask(player);
+        PlayerCheckCacheTask.startTask(player);
         PlayerTimestampTask.startTask(player);
 
         if (!UpdateCheckerTask.isLatestVersion() && player.isOp()) player.sendMessage(QuickUtils.translate(

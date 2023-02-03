@@ -1,6 +1,6 @@
 package me.twomillions.plugin.advancedwish.tasks;
 
-import me.twomillions.plugin.advancedwish.main;
+import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.managers.EffectSendManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
 import org.bukkit.entity.Player;
@@ -12,7 +12,7 @@ import org.bukkit.scheduler.BukkitRunnable;
  * @date 2022/11/24 16:49
  */
 public class PlayerTimestampTask {
-    private static final Plugin plugin = main.getInstance();
+    private static final Plugin plugin = Main.getInstance();
 
     /**
      * 用于时间戳各种检查与执行

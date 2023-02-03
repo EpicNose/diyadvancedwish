@@ -2,7 +2,7 @@ package me.twomillions.plugin.advancedwish.commands;
 
 import de.leonhard.storage.Yaml;
 import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
-import me.twomillions.plugin.advancedwish.main;
+import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.managers.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.RegisterManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
@@ -24,7 +24,7 @@ import java.util.Locale;
  * @date 2022/12/1 18:05
  */
 public class ConsoleCommand implements CommandExecutor {
-    private static final Plugin plugin = main.getInstance();
+    private static final Plugin plugin = Main.getInstance();
 
     /**
      * 控制台指令实现

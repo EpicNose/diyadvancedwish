@@ -2,11 +2,11 @@ package me.twomillions.plugin.advancedwish.utils;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.twomillions.plugin.advancedwish.api.AsyncEffectSendEvent;
-import me.twomillions.plugin.advancedwish.api.AsyncPlayerJoinCheckCacheEvent;
+import me.twomillions.plugin.advancedwish.api.AsyncPlayerCheckCacheEvent;
 import me.twomillions.plugin.advancedwish.api.AsyncPlayerWishEvent;
 import me.twomillions.plugin.advancedwish.api.AsyncWishLimitResetEvent;
 import me.twomillions.plugin.advancedwish.enums.wish.PlayerWishState;
-import me.twomillions.plugin.advancedwish.main;
+import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.managers.RegisterManager;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
  * @date 2022/11/21 12:39
  */
 public class QuickUtils {
-    private static final Plugin plugin = main.getInstance();
+    private static final Plugin plugin = Main.getInstance();
     private static final JexlEngine jexlEngine = new JexlBuilder().create();
 
     public static final String CHAT_BAR = ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "------------------------------------------------";
@@ -277,18 +277,18 @@ public class QuickUtils {
     }
 
     /**
-     * call AsyncPlayerJoinCheckCacheEvent
+     * call AsyncPlayerCheckCacheEvent
      *
      * @param player player
      * @param path path
      * @param hasCache hasCache
-     * @return AsyncPlayerJoinCheckCacheEvent
+     * @return AsyncPlayerCheckCacheEvent
      */
-    public static AsyncPlayerJoinCheckCacheEvent callAsyncPlayerJoinCheckCacheEvent(Player player, String path, boolean hasCache) {
-        AsyncPlayerJoinCheckCacheEvent asyncPlayerJoinCheckCacheEvent = new AsyncPlayerJoinCheckCacheEvent(player, path, hasCache);
-        Bukkit.getPluginManager().callEvent(asyncPlayerJoinCheckCacheEvent);
+    public static AsyncPlayerCheckCacheEvent callAsyncPlayerCheckCacheEvent(Player player, String path, boolean hasCache) {
+        AsyncPlayerCheckCacheEvent asyncPlayerCheckCacheEvent = new AsyncPlayerCheckCacheEvent(player, path, hasCache);
+        Bukkit.getPluginManager().callEvent(asyncPlayerCheckCacheEvent);
 
-        return asyncPlayerJoinCheckCacheEvent;
+        return asyncPlayerCheckCacheEvent;
     }
 
     /**

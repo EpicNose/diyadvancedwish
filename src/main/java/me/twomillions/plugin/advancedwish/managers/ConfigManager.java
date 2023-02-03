@@ -6,7 +6,7 @@ import de.leonhard.storage.Yaml;
 import de.leonhard.storage.internal.settings.ConfigSettings;
 import de.leonhard.storage.internal.settings.DataType;
 import de.leonhard.storage.internal.settings.ReloadSettings;
-import me.twomillions.plugin.advancedwish.main;
+import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -21,7 +21,7 @@ import java.util.List;
  * @date 2022/11/21 12:41
  */
 public class ConfigManager {
-    private static final Plugin plugin = main.getInstance();
+    private static final Plugin plugin = Main.getInstance();
 
     /**
      * 创建默认配置文件
@@ -74,7 +74,7 @@ public class ConfigManager {
      *
      * @return 最新的配置文件版本
      */
-    public static int getLastConfigVersion() { return 43; }
+    public static int getLastConfigVersion() { return 44; }
 
     /**
      * 检查配置文件版本是否为最新版
@@ -192,7 +192,7 @@ public class ConfigManager {
      * @param logString logString
      */
     public static void addPlayerWishLog(Player player, String logString) {
-        Json json = createJson(player.getUniqueId().toString(), main.getLogsPath(), true, false);
+        Json json = createJson(player.getUniqueId().toString(), Main.getLogsPath(), true, false);
         List<String> logs = json.getStringList("logs"); logs.add(logString); json.set("logs", logs);
     }
 
@@ -203,7 +203,7 @@ public class ConfigManager {
      * @param logString logString
      */
     public static void addPlayerWishLog(String uuid, String logString) {
-        Json json = createJson(uuid, main.getLogsPath(), true, false);
+        Json json = createJson(uuid, Main.getLogsPath(), true, false);
         List<String> logs = json.getStringList("logs"); logs.add(logString); json.set("logs", logs);
     }
 
@@ -216,7 +216,7 @@ public class ConfigManager {
      * @return 返回查询出来的日志列表
      */
     public static List<String> getPlayerWishLog(Player player, int findMin, int findMax) {
-        Json json = createJson(player.getUniqueId().toString(), main.getLogsPath(), true, false);
+        Json json = createJson(player.getUniqueId().toString(), Main.getLogsPath(), true, false);
 
         List<String> returnLogs = new ArrayList<>();
         List<String> getLogs = json.getStringList("logs");
@@ -243,7 +243,7 @@ public class ConfigManager {
      * @return 返回查询出来的日志列表
      */
     public static List<String> getPlayerWishLog(String uuid, int findMin, int findMax) {
-        Json json = createJson(uuid, main.getLogsPath(), true, false);
+        Json json = createJson(uuid, Main.getLogsPath(), true, false);
 
         List<String> returnLogs = new ArrayList<>();
         List<String> getLogs = json.getStringList("logs");
@@ -268,7 +268,7 @@ public class ConfigManager {
      * @return 返回日志条目数
      */
     public static int getWishLogsSize(Player player) {
-        Json json = createJson(player.getUniqueId().toString(), main.getLogsPath(), true, false);
+        Json json = createJson(player.getUniqueId().toString(), Main.getLogsPath(), true, false);
 
         return json.getStringList("logs").size();
     }
@@ -280,7 +280,7 @@ public class ConfigManager {
      * @return 返回日志条目数
      */
     public static int getWishLogsSize(String uuid) {
-        Json json = createJson(uuid, main.getLogsPath(), true, false);
+        Json json = createJson(uuid, Main.getLogsPath(), true, false);
 
         return json.getStringList("logs").size();
     }

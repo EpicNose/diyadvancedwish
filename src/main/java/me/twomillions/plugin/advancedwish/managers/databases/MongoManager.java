@@ -11,7 +11,7 @@ import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import lombok.Setter;
 import me.twomillions.plugin.advancedwish.enums.mongo.*;
-import me.twomillions.plugin.advancedwish.main;
+import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.managers.ConfigManager;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import org.bson.Document;
@@ -57,12 +57,12 @@ public class MongoManager {
         String mongoPassword = yaml.getString("MONGO.AUTH.PASSWORD");
 
         // Custom Url
-        setMongoCustomUrlState(yaml.getString("MONGO.CUSTOM-URL").equals("") ? MongoCustomUrlState.TurnOff : MongoCustomUrlState.TurnOn);
+        setMongoCustomUrlState("".equals(yaml.getString("MONGO.CUSTOM-URL")) ? MongoCustomUrlState.TurnOff : MongoCustomUrlState.TurnOn);
 
         // 设置连接 Url
         if (getMongoCustomUrlState() == MongoCustomUrlState.TurnOn) setMongoClientUrlString(yaml.getString("MONGO.CUSTOM-URL"));
         else {
-            if (mongoUser.equals("") || mongoPassword.equals("")) {
+            if ("".equals(mongoUser) || "".equals(mongoPassword)) {
                 setMongoAuthState(MongoAuthState.TurnOff);
                 setMongoClientUrlString("mongodb://" + mongoIP + ":" + mongoPort + "/AdvancedWish");
             } else {
@@ -329,8 +329,8 @@ public class MongoManager {
         if (!yaml.getBoolean("TRANSFORMATION-JSON-TO-MONGO")) return JsonTransformationMongoState.TurnOff;
         if (MongoManager.getMongoConnectState() != MongoConnectState.Connected) { QuickUtils.sendConsoleMessage("&c您开启了数据迁移选项，但 Mongo 数据库并没有成功连接，请检查配置文件，服务器即将关闭。"); return JsonTransformationMongoState.Failed; }
 
-        String logsPath = main.getLogsPath();
-        String guaranteedPath = main.getGuaranteedPath();
+        String logsPath = Main.getLogsPath();
+        String guaranteedPath = Main.getGuaranteedPath();
 
         List<String> logsFileNames = ConfigManager.getAllFileName(logsPath);
         List<String> guaranteedFileNames = ConfigManager.getAllFileName(guaranteedPath);

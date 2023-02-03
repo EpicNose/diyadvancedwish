@@ -2,7 +2,7 @@ package me.twomillions.plugin.advancedwish.managers;
 
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
-import me.twomillions.plugin.advancedwish.main;
+import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.utils.BossBarRandomUtils;
 import me.twomillions.plugin.advancedwish.utils.ExpUtils;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2022/11/24 20:27
  */
 public class EffectSendManager {
-    private static final Plugin plugin = main.getInstance();
+    private static final Plugin plugin = Main.getInstance();
 
     /**
      * 用于储存需要玩家以 OP 身份执行的命令
@@ -78,7 +78,7 @@ public class EffectSendManager {
      */
     private static void sendTitle(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         // 如果是 1.7 服务器则不发送 Title (因为 1.7 没有)
-        if (main.getServerVersion() <= 107) return;
+        if (Main.getServerVersion() <= 107) return;
 
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
@@ -88,7 +88,7 @@ public class EffectSendManager {
         String mainTitle = QuickUtils.replaceTranslateToPapi(yaml.getString("MAIN-TITLE"), targetPlayer, replacePlayer);
         String subTitle = QuickUtils.replaceTranslateToPapi(yaml.getString("SUB-TITLE"), targetPlayer, replacePlayer);
 
-        if (mainTitle.equals("") && subTitle.equals("")) return;
+        if ("".equals(mainTitle) && "".equals(subTitle)) return;
 
         int fadeIn = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getString("FADE-IN")), targetPlayer, replacePlayer));
         int fadeOut = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getString("FADE-OUT")), targetPlayer, replacePlayer));
@@ -96,7 +96,7 @@ public class EffectSendManager {
 
         // 在 1.9 中由于此方法无法定义 fadeIn stay fadeOut 所以使用不同的方法
         // 我没有使用 NMS Spigot API 提供了一种发送标题的方法 旨在跨不同的 Minecraft 版本工作
-        if (main.getServerVersion() == 109) targetPlayer.sendTitle(mainTitle, subTitle);
+        if (Main.getServerVersion() == 109) targetPlayer.sendTitle(mainTitle, subTitle);
         else targetPlayer.sendTitle(mainTitle, subTitle, fadeIn, stay, fadeOut);
     }
 
@@ -429,7 +429,7 @@ public class EffectSendManager {
      */
     private static void sendActionBar(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         // 如果是 1.7 服务器则不发送 Action Bar (因为 1.7 没有)
-        if (main.getServerVersion() <= 107) return;
+        if (Main.getServerVersion() <= 107) return;
 
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
@@ -439,9 +439,9 @@ public class EffectSendManager {
         String actionBarMessage = QuickUtils.replaceTranslateToPapi(yaml.getString("MESSAGE"), targetPlayer, replacePlayer);
         int actionBarTime = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getString("TIME")), targetPlayer, replacePlayer));
 
-        if (actionBarMessage.equals("") || actionBarTime == 0) return;
+        if ("".equals(actionBarMessage) || actionBarTime == 0) return;
 
-        // 由于 Action Bar 并没有具体的淡出淡入显示时间参数，所以只能通过 Runnable 发送
+        // 由于 Action Bar 并没有具体地淡出淡入显示时间参数，所以只能通过 Runnable 发送
 
         new BukkitRunnable() {
             int time = 0;
@@ -471,7 +471,7 @@ public class EffectSendManager {
      */
     private static void sendBossBar(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         // Boss Bar 支持 1.7 / 1.8 会使用到 NMS 所以我选择直接放弃对于 1.7 / 1.8 的 Boss Bar 支持
-        if (main.getServerVersion() <= 108) return;
+        if (Main.getServerVersion() <= 108) return;
 
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
@@ -481,7 +481,7 @@ public class EffectSendManager {
         String bossBarMessage = QuickUtils.replaceTranslateToPapi(yaml.getString("MESSAGE"), targetPlayer, replacePlayer);
         double bossBarTime = Double.parseDouble(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getString("TIME")), targetPlayer, replacePlayer));
 
-        if (bossBarMessage.equals("") || bossBarTime == 0) return;
+        if ("".equals(bossBarMessage) || bossBarTime == 0) return;
 
         String barColorString = yaml.getString("COLOR");
         String barStyleString = yaml.getString("STYLE");

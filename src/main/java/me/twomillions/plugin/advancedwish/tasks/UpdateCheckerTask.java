@@ -1,7 +1,7 @@
 package me.twomillions.plugin.advancedwish.tasks;
 
 import lombok.Getter;
-import me.twomillions.plugin.advancedwish.main;
+import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.managers.ConfigManager;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import org.bukkit.Bukkit;
@@ -16,14 +16,14 @@ import java.util.Scanner;
  * @date 2022/11/24 16:49
  */
 public class UpdateCheckerTask {
-    private static final Plugin plugin = main.getInstance();
+    private static final Plugin plugin = Main.getInstance();
     @Getter private static boolean isLatestVersion = true;
 
     /**
      * 检查插件更新
      */
     public static void startTask() {
-        if (main.isDisabled()) return;
+        if (Main.isDisabled()) return;
 
         if (!ConfigManager.getAdvancedWishYaml().getBoolean("UPDATE-CHECKER")) return;
         int cycle = ConfigManager.getAdvancedWishYaml().getInt("CHECK-CYCLE");
@@ -35,7 +35,7 @@ public class UpdateCheckerTask {
                 isLatestVersion = true;
 
                 QuickUtils.sendConsoleMessage("&a自动更新检查完成，您目前正在使用最新版的 Advanced Wish! 版本: " + plugin.getDescription().getVersion());
-            } else if (!urlString.equals("")) {
+            } else if (!"".equals(urlString)) {
                 isLatestVersion = false;
 
                 QuickUtils.sendConsoleMessage("&c您目前正在使用过时的 Advanced Wish! 请更新以避免服务器出现问题! 下载链接: https://gitee.com/A2000000/advanced-wish/releases/");

@@ -1,6 +1,6 @@
 # 配置版本
 #  请不要擅自更改，插件将在启动时检查配置文件版本，并告诉您您是否应该重新生成补全来防止错误
-CONFIG-VERSION: 43
+CONFIG-VERSION: 44
 
 # 自动重载:
 #  除了 ADVANCED-SETTINGS WISH-LIMIT 以外
@@ -527,44 +527,80 @@ CANT-WISH:
     COLOR: RANDOM
     STYLE: RANDOM
 
-# 缓存设置，这里只会在 Redis 数据库关闭时有用
-CACHE-SETTINGS:
-  WAIT: 2 # 我们将延迟多久发放上次关服未发放完成的奖励 - 单位秒 - 不可小数 - 支持算数
-  WAIT-JOIN: 2 # 我们应该在玩家进入多久后发送 CACHE-SETTINGS 里面的效果内容
-
-  # 当玩家有未发放完成的奖励时当玩家进服显示的提示内容
+# 禁止玩家在加载缓存时许愿
+CANT-WISH-LOADING-CACHE:
   EFFECTS:
     - ""
   TITLE:
-    MAIN-TITLE: "&a奖励补发!"
-    SUB-TITLE: "&7服务器将在 2 秒后重新补发奖励!"
+    MAIN-TITLE: ""
+    SUB-TITLE: ""
     FADE-IN: 20
     FADE-OUT: 20
     STAY: 20
   MESSAGE:
     - "   "
-    - "&7[&e提示&7] &7服务器将每隔 2 秒后发送上次服务器关闭时未发送的奖励!"
+    - "&7[&e提示&7] &7服务器正在加载您的缓存数据，在此期间您无法进行许愿!"
     - "   "
   PARTICLE:
-    - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;FALSE"
+    - ""
   COMMANDS:
     PLAYER:
       - ""
     CONSOLE:
       - ""
   SOUNDS:
-    - "ENTITY_PLAYER_LEVELUP;1;1"
+    - ""
   HEALTH: 0
   HUNGER: 0
   EXP: 0
   ACTION-BAR:
     TIME: 1
-    MESSAGE: "&a奖励补发!"
+    MESSAGE: ""
   BOSS-BAR:
     TIME: 3
-    MESSAGE: "&a奖励补发!"
+    MESSAGE: ""
     COLOR: RANDOM
     STYLE: RANDOM
+
+# 缓存设置，这里只会在 Redis 数据库关闭时有用
+CACHE-SETTINGS:
+  WAIT: 2 # 我们将延迟多久发放上次关服未发放完成的奖励 - 单位秒 - 不可小数 - 支持算数
+  WAIT-JOIN: 2 # 我们应该在玩家进入多久后发送 WISH-CACHE 里面的效果内容 - 单位秒 - 不可小数 - 支持算数
+
+  # 当玩家有未发放完成的奖励时当玩家进服显示的提示内容
+  WISH-CACHE:
+    EFFECTS:
+      - ""
+    TITLE:
+      MAIN-TITLE: "&a奖励补发!"
+      SUB-TITLE: "&7服务器将在 2 秒后重新补发奖励!"
+      FADE-IN: 20
+      FADE-OUT: 20
+      STAY: 20
+    MESSAGE:
+      - "   "
+      - "&7[&e提示&7] &7服务器将每隔 2 秒后发送上次服务器关闭时未发送的奖励!"
+      - "   "
+    PARTICLE:
+      - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;FALSE"
+    COMMANDS:
+      PLAYER:
+        - ""
+      CONSOLE:
+        - ""
+    SOUNDS:
+      - "ENTITY_PLAYER_LEVELUP;1;1"
+    HEALTH: 0
+    HUNGER: 0
+    EXP: 0
+    ACTION-BAR:
+      TIME: 1
+      MESSAGE: "&a奖励补发!"
+    BOSS-BAR:
+      TIME: 3
+      MESSAGE: "&a奖励补发!"
+      COLOR: RANDOM
+      STYLE: RANDOM
 
 # 高级设置，当您试图编辑这里时候，您应该明白您正在做什么
 ADVANCED-SETTINGS:

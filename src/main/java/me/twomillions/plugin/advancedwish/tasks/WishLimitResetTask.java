@@ -2,7 +2,7 @@ package me.twomillions.plugin.advancedwish.tasks;
 
 import lombok.Getter;
 import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
-import me.twomillions.plugin.advancedwish.main;
+import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.managers.EffectSendManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
@@ -19,7 +19,7 @@ import java.util.List;
  * @date 2023/1/9 15:08
  */
 public class WishLimitResetTask {
-    private static final Plugin plugin = main.getInstance();
+    private static final Plugin plugin = Main.getInstance();
     @Getter private static List<BukkitTask> wishLimitResetTaskList = new ArrayList<>();
 
     /**

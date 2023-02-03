@@ -1,7 +1,7 @@
 package me.twomillions.plugin.advancedwish.managers;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import me.twomillions.plugin.advancedwish.main;
+import me.twomillions.plugin.advancedwish.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -15,7 +15,7 @@ import java.util.Locale;
  * @date 2022/12/2 13:16
  */
 public class PapiManager extends PlaceholderExpansion {
-    private static final Plugin plugin = main.getInstance();
+    private static final Plugin plugin = Main.getInstance();
 
     @Override
     public @NotNull String getIdentifier() {

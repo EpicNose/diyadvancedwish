@@ -6,7 +6,7 @@ import lombok.Setter;
 import me.twomillions.plugin.advancedwish.commands.ConsoleCommand;
 import me.twomillions.plugin.advancedwish.commands.MainCommand;
 import me.twomillions.plugin.advancedwish.listener.PlayerListener;
-import me.twomillions.plugin.advancedwish.main;
+import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.tasks.WishLimitResetTask;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import net.milkbowl.vault.economy.Economy;
@@ -25,7 +25,7 @@ import java.util.List;
  * @date 2022/11/24 19:01
  */
 public class RegisterManager {
-    private static final Plugin plugin = main.getInstance();
+    private static final Plugin plugin = Main.getInstance();
     @Getter private static final List<String> registerWish = new ArrayList<>();
 
     @Getter @Setter private volatile static Economy economy;
@@ -56,9 +56,9 @@ public class RegisterManager {
      * 注册指令
      */
     public static void registerCommands() {
-        main.getInstance().getCommand("advancedwish").setExecutor(new MainCommand());
-        main.getInstance().getCommand("advancedwish").setTabCompleter(new MainCommand());
-        main.getInstance().getCommand("awc").setExecutor(new ConsoleCommand());
+        Main.getInstance().getCommand("advancedwish").setExecutor(new MainCommand());
+        Main.getInstance().getCommand("advancedwish").setTabCompleter(new MainCommand());
+        Main.getInstance().getCommand("awc").setExecutor(new ConsoleCommand());
     }
 
     /**
@@ -68,7 +68,7 @@ public class RegisterManager {
         registerWish.clear();
 
         for (String wishName : ConfigManager.getAdvancedWishYaml().getStringList("WISH")) {
-            if (wishName == null || wishName.equals("") || wishName.equals(" ")) return;
+            if (wishName == null || "".equals(wishName) || wishName.equals(" ")) return;
 
             Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, true);
 
@@ -132,7 +132,7 @@ public class RegisterManager {
 
         // 设置玩家数据地址
         String guaranteedConfig = ConfigManager.getAdvancedWishYaml().getString("GUARANTEED-PATH");
-        main.setGuaranteedPath(guaranteedConfig.equals("") ? main.getInstance().getDataFolder() + "/PlayerGuaranteed" : guaranteedConfig);
+        Main.setGuaranteedPath("".equals(guaranteedConfig) ? Main.getInstance().getDataFolder() + "/PlayerGuaranteed" : guaranteedConfig);
 
         // 低版本 Papi 没有 unregister 方法，捕获异常以取消 Papi 重载
         if (isUsingPapi()) Bukkit.getScheduler().runTask(plugin, () -> {

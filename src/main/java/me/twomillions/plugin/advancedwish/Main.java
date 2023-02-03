@@ -11,6 +11,7 @@ import me.twomillions.plugin.advancedwish.managers.RegisterManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
 import me.twomillions.plugin.advancedwish.managers.databases.RedisManager;
+import me.twomillions.plugin.advancedwish.tasks.PlayerCheckCacheTask;
 import me.twomillions.plugin.advancedwish.tasks.PlayerTimestampTask;
 import me.twomillions.plugin.advancedwish.tasks.UpdateCheckerTask;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
@@ -19,8 +20,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Arrays;
 
-public final class main extends JavaPlugin {
-    @Getter @Setter private volatile static main instance;
+/**
+ * @author 2000000
+ * @date 2022/11/21 12:00
+ */
+public final class Main extends JavaPlugin {
+    @Getter @Setter private volatile static Main instance;
     @Getter @Setter private volatile static String logsPath;
     @Getter @Setter private volatile static Double serverVersion;
     @Getter @Setter private volatile static String guaranteedPath;
@@ -47,7 +52,7 @@ public final class main extends JavaPlugin {
         // 版本检查
         if (!ConfigManager.checkLastVersion(messageYaml) || !ConfigManager.checkLastVersion(advancedWishYaml)) return;
 
-        String pluginPath = main.getInstance().getDataFolder().toString();
+        String pluginPath = Main.getInstance().getDataFolder().toString();
 
         String logsConfig = advancedWishYaml.getString("LOGS-PATH");
         String guaranteedConfig = advancedWishYaml.getString("GUARANTEED-PATH");
@@ -59,8 +64,8 @@ public final class main extends JavaPlugin {
         if (MongoManager.setupMongo(advancedWishYaml) == MongoConnectState.CannotConnect) return;
 
         // 获取保底率与日志文件的指定路径
-        setLogsPath(logsConfig.equals("") ? pluginPath + "/PlayerLogs" : logsConfig);
-        setGuaranteedPath(guaranteedConfig.equals("") ? pluginPath + "/PlayerGuaranteed" : guaranteedConfig);
+        setLogsPath("".equals(logsConfig) ? pluginPath + "/PlayerLogs" : logsConfig);
+        setGuaranteedPath("".equals(guaranteedConfig) ? pluginPath + "/PlayerGuaranteed" : guaranteedConfig);
 
         // 迁移检查
         if (MongoManager.playerGuaranteedJsonToMongo(advancedWishYaml) != JsonTransformationMongoState.TurnOff) { Bukkit.shutdown(); return; }
@@ -71,10 +76,7 @@ public final class main extends JavaPlugin {
         RegisterManager.registerCommands();
 
         // bStats
-        if (!ConfigManager.getAdvancedWishYaml().contains("BSTATS") || ConfigManager.getAdvancedWishYaml().getBoolean("BSTATS")) {
-            int pluginId = 16990; // <-- Replace with the id of your plugin!
-            bStats metrics = new bStats(this, pluginId);
-        }
+        if (!ConfigManager.getAdvancedWishYaml().contains("BSTATS") || ConfigManager.getAdvancedWishYaml().getBoolean("BSTATS")) new bStats(this, 16990);
 
         // 网页更新
         UpdateCheckerTask.startTask();
@@ -82,8 +84,14 @@ public final class main extends JavaPlugin {
         /*
          * 如果玩家没有使用插件的指令进行热重载，那么会导致 PlayerTimestampRunnable 停止
          * 这里检查服内是否有此玩家，如果有的话那么就为所有玩家启动 PlayerTimestampRunnable
+         * 并且如果此玩家在线那么直接检查缓存数据，而不是需要玩家重新进入服务器
          */
-        if (Bukkit.getOnlinePlayers().size() != 0) Bukkit.getOnlinePlayers().forEach(PlayerTimestampTask::startTask);
+        if (Bukkit.getOnlinePlayers().size() != 0) {
+            Bukkit.getOnlinePlayers().forEach(onlinePlayer -> {
+                PlayerTimestampTask.startTask(onlinePlayer);
+                PlayerCheckCacheTask.startTask(onlinePlayer);
+            });
+        }
 
         QuickUtils.sendConsoleMessage("&aAdvanced Wish 插件已成功加载! 感谢您使用此插件! 版本: &e" + this.getDescription().getVersion() + "&a, 作者: &e2000000&a。");
     }

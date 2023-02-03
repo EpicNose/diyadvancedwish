@@ -8,9 +8,10 @@ import me.twomillions.plugin.advancedwish.enums.mongo.MongoCollections;
 import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
 import me.twomillions.plugin.advancedwish.enums.redis.RedisConnectState;
 import me.twomillions.plugin.advancedwish.enums.wish.PlayerWishState;
-import me.twomillions.plugin.advancedwish.main;
+import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
 import me.twomillions.plugin.advancedwish.managers.databases.RedisManager;
+import me.twomillions.plugin.advancedwish.tasks.PlayerCheckCacheTask;
 import me.twomillions.plugin.advancedwish.utils.ItemUtils;
 import me.twomillions.plugin.advancedwish.utils.ProbabilityUntilities;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
@@ -33,7 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2022/11/24 16:53
  */
 public class WishManager {
-    private static final Plugin plugin = main.getInstance();
+    private static final Plugin plugin = Main.getInstance();
     private static final boolean usingRedis = RedisManager.getRedisConnectState() == RedisConnectState.Connected;
     private static final boolean usingMongo = MongoManager.getMongoConnectState() == MongoConnectState.Connected;
 
@@ -572,6 +573,16 @@ public class WishManager {
             return;
         }
 
+        // 当玩家正在加载缓存时尝试许愿
+        if (playerWishState == PlayerWishState.LoadingCache) {
+            // isCancelled
+            if (!QuickUtils.callAsyncPlayerWishEvent(player, PlayerWishState.LoadingCache, wishName, force).isCancelled()) {
+                EffectSendManager.sendEffect(wishName, player, null, "/Wish", "CANT-WISH-LOADING-CACHE");
+            }
+
+            return;
+        }
+
         // 当玩家没有满足许愿条件但是尝试许愿时
         if (playerWishState == PlayerWishState.RequirementsNotMet && !force) {
             // isCancelled
@@ -593,7 +604,9 @@ public class WishManager {
         }
 
         // isCancelled
+        System.out.println("isc");
         if (QuickUtils.callAsyncPlayerWishEvent(player, PlayerWishState.Allow, wishName, force).isCancelled()) return;
+        System.out.println("noc");
 
         // 设置与为玩家开启计划任务
         String finalProbabilityWish = getFinalProbabilityWish(player, wishName);
@@ -613,11 +626,11 @@ public class WishManager {
      */
     public static void setPlayerWishGuaranteed(Player player, String wishName, double guaranteed) {
         String wishDataSync = getWishDataSync(wishName);
-        String dataSync = QuickUtils.stringToUnicode(wishDataSync.equals("") ? wishName : wishDataSync);
+        String dataSync = QuickUtils.stringToUnicode("".equals(wishDataSync) ? wishName : wishDataSync);
 
         if (usingMongo) { MongoManager.update(player, dataSync, String.valueOf(guaranteed), MongoCollections.PlayerGuaranteed); return; }
 
-        Json json = ConfigManager.createJson(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
+        Json json = ConfigManager.createJson(player.getUniqueId().toString(), Main.getGuaranteedPath(), true, false);
 
         json.set(dataSync, guaranteed);
     }
@@ -631,11 +644,11 @@ public class WishManager {
      */
     public static double getPlayerWishGuaranteed(Player player, String wishName) {
         String wishDataSync = getWishDataSync(wishName);
-        String dataSync = QuickUtils.stringToUnicode(wishDataSync.equals("") ? wishName : wishDataSync);
+        String dataSync = QuickUtils.stringToUnicode("".equals(wishDataSync) ? wishName : wishDataSync);
 
         if (usingMongo) return Double.parseDouble(MongoManager.getOrDefault(player, dataSync, "0", MongoCollections.PlayerGuaranteed).toString());
 
-        Json json = ConfigManager.createJson(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
+        Json json = ConfigManager.createJson(player.getUniqueId().toString(), Main.getGuaranteedPath(), true, false);
 
         return json.getDouble(dataSync);
     }
@@ -649,11 +662,11 @@ public class WishManager {
      */
     public static void setPlayerWishAmount(Player player, String wishName, int amount) {
         String wishDataSync = getWishDataSync(wishName);
-        String dataSync = QuickUtils.stringToUnicode(wishDataSync.equals("") ? wishName + "_amount" : wishDataSync + "_amount");
+        String dataSync = QuickUtils.stringToUnicode("".equals(wishDataSync) ? wishName + "_amount" : wishDataSync + "_amount");
 
         if (usingMongo) { MongoManager.update(player, dataSync, String.valueOf(amount), MongoCollections.PlayerGuaranteed); return; }
 
-        Json json = ConfigManager.createJson(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
+        Json json = ConfigManager.createJson(player.getUniqueId().toString(), Main.getGuaranteedPath(), true, false);
 
         json.set(dataSync, amount);
     }
@@ -667,11 +680,11 @@ public class WishManager {
      */
     public static Integer getPlayerWishAmount(Player player, String wishName) {
         String wishDataSync = getWishDataSync(wishName);
-        String dataSync = QuickUtils.stringToUnicode(wishDataSync.equals("") ? wishName + "_amount" : wishDataSync + "_amount");
+        String dataSync = QuickUtils.stringToUnicode("".equals(wishDataSync) ? wishName + "_amount" : wishDataSync + "_amount");
 
         if (usingMongo) return Integer.parseInt(MongoManager.getOrDefault(player, dataSync, "0", MongoCollections.PlayerGuaranteed).toString());
 
-        Json json = ConfigManager.createJson(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
+        Json json = ConfigManager.createJson(player.getUniqueId().toString(), Main.getGuaranteedPath(), true, false);
 
         return json.getInt(dataSync);
     }
@@ -688,7 +701,7 @@ public class WishManager {
 
         if (usingMongo) { MongoManager.update(player, wishName, String.valueOf(amount), MongoCollections.PlayerGuaranteed); return; }
 
-        Json json = ConfigManager.createJson(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
+        Json json = ConfigManager.createJson(player.getUniqueId().toString(), Main.getGuaranteedPath(), true, false);
 
         json.set(wishName, amount);
     }
@@ -708,7 +721,7 @@ public class WishManager {
 
         if (usingMongo) return Integer.parseInt(MongoManager.getOrDefault(player, wishName, "0", MongoCollections.PlayerGuaranteed).toString());
 
-        Json json = ConfigManager.createJson(player.getUniqueId().toString(), main.getGuaranteedPath(), true, false);
+        Json json = ConfigManager.createJson(player.getUniqueId().toString(), Main.getGuaranteedPath(), true, false);
 
         return json.getInt(wishName);
     }
@@ -725,7 +738,7 @@ public class WishManager {
         if (usingMongo) { MongoManager.getMongoDatabase().getCollection("PlayerGuaranteed").deleteMany(Filters.gte(wishName, "0")); return; }
 
         // Json
-        String path = main.getGuaranteedPath();
+        String path = Main.getGuaranteedPath();
         for (String fileName : ConfigManager.getAllFileName(path)) { Json json = ConfigManager.createJson(fileName, path, true, false); json.remove(wishName); }
     }
 
@@ -856,6 +869,9 @@ public class WishManager {
         // 检查玩家是否正在许愿
         if (isPlayerInWishList(player)) return PlayerWishState.InProgress;
 
+        // 检查玩家是否正在加载缓存
+        if (PlayerCheckCacheTask.isLoadingCache(player.getUniqueId())) return PlayerWishState.LoadingCache;
+
         Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
         yaml.setPathPrefix("CONDITION");
 
@@ -869,7 +885,7 @@ public class WishManager {
         yaml.setPathPrefix("ADVANCED-SETTINGS");
 
         for (String coupon : yaml.getStringList("COUPON")) {
-            if (coupon.equals("")) break;
+            if ("".equals(coupon)) break;
 
             String[] couponSplit = coupon.split(";");
 
@@ -912,7 +928,7 @@ public class WishManager {
         yaml.setPathPrefix("CONDITION");
 
         // 权限检查
-        if (!perm.equals("") && !player.hasPermission(perm)) return PlayerWishState.RequirementsNotMet;
+        if (!"".equals(perm) && !player.hasPermission(perm)) return PlayerWishState.RequirementsNotMet;
 
         // 等级检查
         if (player.getLevel() < level) return PlayerWishState.RequirementsNotMet;

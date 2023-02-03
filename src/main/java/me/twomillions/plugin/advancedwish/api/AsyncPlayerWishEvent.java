@@ -24,6 +24,7 @@ public class AsyncPlayerWishEvent extends Event {
 
     /**
      * AsyncPlayerWishEvent 异步玩家许愿事件
+     * 如果玩家没有许愿成功，那么 cancel 则为取消发送效果，否则为取消此次许愿
      *
      * @param player player
      * @param playerWishState playerWishState
@@ -37,11 +38,6 @@ public class AsyncPlayerWishEvent extends Event {
         this.wishName = wishName;
         this.isForce = isForce;
         this.playerWishState = playerWishState;
-
-        /*
-         * 如果玩家没有许愿成功，那么 cancel 则为取消发送效果
-         * 如果玩家许愿成功 那么 cancel 则取消此次许愿
-         */
         this.isCancelled = false;
     }
 
