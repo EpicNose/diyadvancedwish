@@ -20,15 +20,15 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * author:     2000000
- * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.commands
- * className:      MainCommand
- * date:    2022/12/1 18:05
+ * @author 2000000
+ * @date 2022/12/1 18:05
  */
 public class ConsoleCommand implements CommandExecutor {
     private static final Plugin plugin = main.getInstance();
 
+    /**
+     * 控制台指令实现
+     */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (sender instanceof Player) {

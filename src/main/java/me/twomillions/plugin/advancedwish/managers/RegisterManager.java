@@ -21,11 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * author:     2000000
- * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.managers
- * className:      RegisterManager
- * date:    2022/11/24 19:01
+ * @author 2000000
+ * @date 2022/11/24 19:01
  */
 public class RegisterManager {
     private static final Plugin plugin = main.getInstance();
@@ -35,7 +32,9 @@ public class RegisterManager {
     @Getter @Setter private volatile static boolean usingPapi;
     @Getter @Setter private volatile static PlayerPointsAPI playerPointsAPI;
 
-    // 监听注册
+    /**
+     * 注册监听器
+     */
     public static void registerListener() {
         PluginManager manager = Bukkit.getPluginManager();
 
@@ -53,21 +52,25 @@ public class RegisterManager {
         }
     }
 
-    // 指令注册
+    /**
+     * 注册指令
+     */
     public static void registerCommands() {
         main.getInstance().getCommand("advancedwish").setExecutor(new MainCommand());
         main.getInstance().getCommand("advancedwish").setTabCompleter(new MainCommand());
         main.getInstance().getCommand("awc").setExecutor(new ConsoleCommand());
     }
 
-    // 注册所有许愿池
+    /**
+     * 注册所有的许愿池
+     */
     public static void registerWish() {
         registerWish.clear();
 
         for (String wishName : ConfigManager.getAdvancedWishYaml().getStringList("WISH")) {
             if (wishName == null || wishName.equals("") || wishName.equals(" ")) return;
 
-            Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, true);
+            Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, true);
 
             if (!ConfigManager.checkLastVersion(yaml)) return;
 
@@ -84,7 +87,9 @@ public class RegisterManager {
         }
     }
 
-    // 设置 Economy
+    /**
+     * 设置 Economy
+     */
     private static void setupEconomy() {
         if (Bukkit.getPluginManager().getPlugin("Vault") == null) return;
 
@@ -102,7 +107,9 @@ public class RegisterManager {
         QuickUtils.sendConsoleMessage("&a检查到服务器存在 &eVault&a，已成功设置 &eVault&a。");
     }
 
-    // 设置 PlayerPoints
+    /**
+     * 设置 PlayerPoints
+     */
     private static void setupPlayerPoints() {
         if (Bukkit.getPluginManager().getPlugin("PlayerPoints") == null) return;
 
@@ -116,7 +123,9 @@ public class RegisterManager {
         QuickUtils.sendConsoleMessage("&a检查到服务器存在 &ePlayerPoints&a，已成功设置 &ePlayerPoints&a。");
     }
 
-    // Reload 方法
+    /**
+     * Reload
+     */
     public static void reload() {
         // 取消任务
         WishLimitResetTask.cancelAllWishLimitResetTasks();

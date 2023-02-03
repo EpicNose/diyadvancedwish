@@ -15,19 +15,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * author:     2000000
- * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.tasks
- * className:      WishLimitResetRunnable
- * date:    2023/1/9 15:08
+ * @author 2000000
+ * @date 2023/1/9 15:08
  */
 public class WishLimitResetTask {
     private static final Plugin plugin = main.getInstance();
     @Getter private static List<BukkitTask> wishLimitResetTaskList = new ArrayList<>();
 
-    // 此 Task 用于检查许愿池是否开启限制许愿功能
-    // 若开启了则为这个许愿池创建一个 Runnable 用于清除玩家的限制许愿次数
-
+    /**
+     * 若开启限制许愿功能则为这个许愿池创建一个 Runnable 用于清除玩家的限制许愿次数
+     *
+     * @param wishName wishName
+     */
     public static void startTask(String wishName) {
         // 读取
         int wishResetLimitStart = WishManager.getWishResetLimitStart(wishName) * 20;
@@ -42,7 +41,7 @@ public class WishLimitResetTask {
             String storeMode = MongoManager.getMongoConnectState() == MongoConnectState.Connected ? "Mongo" : "Json";
 
             // isCancelled
-            if (QuickUtils.callWishLimitResetEvent(wishName, storeMode, wishResetLimitStart, wishResetLimitCycle
+            if (QuickUtils.callAsyncWishLimitResetEvent(wishName, storeMode, wishResetLimitStart, wishResetLimitCycle
                     , isEnabledResetCompleteSend, isEnabledResetCompleteSendConsole).isCancelled()) return;
 
             // 重置
@@ -62,7 +61,9 @@ public class WishLimitResetTask {
         wishLimitResetTaskList.add(resetBukkitTask);
     }
 
-    // 在 reload 的时候结束所有的旧任务
+    /**
+     * 在 reload 的时候结束所有的旧任务
+     */
     public static void cancelAllWishLimitResetTasks() {
         for (BukkitTask bukkitTask : wishLimitResetTaskList) bukkitTask.cancel();
     }

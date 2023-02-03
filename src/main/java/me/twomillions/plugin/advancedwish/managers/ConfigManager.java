@@ -17,55 +17,81 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * author:     2000000
- * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.managers
- * className:      ConfigManager
- * date:    2022/11/21 12:41
+ * @author 2000000
+ * @date 2022/11/21 12:41
  */
 public class ConfigManager {
     private static final Plugin plugin = main.getInstance();
 
-    // 创建默认配置
+    /**
+     * 创建默认配置文件
+     */
     public static void createDefaultConfig() {
-        createYamlConfig("message", null, false, true);
-        createYamlConfig("advancedWish", null, false, true);
+        createYaml("message", null, false, true);
+        createYaml("advancedWish", null, false, true);
     }
 
-    // 获取配置文件
+    /**
+     * 获取 advancedWish.yml
+     *
+     * @return yaml
+     */
     public static Yaml getAdvancedWishYaml() {
         String dataFolder = plugin.getDataFolder().toString();
         File file = new File(dataFolder, "advancedWish.yml");
 
         if (!file.exists()) QuickUtils.sendConsoleMessage("&c运行有误，请检查配置文件是否被误删! 开始重新创建配置文件!");
 
-        return createYamlConfig("advancedWish", null, false, true);
+        return createYaml("advancedWish", null, false, true);
     }
 
-    // 获取 message 配置文件
+    /**
+     * 获取 message.yml
+     *
+     * @return yaml
+     */
     public static Yaml getMessageYaml() {
         String dataFolder = plugin.getDataFolder().toString();
         File file = new File(dataFolder, "message.yml");
 
         if (!file.exists()) QuickUtils.sendConsoleMessage("&c运行有误，请检查配置文件是否被误删! 开始重新创建配置文件!");
 
-        return createYamlConfig("message", null, false, true);
+        return createYaml("message", null, false, true);
     }
 
-    // 获取配置文件版本
+    /**
+     * 获取配置文件版本
+     *
+     * @param yaml yaml
+     * @return 配置文件版本
+     */
     public static int getConfigVersion(Yaml yaml) {
         return yaml.getInt("CONFIG-VERSION");
     }
 
-    // 获取最新的配置文件版本
+    /**
+     * 获取最新的配置文件版本
+     *
+     * @return 最新的配置文件版本
+     */
     public static int getLastConfigVersion() { return 43; }
 
-    // 检查配置文件版本是否为最新版
+    /**
+     * 检查配置文件版本是否为最新版
+     *
+     * @param yaml yaml
+     * @return boolean
+     */
     public static boolean isLastConfigVersion(Yaml yaml) {
         return getConfigVersion(yaml) == getLastConfigVersion();
     }
 
-    // 检查配置文件版本，若为旧版本则发送提示信息并关闭服务器
+    /**
+     * 检查配置文件版本，若为旧版本则发送提示信息并关闭服务器
+     *
+     * @param yaml yaml
+     * @return boolean
+     */
     public static boolean checkLastVersion(Yaml yaml) {
         String yamlFileName = yaml.getFile().getName().replace(".yml", "");
 
@@ -73,8 +99,16 @@ public class ConfigManager {
         else { QuickUtils.sendConsoleMessage("&c检查到 &e" + yamlFileName + " &cYaml 文件不是最新版! 即将关闭服务器，请重新生成配置文件补全以防止错误!"); Bukkit.shutdown(); return false; }
     }
 
-    // 创建指定配置文件 - Yaml
-    public static Yaml createYamlConfig(String fileName, String path, boolean originalPath, boolean inputStreamFromResource) {
+    /**
+     * 创建 Yaml 文件
+     *
+     * @param fileName fileName
+     * @param path path
+     * @param originalPath originalPath
+     * @param inputStreamFromResource inputStreamFromResource
+     * @return yaml
+     */
+    public static Yaml createYaml(String fileName, String path, boolean originalPath, boolean inputStreamFromResource) {
         String dataFolder;
 
         if (fileName.contains(".yml")) fileName = fileName.split(".yml")[0];
@@ -108,8 +142,16 @@ public class ConfigManager {
                     .createYaml();
     }
 
-    // 创建指定配置文件 - Json
-    public static Json createJsonConfig(String fileName, String path, boolean originalPath, boolean inputStreamFromResource) {
+    /**
+     * 创建 Json 文件
+     *
+     * @param fileName fileName
+     * @param path path
+     * @param originalPath originalPath
+     * @param inputStreamFromResource inputStreamFromResource
+     * @return json
+     */
+    public static Json createJson(String fileName, String path, boolean originalPath, boolean inputStreamFromResource) {
         String dataFolder;
 
         if (fileName.contains(".json")) fileName = fileName.split(".json")[0];
@@ -143,21 +185,38 @@ public class ConfigManager {
                     .createJson();
     }
 
-    // 添加玩家许愿日志
+    /**
+     * 添加玩家许愿日志
+     *
+     * @param player player
+     * @param logString logString
+     */
     public static void addPlayerWishLog(Player player, String logString) {
-        Json json = createJsonConfig(player.getUniqueId().toString(), main.getLogsPath(), true, false);
+        Json json = createJson(player.getUniqueId().toString(), main.getLogsPath(), true, false);
         List<String> logs = json.getStringList("logs"); logs.add(logString); json.set("logs", logs);
     }
 
-    // 添加玩家许愿日志 - 多态 UUID
+    /**
+     * 添加玩家许愿日志
+     *
+     * @param uuid uuid
+     * @param logString logString
+     */
     public static void addPlayerWishLog(String uuid, String logString) {
-        Json json = createJsonConfig(uuid, main.getLogsPath(), true, false);
+        Json json = createJson(uuid, main.getLogsPath(), true, false);
         List<String> logs = json.getStringList("logs"); logs.add(logString); json.set("logs", logs);
     }
 
-    // 获取玩家许愿日志
+    /**
+     * 获取玩家许愿日志
+     *
+     * @param player player
+     * @param findMin findMin
+     * @param findMax findMax
+     * @return 返回查询出来的日志列表
+     */
     public static List<String> getPlayerWishLog(Player player, int findMin, int findMax) {
-        Json json = createJsonConfig(player.getUniqueId().toString(), main.getLogsPath(), true, false);
+        Json json = createJson(player.getUniqueId().toString(), main.getLogsPath(), true, false);
 
         List<String> returnLogs = new ArrayList<>();
         List<String> getLogs = json.getStringList("logs");
@@ -175,9 +234,16 @@ public class ConfigManager {
         return returnLogs;
     }
 
-    // 获取玩家许愿日志 - 多态 UUID
+    /**
+     * 获取玩家许愿日志
+     *
+     * @param uuid uuid
+     * @param findMin findMin
+     * @param findMax findMax
+     * @return 返回查询出来的日志列表
+     */
     public static List<String> getPlayerWishLog(String uuid, int findMin, int findMax) {
-        Json json = createJsonConfig(uuid, main.getLogsPath(), true, false);
+        Json json = createJson(uuid, main.getLogsPath(), true, false);
 
         List<String> returnLogs = new ArrayList<>();
         List<String> getLogs = json.getStringList("logs");
@@ -195,30 +261,42 @@ public class ConfigManager {
         return returnLogs;
     }
 
-    // 获取玩家所有日志条目数
+    /**
+     * 获取玩家所有日志条目数
+     *
+     * @param player player
+     * @return 返回日志条目数
+     */
     public static int getWishLogsSize(Player player) {
-        Json json = createJsonConfig(player.getUniqueId().toString(), main.getLogsPath(), true, false);
+        Json json = createJson(player.getUniqueId().toString(), main.getLogsPath(), true, false);
 
         return json.getStringList("logs").size();
     }
 
-    // 获取玩家所有日志条目数
+    /**
+     * 获取玩家所有日志条目数
+     *
+     * @param uuid uuid
+     * @return 返回日志条目数
+     */
     public static int getWishLogsSize(String uuid) {
-        Json json = createJsonConfig(uuid, main.getLogsPath(), true, false);
+        Json json = createJson(uuid, main.getLogsPath(), true, false);
 
         return json.getStringList("logs").size();
     }
 
-    // 获取一个文件夹下所有文件的名称 不包括此文件夹下的文件夹
+    /**
+     * 获取指定文件夹下的所有文件
+     *
+     * @param path path
+     * @return 文件名列表
+     */
     public static List<String> getAllFileName(String path) {
-        File file = new File(path);
         List<String> fileNames = new ArrayList<>();
-        return getFileNames(file, fileNames);
-    }
 
-    private static List<String> getFileNames(File file, List<String> fileNames) {
-        File[] files = file.listFiles();
-        if (files != null) for (File f : files) fileNames.add(f.getName());
+        File[] files = new File(path).listFiles();
+        if (files != null) for (File file : files) fileNames.add(file.getName());
+
         return fileNames;
     }
 }

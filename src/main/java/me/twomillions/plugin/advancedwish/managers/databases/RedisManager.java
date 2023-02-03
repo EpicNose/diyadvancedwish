@@ -13,11 +13,8 @@ import redis.clients.jedis.JedisPool;
 import java.util.List;
 
 /**
- * author:     2000000
- * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.databases.manager
- * className:      RedisManager
- * date:    2023/1/8 20:51
+ * @author 2000000
+ * @date 2023/1/8 20:51
  */
 public class RedisManager {
     @Getter @Setter private volatile static JedisPool jedisPool;
@@ -26,7 +23,12 @@ public class RedisManager {
     @Getter @Setter private volatile static RedisAuthState redisAuthState;
     @Getter @Setter private volatile static RedisConnectState redisConnectState;
 
-    // 设置 Redis
+    /**
+     * 设置 Redis 数据库
+     *
+     * @param yaml yaml
+     * @return RedisConnectState
+     */
     public static RedisConnectState setupRedis(Yaml yaml) {
         // Redis 开启检查
         if (!yaml.getBoolean("USE-REDIS")) {
@@ -68,7 +70,12 @@ public class RedisManager {
         return getRedisConnectState();
     }
 
-    // 设置普通值
+    /**
+     * 将字符串值设置为键的值
+     *
+     * @param key key
+     * @param value value
+     */
     public static void set(String key, String value) {
         // try-with-resources 语法糖
         // try 内代码执行结束后会自动调用try括号中对象的close方法来关闭
@@ -79,7 +86,13 @@ public class RedisManager {
         }
     }
 
-    // 设置 Map
+    /**
+     * 设置 Map
+     *
+     * @param key key
+     * @param field field
+     * @param value value
+     */
     public static void setMap(String key, String field, String value) {
         try (Jedis jedis = jedisPool.getResource()) {
             if (redisPassword != null) jedis.auth(redisPassword);
@@ -88,7 +101,12 @@ public class RedisManager {
         }
     }
 
-    // 删除 Map
+    /**
+     * 删除 Map
+     *
+     * @param key key
+     * @param value value
+     */
     public static void removeMap(String key, String value) {
         try (Jedis jedis = jedisPool.getResource()) {
             if (redisPassword != null) jedis.auth(redisPassword);
@@ -97,7 +115,12 @@ public class RedisManager {
         }
     }
 
-    // 获取 List
+    /**
+     * 获取 List
+     *
+     * @param key key
+     * @return list
+     */
     public static List<String> getList(String key) {
         try (Jedis jedis = jedisPool.getResource()) {
             if (redisPassword != null) jedis.auth(redisPassword);
@@ -106,7 +129,12 @@ public class RedisManager {
         }
     }
 
-    // 添加 List
+    /**
+     * 添加 Map
+     *
+     * @param key key
+     * @param value value
+     */
     public static void pushListValue(String key, String value) {
         try (Jedis jedis = jedisPool.getResource()) {
             if (redisPassword != null) jedis.auth(redisPassword);
@@ -116,7 +144,12 @@ public class RedisManager {
         }
     }
 
-    // 删除 List 内容
+    /**
+     * 删除 List 内容
+     *
+     * @param key key
+     * @param value value
+     */
     public static void removeListValue(String key, String value) {
         try (Jedis jedis = jedisPool.getResource()) {
             if (redisPassword != null) jedis.auth(redisPassword);
@@ -125,7 +158,11 @@ public class RedisManager {
         }
     }
 
-    // 删除 List 内容
+    /**
+     * 删除 List 全部内容
+     *
+     * @param key key
+     */
     public static void removeListValue(String key) {
         try (Jedis jedis = jedisPool.getResource()) {
             if (redisPassword != null) jedis.auth(redisPassword);
@@ -134,7 +171,13 @@ public class RedisManager {
         }
     }
 
-    // 获取普通值
+    /**
+     * 获取
+     *
+     * @param key key
+     * @param defaultValue defaultValue
+     * @return getOrDefault
+     */
     public static String getOrDefault(String key, String defaultValue) {
         try (Jedis jedis = jedisPool.getResource()) {
             if (redisPassword != null) jedis.auth(redisPassword);
@@ -144,7 +187,14 @@ public class RedisManager {
         }
     }
 
-    // 获取 Map
+    /**
+     * 获取
+     *
+     * @param key key
+     * @param field field
+     * @param defaultValue defaultValue
+     * @return getOrDefault
+     */
     public static String getOrDefaultMap(String key, String field, String defaultValue) {
         try (Jedis jedis = jedisPool.getResource()) {
             if (redisPassword != null) jedis.auth(redisPassword);

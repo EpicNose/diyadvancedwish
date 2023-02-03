@@ -4,17 +4,15 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 
 /**
- * author:     2000000
- * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.managers
- * className:      BarColorRandomUtils
- * date:    2022/12/3 19:27
+ * @author 2000000
+ * @date 2022/12/3 19:27
  */
 public class BossBarRandomUtils {
-
-    // 来自于 Advanced Exp Booster
-    // 它同样由我编写，是非常好的插件 -> https://www.mcbbs.net/thread-1397855-1-1.html
-
+    /**
+     * 获取随机 Bar Color
+     *
+     * @return BarColor
+     */
     public static BarColor randomColor() {
         int num = (int) (Math.random() * 6);
 
@@ -38,6 +36,11 @@ public class BossBarRandomUtils {
         return BarColor.WHITE;
     }
 
+    /**
+     * 获取随机 Bar Style
+     *
+     * @return BarStyle
+     */
     public static BarStyle randomStyle() {
         int num = (int) (Math.random() * 4);
 

@@ -4,10 +4,9 @@ import org.bukkit.entity.Player;
 
 /**
  * A utility for managing player experience.
+ * by <a href="https://gist.github.com/Jikoo/30ec040443a4701b8980">Jikoo</a>
  */
 public final class ExpUtils {
-
-    // by https://gist.github.com/Jikoo/30ec040443a4701b8980
 
     /**
      * Calculate a player's total experience based on level and progress to next.

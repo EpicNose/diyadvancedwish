@@ -8,27 +8,24 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
- * author:     2000000
- * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.tasks
- * className:      TimestampRunnable
- * date:    2022/11/24 16:49
+ * @author 2000000
+ * @date 2022/11/24 16:49
  */
 public class PlayerTimestampTask {
     private static final Plugin plugin = main.getInstance();
 
-    // 此 Task 将在每位玩家进入后开启
-    // 这可能不会造成滞后，因为这是异步的，尽管它执行间隔会非常快
-    // 主要作用用于时间戳各种检查与执行
-    // 格式: UUID[0];时间戳[1];许愿池文件名[2];执行节点[3]
-
+    /**
+     * 用于时间戳各种检查与执行
+     * 格式: UUID[0];时间戳[1];许愿池文件名[2];执行节点[3]
+     *
+     * @param player player
+     */
     public static void startTask(Player player) {
         new BukkitRunnable() {
             @Override
             public void run() {
                 if (!player.isOnline()) { cancel(); return; }
 
-                // 不在 forEach 中增删数据以修复 ConcurrentModificationException
                 for (String playerScheduledTask : WishManager.getPlayerScheduledTasks(player.getUniqueId())) {
                     long currentTimeMillis = System.currentTimeMillis();
                     long time = Long.parseLong(WishManager.getPlayerScheduledTaskStringTime(playerScheduledTask));

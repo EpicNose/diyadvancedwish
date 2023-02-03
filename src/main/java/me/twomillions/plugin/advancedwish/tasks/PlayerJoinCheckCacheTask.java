@@ -16,18 +16,18 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * author:     2000000
- * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.tasks
- * className:      PlayerJoinCheckCacheRunnable
- * date:    2022/11/24 20:09
+ * @author 2000000
+ * @date 2022/11/24 20:09
  */
 public class PlayerJoinCheckCacheTask {
     private static final Plugin plugin = main.getInstance();
 
-    // 此 Task 将在每位玩家进入后检查服务器的缓存数据
-    // 自 0.0.3.4-SNAPSHOT 后这里将记录每次玩家因为指令 setOp 的状态等，防止安全问题
-
+    /**
+     * 检查玩家缓存数据
+     * 自 0.0.3.4-SNAPSHOT 后这里将记录每次玩家因为指令 setOp 的状态等，防止安全问题
+     *
+     * @param player player
+     */
     public static void startTask(Player player) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             UUID uuid = player.getUniqueId();
@@ -37,18 +37,22 @@ public class PlayerJoinCheckCacheTask {
             boolean hasCache = ConfigManager.getAllFileName(path).contains(uuid + ".json");
 
             // isCancelled
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                if (QuickUtils.callPlayerJoinCheckCacheEvent(player, path, hasCache).isCancelled() || !hasCache) return;
+            if (QuickUtils.callAsyncPlayerJoinCheckCacheEvent(player, path, hasCache).isCancelled() || !hasCache) return;
 
-                // 检查缓存
-                Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> checkCache(player, path));
-            });
+            // 检查缓存
+            checkCache(player, path);
         });
     }
 
+    /**
+     * 检查玩家缓存数据
+     *
+     * @param player player
+     * @param path path
+     */
     private static void checkCache(Player player, String path) {
         UUID uuid = player.getUniqueId();
-        Json json = ConfigManager.createJsonConfig(uuid.toString(), path, true, false);
+        Json json = ConfigManager.createJson(uuid.toString(), path, true, false);
 
         // 安全问题 - Op 执行指令
         if (json.getBoolean("DO-OP-COMMAND")) {
@@ -56,8 +60,10 @@ public class PlayerJoinCheckCacheTask {
             json.set("DO-OP-COMMAND", null);
         }
 
-        // donePlayerWishPrizeDoStringList - 玩家执行完毕的 Prize Do 项目
-        // playerWishPrizeDoStringList - 玩家所有的 Prize Do 项目
+        /*
+         * donePlayerWishPrizeDoStringList - 玩家执行完毕的 Prize Do 项目
+         * playerWishPrizeDoStringList - 玩家所有的 Prize Do 项目
+         */
         List<String> donePlayerWishPrizeDoStringList = new ArrayList<>();
         List<String> playerWishPrizeDoStringList = json.getStringList("CACHE");
 
@@ -73,12 +79,11 @@ public class PlayerJoinCheckCacheTask {
             String wishName = WishManager.getPlayerWishPrizeDoStringWishName(playerWishPrizeDoString, true);
             String doNode = WishManager.getPlayerWishPrizeDoStringWishDoNode(playerWishPrizeDoString, true);
 
-            Yaml yaml = ConfigManager.createYamlConfig(wishName, "/Wish", false, false);
+            Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
             int waitSeconds = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getString("CACHE-SETTINGS.WAIT")), player));
             int waitJoinSeconds = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getString("CACHE-SETTINGS.WAIT-JOIN")), player));
 
             // 玩家进入的消息提示与延迟
-            // 这里是异步，所以直接使用 Thread.sleep 更加方便
             if (!configCacheSettingsSent) {
                 try { Thread.sleep(waitJoinSeconds * 1000L); }
                 catch (Exception ignore) { }
@@ -110,10 +115,18 @@ public class PlayerJoinCheckCacheTask {
         deleteJson(player, json, playerWishPrizeDoStringList);
     }
 
+    /**
+     * 检查是否可以删除玩家缓存文件
+     * 如果 playerWishPrizeDoStringList 内仍然有未执行完毕的内容那么就不删除文件
+     *
+     * @param player player
+     * @param json json
+     * @param playerWishPrizeDoStringList playerWishPrizeDoStringList
+     * @return boolean
+     */
     private static boolean deleteJson(Player player, Json json, List<String> playerWishPrizeDoStringList) {
         UUID uuid = player.getUniqueId();
 
-        // 如果 playerWishPrizeDoStringList 内仍然有未执行完毕的内容那么就不删除文件
         if (playerWishPrizeDoStringList.size() != 0 || json.getFile().delete()) return true;
 
         QuickUtils.sendConsoleMessage("&cAdvanced Wish 没有给予遗漏的物品奖励，文件删除错误! 这是一个严重的问题! 我们会关闭服务器，您必须解决它并且手动删除它 (位于插件配置文件夹下的 PlayerCache 文件夹)! 玩家名称/文件名称: "

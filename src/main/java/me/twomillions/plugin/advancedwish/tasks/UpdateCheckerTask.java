@@ -12,18 +12,16 @@ import java.net.URL;
 import java.util.Scanner;
 
 /**
- * author:     2000000
- * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.tasks
- * className:      UpdateCheckerRunnable
- * date:    2022/11/24 16:49
+ * @author 2000000
+ * @date 2022/11/24 16:49
  */
 public class UpdateCheckerTask {
     private static final Plugin plugin = main.getInstance();
     @Getter private static boolean isLatestVersion = true;
 
-    // 此 Task 用于检查插件更新
-
+    /**
+     * 检查插件更新
+     */
     public static void startTask() {
         if (main.isDisabled()) return;
 
@@ -45,7 +43,11 @@ public class UpdateCheckerTask {
         }, 0, (long) cycle * 1200); // 一分钟等于 1200 ticks
     }
 
-    // 获取网页内容
+    /**
+     * 获取网页内容
+     *
+     * @return string
+     */
     private static String getURLString() {
         StringBuilder stringBuilder = new StringBuilder();
 

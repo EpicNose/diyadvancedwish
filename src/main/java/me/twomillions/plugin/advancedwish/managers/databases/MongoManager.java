@@ -23,11 +23,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * author:     2000000
- * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.databases.manager
- * className:      MongoManager
- * date:    2023/1/8 21:23
+ * @author 2000000
+ * @date 2023/1/8 21:23
  */
 public class MongoManager {
     @Getter @Setter private volatile static MongoClient mongoClient;
@@ -40,7 +37,12 @@ public class MongoManager {
     @Getter @Setter private volatile static MongoConnectState mongoConnectState;
     @Getter @Setter private volatile static MongoCustomUrlState mongoCustomUrlState;
 
-    // 设置 Mongo
+    /**
+     * 设置 Mongo 数据库
+     *
+     * @param yaml yaml
+     * @return MongoConnectState
+     */
     public static MongoConnectState setupMongo(Yaml yaml) {
         // Mongo 开启检查
         if (!yaml.getBoolean("USE-MONGO")) {
@@ -91,7 +93,15 @@ public class MongoManager {
         return getMongoConnectState();
     }
 
-    // 查询数据 - 若为空则设置并返回为 value - Object
+    /**
+     * 查询数据
+     *
+     * @param player player
+     * @param foundKey key
+     * @param value value
+     * @param mongoCollections MongoCollections
+     * @return getOrDefault
+     */
     public static Object getOrDefault(Player player, String foundKey, Object value, MongoCollections mongoCollections) {
         String playerUUID = player.getUniqueId().toString();
 
@@ -107,7 +117,15 @@ public class MongoManager {
         return foundDocument.getOrDefault(foundKey, value);
     }
 
-    // 查询数据 - 若为空则设置并返回为 value - Object - 多态 UUID
+    /**
+     * 查询数据
+     *
+     * @param uuid uuid
+     * @param foundKey key
+     * @param value value
+     * @param mongoCollections MongoCollections
+     * @return getOrDefault
+     */
     public static Object getOrDefault(String uuid, String foundKey, Object value, MongoCollections mongoCollections) {
         MongoCollection<Document> playerGuaranteed = getMongoDatabase().getCollection(mongoCollections.toString());
 
@@ -121,7 +139,15 @@ public class MongoManager {
         return foundDocument.getOrDefault(foundKey, value);
     }
 
-    // 查询数据 - 若为空则设置并返回为 value - List
+    /**
+     * 查询数据
+     *
+     * @param player player
+     * @param foundKey key
+     * @param value value
+     * @param mongoCollections MongoCollections
+     * @return getOrDefault
+     */
     public static List<String> getOrDefaultList(Player player, String foundKey, List<String> value, MongoCollections mongoCollections) {
         String playerUUID = player.getUniqueId().toString();
 
@@ -137,7 +163,15 @@ public class MongoManager {
         return foundDocument.getList(foundKey, String.class, value);
     }
 
-    // 查询数据 - 若为空则设置并返回为 value - List - 多态 UUID
+    /**
+     * 查询数据
+     *
+     * @param uuid uuid
+     * @param foundKey key
+     * @param value value
+     * @param mongoCollections MongoCollections
+     * @return getOrDefault
+     */
     public static List<String> getOrDefaultList(String uuid, String foundKey, List<String> value, MongoCollections mongoCollections) {
         MongoCollection<Document> playerGuaranteed = getMongoDatabase().getCollection(mongoCollections.toString());
 
@@ -151,7 +185,14 @@ public class MongoManager {
         return foundDocument.getList(foundKey, String.class, value);
     }
 
-    // 更新数据
+    /**
+     * 更新数据
+     *
+     * @param player player
+     * @param foundKey key
+     * @param value value
+     * @param mongoCollections MongoCollections
+     */
     public static void update(Player player, String foundKey, Object value, MongoCollections mongoCollections) {
         String playerUUID = player.getUniqueId().toString();
 
@@ -166,7 +207,14 @@ public class MongoManager {
         playerGuaranteed.updateOne(playerDocument, updateDocument, updateOptions);
     }
 
-    // 更新数据 - 多态 UUID
+    /**
+     * 更新数据
+     *
+     * @param uuid uuid
+     * @param foundKey key
+     * @param value value
+     * @param mongoCollections MongoCollections
+     */
     public static void update(String uuid, String foundKey, Object value, MongoCollections mongoCollections) {
         MongoCollection<Document> playerGuaranteed = getMongoDatabase().getCollection(mongoCollections.toString());
 
@@ -179,19 +227,36 @@ public class MongoManager {
         playerGuaranteed.updateOne(playerDocument, updateDocument, updateOptions);
     }
 
-    // 添加玩家许愿日志
+    /**
+     * 添加玩家许愿日志
+     *
+     * @param player player
+     * @param logString logString
+     */
     public static void addPlayerWishLog(Player player, String logString) {
         List<String> logs = getOrDefaultList(player, "logs", new ArrayList<>(), MongoCollections.PlayerLogs); logs.add(logString);
         update(player, "logs", logs, MongoCollections.PlayerLogs);
     }
 
-    // 添加玩家许愿日志 - 多态 UUID
+    /**
+     * 添加玩家许愿日志
+     *
+     * @param uuid uuid
+     * @param logString logString
+     */
     public static void addPlayerWishLog(String uuid, String logString) {
         List<String> logs = getOrDefaultList(uuid, "logs", new ArrayList<>(), MongoCollections.PlayerLogs); logs.add(logString);
         update(uuid, "logs", logs, MongoCollections.PlayerLogs);
     }
 
-    // 获取玩家许愿日志
+    /**
+     * 获取玩家许愿日志
+     *
+     * @param player player
+     * @param findMin findMin
+     * @param findMax findMax
+     * @return 返回查询出来的日志列表
+     */
     public static List<String> getPlayerWishLog(Player player, int findMin, int findMax) {
         List<String> returnLogs = new ArrayList<>();
         List<String> getLogs = getOrDefaultList(player, "logs", new ArrayList<>(), MongoCollections.PlayerLogs);
@@ -209,7 +274,14 @@ public class MongoManager {
         return returnLogs;
     }
 
-    // 获取玩家许愿日志 - 多态 UUID
+    /**
+     * 获取玩家许愿日志
+     *
+     * @param uuid uuid
+     * @param findMin findMin
+     * @param findMax findMax
+     * @return 返回查询出来的日志列表
+     */
     public static List<String> getPlayerWishLog(String uuid, int findMin, int findMax) {
         List<String> returnLogs = new ArrayList<>();
         List<String> getLogs = getOrDefaultList(uuid, "logs", new ArrayList<>(), MongoCollections.PlayerLogs);
@@ -227,17 +299,32 @@ public class MongoManager {
         return returnLogs;
     }
 
-    // 获取玩家所有日志条目数
+    /**
+     * 获取玩家所有日志条目数
+     *
+     * @param player player
+     * @return 返回日志条目数
+     */
     public static int getWishLogsSize(Player player) {
         return getOrDefaultList(player, "logs", new ArrayList<>(), MongoCollections.PlayerLogs).size();
     }
 
-    // 获取玩家所有日志条目数
+    /**
+     * 获取玩家所有日志条目数
+     *
+     * @param uuid uuid
+     * @return 返回日志条目数
+     */
     public static int getWishLogsSize(String uuid) {
         return getOrDefaultList(uuid, "logs", new ArrayList<>(), MongoCollections.PlayerLogs).size();
     }
 
-    // Json 转换为 Mongo 数据
+    /**
+     * Json 转换为 Mongo 数据
+     *
+     * @param yaml yaml
+     * @return 返回数据迁移状态
+     */
     public static JsonTransformationMongoState playerGuaranteedJsonToMongo(Yaml yaml) {
         if (!yaml.getBoolean("TRANSFORMATION-JSON-TO-MONGO")) return JsonTransformationMongoState.TurnOff;
         if (MongoManager.getMongoConnectState() != MongoConnectState.Connected) { QuickUtils.sendConsoleMessage("&c您开启了数据迁移选项，但 Mongo 数据库并没有成功连接，请检查配置文件，服务器即将关闭。"); return JsonTransformationMongoState.Failed; }
@@ -259,7 +346,7 @@ public class MongoManager {
 
         if (!notTransformationGuaranteed) {
             for (String guaranteedFileName : guaranteedFileNames) {
-                Json json = ConfigManager.createJsonConfig(guaranteedFileName, guaranteedPath, true, false);
+                Json json = ConfigManager.createJson(guaranteedFileName, guaranteedPath, true, false);
 
                 Set<String> jsonKeySet = json.keySet();
                 jsonKeySetAmount = jsonKeySetAmount + jsonKeySet.size();
@@ -270,7 +357,7 @@ public class MongoManager {
 
         if (!notTransformationLogs) {
             for (String logsFileName : logsFileNames) {
-                Json json = ConfigManager.createJsonConfig(logsFileName, logsPath, true, false);
+                Json json = ConfigManager.createJson(logsFileName, logsPath, true, false);
 
                 Set<String> jsonKeySet = json.keySet();
                 jsonKeySetAmount = jsonKeySetAmount + jsonKeySet.size();

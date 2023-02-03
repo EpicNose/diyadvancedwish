@@ -8,25 +8,28 @@ import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * author:     2000000
- * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.api
- * className:      PlayerJoinCheckCacheEvent
- * date:    2023/1/31 19:00
+ * @author 2000000
+ * @date 2023/1/31 19:00
  */
-public class PlayerJoinCheckCacheEvent extends Event {
-
-    // 玩家缓存检查事件
-
-    @Getter private final Player player; // 玩家
-    @Getter private final String path; // 文件路径
-    @Getter private final boolean hasCache; // 是否具有缓存文件
+public class AsyncPlayerJoinCheckCacheEvent extends Event {
+    @Getter private final Player player;
+    @Getter private final String path;
+    @Getter private final boolean hasCache;
 
     @Getter @Setter private boolean isCancelled;
 
     private static final HandlerList HANDLERS = new HandlerList();
 
-    public PlayerJoinCheckCacheEvent(Player player, String path, boolean hasCache) {
+    /**
+     * AsyncPlayerJoinCheckCacheEvent 异步玩家缓存检查事件
+     *
+     * @param player player
+     * @param path path
+     * @param hasCache hasCache
+     */
+    public AsyncPlayerJoinCheckCacheEvent(Player player, String path, boolean hasCache) {
+        super(true);
+
         this.player = player;
         this.path = path;
         this.hasCache = hasCache;

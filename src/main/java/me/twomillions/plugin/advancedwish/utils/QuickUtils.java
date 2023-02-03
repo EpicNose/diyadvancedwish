@@ -1,10 +1,10 @@
 package me.twomillions.plugin.advancedwish.utils;
 
 import me.clip.placeholderapi.PlaceholderAPI;
-import me.twomillions.plugin.advancedwish.api.EffectSendEvent;
-import me.twomillions.plugin.advancedwish.api.PlayerJoinCheckCacheEvent;
-import me.twomillions.plugin.advancedwish.api.PlayerWishEvent;
-import me.twomillions.plugin.advancedwish.api.WishLimitResetEvent;
+import me.twomillions.plugin.advancedwish.api.AsyncEffectSendEvent;
+import me.twomillions.plugin.advancedwish.api.AsyncPlayerJoinCheckCacheEvent;
+import me.twomillions.plugin.advancedwish.api.AsyncPlayerWishEvent;
+import me.twomillions.plugin.advancedwish.api.AsyncWishLimitResetEvent;
 import me.twomillions.plugin.advancedwish.enums.wish.PlayerWishState;
 import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.managers.RegisterManager;
@@ -20,11 +20,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * author:     2000000
- * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.utils
- * className:      QuickUtils
- * date:    2022/11/21 12:39
+ * @author 2000000
+ * @date 2022/11/21 12:39
  */
 public class QuickUtils {
     private static final Plugin plugin = main.getInstance();
@@ -36,12 +33,23 @@ public class QuickUtils {
         return ChatColor.translateAlternateColorCodes('&', message);
     }
 
-    // 控制台发送消息
+    /**
+     * 向控制台发送消息
+     *
+     * @param message message
+     */
     public static void sendConsoleMessage(String message) {
         Bukkit.getConsoleSender().sendMessage(translate("&e[Advanced Wish] " + message));
     }
 
-    // 快捷替换方法
+    /**
+     * 替换方法
+     *
+     * @param message message
+     * @param player player
+     * @param replacePlayer replacePlayer
+     * @return replaced translated
+     */
     public static String replaceTranslate(String message, Player player, Player replacePlayer) {
         if (message.contains("<version>")) message = message.replaceAll("<version>", plugin.getDescription().getVersion());
         if (message.contains("<wishlist>")) message = message.replaceAll("<wishlist>", RegisterManager.getRegisterWish().toString());
@@ -53,7 +61,12 @@ public class QuickUtils {
         return translate(message);
     }
 
-    // String 转 Unicode
+    /**
+     * String to Unicode
+     *
+     * @param string string
+     * @return unicode
+     */
     public static String stringToUnicode(String string) {
         char[] utfBytes = string.toCharArray();
         StringBuilder unicodeBytes = new StringBuilder();
@@ -67,7 +80,12 @@ public class QuickUtils {
         return unicodeBytes.toString();
     }
 
-    // Unicode 转 String
+    /**
+     * Unicode to String
+     *
+     * @param string unicode
+     * @return string
+     */
     public static String unicodeToString(String string) {
         Pattern pattern = Pattern.compile("(\\\\u(\\p{XDigit}{4}))");
         Matcher matcher = pattern.matcher(string);
@@ -80,39 +98,79 @@ public class QuickUtils {
         return string;
     }
 
-    // Papi - 先 replaceTranslate 后转 Papi
+    /**
+     * replace translate and to papi
+     *
+     * @param string string
+     * @param player player
+     * @param replacePlayer replacePlayer
+     * @return replaced translated and to papi
+     */
     public static String replaceTranslateToPapi(String string, Player player, Player replacePlayer) {
         if (RegisterManager.isUsingPapi()) return PlaceholderAPI.setPlaceholders(player, replaceTranslate(string, player, replacePlayer));
         else return replaceTranslate(string, player, replacePlayer);
     }
 
-    // Papi - replaceTranslateToPapi 但是 replacePlayer 为 null Player 为 null
+    /**
+     * replaceTranslateToPapi but replacePlayer and player null
+     *
+     * @param string string
+     * @return replaced translated and to papi
+     */
     public static String replaceTranslateToPapi(String string) {
         return replaceTranslateToPapi(string, null, null);
     }
 
-    // Papi - replaceTranslateToPapi 但是 replacePlayer 为 null
+    /**
+     * replaceTranslateToPapi but replacePlayer null
+     *
+     * @param string string
+     * @param player player
+     * @return replaced translated and to papi
+     */
     public static String replaceTranslateToPapi(String string, Player player) {
         return replaceTranslateToPapi(string, player, null);
     }
 
-    // Papi - 先 replaceTranslateToPapi 后 count 但是 replacePlayer 为 null Player 为 null
+    /**
+     * replaceTranslateToPapi but replacePlayer and player null
+     *
+     * @param string string
+     * @return replaced translated and to papi and calculated
+     */
     public static String replaceTranslateToPapiCount(String string) {
         return count(replaceTranslateToPapi(string, null, null)).toString();
     }
 
-    // Papi - 先 replaceTranslateToPapi 后 count 但是 replacePlayer 为 null
+    /**
+     * replaceTranslateToPapi but replacePlayer null
+     *
+     * @param string string
+     * @param player player
+     * @return replaced translated and to papi and calculated
+     */
     public static String replaceTranslateToPapiCount(String string, Player player) {
         return count(replaceTranslateToPapi(string, player, null)).toString();
     }
 
-    // Papi - 先 replaceTranslate 转 Papi 后进行 count
+    /**
+     * replaceTranslateToPapi and calculated
+     *
+     * @param string string
+     * @param player player
+     * @param replacePlayer replacePlayer
+     * @return replaced translated and to papi and calculated
+     */
     public static String replaceTranslateToPapiCount(String string, Player player, Player replacePlayer) {
         return count(replaceTranslateToPapi(string, player, replacePlayer)).toString();
     }
 
-    // 随机语句
-    // 示例语句: randomSentence(A#10~B#20~C#30)end
+    /**
+     * 随机语句，randomSentence(A#10~B#20~C#30)end
+     *
+     * @param randomSentence randomSentence
+     * @return random sentence result
+     */
     public static String getRandomSentenceResult(String randomSentence) {
         if (!randomSentence.contains("randomSentence(") || !randomSentence.contains(")end")) return randomSentence;
 
@@ -141,53 +199,108 @@ public class QuickUtils {
         return stringInterceptReplace(randomSentence, "randomSentence(", ")end", randomElement, true);
     }
 
-    // 字符串内算数
+    /**
+     * 算数
+     *
+     * @param countString countString
+     * @return object
+     */
     public static Object count(String countString) {
         return jexlEngine.createExpression(countString).evaluate(null);
     }
 
-    // 快捷返回负面信息
+    /**
+     * 快捷发送警告信息
+     *
+     * @param unknown unknown
+     * @param fileName fileName
+     * @param unknownName unknownName
+     */
     public static void sendUnknownWarn(String unknown, String fileName, String unknownName) {
         sendConsoleMessage("&c您填入了一个未知的" + unknown + "，位于: &e" + fileName + "&c，您填入的未知" + unknown + "为: &e" + unknownName);
     }
 
-    // call PlayerWishEvent 并且返回
-    public static PlayerWishEvent callPlayerWishEvent(Player player, PlayerWishState playerWishState, String wishName, boolean isForce) {
-        PlayerWishEvent playerWishEvent = new PlayerWishEvent(player, playerWishState, wishName, isForce);
-        Bukkit.getPluginManager().callEvent(playerWishEvent);
+    /**
+     * call AsyncPlayerWishEvent
+     *
+     * @param player player
+     * @param playerWishState playerWishState
+     * @param wishName wishName
+     * @param isForce isForce
+     * @return AsyncPlayerWishEvent
+     */
+    public static AsyncPlayerWishEvent callAsyncPlayerWishEvent(Player player, PlayerWishState playerWishState, String wishName, boolean isForce) {
+        AsyncPlayerWishEvent asyncPlayerWishEvent = new AsyncPlayerWishEvent(player, playerWishState, wishName, isForce);
+        Bukkit.getPluginManager().callEvent(asyncPlayerWishEvent);
 
-        return playerWishEvent;
+        return asyncPlayerWishEvent;
     }
 
-    // call EffectSendEvent 并且返回
-    public static EffectSendEvent callEffectSendEvent(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
-        EffectSendEvent effectSendEvent = new EffectSendEvent(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        Bukkit.getPluginManager().callEvent(effectSendEvent);
+    /**
+     * call AsyncEffectSendEvent
+     *
+     * @param fileName fileName
+     * @param targetPlayer targetPlayer
+     * @param replacePlayer replacePlayer
+     * @param path path
+     * @param pathPrefix pathPrefix
+     * @return AsyncEffectSendEvent
+     */
+    public static AsyncEffectSendEvent callAsyncEffectSendEvent(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
+        AsyncEffectSendEvent asyncEffectSendEvent = new AsyncEffectSendEvent(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+        Bukkit.getPluginManager().callEvent(asyncEffectSendEvent);
 
-        return effectSendEvent;
+        return asyncEffectSendEvent;
     }
 
-    // call wishLimitResetEvent 并且返回
-    public static WishLimitResetEvent callWishLimitResetEvent(String wishName, String storeMode, int wishResetLimitStart, int wishResetLimitCycle
+    /**
+     * call AsyncWishLimitResetEvent
+     *
+     * @param wishName wishName
+     * @param storeMode storeMode
+     * @param wishResetLimitStart wishResetLimitStart
+     * @param wishResetLimitCycle wishResetLimitCycle
+     * @param isEnabledResetCompleteSend isEnabledResetCompleteSend
+     * @param isEnabledResetCompleteSendConsole isEnabledResetCompleteSendConsole
+     * @return AsyncWishLimitResetEvent
+     */
+    public static AsyncWishLimitResetEvent callAsyncWishLimitResetEvent(String wishName, String storeMode, int wishResetLimitStart, int wishResetLimitCycle
             , boolean isEnabledResetCompleteSend, boolean isEnabledResetCompleteSendConsole) {
 
-        WishLimitResetEvent wishLimitResetEvent = new WishLimitResetEvent(wishName, storeMode
+        AsyncWishLimitResetEvent asyncWishLimitResetEvent = new AsyncWishLimitResetEvent(wishName, storeMode
                 , wishResetLimitStart, wishResetLimitCycle
                 , isEnabledResetCompleteSend, isEnabledResetCompleteSendConsole);
 
-        Bukkit.getPluginManager().callEvent(wishLimitResetEvent);
+        Bukkit.getPluginManager().callEvent(asyncWishLimitResetEvent);
 
-        return wishLimitResetEvent;
+        return asyncWishLimitResetEvent;
     }
 
-    // call PlayerJoinCheckCacheEvent 并且返回
-    public static PlayerJoinCheckCacheEvent callPlayerJoinCheckCacheEvent(Player player, String path, boolean hasCache) {
-        PlayerJoinCheckCacheEvent playerJoinCheckCacheEvent = new PlayerJoinCheckCacheEvent(player, path, hasCache);
-        Bukkit.getPluginManager().callEvent(playerJoinCheckCacheEvent);
+    /**
+     * call AsyncPlayerJoinCheckCacheEvent
+     *
+     * @param player player
+     * @param path path
+     * @param hasCache hasCache
+     * @return AsyncPlayerJoinCheckCacheEvent
+     */
+    public static AsyncPlayerJoinCheckCacheEvent callAsyncPlayerJoinCheckCacheEvent(Player player, String path, boolean hasCache) {
+        AsyncPlayerJoinCheckCacheEvent asyncPlayerJoinCheckCacheEvent = new AsyncPlayerJoinCheckCacheEvent(player, path, hasCache);
+        Bukkit.getPluginManager().callEvent(asyncPlayerJoinCheckCacheEvent);
 
-        return playerJoinCheckCacheEvent;
+        return asyncPlayerJoinCheckCacheEvent;
     }
 
+    /**
+     * stringInterceptReplace
+     *
+     * @param string string
+     * @param start start
+     * @param end end
+     * @param replace replace
+     * @param removeStartEndString removeStartEndString
+     * @return replaced string
+     */
     private static String stringInterceptReplace(String string, String start, String end, String replace, boolean removeStartEndString) {
         int startIndex = string.indexOf(start);
         int endIndex = string.indexOf(end, startIndex + 1);

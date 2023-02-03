@@ -1,0 +1,11 @@
+me.twomillions.plugin.advancedwish
+me.twomillions.plugin.advancedwish.api
+me.twomillions.plugin.advancedwish.commands
+me.twomillions.plugin.advancedwish.enums.mongo
+me.twomillions.plugin.advancedwish.enums.redis
+me.twomillions.plugin.advancedwish.enums.wish
+me.twomillions.plugin.advancedwish.listener
+me.twomillions.plugin.advancedwish.managers
+me.twomillions.plugin.advancedwish.managers.databases
+me.twomillions.plugin.advancedwish.tasks
+me.twomillions.plugin.advancedwish.utils

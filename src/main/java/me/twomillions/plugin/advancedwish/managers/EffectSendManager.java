@@ -2,7 +2,6 @@ package me.twomillions.plugin.advancedwish.managers;
 
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
-import me.twomillions.plugin.advancedwish.api.EffectSendEvent;
 import me.twomillions.plugin.advancedwish.main;
 import me.twomillions.plugin.advancedwish.utils.BossBarRandomUtils;
 import me.twomillions.plugin.advancedwish.utils.ExpUtils;
@@ -29,50 +28,61 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * author:     2000000
- * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.managers
- * className:      EffectSendManager
- * date:    2022/11/24 20:27
+ * @author 2000000
+ * @date 2022/11/24 20:27
  */
 public class EffectSendManager {
     private static final Plugin plugin = main.getInstance();
+
+    /**
+     * 用于储存需要玩家以 OP 身份执行的命令
+     */
     @Getter private volatile static Map<Player, String> opSentCommand = new ConcurrentHashMap<>();
 
-    // 效果发送
+    /**
+     * 发送效果
+     *
+     * @param fileName fileName
+     * @param targetPlayer targetPlayer
+     * @param replacePlayer replacePlayer
+     * @param path path
+     * @param pathPrefix pathPrefix
+     */
     public static void sendEffect(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         if (!targetPlayer.isOnline()) return;
 
-        Bukkit.getScheduler().runTask(plugin, () -> {
-            EffectSendEvent effectSendEvent = QuickUtils.callEffectSendEvent(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+        // isCancelled
+        if (QuickUtils.callAsyncEffectSendEvent(fileName, targetPlayer, replacePlayer, path, pathPrefix).isCancelled()) return;
 
-            // isCancelled
-            if (effectSendEvent.isCancelled()) return;
-
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                sendTitle(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-                sendParticle(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-                sendSounds(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-                sendCommands(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-                sendMessage(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-                sendAnnouncement(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-                sendPotion(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-                sendHealthAndHunger(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-                sendExp(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-                sendActionBar(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-                sendBossBar(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-            });
-        });
+        sendTitle(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+        sendParticle(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+        sendSounds(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+        sendCommands(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+        sendMessage(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+        sendAnnouncement(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+        sendPotion(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+        sendHealthAndHunger(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+        sendExp(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+        sendActionBar(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+        sendBossBar(fileName, targetPlayer, replacePlayer, path, pathPrefix);
     }
 
-    // 发送标题
+    /**
+     * 发送标题
+     *
+     * @param fileName fileName
+     * @param targetPlayer targetPlayer
+     * @param replacePlayer replacePlayer
+     * @param path path
+     * @param pathPrefix pathPrefix
+     */
     private static void sendTitle(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         // 如果是 1.7 服务器则不发送 Title (因为 1.7 没有)
         if (main.getServerVersion() <= 107) return;
 
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
-        Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
+        Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix == null ? "TITLE" : pathPrefix + ".TITLE");
 
         String mainTitle = QuickUtils.replaceTranslateToPapi(yaml.getString("MAIN-TITLE"), targetPlayer, replacePlayer);
@@ -90,11 +100,19 @@ public class EffectSendManager {
         else targetPlayer.sendTitle(mainTitle, subTitle, fadeIn, stay, fadeOut);
     }
 
-    // 发送粒子效果
+    /**
+     * 发送粒子效果
+     *
+     * @param fileName fileName
+     * @param targetPlayer targetPlayer
+     * @param replacePlayer replacePlayer
+     * @param path path
+     * @param pathPrefix pathPrefix
+     */
     private static void sendParticle(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
-        Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
+        Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
         yaml.getStringList("PARTICLE").forEach(particleConfig -> {
@@ -174,11 +192,19 @@ public class EffectSendManager {
         });
     }
 
-    // 发送音效
+    /**
+     * 发送音效
+     *
+     * @param fileName fileName
+     * @param targetPlayer targetPlayer
+     * @param replacePlayer replacePlayer
+     * @param path path
+     * @param pathPrefix pathPrefix
+     */
     private static void sendSounds(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
-        Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
+        Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
         yaml.getStringList("SOUNDS").forEach(soundsConfig -> {
@@ -199,18 +225,26 @@ public class EffectSendManager {
         });
     }
 
-    // 发送指令
+    /**
+     * 发送指令
+     *
+     * @param fileName fileName
+     * @param targetPlayer targetPlayer
+     * @param replacePlayer replacePlayer
+     * @param path path
+     * @param pathPrefix pathPrefix
+     */
     private static void sendCommands(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
-        Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
+        Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix == null ? "COMMANDS" : pathPrefix + ".COMMANDS");
 
         yaml.getStringList("PLAYER").forEach(commandConfig -> {
             if (commandConfig == null || commandConfig.length() <= 1) return;
 
             // OP 执行
-            String command = QuickUtils.replaceTranslateToPapi(commandConfig, targetPlayer).toLowerCase(Locale.ROOT);
+            String command = QuickUtils.replaceTranslateToPapi(commandConfig, targetPlayer, replacePlayer).toLowerCase(Locale.ROOT);
 
             if (!command.startsWith("[op]:") || targetPlayer.isOp()) {
                 String finalCommand = command.replace("[op]:", "");
@@ -241,34 +275,53 @@ public class EffectSendManager {
             if (commandConfig == null || commandConfig.length() <= 1) return;
 
             ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
-            String command = QuickUtils.replaceTranslateToPapi(commandConfig, targetPlayer);
+            String command = QuickUtils.replaceTranslateToPapi(commandConfig, targetPlayer, replacePlayer);
 
-            Bukkit.getScheduler().runTask(plugin, () -> Bukkit.dispatchCommand(console, QuickUtils.replaceTranslateToPapi(command, targetPlayer)));
+            Bukkit.getScheduler().runTask(plugin, () -> Bukkit.dispatchCommand(console, QuickUtils.replaceTranslateToPapi(command, targetPlayer, replacePlayer)));
         });
     }
 
-    // 发送消息
+    /**
+     * 发送消息
+     *
+     * @param fileName fileName
+     * @param targetPlayer targetPlayer
+     * @param replacePlayer replacePlayer
+     * @param path path
+     * @param pathPrefix pathPrefix
+     */
     private static void sendMessage(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
-        Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
+        Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
         yaml.getStringList("MESSAGE").forEach(messageConfig -> {
             if (messageConfig == null || messageConfig.length() <= 1) return;
 
-            // https://www.spigotmc.org/threads/is-sendmessage-thread-safe-like-this.372767/
-            // Messaging is one of the few things that can be done async safely.
-            // 消息传递是为数不多的可以异步安全完成的事情之一。 By SpigotMc Moderator - SteelPhoenix
+            /*
+             * https://www.spigotmc.org/threads/is-sendmessage-thread-safe-like-this.372767/
+             *
+             * Messaging is one of the few things that can be done async safely.
+             * 消息传递是为数不多的可以异步安全完成的事情之一。 By SpigotMc Moderator SteelPhoenix
+             */
             targetPlayer.sendMessage(QuickUtils.replaceTranslateToPapi(messageConfig, targetPlayer, replacePlayer));
         });
     }
 
-    // 发送公告
+    /**
+     * 发送公告
+     *
+     * @param fileName fileName
+     * @param targetPlayer targetPlayer
+     * @param replacePlayer replacePlayer
+     * @param path path
+     * @param pathPrefix pathPrefix
+     */
     private static void sendAnnouncement(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
-        Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
+        Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
         yaml.getStringList("ANNOUNCEMENT").forEach(announcementConfig -> {
@@ -278,11 +331,19 @@ public class EffectSendManager {
         });
     }
 
-    // 发送药水效果
+    /**
+     * 发送药水效果
+     *
+     * @param fileName fileName
+     * @param targetPlayer targetPlayer
+     * @param replacePlayer replacePlayer
+     * @param path path
+     * @param pathPrefix pathPrefix
+     */
     private static void sendPotion(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
-        Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
+        Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
         yaml.getStringList("EFFECTS").forEach(effectsConfig -> {
@@ -308,11 +369,19 @@ public class EffectSendManager {
         });
     }
 
-    // 回复血量以及饱食度
+    /**
+     * 回复血量以及饱食度
+     *
+     * @param fileName fileName
+     * @param targetPlayer targetPlayer
+     * @param replacePlayer replacePlayer
+     * @param path path
+     * @param pathPrefix pathPrefix
+     */
     private static void sendHealthAndHunger(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
-        Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
+        Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
         int hunger = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getString("HUNGER")), targetPlayer, replacePlayer));
@@ -329,11 +398,19 @@ public class EffectSendManager {
         }
     }
 
-    // 给予EXP
+    /**
+     * 给予 EXP
+     *
+     * @param fileName fileName
+     * @param targetPlayer targetPlayer
+     * @param replacePlayer replacePlayer
+     * @param path path
+     * @param pathPrefix pathPrefix
+     */
     private static void sendExp(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
 
-        Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
+        Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
         int exp = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getString("EXP")), targetPlayer, replacePlayer));
@@ -341,13 +418,21 @@ public class EffectSendManager {
         if (exp != 0) ExpUtils.changeExp(targetPlayer, exp);
     }
 
-    // 发送 Action Bar
+    /**
+     * 发送 Action Bar
+     *
+     * @param fileName fileName
+     * @param targetPlayer targetPlayer
+     * @param replacePlayer replacePlayer
+     * @param path path
+     * @param pathPrefix pathPrefix
+     */
     private static void sendActionBar(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         // 如果是 1.7 服务器则不发送 Action Bar (因为 1.7 没有)
         if (main.getServerVersion() <= 107) return;
 
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
-        Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
+        Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
 
         yaml.setPathPrefix(pathPrefix == null ? "ACTION-BAR" : pathPrefix + ".ACTION-BAR");
 
@@ -356,8 +441,7 @@ public class EffectSendManager {
 
         if (actionBarMessage.equals("") || actionBarTime == 0) return;
 
-        // 由于 Action Bar 并没有具体的淡出淡入显示时间参数
-        // 所以只能通过 Runnable 发送
+        // 由于 Action Bar 并没有具体的淡出淡入显示时间参数，所以只能通过 Runnable 发送
 
         new BukkitRunnable() {
             int time = 0;
@@ -376,13 +460,21 @@ public class EffectSendManager {
         }.runTaskTimerAsynchronously(plugin, 0, 20);
     }
 
-    // 发送 Boss Bar
+    /**
+     * 发送 Boss Bar
+     *
+     * @param fileName fileName
+     * @param targetPlayer targetPlayer
+     * @param replacePlayer replacePlayer
+     * @param path path
+     * @param pathPrefix pathPrefix
+     */
     private static void sendBossBar(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         // Boss Bar 支持 1.7 / 1.8 会使用到 NMS 所以我选择直接放弃对于 1.7 / 1.8 的 Boss Bar 支持
         if (main.getServerVersion() <= 108) return;
 
         path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
-        Yaml yaml = ConfigManager.createYamlConfig(fileName, path, true, false);
+        Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
 
         yaml.setPathPrefix(pathPrefix == null ? "BOSS-BAR" : pathPrefix + ".BOSS-BAR");
 

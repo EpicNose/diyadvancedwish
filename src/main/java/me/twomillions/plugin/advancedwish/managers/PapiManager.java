@@ -11,11 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Locale;
 
 /**
- * author:     2000000
- * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.managers
- * className:      PapiManager
- * date:    2022/12/2 13:16
+ * @author 2000000
+ * @date 2022/12/2 13:16
  */
 public class PapiManager extends PlaceholderExpansion {
     private static final Plugin plugin = main.getInstance();

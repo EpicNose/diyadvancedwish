@@ -4,13 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-/**
- * author:     2000000
- * project:    AdvancedFish
- * package:        me.twomillions.plugin.advancedfish.utils
- * className:      ProbabilityUntilities
- * date:    2022/10/31 12:44
- */
 public class ProbabilityUntilities {
     // by https://www.spigotmc.org/threads/getting-random-key-from-hashmap-with-chance.199285/#post-2073868
 

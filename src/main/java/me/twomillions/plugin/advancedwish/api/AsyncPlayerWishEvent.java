@@ -9,16 +9,10 @@ import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * author:     2000000
- * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.api
- * className:      PlayerWishEvent
- * date:    2023/1/28 19:30
+ * @author 2000000
+ * @date 2023/1/28 19:30
  */
-public class PlayerWishEvent extends Event {
-
-    // 玩家许愿事件
-
+public class AsyncPlayerWishEvent extends Event {
     @Getter private final Player player;
     @Getter private final String wishName;
     @Getter private final boolean isForce;
@@ -28,12 +22,27 @@ public class PlayerWishEvent extends Event {
 
     private static final HandlerList HANDLERS = new HandlerList();
 
-    public PlayerWishEvent(Player player, PlayerWishState playerWishState, String wishName, boolean isForce) {
+    /**
+     * AsyncPlayerWishEvent 异步玩家许愿事件
+     *
+     * @param player player
+     * @param playerWishState playerWishState
+     * @param wishName wishName
+     * @param isForce isForce
+     */
+    public AsyncPlayerWishEvent(Player player, PlayerWishState playerWishState, String wishName, boolean isForce) {
+        super(true);
+
         this.player = player;
         this.wishName = wishName;
         this.isForce = isForce;
         this.playerWishState = playerWishState;
-        this.isCancelled = playerWishState != PlayerWishState.Allow;
+
+        /*
+         * 如果玩家没有许愿成功，那么 cancel 则为取消发送效果
+         * 如果玩家许愿成功 那么 cancel 则取消此次许愿
+         */
+        this.isCancelled = false;
     }
 
     public static HandlerList getHandlerList() {

@@ -20,7 +20,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.Arrays;
 
 public final class main extends JavaPlugin {
-    // volatile 防止线程直接共享变量可能会有值更新不可见的问题
     @Getter @Setter private volatile static main instance;
     @Getter @Setter private volatile static String logsPath;
     @Getter @Setter private volatile static Double serverVersion;
@@ -33,9 +32,10 @@ public final class main extends JavaPlugin {
         setInstance(this);
         setDisabled(false);
 
-        // 获取 -> org.bukkit.craftbukkit.v1_7_R4
-        // 分割后为 -> 1_7, 最终为 -> 107
-        // 1.12.2 -> 101202 1.19.2 -> 101902 这里把 _ 换成 0 是为了放置 1.19 比 1.7 小的问题
+        /*
+         * 获取 -> org.bukkit.craftbukkit.v1_7_R4，分割后为 -> 1_7, 最终为 -> 107
+         * 1.12.2 -> 101202 1.19.2 -> 101902 这里把 _ 换成 0 是为了放置 1.19 比 1.7 小的问题
+         */
         setServerVersion(Double.parseDouble(Arrays.toString(org.apache.commons.lang.StringUtils.substringsBetween(getServer().getClass().getPackage().getName(), ".v", "_R"))
                 .replace("_", "0").replace("[", "").replace("]", "")));
 
@@ -79,9 +79,10 @@ public final class main extends JavaPlugin {
         // 网页更新
         UpdateCheckerTask.startTask();
 
-        // 这里是热重载
-        // 如果玩家没有使用插件的指令进行热重载，那么会导致 PlayerTimestampRunnable 停止
-        // 所以这里检查服内是否有此玩家，如果有的话那么就为所有玩家启动 PlayerTimestampRunnable
+        /*
+         * 如果玩家没有使用插件的指令进行热重载，那么会导致 PlayerTimestampRunnable 停止
+         * 这里检查服内是否有此玩家，如果有的话那么就为所有玩家启动 PlayerTimestampRunnable
+         */
         if (Bukkit.getOnlinePlayers().size() != 0) Bukkit.getOnlinePlayers().forEach(PlayerTimestampTask::startTask);
 
         QuickUtils.sendConsoleMessage("&aAdvanced Wish 插件已成功加载! 感谢您使用此插件! 版本: &e" + this.getDescription().getVersion() + "&a, 作者: &e2000000&a。");

@@ -14,32 +14,36 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import java.util.Map;
 
 /**
- * author:     2000000
- * project:    AdvancedWish
- * package:        me.twomillions.plugin.advancedwish.listener
- * className:      PlayerListener
- * date:    2022/11/24 16:58
+ * @author 2000000
+ * @date 2022/11/24 16:58
  */
 public class PlayerListener implements Listener {
     private static final Map<Player, String> opSentCommand = EffectSendManager.getOpSentCommand();
 
+    /**
+     * 玩家进入监听器，用于处理玩家进入的时候的缓存并开始此玩家的时间戳检查
+     *
+     * @param event PlayerJoinEvent
+     */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
-        // 玩家进入的时候检查缓存并且开始此玩家的时间戳检查
         PlayerJoinCheckCacheTask.startTask(player);
         PlayerTimestampTask.startTask(player);
 
-        // 及时更新
         if (!UpdateCheckerTask.isLatestVersion() && player.isOp()) player.sendMessage(QuickUtils.translate(
                 "&7[&6&lAdvanced Wish&7] &c您看起来在使用过时的 Advanced Wish 版本! 您应该获取更新以防止未知问题出现! 下载链接: https://gitee.com/A2000000/advanced-wish/releases"
         ));
     }
 
+    /**
+     * 玩家以 OP 身份执行指令的安全措施
+     *
+     * @param event PlayerCommandPreprocessEvent
+     */
     @EventHandler
     public void onPlayerSendCommand(PlayerCommandPreprocessEvent event) {
-        // OP 执行指令的安全措施
         Player player = event.getPlayer();
         String command = event.getMessage();
 
