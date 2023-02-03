@@ -11,6 +11,9 @@
 > bStats
 - https://bstats.org/plugin/bukkit/AdvancedWish/16990
 ---
+> JavaDoc
+- http://advancedwish.javadoc.twomillions.top/
+---
 > 此插件的配置文件较多，但是非常简单，您可以通过查看配置文件内注释来了解此插件的各种信息。
 ---
 ## 开源协议
