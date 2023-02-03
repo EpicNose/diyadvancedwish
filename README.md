@@ -85,7 +85,9 @@
 ---
 ## 开发者 API
 > 触发事件
-- 目前 Advanced Wish 提供了两个触发事件，分别为 EffectSendEvent PlayerWishEvent.
-- EffectSendEvent 将会在发送效果时触发，可获得对应的文件名，目标玩家，路径等等，cancel 则取消发送效果。
-- PlayerWishEvent 将会在玩家许愿时触发，可获得对应的许愿状态，目标玩家等等，若成功许愿 cancel 此事件将会取消许愿，若失败则取消发送效果。
+- 目前 Advanced Wish 提供了四个异步触发事件.
+- AsyncEffectSendEvent 将会在发送效果时触发，可获得对应的文件名，目标玩家，路径等等，cancel 则取消发送效果。
+- AsyncPlayerCheckCacheEvent 将会在服务器检查玩家缓存文件时触发，可获得玩家与文件路径等等，cancel 则取消此次检查。
+- AsyncPlayerWishEvent 将会在玩家许愿时触发，可获得对应的许愿状态，目标玩家等等，若成功许愿 cancel 此事件将会取消许愿，若失败则取消发送效果。
+- AsyncWisLimitResetEvent 将会在许愿池重置限制次数时触发，可获得对应的许愿池名，等等，若 cancel 则取消重置。
 ---
