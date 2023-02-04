@@ -1,8 +1,8 @@
 package me.twomillions.plugin.advancedwish.commands;
 
 import de.leonhard.storage.Yaml;
-import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
 import me.twomillions.plugin.advancedwish.Main;
+import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
 import me.twomillions.plugin.advancedwish.managers.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.RegisterManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
@@ -362,7 +362,7 @@ public class ConsoleCommand implements CommandExecutor {
                     int allLogsSize = MongoManager.getMongoConnectState() == MongoConnectState.Connected ?
                             MongoManager.getWishLogsSize(queryPlayerUUID) : ConfigManager.getWishLogsSize(queryPlayerUUID);
 
-                    if (logs.size() <= 0 || allLogsSize <= 0)
+                    if (logs.size() == 0 || allLogsSize <= 0)
                     { for (String queryPrefix : messageYaml.getStringList("QUERY-WISH.LOGS-NULL")) sender.sendMessage(QuickUtils.replaceTranslateToPapi(queryPrefix)); return; }
 
                     // 头消息

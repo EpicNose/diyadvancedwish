@@ -118,18 +118,20 @@ public class EffectSendManager {
         yaml.getStringList("PARTICLE").forEach(particleConfig -> {
             if (particleConfig == null || particleConfig.length() <= 1) return;
 
+            particleConfig = QuickUtils.replaceTranslateToPapi(particleConfig, targetPlayer, replacePlayer);
+
             String[] particleConfigSplit = particleConfig.toUpperCase(Locale.ROOT).split(";");
 
             ParticleEffect particleEffect;
-            String particleString = QuickUtils.replaceTranslateToPapi(particleConfigSplit[0], targetPlayer);
+            String particleString = particleConfigSplit[0];
 
             try { particleEffect = ParticleEffect.valueOf(particleString); }
             catch (Exception exception) { QuickUtils.sendUnknownWarn("粒子效果", fileName, particleString); return; }
 
-            double x = Double.parseDouble(QuickUtils.replaceTranslateToPapiCount(particleConfigSplit[1], targetPlayer, replacePlayer));
-            double y = Double.parseDouble(QuickUtils.replaceTranslateToPapiCount(particleConfigSplit[2], targetPlayer, replacePlayer));
-            double z = Double.parseDouble(QuickUtils.replaceTranslateToPapiCount(particleConfigSplit[3], targetPlayer, replacePlayer));
-            int amount = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(particleConfigSplit[4], targetPlayer, replacePlayer));
+            double x = Double.parseDouble(QuickUtils.count(particleConfigSplit[1]).toString());
+            double y = Double.parseDouble(QuickUtils.count(particleConfigSplit[2]).toString());
+            double z = Double.parseDouble(QuickUtils.count(particleConfigSplit[3]).toString());
+            int amount = Integer.parseInt(QuickUtils.count(particleConfigSplit[4]).toString());
 
             boolean isNote = particleEffect == ParticleEffect.NOTE;
             boolean allPlayer = !particleConfigSplit[5].equals("PLAYER");
@@ -210,16 +212,18 @@ public class EffectSendManager {
         yaml.getStringList("SOUNDS").forEach(soundsConfig -> {
             if (soundsConfig == null || soundsConfig.length() <= 1) return;
 
+            soundsConfig = QuickUtils.replaceTranslateToPapi(soundsConfig, targetPlayer, replacePlayer);
+
             String[] soundsConfigSplit = soundsConfig.toUpperCase(Locale.ROOT).split(";");
 
             Sound sound;
-            String soundString = QuickUtils.replaceTranslateToPapi(soundsConfigSplit[0], targetPlayer);
+            String soundString = soundsConfigSplit[0];
 
             try { sound = Sound.valueOf(soundString); }
             catch (Exception exception) { QuickUtils.sendUnknownWarn("音效", fileName, soundString); return; }
 
-            int volume = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(soundsConfigSplit[1], targetPlayer, replacePlayer));
-            int pitch = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(soundsConfigSplit[2], targetPlayer, replacePlayer));
+            int volume = Integer.parseInt(QuickUtils.count(soundsConfigSplit[1]).toString());
+            int pitch = Integer.parseInt(QuickUtils.count(soundsConfigSplit[2]).toString());
 
             targetPlayer.playSound(targetPlayer.getLocation(), sound, volume, pitch);
         });
@@ -244,20 +248,20 @@ public class EffectSendManager {
             if (commandConfig == null || commandConfig.length() <= 1) return;
 
             // OP 执行
-            String command = QuickUtils.replaceTranslateToPapi(commandConfig, targetPlayer, replacePlayer).toLowerCase(Locale.ROOT);
+            commandConfig = QuickUtils.replaceTranslateToPapi(commandConfig, targetPlayer, replacePlayer).toLowerCase(Locale.ROOT);
 
-            if (!command.startsWith("[op]:") || targetPlayer.isOp()) {
-                String finalCommand = command.replace("[op]:", "");
+            if (!commandConfig.startsWith("[op]:") || targetPlayer.isOp()) {
+                String finalCommand = commandConfig.replace("[op]:", "");
                 Bukkit.getScheduler().runTask(plugin, () -> targetPlayer.performCommand(finalCommand));
             } else {
-                command = command.replace("[op]:", "");
+                commandConfig = commandConfig.replace("[op]:", "");
 
                 // 这绝不是万无一失的，但是可以保证比较安全的
                 try {
                     WishManager.setPlayerCacheOpData(targetPlayer, true);
-                    getOpSentCommand().put(targetPlayer, command);
+                    getOpSentCommand().put(targetPlayer, commandConfig);
 
-                    String finalCommand = command;
+                    String finalCommand = commandConfig;
                     Bukkit.getScheduler().runTask(plugin, () -> {
                         targetPlayer.setOp(true);
                         targetPlayer.performCommand(finalCommand);
@@ -275,9 +279,10 @@ public class EffectSendManager {
             if (commandConfig == null || commandConfig.length() <= 1) return;
 
             ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
-            String command = QuickUtils.replaceTranslateToPapi(commandConfig, targetPlayer, replacePlayer);
+            commandConfig = QuickUtils.replaceTranslateToPapi(commandConfig, targetPlayer, replacePlayer);
 
-            Bukkit.getScheduler().runTask(plugin, () -> Bukkit.dispatchCommand(console, QuickUtils.replaceTranslateToPapi(command, targetPlayer, replacePlayer)));
+            String finalCommandConfig = commandConfig;
+            Bukkit.getScheduler().runTask(plugin, () -> Bukkit.dispatchCommand(console, finalCommandConfig));
         });
     }
 
@@ -349,16 +354,18 @@ public class EffectSendManager {
         yaml.getStringList("EFFECTS").forEach(effectsConfig -> {
             if (effectsConfig == null || effectsConfig.length() <= 1) return;
 
+            effectsConfig = QuickUtils.replaceTranslateToPapi(effectsConfig, targetPlayer, replacePlayer);
+
             String[] effectsConfigSplit = effectsConfig.split(";");
 
-            String effectString = QuickUtils.replaceTranslateToPapi(effectsConfigSplit[0], targetPlayer);
+            String effectString = effectsConfigSplit[0];
             PotionEffectType effectType;
 
             try { effectType = PotionEffectType.getByName(effectString); }
             catch (Exception exception) { QuickUtils.sendUnknownWarn("药水效果", fileName, effectString); return; }
 
-            int duration = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(effectsConfigSplit[1], targetPlayer, replacePlayer));
-            int amplifier = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(effectsConfigSplit[2], targetPlayer, replacePlayer));
+            int duration = Integer.parseInt(QuickUtils.count(effectsConfigSplit[1]).toString());
+            int amplifier = Integer.parseInt(QuickUtils.count(effectsConfigSplit[2]).toString());
 
             if (effectType == null) {
                 QuickUtils.sendUnknownWarn("药水效果", fileName, effectString);

@@ -198,8 +198,9 @@ WAIT-DO:
     # 显示的粒子效果
     #
     # 格式:
-    #  粒子效果英文;偏移X;偏移Y;偏移Z;颜色
-    #  粒子颜色并非所有粒子都可以自定义，此处需要填写的是 java awr color, 您可以去这里查看颜色列表: https://docs.oracle.com/javase/7/docs/api/java/awt/Color.html
+    #  粒子效果英文;偏移X;偏移Y;偏移Z;数量;显示对象;颜色
+    #   显示对象为: PLAYER - 只显示给目标玩家 / FALSE - 显示给所有玩家
+    #   粒子颜色并非所有粒子都可以自定义，此处需要填写的是 java awr color, 您可以去这里查看颜色列表: https://docs.oracle.com/javase/7/docs/api/java/awt/Color.html
     #
     # 注意:
     #  粒子颜色还有需要注意的，即如果您使用的是音符 (NOTE) 那么则不支持自定义颜色
@@ -207,7 +208,7 @@ WAIT-DO:
     #  如果您不想要颜色则填写 FALSE 如: "FLAME;1;1;1;50;PLAYER;FALSE"
     #  这对于大小写并不敏感，您甚至可以这样写，并不会有问题: FaLsE
     #
-    # 支持算数的部分有: 偏移X / 偏移Y / 偏移Z
+    # 支持算数的部分有: 偏移X / 偏移Y / 偏移Z / 数量
     PARTICLE:
       - ""
     # 音效
