@@ -174,7 +174,7 @@ public class QuickUtils {
     public static String getRandomSentenceResult(String randomSentence) {
         if (!randomSentence.contains("randomSentence(") || !randomSentence.contains(")end")) return randomSentence;
 
-        ProbabilityUntilities probabilities = new ProbabilityUntilities();
+        RandomUtils randomUtils = new RandomUtils();
 
         try {
             String[] randomSentenceSplit = StringUtils.substringBetween(randomSentence, "randomSentence(", ")end").split("~");
@@ -185,7 +185,7 @@ public class QuickUtils {
                 Object randomObject = random[0];
                 int probability = Integer.parseInt(random[1]);
 
-                probabilities.addChance(randomObject, probability);
+                randomUtils.addRandomObject(randomObject, probability);
             }
 
         } catch (Exception exception) {
@@ -194,7 +194,7 @@ public class QuickUtils {
             return randomSentence;
         }
 
-        String randomElement = probabilities.getRandomElement().toString();
+        String randomElement = randomUtils.getResult().toString();
 
         return stringInterceptReplace(randomSentence, "randomSentence(", ")end", randomElement, true);
     }

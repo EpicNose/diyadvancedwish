@@ -90,9 +90,9 @@ public class EffectSendManager {
 
         if ("".equals(mainTitle) && "".equals(subTitle)) return;
 
-        int fadeIn = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getString("FADE-IN")), targetPlayer, replacePlayer));
-        int fadeOut = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getString("FADE-OUT")), targetPlayer, replacePlayer));
-        int stay = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getString("STAY")), targetPlayer, replacePlayer));
+        int fadeIn = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("FADE-IN"), targetPlayer, replacePlayer));
+        int fadeOut = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("FADE-OUT"), targetPlayer, replacePlayer));
+        int stay = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("STAY"), targetPlayer, replacePlayer));
 
         // 在 1.9 中由于此方法无法定义 fadeIn stay fadeOut 所以使用不同的方法
         // 我没有使用 NMS Spigot API 提供了一种发送标题的方法 旨在跨不同的 Minecraft 版本工作
@@ -391,8 +391,8 @@ public class EffectSendManager {
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
-        int hunger = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getString("HUNGER")), targetPlayer, replacePlayer));
-        double health = Double.parseDouble(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getString("HEALTH")), targetPlayer, replacePlayer));
+        int hunger = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("HUNGER"), targetPlayer, replacePlayer));
+        double health = Double.parseDouble(QuickUtils.replaceTranslateToPapiCount(yaml.getString("HEALTH"), targetPlayer, replacePlayer));
 
         if (health != 0) {
             double playerHealth = targetPlayer.getHealth();
@@ -420,9 +420,9 @@ public class EffectSendManager {
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
-        int exp = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getString("EXP")), targetPlayer, replacePlayer));
+        int exp = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("EXP"), targetPlayer, replacePlayer));
 
-        if (exp != 0) ExpUtils.changeExp(targetPlayer, exp);
+        if (exp != 0) ExpUtils.addExp(targetPlayer, exp);
     }
 
     /**
@@ -444,7 +444,7 @@ public class EffectSendManager {
         yaml.setPathPrefix(pathPrefix == null ? "ACTION-BAR" : pathPrefix + ".ACTION-BAR");
 
         String actionBarMessage = QuickUtils.replaceTranslateToPapi(yaml.getString("MESSAGE"), targetPlayer, replacePlayer);
-        int actionBarTime = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getString("TIME")), targetPlayer, replacePlayer));
+        int actionBarTime = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("TIME"), targetPlayer, replacePlayer));
 
         if ("".equals(actionBarMessage) || actionBarTime == 0) return;
 
@@ -486,12 +486,12 @@ public class EffectSendManager {
         yaml.setPathPrefix(pathPrefix == null ? "BOSS-BAR" : pathPrefix + ".BOSS-BAR");
 
         String bossBarMessage = QuickUtils.replaceTranslateToPapi(yaml.getString("MESSAGE"), targetPlayer, replacePlayer);
-        double bossBarTime = Double.parseDouble(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getString("TIME")), targetPlayer, replacePlayer));
+        double bossBarTime = Double.parseDouble(QuickUtils.replaceTranslateToPapiCount(yaml.getString("TIME"), targetPlayer, replacePlayer));
 
         if ("".equals(bossBarMessage) || bossBarTime == 0) return;
 
-        String barColorString = yaml.getString("COLOR");
-        String barStyleString = yaml.getString("STYLE");
+        String barColorString = QuickUtils.replaceTranslateToPapi(yaml.getString("COLOR"), targetPlayer, replacePlayer);
+        String barStyleString = QuickUtils.replaceTranslateToPapi(yaml.getString("STYLE"), targetPlayer, replacePlayer);
 
         BarColor bossBarColor = barColorString.equals("RANDOM") ? BossBarRandomUtils.randomColor() : BarColor.valueOf(barColorString);
         BarStyle bossBarStyle = barStyleString.equals("RANDOM") ? BossBarRandomUtils.randomStyle() : BarStyle.valueOf(barStyleString);

@@ -1,8 +1,9 @@
 package me.twomillions.plugin.advancedwish.commands;
 
 import de.leonhard.storage.Yaml;
-import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
+import lombok.Getter;
 import me.twomillions.plugin.advancedwish.Main;
+import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
 import me.twomillions.plugin.advancedwish.managers.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.RegisterManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
@@ -18,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -27,6 +29,38 @@ import java.util.Locale;
  */
 public class MainCommand implements TabExecutor {
     private static final Plugin plugin = Main.getInstance();
+
+    /**
+     * 在此存储普通玩家可以执行的子指令用于 Tab 补全
+     */
+    @Getter private static final String[] defaultCommands = new String[] {
+            "list",
+            "amount",
+            "guaranteed",
+            "limitamount",
+            "makewish"
+    };
+
+    /**
+     * 在此存储 Admin 玩家可以执行的子指令用于 Tab 补全
+     */
+    @Getter private static final String[] adminCommands = new String[] {
+            "list",
+            "amount",
+            "guaranteed",
+            "limitamount",
+            "makewish",
+            "makewishforce",
+            "getamount",
+            "setamount",
+            "getguaranteed",
+            "setguaranteed",
+            "getlimitamount",
+            "setlimitamount",
+            "resetlimitamount",
+            "querywish",
+            "reload"
+    };
 
     /**
      * 主指令实现
@@ -46,7 +80,7 @@ public class MainCommand implements TabExecutor {
             Yaml messageYaml = ConfigManager.getMessageYaml();
             Yaml advancedWishYaml = ConfigManager.getAdvancedWishYaml();
             
-            boolean isAdmin = player.hasPermission(advancedWishYaml.getString("ADMIN-PERM"));
+            boolean isAdmin = isAdmin(player);
 
             if (args.length == 0) {
                 if (isAdmin) messageYaml.getStringList("ADMIN-SHOW-COMMAND").forEach(message -> player.sendMessage(QuickUtils.replaceTranslateToPapi(message, player)));
@@ -475,9 +509,18 @@ public class MainCommand implements TabExecutor {
         return false;
     }
 
+    public static boolean isAdmin(Player player) {
+        return player.hasPermission(ConfigManager.getAdvancedWishYaml().getString("ADMIN-PERM"));
+    }
+
     @Nullable
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
+        if (args.length == 1) {
+            if (isAdmin((Player) sender)) return Arrays.asList(adminCommands);
+            else return Arrays.asList(defaultCommands);
+        }
+
         List<String> result = new ArrayList<>(RegisterManager.getRegisterWish());
         Bukkit.getOnlinePlayers().forEach(onlinePlayer -> result.add(onlinePlayer.getName()));
 

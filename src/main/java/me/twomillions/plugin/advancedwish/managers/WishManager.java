@@ -13,8 +13,8 @@ import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
 import me.twomillions.plugin.advancedwish.managers.databases.RedisManager;
 import me.twomillions.plugin.advancedwish.tasks.PlayerCheckCacheTask;
 import me.twomillions.plugin.advancedwish.utils.ItemUtils;
-import me.twomillions.plugin.advancedwish.utils.ProbabilityUntilities;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
+import me.twomillions.plugin.advancedwish.utils.RandomUtils;
 import net.milkbowl.vault.economy.Economy;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.Bukkit;
@@ -279,6 +279,8 @@ public class WishManager {
         UUID uuid = player.getUniqueId();
 
         for (String wishScheduledTask : getWishScheduledTasks(wishName)) {
+            wishScheduledTask = QuickUtils.replaceTranslateToPapi(wishScheduledTask, player);
+
             String scheduledTasksPrizeDo = getWishScheduledTasksPrizeDo(wishScheduledTask);
             String wishItemPrizeDo = "PRIZE-DO." + getWishPrizeSetPrizeDo(finalProbabilityWish);
             Long time = System.currentTimeMillis() + getWishScheduledTasksSeconds(wishScheduledTask) * 1000L;
@@ -492,7 +494,7 @@ public class WishManager {
      */
     public static int getWishNeedIncreasedAmount(String wishName, Player player) {
         Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
-        return Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getOrDefault("ADVANCED-SETTINGS.INCREASED-WISH-AMOUNT", "1")), player));
+        return Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getOrDefault("ADVANCED-SETTINGS.INCREASED-WISH-AMOUNT", "1"), player));
     }
 
     /**
@@ -506,21 +508,27 @@ public class WishManager {
     public static String getFinalProbabilityWish(Player player, String wishName) {
         // 检查保底
         for (String wishGuaranteedString : getWishGuaranteedList(wishName)) {
-            if (getPlayerWishGuaranteed(player, wishName) == getWishGuaranteed(QuickUtils.replaceTranslateToPapi(wishGuaranteedString, player))) {
+            wishGuaranteedString = QuickUtils.replaceTranslateToPapi(wishGuaranteedString, player);
+
+            if (getPlayerWishGuaranteed(player, wishName) == getWishGuaranteed(wishGuaranteedString)) {
                 // 保底率的增加与清空
                 setPlayerWishGuaranteed(player, wishName, wishGuaranteedString, true);
                 // 设置玩家此奖池的许愿数
                 setPlayerWishAmount(player, wishName, getPlayerWishAmount(player, wishName) + getWishNeedIncreasedAmount(wishName, player));
+
                 return wishGuaranteedString;
             }
         }
 
         // 如果没有保底再随机
-        ProbabilityUntilities probabilities = new ProbabilityUntilities();
+        RandomUtils randomUtils = new RandomUtils();
 
-        for (String wishItem : getWishPrizeSetList(wishName)) probabilities.addChance(wishItem, getWishPrizeSetProbability(QuickUtils.replaceTranslateToPapi(wishItem, player)));
+        for (String wishPrizeSetString : getWishPrizeSetList(wishName)) {
+            wishPrizeSetString = QuickUtils.replaceTranslateToPapi(wishPrizeSetString, player);
+            randomUtils.addRandomObject(wishPrizeSetString, getWishPrizeSetProbability(wishPrizeSetString));
+        }
 
-        String randomElement = probabilities.getRandomElement().toString();
+        String randomElement = randomUtils.getResult().toString();
 
         // 保底率的增加与清空
         setPlayerWishGuaranteed(player, wishName, randomElement, false);
@@ -751,7 +759,7 @@ public class WishManager {
     public static String getWishDataSync(String wishName) {
         Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
 
-        return yaml.getString("ADVANCED-SETTINGS.DATA-SYNC");
+        return QuickUtils.replaceTranslateToPapi(yaml.getString("ADVANCED-SETTINGS.DATA-SYNC"));
     }
 
     /**
@@ -775,6 +783,7 @@ public class WishManager {
 
         return Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.LIMIT-AMOUNT")));
     }
+
     /**
      * 获取服务器开启重置秒数
      *
@@ -877,15 +886,17 @@ public class WishManager {
 
         String perm = QuickUtils.replaceTranslateToPapi(yaml.getString("PERM"), player);
 
-        int level = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getString("LEVEL")), player));
-        int point = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getString("POINT")), player));
-        double money = Double.parseDouble(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getString("MONEY")), player));
+        int level = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("LEVEL"), player));
+        int point = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("POINT"), player));
+        double money = Double.parseDouble(QuickUtils.replaceTranslateToPapiCount(yaml.getString("MONEY"), player));
 
         // 许愿券检查
         yaml.setPathPrefix("ADVANCED-SETTINGS");
 
         for (String coupon : yaml.getStringList("COUPON")) {
             if ("".equals(coupon)) break;
+
+            coupon = QuickUtils.replaceTranslateToPapi(coupon, player);
 
             String[] couponSplit = coupon.split(";");
 
@@ -899,10 +910,10 @@ public class WishManager {
                 for (String lore : meta.getLore()) {
                     lore = QuickUtils.replaceTranslateToPapi(lore, player);
 
-                    if (!lore.contains(QuickUtils.translate(couponSplit[1]))) continue;
+                    if (!lore.contains(couponSplit[1])) continue;
 
                     int itemAmount = itemStack.getAmount();
-                    int checkAmount = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(couponSplit[0], player));
+                    int checkAmount = Integer.parseInt(QuickUtils.count(couponSplit[0]).toString());
 
                     if (itemAmount < checkAmount) break;
 
@@ -937,12 +948,14 @@ public class WishManager {
         for (String configInventoryHave : yaml.getStringList("INVENTORY-HAVE")) {
             if (configInventoryHave == null || configInventoryHave.length() <= 1) continue;
 
+            configInventoryHave = QuickUtils.replaceTranslateToPapi(configInventoryHave, player);
+
             String[] configInventoryHaveSplit = configInventoryHave.toUpperCase(Locale.ROOT).split(";");
 
             int itemAmount = 0;
-            int checkAmount = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(configInventoryHaveSplit[1], player));
+            int checkAmount = Integer.parseInt(QuickUtils.count(configInventoryHaveSplit[1]).toString());
 
-            Material material = ItemUtils.materialValueOf(QuickUtils.replaceTranslateToPapi(configInventoryHaveSplit[0], player), wishName);
+            Material material = ItemUtils.materialValueOf(configInventoryHaveSplit[0], wishName);
 
             // 数量检查
             for (ItemStack itemStack : player.getInventory().all(material).values()) {
@@ -956,12 +969,14 @@ public class WishManager {
         for (String configPotionEffectsHave : yaml.getStringList("PLAYER-HAVE-EFFECTS")) {
             if (configPotionEffectsHave == null || configPotionEffectsHave.length() <= 1) continue;
 
+            configPotionEffectsHave = QuickUtils.replaceTranslateToPapi(configPotionEffectsHave, player);
+
             String[] effect = configPotionEffectsHave.toUpperCase(Locale.ROOT).split(";");
 
-            int amplifier = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(effect[1], player));
+            int amplifier = Integer.parseInt(QuickUtils.count(effect[1]).toString());
 
-            String effectString = QuickUtils.replaceTranslateToPapi(effect[0], player);
-            PotionEffectType effectType = PotionEffectType.getByName(QuickUtils.replaceTranslateToPapi(effectString, player));
+            String effectString = effect[0];
+            PotionEffectType effectType = PotionEffectType.getByName(effectString);
 
             if (effectType == null) {
                 QuickUtils.sendUnknownWarn("药水效果", wishName, effectString);

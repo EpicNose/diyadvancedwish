@@ -108,8 +108,8 @@ public class PlayerCheckCacheTask {
 
             Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
 
-            int waitSeconds = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getString("CACHE-SETTINGS.WAIT")), player));
-            int waitJoinSeconds = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(String.valueOf(yaml.getString("CACHE-SETTINGS.WAIT-JOIN")), player));
+            int waitSeconds = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("CACHE-SETTINGS.WAIT"), player));
+            int waitJoinSeconds = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("CACHE-SETTINGS.WAIT-JOIN"), player));
 
             // 玩家进入的消息提示与延迟
             if (!configCacheSettingsSent) {
