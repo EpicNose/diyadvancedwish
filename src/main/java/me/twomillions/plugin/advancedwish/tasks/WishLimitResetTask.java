@@ -1,8 +1,10 @@
 package me.twomillions.plugin.advancedwish.tasks;
 
+import de.leonhard.storage.Yaml;
 import lombok.Getter;
-import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
 import me.twomillions.plugin.advancedwish.Main;
+import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
+import me.twomillions.plugin.advancedwish.managers.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.EffectSendManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
@@ -49,7 +51,16 @@ public class WishLimitResetTask {
 
             // 发送效果
             if (isEnabledResetCompleteSend) {
-                Bukkit.getOnlinePlayers().forEach(onlinePlayer -> EffectSendManager.sendEffect(wishName, onlinePlayer, null, "/Wish", "ADVANCED-SETTINGS.WISH-LIMIT.RESET-COMPLETE"));
+                Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
+
+                for (String resetCompleteTask : yaml.getStringList("ADVANCED-SETTINGS.WISH-LIMIT.RESET-COMPLETE")) {
+                    resetCompleteTask = QuickUtils.randomSentence(QuickUtils.replaceTranslateToPapi(resetCompleteTask));
+
+                    if (QuickUtils.sleepSentence(resetCompleteTask)) continue;
+
+                    String finalResetCompleteTask = resetCompleteTask;
+                    Bukkit.getOnlinePlayers().forEach(player -> EffectSendManager.sendEffect(wishName, player, null, "/Wish", finalResetCompleteTask, true));
+                }
             }
 
             // 控制台发送提示信息

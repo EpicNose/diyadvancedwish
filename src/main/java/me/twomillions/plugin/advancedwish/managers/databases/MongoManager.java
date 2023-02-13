@@ -45,7 +45,7 @@ public class MongoManager {
      */
     public static MongoConnectState setupMongo(Yaml yaml) {
         // Mongo 开启检查
-        if (!yaml.getBoolean("USE-MONGO")) {
+        if (!yaml.getBoolean("MONGO.ENABLE")) {
             setMongoConnectState(MongoConnectState.TurnOff);
             return getMongoConnectState();
         }

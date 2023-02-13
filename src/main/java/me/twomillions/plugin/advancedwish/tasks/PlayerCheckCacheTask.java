@@ -11,10 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -24,9 +21,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PlayerCheckCacheTask {
     private static final Plugin plugin = Main.getInstance();
     private static final Map<UUID, Boolean> loadingCache = new ConcurrentHashMap<>();
+    private static final Map<UUID, Boolean> waitingLadingCache = new ConcurrentHashMap<>();
 
     /**
-     * 设置玩家加载缓存状态
+     * 设置玩家处理缓存状态
      *
      * @param uuid uuid
      * @param isLoadingCache isLoadingCache
@@ -36,13 +34,61 @@ public class PlayerCheckCacheTask {
     }
 
     /**
-     * 检查玩家是否正在加载缓存
+     * 检查玩家是否正在处理缓存
      *
      * @param uuid uuid
      * @return get or false
      */
     public static boolean isLoadingCache(UUID uuid) {
         return loadingCache.getOrDefault(uuid, false);
+    }
+
+    /**
+     * 设置玩家等待处理缓存状态
+     *
+     * @param uuid uuid
+     * @param isWaitingLoadingCache isWaitingLoadingCache
+     */
+    public static void setWaitingLadingCache(UUID uuid, boolean isWaitingLoadingCache) {
+        waitingLadingCache.put(uuid, isWaitingLoadingCache);
+    }
+
+    /**
+     * 检查玩家是否正在等待处理缓存
+     *
+     * @param uuid uuid
+     * @return get or false
+     */
+    public static boolean isWaitingLoadingCache(UUID uuid) {
+        return waitingLadingCache.getOrDefault(uuid, false);
+    }
+
+    /**
+     * 设置玩家退出时间戳
+     *
+     * @param player player
+     */
+    public static void setPlayerQuitTime(Player player, Long time) {
+        ConfigManager.createJson(player.getUniqueId().toString(), Main.getDoListCachePath(), true, false).set("QUIT-CACHE", time);
+    }
+
+    /**
+     * 设置玩家退出时间戳
+     *
+     * @param player player
+     */
+    public static void setPlayerQuitTime(Player player) {
+        setPlayerQuitTime(player, System.currentTimeMillis());
+    }
+
+    /**
+     * 获取玩家退出时间戳
+     *
+     * @param player player
+     * @return long
+     */
+    public static long getPlayerQuitTime(Player player) {
+        return ConfigManager.createJson(player.getUniqueId().toString(), Main.getDoListCachePath(), true, false).getLong("QUIT-CACHE");
     }
 
     /**
@@ -54,16 +100,24 @@ public class PlayerCheckCacheTask {
     public static void startTask(Player player) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             UUID uuid = player.getUniqueId();
-            String path = Main.getInstance().getDataFolder() + "/PlayerCache";
+
+            String normalPath = plugin.getDataFolder() + "/PlayerCache";
+            String doListCachePath = Main.getDoListCachePath();
 
             // 遍历缓存文件
-            boolean hasCache = ConfigManager.getAllFileName(path).contains(uuid + ".json");
+            boolean hasNormalCache = ConfigManager.getAllFileName(normalPath).contains(uuid + ".json");
+            boolean hasDoListCachePath = ConfigManager.getAllFileName(doListCachePath).contains(uuid + ".json");
+
+            if (!hasNormalCache) normalPath = null;
+            if (!hasDoListCachePath) doListCachePath = null;
 
             // isCancelled
-            if (QuickUtils.callAsyncPlayerCheckCacheEvent(player, path, hasCache).isCancelled() || !hasCache) return;
+            if (QuickUtils.callAsyncPlayerCheckCacheEvent(player, normalPath, doListCachePath).isCancelled()) return;
+
+            if (!hasNormalCache && !hasDoListCachePath) return;
 
             // 检查缓存
-            checkCache(player, path);
+            checkCache(player, normalPath, doListCachePath);
         });
     }
 
@@ -71,97 +125,87 @@ public class PlayerCheckCacheTask {
      * 检查玩家缓存数据
      *
      * @param player player
-     * @param path path
+     * @param normalPath normalPath
+     * @param doListCachePath doListCachePath
      */
-    private static void checkCache(Player player, String path) {
+    private static void checkCache(Player player, String normalPath, String doListCachePath) {
         UUID uuid = player.getUniqueId();
-        Json json = ConfigManager.createJson(uuid.toString(), path, true, false);
 
         setLoadingCache(uuid, true);
 
-        // 安全问题 - Op 执行指令
-        if (json.getBoolean("DO-OP-COMMAND")) {
-            player.setOp(false);
-            json.set("DO-OP-COMMAND", null);
+        if (normalPath != null) {
+            Json normalJson = ConfigManager.createJson(uuid.toString(), normalPath, true, false);
+
+            // 安全问题 - Op 执行指令
+            if (normalJson.getBoolean("DO-OP-COMMAND")) {
+                player.setOp(false);
+                normalJson.set("DO-OP-COMMAND", null);
+            }
         }
 
-        /*
-         * donePlayerWishPrizeDoStringList - 玩家执行完毕的 Prize Do 项目
-         * playerWishPrizeDoStringListClone - 上一个 List 的克隆项，执行完毕的项目会在此 List 被删除并写入 Json
-         *
-         * 0.0.4.4-SNAPSHOT 版本后将会执行完毕一个项目便进行一次写入剩余执行项以确保不出现安全问题
-         */
-        List<String> playerWishPrizeDoStringList = json.getStringList("CACHE");
-        List<String> playerWishPrizeDoStringListClone = new ArrayList<>(playerWishPrizeDoStringList);
+        if (doListCachePath != null) {
+            Json doListCacheJson = ConfigManager.createJson(uuid.toString(), doListCachePath, true, false);
 
-        boolean configCacheSettingsSent = false;
+            // 0.0.5-SNAPSHOT 版本后将会执行完毕一个项目便进行一次写入剩余执行项以确保不出现安全问题
+            List<String> playerDoListCache = doListCacheJson.getStringList("CACHE");
+            List<String> playerDoListCacheClone = new ArrayList<>(playerDoListCache);
 
-        // 如果没有缓存项则退出
-        if (deleteJson(player, json, playerWishPrizeDoStringList)) return;
+            // 如果没有缓存项则退出
+            if (playerDoListCache.size() == 0) { setLoadingCache(uuid, false); return; }
 
-        // 遍历缓存执行项
-        for (String playerWishPrizeDoString : playerWishPrizeDoStringList) {
-            playerWishPrizeDoString = QuickUtils.unicodeToString(playerWishPrizeDoString);
+            boolean firstSentEffect = true;
 
-            String wishName = WishManager.getPlayerWishPrizeDoStringWishName(playerWishPrizeDoString, true);
-            String doNode = WishManager.getPlayerWishPrizeDoStringWishDoNode(playerWishPrizeDoString, true);
+            // 遍历缓存执行项
+            for (String playerWishDoListString : playerDoListCache) {
+                playerWishDoListString = QuickUtils.unicodeToString(playerWishDoListString);
 
-            Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
+                String doList = WishManager.getPlayerScheduledTaskStringDoList(playerWishDoListString);
+                String wishName = WishManager.getPlayerScheduledTaskStringWishName(playerWishDoListString);
 
-            int waitSeconds = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("CACHE-SETTINGS.WAIT"), player));
-            int waitJoinSeconds = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("CACHE-SETTINGS.WAIT-JOIN"), player));
+                Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
 
-            // 玩家进入的消息提示与延迟
-            if (!configCacheSettingsSent) {
-                try { Thread.sleep(waitJoinSeconds * 1000L); }
-                catch (Exception ignore) { }
+                // 第一次进入发送信息
+                if (firstSentEffect) {
+                    for (String wishCacheTask : yaml.getStringList("CACHE-SETTINGS.WISH-CACHE")) {
+                        wishCacheTask = QuickUtils.randomSentence(QuickUtils.replaceTranslateToPapi(wishCacheTask, player));
 
-                // 如果玩家离线则直接写入未执行项
+                        if (QuickUtils.sleepSentence(wishCacheTask)) continue;
+
+                        EffectSendManager.sendEffect(wishName, player, null, "/Wish", wishCacheTask, true);
+                    }
+
+                    if (!player.isOnline()) break;
+
+                    // 延迟
+                    try { Thread.sleep(Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("CACHE-SETTINGS.WAIT-RECOVERY"), player)) * 1000L); }
+                    catch (Exception ignore) { }
+
+                    firstSentEffect = false;
+                }
+
+                /*
+                 * 如果玩家离线则直接写入未执行项
+                 * 恢复的时间戳算法应该是: 原执行时间 - 退出时间 + 现在时间
+                 * 这应该是正确的，在几次模拟内都会正确的推断出多个任务间隔，也许
+                 */
+                if (player.isOnline()) {
+                    long nowTime = System.currentTimeMillis();
+                    long quitTime = getPlayerQuitTime(player);
+                    long oldTime = Long.parseLong(WishManager.getPlayerScheduledTaskStringTime(playerWishDoListString));
+
+                    WishManager.addPlayerScheduledTasks(player, oldTime - quitTime + nowTime, wishName, doList);
+                    playerDoListCacheClone.remove(QuickUtils.stringToUnicode(playerWishDoListString));
+                }
+
+                // 将已经完成的项目写入缓存
+                if (playerDoListCacheClone.size() == 0) doListCacheJson.set("CACHE", null);
+                else doListCacheJson.set("CACHE", playerDoListCacheClone);
+
                 if (!player.isOnline()) break;
-
-                configCacheSettingsSent = true;
-                EffectSendManager.sendEffect(wishName, player, null, "/Wish", "CACHE-SETTINGS.WISH-CACHE");
             }
-
-            // 奖励发送的延迟
-            try { Thread.sleep(waitSeconds * 1000L); }
-            catch (Exception ignore) { }
-
-            // 如果玩家离线则直接写入未执行项
-            if (player.isOnline()) {
-                EffectSendManager.sendEffect(wishName, player, null, "/Wish", "PRIZE-DO." + doNode);
-                QuickUtils.sendConsoleMessage("&aAdvanced Wish 已成功给予遗漏的物品奖励，并且成功重新写入缓存文件! 玩家名称/文件名称: " + player.getName() + "/" + uuid);
-                playerWishPrizeDoStringListClone.remove(QuickUtils.stringToUnicode(playerWishPrizeDoString));
-            }
-
-            // 将已经完成的项目写入缓存
-            json.set("CACHE", playerWishPrizeDoStringListClone);
-
-            if (!player.isOnline()) break;
         }
 
-        // 二次检查，如果玩家没有在中途退出，那么按理来说会将所有执行项执行完毕后删除
-        deleteJson(player, json, playerWishPrizeDoStringListClone);
-    }
-
-    /**
-     * 检查是否可以删除玩家缓存文件
-     * 如果 playerWishPrizeDoStringList 内仍然有未执行完毕的内容那么就不删除文件
-     *
-     * @param player player
-     * @param json json
-     * @param playerWishPrizeDoStringList playerWishPrizeDoStringList
-     * @return boolean
-     */
-    private static boolean deleteJson(Player player, Json json, List<String> playerWishPrizeDoStringList) {
-        UUID uuid = player.getUniqueId();
-
-        if (playerWishPrizeDoStringList.size() != 0) return false;
-        if (json.getFile().delete()) { setLoadingCache(uuid, false); return true; }
-
-        QuickUtils.sendConsoleMessage("&cAdvanced Wish 文件删除错误! 这是一个问题! 是否为权限不足?? 您需要手动删除它 (位于插件配置文件夹下的 PlayerCache 文件夹) 玩家名称/文件名称: "
-                + player.getName() + "/" + uuid);
-
-        return true;
+        System.out.println("set");
+        setLoadingCache(uuid, false);
     }
 }

@@ -380,7 +380,7 @@ public class ConsoleCommand implements CommandExecutor {
                         String queryLogTime = queryLogSplit[0].replace("-", " ");
                         String queryLogPlayerName = queryLogSplit[1];
                         String queryLogWishName = QuickUtils.unicodeToString(queryLogSplit[3]);
-                        String queryLogPrizeDo = queryLogSplit[4];
+                        String queryLogDoList = queryLogSplit[4];
 
                         for (String queryQuery : messageYaml.getStringList("QUERY-WISH.QUERY")) {
                             queryQuery = QuickUtils.replaceTranslateToPapi(queryQuery);
@@ -389,7 +389,7 @@ public class ConsoleCommand implements CommandExecutor {
                             if (queryQuery.contains("<targetPlayerUUID>")) queryQuery = queryQuery.replaceAll("<targetPlayerUUID>", queryPlayerUUID);
                             if (queryQuery.contains("<time>")) queryQuery = queryQuery.replaceAll("<time>", queryLogTime);
                             if (queryQuery.contains("<wish>")) queryQuery = queryQuery.replaceAll("<wish>", queryLogWishName);
-                            if (queryQuery.contains("<prizeDo>")) queryQuery = queryQuery.replaceAll("<prizeDo>", queryLogPrizeDo);
+                            if (queryQuery.contains("<doList>")) queryQuery = queryQuery.replaceAll("<doList>", queryLogDoList);
                             if (queryQuery.contains("<size>")) queryQuery = queryQuery.replaceAll("<size>", String.valueOf(logs.size()));
 
                             sender.sendMessage(queryQuery);

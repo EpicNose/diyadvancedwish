@@ -4,20 +4,17 @@ import com.mongodb.client.model.Filters;
 import de.leonhard.storage.Json;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
+import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.enums.mongo.MongoCollections;
 import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
-import me.twomillions.plugin.advancedwish.enums.redis.RedisConnectState;
 import me.twomillions.plugin.advancedwish.enums.wish.PlayerWishState;
-import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
-import me.twomillions.plugin.advancedwish.managers.databases.RedisManager;
 import me.twomillions.plugin.advancedwish.tasks.PlayerCheckCacheTask;
 import me.twomillions.plugin.advancedwish.utils.ItemUtils;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import me.twomillions.plugin.advancedwish.utils.RandomUtils;
 import net.milkbowl.vault.economy.Economy;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -25,7 +22,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -35,11 +31,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class WishManager {
     private static final Plugin plugin = Main.getInstance();
-    private static final boolean usingRedis = RedisManager.getRedisConnectState() == RedisConnectState.Connected;
     private static final boolean usingMongo = MongoManager.getMongoConnectState() == MongoConnectState.Connected;
 
     /**
-     * 检查许愿池内是否含有指定的许愿池
+     * 检查是否含有指定的许愿池
      *
      * @param wishName wishName
      * @return boolean
@@ -61,10 +56,7 @@ public class WishManager {
      * @return boolean
      */
     public static boolean isPlayerInWishList(Player player) {
-        UUID uuid = player.getUniqueId();
-
-        if (usingRedis) return RedisManager.getList("wishPlayers").contains(uuid.toString());
-        else return wishPlayers.contains(uuid);
+        return wishPlayers.contains(player.getUniqueId());
     }
 
     /**
@@ -73,10 +65,7 @@ public class WishManager {
      * @param player player
      */
     public static void addPlayerToWishList(Player player) {
-        UUID uuid = player.getUniqueId();
-
-        if (usingRedis) RedisManager.pushListValue("wishPlayers", uuid.toString());
-        else if (!isPlayerInWishList(player)) wishPlayers.add(uuid);
+        if (!isPlayerInWishList(player)) wishPlayers.add(player.getUniqueId());
     }
 
     /**
@@ -85,157 +74,25 @@ public class WishManager {
      * @param player player
      */
     public static void removePlayerWithWishList(Player player) {
-        UUID uuid = player.getUniqueId();
-
-        if (usingRedis) RedisManager.removeListValue("wishPlayers", uuid.toString());
-        else wishPlayers.remove(uuid);
-    }
-
-    /**
-     * 玩家许愿后的最终执行记录 (PrizeDo)
-     */
-    private static final Map<UUID, List<String>> playerWishPrizeDo = new ConcurrentHashMap<>();
-
-    /**
-     * 快速转换为 PlayerWishPrizeDoString
-     * 格式为: UUID[0];许愿池文件名[1];对应节点[2] or save 格式为: 许愿池文件名[0];对应节点[1]
-     *
-     * @param uuid uuid
-     * @param wishName wishName
-     * @param doNode doNode
-     * @return PlayerWishPrizeDoString
-     */
-    public static String toPlayerWishPrizeDoString(UUID uuid, String wishName, String doNode) {
-        return uuid + ";" + wishName + ";" + doNode;
-    }
-
-    /**
-     * PlayerWishPrizeDoString 获取许愿池文件名
-     *
-     * @param playerWishPrizeDoString playerWishPrizeDoString
-     * @param save save
-     * @return wishName
-     */
-    public static String getPlayerWishPrizeDoStringWishName(String playerWishPrizeDoString, boolean save) {
-        if (save) return playerWishPrizeDoString.split(";") [0];
-        else return playerWishPrizeDoString.split(";") [1];
-    }
-
-    /**
-     * PlayerWishPrizeDoString 获取许愿池节点
-     *
-     * @param playerWishPrizeDoString playerWishPrizeDoString
-     * @param save save
-     * @return doNode
-     */
-    public static String getPlayerWishPrizeDoStringWishDoNode(String playerWishPrizeDoString, boolean save) {
-        if (save) return playerWishPrizeDoString.split(";") [1];
-        else return playerWishPrizeDoString.split(";") [2];
-    }
-
-    /**
-     * 设置玩家应执行的 Prize Do
-     *
-     * @param player player
-     * @param wishName wishName
-     * @param doNode doNode
-     */
-    public static void addPlayerWishPrizeDo(Player player, String wishName, String doNode) {
-        UUID uuid = player.getUniqueId();
-        String playerWishPrizeDoString = toPlayerWishPrizeDoString(uuid, wishName, doNode);
-
-        List<String> newPlayerWishPrizeDo;
-        if (playerWishPrizeDo.get(uuid) != null) newPlayerWishPrizeDo = new ArrayList<>(playerWishPrizeDo.get(uuid));
-        else newPlayerWishPrizeDo = new ArrayList<>();
-
-        newPlayerWishPrizeDo.add(playerWishPrizeDoString);
-
-        if (usingRedis) RedisManager.pushListValue("playerWishPrizeDo_" + uuid, playerWishPrizeDoString);
-        else playerWishPrizeDo.put(uuid, newPlayerWishPrizeDo);
-    }
-
-    /**
-     * 清除玩家指定 Prize Do
-     *
-     * @param player player
-     * @param playerWishPrizeDoString playerWishPrizeDoString
-     */
-    public static void removePlayerWishPrizeDo(Player player, String playerWishPrizeDoString) {
-        UUID uuid = player.getUniqueId();
-
-        if (usingRedis) RedisManager.removeListValue("playerWishPrizeDo_" + uuid, playerWishPrizeDoString);
-        else playerWishPrizeDo.get(uuid).remove(playerWishPrizeDoString);
-    }
-
-    /**
-     * 清除玩家所有 Prize Do
-     *
-     * @param player player
-     */
-    public static void removePlayerAllWishPrizeDo(Player player) {
-        UUID uuid = player.getUniqueId();
-
-        if (usingRedis) RedisManager.removeListValue("playerWishPrizeDo_" + uuid);
-        else playerWishPrizeDo.remove(uuid);
-    }
-
-    /**
-     * 获取玩家 Prize Do
-     * 格式为: 许愿池文件名[0];对应 Prize Do 节点[1]
-     *
-     * @param player player
-     * @param save save
-     * @return prizeDo List
-     */
-    public static List<String> getPlayerWishPrizeDo(Player player, boolean save) {
-        List<String> playerWishPrizeDoList = playerWishPrizeDo.get(player.getUniqueId());
-        List<String> newPlayerWishPrizeDoList = new ArrayList<>();
-
-        for (String playerWishPrizeDoString : playerWishPrizeDoList) {
-            if (save) newPlayerWishPrizeDoList.add(getPlayerWishPrizeDoStringWishName(playerWishPrizeDoString, false) + ";" + getPlayerWishPrizeDoStringWishDoNode(playerWishPrizeDoString, false));
-        }
-
-        if (save) return newPlayerWishPrizeDoList;
-        else return playerWishPrizeDoList;
-    }
-
-    /**
-     * 获取玩家 Prize Do
-     * 格式为: 许愿池文件名[0];对应 Prize Do 节点[1]
-     *
-     * @param uuid uuid
-     * @param save save
-     * @return prizeDo List
-     */
-    public static List<String> getPlayerWishPrizeDo(UUID uuid, boolean save) {
-        List<String> playerWishPrizeDoList = playerWishPrizeDo.get(uuid);
-        List<String> newPlayerWishPrizeDoList = new ArrayList<>();
-
-        for (String playerWishPrizeDoString : playerWishPrizeDoList) {
-            if (save) newPlayerWishPrizeDoList.add(getPlayerWishPrizeDoStringWishName(playerWishPrizeDoString, false) + ";" + getPlayerWishPrizeDoStringWishDoNode(playerWishPrizeDoString, false));
-        }
-
-        if (save) return newPlayerWishPrizeDoList;
-        else return playerWishPrizeDoList;
+        wishPlayers.remove(player.getUniqueId());
     }
 
     /**
      * 玩家计划任务记录
      */
-    private static final List<String> playerScheduledTasks = new ArrayList<>();
+    private static final Map<UUID, ArrayList<String>> playerScheduledTasks = new ConcurrentHashMap<>();
 
     /**
      * 快速转换为 ScheduledTaskString
-     * 格式为: UUID[0];时间[1];许愿池文件名[2];对应节点[3]
+     * 格式为: 时间[0];许愿池文件名[1];Do-List[2]
      *
-     * @param uuid uuid
      * @param time time
      * @param wishName wishName
-     * @param doNode doNode
+     * @param doList doList
      * @return scheduledTaskString
      */
-    public static String toPlayerScheduledTaskString(UUID uuid, Long time, String wishName, String doNode) {
-        return uuid + ";" + time + ";" + wishName + ";" + doNode;
+    public static String toPlayerScheduledTaskString(Long time, String wishName, String doList) {
+        return time + ";" + wishName + ";" + doList;
     }
 
     /**
@@ -245,7 +102,7 @@ public class WishManager {
      * @return time
      */
     public static String getPlayerScheduledTaskStringTime(String scheduledTaskString) {
-        return scheduledTaskString.split(";") [1];
+        return scheduledTaskString.split(";") [0];
     }
 
     /**
@@ -255,17 +112,95 @@ public class WishManager {
      * @return wishName
      */
     public static String getPlayerScheduledTaskStringWishName(String scheduledTaskString) {
+        return scheduledTaskString.split(";") [1];
+    }
+
+    /**
+     * ScheduledTaskString 获取计划任务对应 Do-List
+     *
+     * @param scheduledTaskString scheduledTaskString
+     * @return doList
+     */
+    public static String getPlayerScheduledTaskStringDoList(String scheduledTaskString) {
         return scheduledTaskString.split(";") [2];
     }
 
     /**
-     * ScheduledTaskString 获取计划任务对应 Do Node
+     * 获取指定许愿池 WAIT-SET 计划任务
      *
-     * @param scheduledTaskString scheduledTaskString
-     * @return doNode
+     * @param wishName wishName
+     * @return wishScheduledTasksString
      */
-    public static String getPlayerScheduledTaskStringDoNode(String scheduledTaskString) {
-        return scheduledTaskString.split(";") [3];
+    public static List<String> getWishWaitSetScheduledTasks(String wishName) {
+        Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
+        return yaml.getStringList("WAIT-SET");
+    }
+
+    /**
+     * 添加玩家指定计划任务
+     *
+     * @param player player
+     * @param scheduledTask scheduledTask
+     */
+    public static void addPlayerScheduledTasks(Player player, String scheduledTask) {
+        UUID uuid = player.getUniqueId();
+
+        ArrayList<String> list = playerScheduledTasks.getOrDefault(uuid, new ArrayList<>());
+
+        if (!list.contains(scheduledTask)) {
+            list.add(scheduledTask);
+            playerScheduledTasks.put(uuid, list);
+        }
+    }
+
+    /**
+     * 添加玩家指定计划任务
+     *
+     * @param player player
+     * @param time time
+     * @param wishName wishName
+     * @param doList doList
+     */
+    public static void addPlayerScheduledTasks(Player player, Long time, String wishName, String doList) {
+        if (!doList.contains("DO-LIST.")) doList = "DO-LIST." + doList;
+
+        UUID uuid = player.getUniqueId();
+        String scheduledTask = toPlayerScheduledTaskString(time, wishName, doList);
+
+        ArrayList<String> list = playerScheduledTasks.getOrDefault(uuid, new ArrayList<>());
+
+        if (!list.contains(scheduledTask)) {
+            list.add(scheduledTask);
+            playerScheduledTasks.put(uuid, list);
+        }
+    }
+
+    /**
+     * 删除指定计划任务
+     *
+     * @param wishScheduledTasksString wishScheduledTasksString
+     */
+    public static void removePlayerScheduledTasks(Player player, String wishScheduledTasksString) {
+        playerScheduledTasks.getOrDefault(player.getUniqueId(), new ArrayList<>()).remove(wishScheduledTasksString);
+    }
+
+    /**
+     * 删除指定玩家所有计划任务
+     *
+     * @param player player
+     */
+    public static void removePlayerScheduledTasks(Player player) {
+        playerScheduledTasks.remove(player.getUniqueId());
+    }
+
+    /**
+     * 获取指定玩家计划任务
+     *
+     * @param player player
+     * @return wishScheduledTasksStringList
+     */
+    public static List<String> getPlayerScheduledTasks(Player player) {
+        return playerScheduledTasks.getOrDefault(player.getUniqueId(), new ArrayList<>());
     }
 
     /**
@@ -276,124 +211,34 @@ public class WishManager {
      * @param finalProbabilityWish finalProbabilityWish
      */
     public static void createPlayerScheduledTasks(Player player, String wishName, String finalProbabilityWish) {
-        UUID uuid = player.getUniqueId();
+        for (String wishWaitSetScheduledTask : getWishWaitSetScheduledTasks(wishName)) {
+            wishWaitSetScheduledTask = QuickUtils.randomSentence(QuickUtils.replaceTranslateToPapi(wishWaitSetScheduledTask, player));
 
-        for (String wishScheduledTask : getWishScheduledTasks(wishName)) {
-            wishScheduledTask = QuickUtils.replaceTranslateToPapi(wishScheduledTask, player);
+            Long time = System.currentTimeMillis();
 
-            String scheduledTasksPrizeDo = getWishScheduledTasksPrizeDo(wishScheduledTask);
-            String wishItemPrizeDo = "PRIZE-DO." + getWishPrizeSetPrizeDo(finalProbabilityWish);
-            Long time = System.currentTimeMillis() + getWishScheduledTasksSeconds(wishScheduledTask) * 1000L;
+            if (QuickUtils.hasSleepSentenceMs(wishWaitSetScheduledTask)) {
+                time = time + QuickUtils.getSleepSentenceMs(wishWaitSetScheduledTask);
+                wishWaitSetScheduledTask = QuickUtils.removeSleepSentence(wishWaitSetScheduledTask);
+            }
 
-            /*
-             * 这里的 RANDOM-PRIZE-DO 是重新进行随机，连抽使用
-             * 在添加中间任务之前将会 getFinalProbabilityWish 添加玩家的保底以及抽奖数
-             * 所以保底在 RANDOM-PRIZE-DO 中依然有使用
-             */
-            if (scheduledTasksPrizeDo.equals("RANDOM-PRIZE-DO")) {
-                String randomFinalProbabilityWish = getFinalProbabilityWish(player, wishName);
-                addPlayerWishPrizeDo(player, wishName, getWishPrizeSetPrizeDo(finalProbabilityWish));
-                addPlayerScheduledTasks(uuid, time, wishName, "PRIZE-DO." + getWishPrizeSetPrizeDo(randomFinalProbabilityWish));
-
+            if (wishWaitSetScheduledTask.equals("GO-RANDOM")) {
+                addPlayerScheduledTasks(player, time, wishName, getProbabilityWishDoList(finalProbabilityWish));
                 continue;
             }
 
-            if (scheduledTasksPrizeDo.equals("GO-PRIZE-DO")) addPlayerScheduledTasks(uuid, time, wishName, wishItemPrizeDo);
-            else addPlayerScheduledTasks(uuid, time, wishName, "WAIT-DO." + scheduledTasksPrizeDo);
+            if (wishWaitSetScheduledTask.equals("RANDOM-AGAIN")) {
+                String randomFinalProbabilityWish = getFinalProbabilityWish(player, wishName);
+                addPlayerScheduledTasks(player, time, wishName, getProbabilityWishDoList(randomFinalProbabilityWish));
+                continue;
+            }
+
+            addPlayerScheduledTasks(player, time, wishName, wishWaitSetScheduledTask);
         }
-    }
-
-    /**
-     * 获取指定许愿池内的计划任务
-     * 格式为: 等待秒数[0];执行操作[1]
-     *
-     * @param wishName wishName
-     * @return wishScheduledTasksString
-     */
-    public static List<String> getWishScheduledTasks(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
-        return yaml.getStringList("WAIT-SET");
-    }
-
-    /**
-     * 获取许愿池计划任务的延迟秒数
-     *
-     * @param wishScheduledTasksString wishScheduledTasksString
-     * @return seconds
-     */
-    public static int getWishScheduledTasksSeconds(String wishScheduledTasksString) {
-        return Integer.parseInt(QuickUtils.count(QuickUtils.getRandomSentenceResult(wishScheduledTasksString.split(";") [0])).toString());
-    }
-
-    /**
-     * 获取许愿池计划任务的执行操作
-     *
-     * @param wishScheduledTasksString wishScheduledTasksString
-     * @return prizeDo
-     */
-    public static String getWishScheduledTasksPrizeDo(String wishScheduledTasksString) {
-        return QuickUtils.getRandomSentenceResult(wishScheduledTasksString.split(";") [1]);
-    }
-
-    /**
-     * 添加玩家指定计划任务
-     *
-     * @param uuid uuid
-     * @param time time
-     * @param wishName wishName
-     * @param doNode doNode
-     */
-    public static void addPlayerScheduledTasks(UUID uuid, Long time, String wishName, String doNode) {
-        String scheduledTask = toPlayerScheduledTaskString(uuid, time, wishName, doNode);
-
-        // 日志记录
-        if (doNode.startsWith("PRIZE-DO") && isEnabledRecordWish(wishName)) {
-            String logTime = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss").format(time);
-
-            // 如果这个玩家在线则直接获取 若不在线则获取 offlinePlayer
-            Player player = Bukkit.getPlayer(uuid);
-            String playerName = player == null ? Bukkit.getOfflinePlayer(uuid).getName(): player.isOnline() ? player.getName() : Bukkit.getOfflinePlayer(uuid).getName();
-
-            String prizeDoString = doNode.split("\\.")[1];
-
-            String finalLogString = logTime + ";" + playerName + ";" + uuid + ";" + QuickUtils.stringToUnicode(wishName) + ";" + prizeDoString + ";";
-
-            if (MongoManager.getMongoConnectState() == MongoConnectState.Connected) MongoManager.addPlayerWishLog(uuid.toString(), finalLogString); else ConfigManager.addPlayerWishLog(uuid.toString(), finalLogString);
-        }
-
-        // JedisUtils 内的 addList 方法会自动查重
-        if (usingRedis) RedisManager.pushListValue("playerScheduledTasks", scheduledTask);
-        else if (!playerScheduledTasks.contains(scheduledTask)) playerScheduledTasks.add(scheduledTask);
-    }
-
-    /**
-     * 删除玩家指定计划任务
-     *
-     * @param wishScheduledTasksString wishScheduledTasksString
-     */
-    public static void removePlayerScheduledTasks(String wishScheduledTasksString) {
-        if (usingRedis) RedisManager.removeListValue("playerScheduledTasks", wishScheduledTasksString);
-        else playerScheduledTasks.remove(wishScheduledTasksString);
-    }
-
-    /**
-     * 获取指定玩家计划任务
-     *
-     * @param uuid uuid
-     * @return wishScheduledTasksStringList
-     */
-    public static List<String> getPlayerScheduledTasks(UUID uuid) {
-        List<String> wishScheduledTasksStringList = new ArrayList<>();
-
-        if (usingRedis) for (String scheduledTask : RedisManager.getList("playerScheduledTasks")) { if (scheduledTask.startsWith(uuid.toString())) wishScheduledTasksStringList.add(scheduledTask); }
-        else for (String scheduledTask : new ArrayList<>(playerScheduledTasks)) { if (scheduledTask.startsWith(uuid.toString())) wishScheduledTasksStringList.add(scheduledTask); }
-
-        return wishScheduledTasksStringList;
     }
 
     /**
      * 获取许愿池奖品
-     * 格式为: 几率[0];PRIZE-DO内所执行项[1];增加的增率 (保底率) [2];是否清零保底率[3]
+     * 格式为: 几率[0];Do-List[1];增加的增率 (保底率) [2];是否清零保底率[3]
      *
      * @param wishName wishName
      * @return wishPrizeSetString List
@@ -404,13 +249,13 @@ public class WishManager {
     }
 
     /**
-     * 获取 Prize Do / Guaranteed 执行项
+     * 获取 Do-List 执行项
      *
      * @param wishPrizeSetStringOrWishGuaranteedString wishPrizeSetString Or WishGuaranteedString
-     * @return prizeDo or guaranteed
+     * @return doList or guaranteed
      */
-    public static String getWishPrizeSetPrizeDo(String wishPrizeSetStringOrWishGuaranteedString) {
-        return QuickUtils.getRandomSentenceResult(wishPrizeSetStringOrWishGuaranteedString.split(";") [1]);
+    public static String getProbabilityWishDoList(String wishPrizeSetStringOrWishGuaranteedString) {
+        return QuickUtils.randomSentence(wishPrizeSetStringOrWishGuaranteedString.split(";") [1]);
     }
 
     /**
@@ -420,7 +265,7 @@ public class WishManager {
      * @return probability
      */
     public static int getWishPrizeSetProbability(String wishPrizeSetString) {
-        return Integer.parseInt(QuickUtils.count(QuickUtils.getRandomSentenceResult(wishPrizeSetString.split(";") [0])).toString());
+        return Integer.parseInt(QuickUtils.count(QuickUtils.randomSentence(wishPrizeSetString.split(";") [0])).toString());
     }
 
     /**
@@ -430,7 +275,7 @@ public class WishManager {
      * @return added guaranteed
      */
     public static double getWishPrizeSetGuaranteed(String wishPrizeSetString) {
-        return Double.parseDouble(QuickUtils.count(QuickUtils.getRandomSentenceResult(wishPrizeSetString.split(";") [2])).toString());
+        return Double.parseDouble(QuickUtils.count(QuickUtils.randomSentence(wishPrizeSetString.split(";") [2])).toString());
     }
 
     /**
@@ -440,12 +285,12 @@ public class WishManager {
      * @return clear guaranteed
      */
     public static boolean isWishPrizeSetClearGuaranteed(String wishPrizeSetString) {
-        return Boolean.parseBoolean(QuickUtils.getRandomSentenceResult(wishPrizeSetString.split(";") [3]));
+        return Boolean.parseBoolean(QuickUtils.randomSentence(wishPrizeSetString.split(";") [3]));
     }
 
     /**
      * 获取 wishGuaranteedString List
-     * 格式: 保底率[0];PRIZE-DO内所执行项[1];增加的保底率[2];是否清空保底率[3]
+     * 格式: 保底率[0];Do-List[1];增加的保底率[2];是否清空保底率[3]
      *
      * @param wishName wishName
      * @return wishGuaranteedString List
@@ -462,7 +307,7 @@ public class WishManager {
      * @return wishGuaranteed
      */
     public static double getWishGuaranteed(String wishGuaranteedString) {
-        return Double.parseDouble(QuickUtils.count(QuickUtils.getRandomSentenceResult(wishGuaranteedString.split(";") [0])).toString());
+        return Double.parseDouble(QuickUtils.count(QuickUtils.randomSentence(wishGuaranteedString.split(";") [0])).toString());
     }
 
     /**
@@ -472,7 +317,7 @@ public class WishManager {
      * @return added guaranteed
      */
     public static double getWishGuaranteedMinimumRate(String wishGuaranteedString) {
-        return Double.parseDouble(QuickUtils.count(QuickUtils.getRandomSentenceResult(wishGuaranteedString.split(";") [2])).toString());
+        return Double.parseDouble(QuickUtils.count(QuickUtils.randomSentence(wishGuaranteedString.split(";") [2])).toString());
     }
 
     /**
@@ -482,7 +327,7 @@ public class WishManager {
      * @return clear guaranteed
      */
     public static boolean isWishGuaranteedClearGuaranteed(String wishGuaranteedString) {
-        return Boolean.parseBoolean(QuickUtils.getRandomSentenceResult(wishGuaranteedString.split(";") [3]));
+        return Boolean.parseBoolean(QuickUtils.randomSentence(wishGuaranteedString.split(";") [3]));
     }
 
     /**
@@ -570,22 +415,51 @@ public class WishManager {
     public static void makeWish(Player player, String wishName, boolean force) {
         // 许愿状态
         PlayerWishState playerWishState = checkWish(player, wishName);
+        Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
 
         // 当玩家许愿一次后没有等待最终奖品发放便尝试二次许愿时
         if (playerWishState == PlayerWishState.InProgress) {
             // isCancelled
             if (!QuickUtils.callAsyncPlayerWishEvent(player, PlayerWishState.InProgress, wishName, force).isCancelled()) {
-                EffectSendManager.sendEffect(wishName, player, null, "/Wish", "CANT-WISH-AGAIN");
+                for (String cantWishAgainTasks : yaml.getStringList("CANT-WISH-AGAIN")) {
+                    cantWishAgainTasks = QuickUtils.randomSentence(QuickUtils.replaceTranslateToPapi(cantWishAgainTasks, player));
+
+                    if (QuickUtils.sleepSentence(cantWishAgainTasks)) continue;
+
+                    EffectSendManager.sendEffect(wishName, player, null, "/Wish", cantWishAgainTasks, true);
+                }
             }
 
             return;
         }
 
-        // 当玩家正在加载缓存时尝试许愿
+        // 当玩家正在处理缓存时尝试许愿
         if (playerWishState == PlayerWishState.LoadingCache) {
             // isCancelled
             if (!QuickUtils.callAsyncPlayerWishEvent(player, PlayerWishState.LoadingCache, wishName, force).isCancelled()) {
-                EffectSendManager.sendEffect(wishName, player, null, "/Wish", "CANT-WISH-LOADING-CACHE");
+                for (String cantWishLoadingCacheTask : yaml.getStringList("CANT-WISH-LOADING-CACHE")) {
+                    cantWishLoadingCacheTask = QuickUtils.randomSentence(QuickUtils.replaceTranslateToPapi(cantWishLoadingCacheTask, player));
+
+                    if (QuickUtils.sleepSentence(cantWishLoadingCacheTask)) continue;
+
+                    EffectSendManager.sendEffect(wishName, player, null, "/Wish", cantWishLoadingCacheTask, true);
+                }
+            }
+
+            return;
+        }
+
+        // 当玩家正在等待处理缓存时尝试许愿
+        if (playerWishState == PlayerWishState.WaitingLoadingCache) {
+            // isCancelled
+            if (!QuickUtils.callAsyncPlayerWishEvent(player, PlayerWishState.WaitingLoadingCache, wishName, force).isCancelled()) {
+                for (String cantWishWaitingLoadingCacheTask : yaml.getStringList("CANT-WISH-WAITING-LOADING-CACHE")) {
+                    cantWishWaitingLoadingCacheTask = QuickUtils.randomSentence(QuickUtils.replaceTranslateToPapi(cantWishWaitingLoadingCacheTask, player));
+
+                    if (QuickUtils.sleepSentence(cantWishWaitingLoadingCacheTask)) continue;
+
+                    EffectSendManager.sendEffect(wishName, player, null, "/Wish", cantWishWaitingLoadingCacheTask, true);
+                }
             }
 
             return;
@@ -595,7 +469,13 @@ public class WishManager {
         if (playerWishState == PlayerWishState.RequirementsNotMet && !force) {
             // isCancelled
             if (!QuickUtils.callAsyncPlayerWishEvent(player, PlayerWishState.RequirementsNotMet, wishName, false).isCancelled()) {
-                EffectSendManager.sendEffect(wishName, player, null, "/Wish", "CANT-WISH");
+                for (String cantWishTask : yaml.getStringList("CANT-WISH")) {
+                    cantWishTask = QuickUtils.randomSentence(QuickUtils.replaceTranslateToPapi(cantWishTask, player));
+
+                    if (QuickUtils.sleepSentence(cantWishTask)) continue;
+
+                    EffectSendManager.sendEffect(wishName, player, null, "/Wish", cantWishTask, true);
+                }
             }
 
             return;
@@ -605,22 +485,25 @@ public class WishManager {
         if (playerWishState == PlayerWishState.ReachLimit && !force) {
             // isCancelled
             if (!QuickUtils.callAsyncPlayerWishEvent(player, PlayerWishState.ReachLimit, wishName, false).isCancelled()) {
-                EffectSendManager.sendEffect(wishName, player, null, "/Wish", "ADVANCED-SETTINGS.WISH-LIMIT.REACH-LIMIT");
+                for (String reachLimitTask : yaml.getStringList("ADVANCED-SETTINGS.WISH-LIMIT.REACH-LIMIT")) {
+                    reachLimitTask = QuickUtils.randomSentence(QuickUtils.replaceTranslateToPapi(reachLimitTask, player));
+
+                    if (QuickUtils.sleepSentence(reachLimitTask)) continue;
+
+                    EffectSendManager.sendEffect(wishName, player, null, "/Wish", reachLimitTask, true);
+                }
             }
 
             return;
         }
 
         // isCancelled
-        System.out.println("isc");
         if (QuickUtils.callAsyncPlayerWishEvent(player, PlayerWishState.Allow, wishName, force).isCancelled()) return;
-        System.out.println("noc");
 
         // 设置与为玩家开启计划任务
         String finalProbabilityWish = getFinalProbabilityWish(player, wishName);
 
         addPlayerToWishList(player);
-        addPlayerWishPrizeDo(player, wishName, getWishPrizeSetPrizeDo(finalProbabilityWish));
         createPlayerScheduledTasks(player, wishName, finalProbabilityWish);
     }
 
@@ -875,11 +758,16 @@ public class WishManager {
      * @return PlayerWishState
      */
     public static PlayerWishState checkWish(Player player, String wishName) {
+        UUID uuid = player.getUniqueId();
+
         // 检查玩家是否正在许愿
         if (isPlayerInWishList(player)) return PlayerWishState.InProgress;
 
-        // 检查玩家是否正在加载缓存
-        if (PlayerCheckCacheTask.isLoadingCache(player.getUniqueId())) return PlayerWishState.LoadingCache;
+        // 检查玩家是否正在处理缓存
+        if (PlayerCheckCacheTask.isLoadingCache(uuid)) return PlayerWishState.LoadingCache;
+        
+        // 检查玩家是否正在等待处理缓存
+        if (PlayerCheckCacheTask.isWaitingLoadingCache(uuid)) return PlayerWishState.WaitingLoadingCache;
 
         Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
         yaml.setPathPrefix("CONDITION");
@@ -1020,22 +908,33 @@ public class WishManager {
     }
 
     /**
-     * 保存玩家缓存数据，当服务器没有使用 Redis 关服时有玩家许愿未完成的情况下
+     * 用于玩家退出保存缓存状态
      */
-    public static void savePlayerCacheData() {
-        for (UUID uuid : WishManager.getWishPlayers()) {
-            List<String> playerWishPrizeDoList = WishManager.getPlayerWishPrizeDo(uuid, true);
-            List<String> newPlayerWishPrizeDoList = new ArrayList<>();
+    @Getter private static Map<UUID, Boolean> savingCache = new ConcurrentHashMap<>();
 
-            if (playerWishPrizeDoList == null) return;
+    /**
+     * 保存玩家缓存数据
+     */
+    public static void savePlayerCacheData(Player player) {
+        UUID uuid = player.getUniqueId();
 
-            // 转换 Unicode 防止乱码
-            for (String playerWishPrizeDoString : playerWishPrizeDoList) newPlayerWishPrizeDoList.add(QuickUtils.stringToUnicode(playerWishPrizeDoString));
+        savingCache.put(uuid, true);
 
-            Json playerCacheJson = ConfigManager.createJson(uuid.toString(), "/PlayerCache", false, false);
+        PlayerCheckCacheTask.setPlayerQuitTime(player);
 
-            playerCacheJson.set("CACHE", newPlayerWishPrizeDoList);
-        }
+        List<String> newPlayerDoList = new ArrayList<>();
+        List<String> playerDoList = WishManager.getPlayerScheduledTasks(player);
+
+        if (playerDoList.size() == 0) { savingCache.put(uuid, false); return; }
+
+        // 转换 Unicode 防止乱码
+        for (String playerWishDoListString : playerDoList) newPlayerDoList.add(QuickUtils.stringToUnicode(playerWishDoListString));
+
+        ConfigManager.createJson(uuid.toString(), Main.getDoListCachePath(), true, false).set("CACHE", newPlayerDoList);
+
+        WishManager.removePlayerScheduledTasks(player);
+
+        savingCache.put(uuid, false);
     }
 
     /**

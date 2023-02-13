@@ -1,6 +1,5 @@
-# 配置版本
-#  请不要擅自更改，插件将在启动时检查配置文件版本，并告诉您您是否应该重新生成补全来防止错误
-CONFIG-VERSION: 44
+# 配置版本 请不要擅自更改，插件将在启动时检查配置文件版本，并告诉您您是否应该重新生成来防止错误
+CONFIG-VERSION: 50
 
 # 自动重载:
 #  除了 ADVANCED-SETTINGS WISH-LIMIT 以外
@@ -8,12 +7,41 @@ CONFIG-VERSION: 44
 #
 # 注意:
 #  本插件本体不提供任何 Gui 界面
-#  您需要使用其他菜单自行制作 Gui 界面以供玩家更好的许愿，当然您也可以选择使用指令进行许愿
+#  您需要使用其他菜单自行制作 Gui 界面以供玩家更好地许愿，当然您也可以选择使用指令进行许愿
 #
 # 更新注意:
 #  从 0.0.2.6-SNAPSHOT 后均支持使用 Papi，算数并未全部支持，若有支持算数的部分会进行标记，若没有标记则表示不支持
 #  从 0.0.3.2-SNAPSHOT 后新增 randomSentence 语句，若有支持的部分会进行标记，若没有标记则表示不支持
+#  从 0.0.5-SNAPSHOT 后新增 sleepSentence 语句，并大幅度修改配置文件，若有支持的部分会进行标记，若没有标记则表示不支持
 #
+#  从 0.0.5-SNAPSHOT 后配置文件的格式进行了变化，格式如下:
+#
+#   WAIT-SET:
+#    - "START"
+#    - "C1 sleepSentence(1000)end"
+#    - "C2 sleepSentence(2000)end"
+#    - "C3 sleepSentence(3000)end"
+#    - "GO-RANDOM sleepSentence(4000)end"
+#
+#  这里使用 WAIT-SET 部分进行举例，sleepSentence 语句在下文拥有介绍，此写法将会被解读为
+#  即刻发送 DO-LIST 内的 START 效果，1000ms 延迟发送 DO-LIST 内的 C1 效果，以此类推
+#
+# 语句介绍:
+#  randomSentence 语句:
+#   randomSentence 语句是在 0.0.3.2-SNAPSHOT 版本后新加入的随机语句。
+#   它由 "randomSentence(" 开头，由 ")end" 结尾，括号内则为随机内容，示例: randomSentence(A#10~B#20~C#30)end
+#   在示例语句中，随机内容为 A#10~B#20~C#30，这意味着，我们将随机 A B C 三个内容，A 的概率为 10，B 为 20，C 为 30
+#   而总概率则为 A 的概率 + B 的概率 + C 的概率，则为 60。这个语句可以无限随机，如: randomSentence(A#10~B#20~C#30~D#40~E#50)end
+#   您可以用 randomSentence 语句来进行保底的随机，奖品的二次随机，等等一系列复杂的操作。
+#   randomSentence 需要注意的是，您不能套娃这个语句，比如 randomSentence(randomSentence(A1#10~B1#20)end~B#20~C#30~D#40~E#50)end
+#
+#  sleepSentence 语句:
+#   sleepSentence 语句是在 0.0.5-SNAPSHOT 版本后新加入的延迟语句。
+#   它由 “sleepSentence(” 开头，由 ")end" 结尾，括号内则为延迟毫秒，实例: sleepSentence(1000)end
+#   sleepSentence 有两种写法，一种紧跟在效果后，意味发送效果的时间会延迟，但是我们会先进行记录，这只是增加了执行时间，这种写法只能用于 WAIT-SET 部分
+#   一种是在单独一行进行书写，这意味着遇到这个语句会先进行延迟，等待延迟结束之后才会记录它，我们强烈不建议您在 WAIT-SET 部分使用这种写法，这只会导致数据丢失
+#
+
 # 使用限制
 CONDITION:
   # 权限检查，玩家必须含有什么权限
@@ -36,27 +64,19 @@ CONDITION:
   POINT: 0 # 这里指的是扣除，如果您不想启用的话则设置为0. 此功能需要用到 PlayerPoints 插件 - 不可小数 - 支持算数
 
 # 设置奖品
-# 格式: 几率;PRIZE-DO内所执行项;增加的增率 (保底率);是否清零保底率 (插件会先检查清空，再检查是否增加保底率)
+# 格式: 几率;执行项 (DO-LIST);增加的增率 (保底率);是否清零保底率 (插件会先检查清空，再检查是否增加保底率)
 #
 # 几率:
 #  此处的几率计算为，A 物品的几率为 5, B 为 20, C 为 75
 #  那么总几率即为 5 + 20 + 75 = 100, 抽到 A 的几率为 5/100 = 1/20
 #
-# 更新须知:
+# 更新注意:
 #  自从 0.0.1.1-SNAPSHOT 后 (包括)，这里支持使用 Papi 变量以及算数
 #  例如: "5+1;A;0;true" 或者 "5*2;A;0;true" 或者 "5+%papi%;A;0;true" 等
 #  对应 Issue -> https://gitee.com/A2000000/advanced-wish/issues/I64GIA
 #
 #  自从 0.0.3.2-SNAPSHOT 后 (包括)，我们将会先检查是否清空保底率，再去添加您指定的保底率。
 #  比如: "30;A;5;true"，那么将会先清除玩家的保底率，随后为玩家添加 5 点的保底率。
-#
-# randomSentence 语句:
-#  randomSentence 语句是在 0.0.3.2-SNAPSHOT 版本后新加入的随机语句。
-#  它由 "randomSentence(" 开头，由 ")end" 结尾，括号内则为随机内容，示例: randomSentence(A#10~B#20~C#30)end
-#  在示例语句中，随机内容为 A#10~B#20~C#30，这意味着，我们将随机 A B C 三个内容，A 的概率为 10，B 为 20，C 为 30
-#  而总概率则为 A 的概率 + B 的概率 + C 的概率，则为 60。这个语句可以无限随机，如: randomSentence(A#10~B#20~C#30~D#40~E#50)end
-#  您可以用 randomSentence 语句来进行保底的随机，奖品的二次随机，等等一系列复杂的操作。
-#  randomSentence 需要注意的是，您不能套娃这个语句，比如 randomSentence(randomSentence(A1#10~B1#20)end~B#20~C#30~D#40~E#50)end
 #
 # 支持 randomSentence 语句的部分有: 全部
 # 支持的算数部分有: 几率 / 增加的增率 (保底率)
@@ -66,7 +86,7 @@ PRIZE-SET:
   - "75;C;1;false"
 
 # 保底，即当 增率 (保底率) 到多少了触发对应的保底机制
-# 格式: 增率 (保底率);PRIZE-DO内所执行项;增加的增率 (保底率);是否清空保底率 (插件会先检查清空，再检查是否增加保底率)
+# 格式: 增率 (保底率);执行项 (DO-LIST);增加的增率 (保底率);是否清空保底率 (插件会先检查清空，再检查是否增加保底率)
 #
 # 使用技巧:
 #  您可以在这里设置玩家的小保底，或大保底。
@@ -85,7 +105,7 @@ PRIZE-SET:
 #  而在此处，您设置的是 "30;A;5;true"，A 的保底为 30 保底率，抽到后清空玩家保底率，后增加 5 点保底率。
 #  那么插件将会遵守此处的写法，清空玩家保底率，后增加 5 点保底率，而不是 PRIZE-SET 所规定的。
 #
-# 更新须知:
+# 更新注意:
 #  自从 0.0.1.1-SNAPSHOT 后 (包括)，这里支持使用 Papi 变量以及算数
 #  例如: "30+1;A;0;true" 或者 "30*2;A;0;true" 或者 "30+%papi%;A;0;true" 等
 #  对应 Issue -> https://gitee.com/A2000000/advanced-wish/issues/I64GIA
@@ -100,65 +120,153 @@ GUARANTEED:
   - "15;B;1;false" # 这里是小保底
 
 # 我们应该怎么样写等待时间，这里将以秒为单位 (此任务支持跨服执行)
-# 格式: 等待秒数;执行操作
+# 格式: 执行项 (DO-LIST)
 #
 # 执行操作类型:
-#  GO-PRIZE-DO - 去到对应的 PRIZE-DO 模块
-#  RANDOM-PRIZE-DO - 重新进行随机并设置计划任务，连抽使用 (下方有具体介绍)
-#
-# 执行逻辑:
-#  当玩家使用此奖池许愿后，这里将会先进行计划任务
-#  如，在这里写了 3;C3 2;C2 1;C1 那么我们将会
-#  在玩家使用此奖池许愿后 1s 执行 C1, 2s 执行 C2
-#  以此类推。
+#  GO-RANDOM - 执行随即完成的执行想
+#  RANDOM-AGAIN - 重新进行随机并设置计划任务，连抽使用 (下方有具体介绍)
 #
 # 使用技巧:
-#  这里可以延迟玩家的许愿时间，比如玩家需要等待十分钟
-#  亦或者是五分钟才可以拿到最终的许愿奖品。
+#  这里可以延迟玩家的许愿时间，比如玩家需要等待十分钟，亦或者是五分钟才可以拿到最终地许愿奖品。
 #
 # 注意事项:
-#  如果玩家在许愿后
-#  服务器被关闭 或者 您没有使用此插件自带的重载指令 而是使用了其他第三方插件重载了此插件 (如 Yum Plugman)
-#  那么会发生以下两种情况
-#   1.当您启动了 Redis 数据库，您没有重置 Redis 数据库内容，您没有重启机器，那么计时不会断，依然会在玩家计时到达指定时间段时执行对应的操作。
-#   2.如果您是单端模式，没有启用 Redis 数据库，那么发生以上情况后服务器再次开启后玩家进入，玩家将会跳过所有的操作，直接即刻收到奖励。
-#
-#  当然还需要注意的是，这一切都是您没有更改 PRIZE-DO 名称的前提下
-#  此功能的具体实现原理为:
-#   当服务器关闭后 / 插件被卸载，我们会记录玩家的中奖情况，如果服务器存在 Redis 数据库则不会进行记录
-#   如果服务器是单端，那么我们会将玩家与其对应的 结果操作 (PRIZE-DO) 进行记录，玩家将会跳过所有的操作，直接即刻收到奖励
-#   我们会记录奖励在对应 PRIZE-DO 中的具体编号，并且在玩家进入时直接执行内容，
-#   如果您更改了编号，导致此编号不存在，那么将不会发生任何事情。
+#  如果玩家在许愿后，服务器被关闭，玩家掉线或者您没有使用此插件自带的重载指令，而是使用了其他第三方插件重载了此插件 (如 Yum Plugman)
+#  那么此时，Advanced Wish 会将玩家未执行完毕的抽奖执行项保存到缓存中，以便玩家在下次进入服务器或重载过后即使恢复进度
+#  当然还需要注意的是，这一切都是您没有更改 执行项 (DO-LIST) 名称的前提下
 #
 # 更新注意:
-#  在 0.0.3.0-SNAPSHOT 版本后，插件新加入了 RANDOM-PRIZE-DO 执行操作类型
+#  在 0.0.3.0-SNAPSHOT 版本后，插件新加入了 RANDOM-AGAIN 执行操作类型
 #  此操作类型用处在于实现连抽，此操作类型执行的内容为: 重新进行一次随机，设置计划任务
-#  RANDOM-PRIZE-DO 同样会检查保底，以及增加保底率和抽奖次数，在 0.0.3.7-SNAPSHOT 后支持自定义增加抽奖次数
-#  但是需要注意的是: 如果您要运行 RANDOM-PRIZE-DO，并且 WAIT-SET 中还存在 GO-PRIZE-DO 执行操作
-#  那么您应该首先执行 GO-PRIZE-DO 后执行 RANDOM-PRIZE-DO，而不是直接执行 RANDOM-PRIZE-DO
+#  RANDOM-AGAIN 同样会检查保底，以及增加保底率和抽奖次数，在 0.0.3.7-SNAPSHOT 后支持自定义增加抽奖次数
+#  但是需要注意的是: 如果您要运行 RANDOM-AGAIN，并且 WAIT-SET 中还存在 GO-RANDOM 执行操作
+#  那么您应该首先执行 GO-RANDOM 后执行 RANDOM-AGAIN，而不是直接执行 RANDOM-AGAIN
 #  下面我将展示一个三连抽的示例配置文件以供您参考。
 #  (如果您的连抽池与单抽许愿池等不相同，那么您需要去看 高级设置内的数据同步 选项来保证玩家数据在每个奖池相同!)
 #
-# 三连抽示例 WAIT-SET 配置文件:
-#   - "0;START"
-#   - "1;C1"
-#   - "2;C2"
-#   - "3;C3"
-#   - "4;GO-PRIZE-DO" - 这里是第一抽
-#   - "5;RANDOM-PRIZE-DO" - 这里是第二抽
-#   - "6;RANDOM-PRIZE-DO" - 这里是第三抽
+# 三连抽示例:
+#   - "START"
+#   - "C1 sleepSentence(1000)end"
+#   - "C2 sleepSentence(2000)end"
+#   - "C3 sleepSentence(3000)end"
+#   - "GO-RANDOM sleepSentence(4000)end"
+#   - "RANDOM-AGAIN sleepSentence(5000)end"
+#   - "RANDOM-AGAIN sleepSentence(6000)end"
 #
 # 支持的算数部分有: 等待秒数
+# 支持 sleepSentence 语句的部分有: 全部
 # 支持 randomSentence 语句的部分有: 全部
 WAIT-SET:
-  - "0;START"
-  - "1;C1"
-  - "2;C2"
-  - "3;C3"
-  - "4;GO-PRIZE-DO"
+  - "START"
+  - "C1 sleepSentence(1000)end"
+  - "C2 sleepSentence(2000)end"
+  - "C3 sleepSentence(3000)end"
+  - "GO-RANDOM sleepSentence(4000)end"
 
-# 在这里详细规定 WAIT-SET 内的所执行项
-WAIT-DO:
+# 当玩家许愿一次后没有等待最终奖品发放便尝试二次许愿时
+# 支持 randomSentence 语句的部分有: 全部
+CANT-WISH-AGAIN:
+  - "CANT-WISH-AGAIN-EFFECT"
+
+# 当玩家没有满足许愿条件但是尝试许愿时
+# 支持 randomSentence 语句的部分有: 全部
+CANT-WISH:
+  - "CANT-WISH"
+
+# 禁止玩家在处理缓存时许愿
+# 支持 randomSentence 语句的部分有: 全部
+CANT-WISH-LOADING-CACHE:
+  - "CANT-WISH-LOADING-CACHE"
+
+# 禁止玩家在等待处理缓存时许愿
+# 支持 randomSentence 语句的部分有: 全部
+CANT-WISH-WAITING-LOADING-CACHE:
+  - "CANT-WISH-WAITING-LOADING-CACHE"
+
+# 缓存设置
+CACHE-SETTINGS:
+  WAIT-RECOVERY: 2 # 发送完毕 WISH-CACHE 后我们应该多久后恢复原本未执行的 DO-LIST 内容 - 单位秒 - 不可小数 - 支持算数
+
+  # 当玩家有未执行完毕的执行项玩家进服显示的提示内容
+  WISH-CACHE:
+    - "WISH-CACHE"
+
+# 高级设置，当您试图编辑这里时候，您应该明白您正在做什么
+ADVANCED-SETTINGS:
+  # 许愿券 (如果不想使用此功能则留空)
+  #  当玩家尝试进行一次许愿时，我们会遍历此玩家的背包物品
+  #  如果背包物品内的物品 含有 Lore 且 Lore 的某一行含有 COUPON 项所写的，那么就会绕过许愿要求检查
+  #  而是扣除指定数量的许愿券，开始此次许愿
+  #
+  # 格式: 扣除的数量;判断是否为许愿券的 Lore (区分大小写)
+  #
+  # 注意:
+  #  扣除的数量支持 与 判断是否为许愿券的 Lore 都支持使用 Papi 变量
+  #
+  # 更新注意:
+  #  在 0.0.3.2-SNAPSHOT 版本后 (包括 0.0.3.2-SNAPSHOT)，可以使用 "&" 来表示颜色
+  #  而在 0.0.3.2-SNAPSHOT 版本之前则需要使用 "§" 来表示颜色
+  COUPON:
+    - ""
+
+  # 数据同步 (连抽使用，如果不想使用此功能则留空)
+  #  此功能旨在两个或多个奖池同步玩家的保底率与抽奖次数，防止连抽奖池与单抽奖池数据分开的问题
+  #  具体实现原理: 如果此功能关闭插件会将此奖池的名称转换为 unicode 编码进行保存
+  #  如果开启此功能则不会使用此奖池的名称，而是使用此处规定的名称转换为 unicode 编码进行保存，来实现多奖池数据同步
+  #  此功能仅仅有效于记录玩家的保底率与抽奖次数，而不会影响到未使用 Redis 时的关服 Json 缓存
+  DATA-SYNC: "基础许愿池"
+
+  # 玩家许愿后增加多少的许愿次数 - 不可小数 - 支持算数
+  #  此功能为玩家进行一次随机抽奖增加的许愿次数。
+  #  对应 Issue -> https://gitee.com/A2000000/advanced-wish/issues/I68DOU
+  INCREASED-WISH-AMOUNT: "1"
+
+  # 玩家许愿数限制 (单个许愿池限制)
+  #  此功能用于实现限制在一定时间内的许愿次数。
+  #  具体实现原理: 当服务器开启时经过 RESET-LIMIT-START 所规定的秒数后重置玩家的许愿次数
+  #  随后每隔 RESET-LIMIT-CYCLE 所规定的秒数进行一次许愿次数的重置，这只会重置这一个许愿池的许愿次数
+  #
+  #  例子:
+  #   若 RESET-LIMIT-START 为 5， RESET-LIMIT-CYCLE 为 10，则服务器开启 5 秒后会对许愿次数进行一次重置，随后每隔 10 秒对玩家许愿次数进行重置。
+  #
+  #  许愿券:
+  #   若 COUPON-LIMIT 为 false，那么许愿券将不会增加许愿数，使用了许愿卷会无视许愿数的限制，直接进行许愿
+  #   若为 true，则会检查许愿数量，若此次许愿后增加的许愿数大于限制许愿数则取消这次许愿，返回 REACH-LIMIT 效果，并且不会消除许愿卷，若小于则增加数量并且许愿
+  #
+  # 注意: 此处的重置许愿次数并不是玩家的总许愿次数，而是限制次数。
+  # 重载注意: 此部分并不支持自动重载，为了避免一些问题，您在重载时比如要用指令进行重载。
+  #
+  # 支持的算数部分有: MAX-WISH-AMOUNT / RESET-LIMIT-START / RESET-LIMIT-CYCLE / REACH-LIMIT RESET-COMPLETE 部分 (与其他部分一样)
+  WISH-LIMIT:
+    LIMIT-AMOUNT: 0 # 最多许愿次数 (大于) - 单位秒不可小数 - 若关闭则填写 0，若开启则填写自己想要的数
+    RESET-LIMIT-START: 0 # 服务器开启后多少秒后重置 - 单位秒不可小数 - 0 则为立即重置
+    RESET-LIMIT-CYCLE: 0 # 服务器开启后重置完成后每隔多少秒进行一次重置 - 单位秒不可小数 - 0 则为立即重置
+    COUPON-LIMIT: false # 如果玩家使用许愿卷许愿，是否增加一次许愿限制次数
+    INCREASED-AMOUNT: 1 # 当玩家许愿一次，增加多少的许愿限制次数
+    RESET-COMPLETE-SEND: false # 当次许愿池许愿次数重置完毕后是否给所有在线玩家发送效果? 效果为下面的 RESET-COMPLETE
+    RESET-COMPLETE-SEND-CONSOLE: false # 当许愿池许愿次数重置完毕后是否给控制台发送提示信息?
+
+    # 当玩家到达许愿次数限制后尝试许愿的效果
+    REACH-LIMIT:
+      - "REACH-LIMIT"
+
+    # 当次许愿池重置次数时给所有玩家发送的效果
+    #
+    # 使用技巧:
+    #  此消息只会在此许愿池被重置的时候发送，这意味着如果有较多的许愿池的重置时间都是一样的。
+    #  那么就会一次性发送非常多的效果，玩家视角混乱不堪，您可以为不同的许愿池设置不同的重置时间，将其间隔增加几秒。
+    #  这样就会整齐一些，这个许愿池发送完毕发送另一个，看起来十分舒适整洁。
+    RESET-COMPLETE:
+      - "RESET-COMPLETE"
+
+  # 抽奖日志记录
+  #  具体实现原理: 当玩家许愿后创建对应计划任务时，我们会将此次抽奖的详细信息以 Json 或 Mongo 的形式进行记录。
+  #  若开启了 Mongo 数据库则记录在 Mongo 数据库内，反之则记录在 Json 文件内，Json 路径可在 advancedWish.yml 中 LOGS-PATH 项规定。
+  #  记录的日志文件是近乎不可读的，所以您需要在游戏内或者控制台使用指令获取详细日志。
+  RECORD-WISH: true
+
+# 在新版本中， PRIZE-DO / WAIT-DO 将被全部合并为 DO-LIST
+# 在其余需要发送效果的地方需直接引用 DO-LIST 中的内容，这样极大程度简化配置文件
+DO-LIST:
   C1:
     # 给予的药水效果
     # 格式: 药水名称;时间;等级
@@ -334,15 +442,12 @@ WAIT-DO:
     ACTION-BAR:
       TIME: 3
       MESSAGE: "&7阿门 &7您虔诚的祈祷..."
-    # Boss Bar
     BOSS-BAR:
       TIME: 4
       MESSAGE: "&7您虔诚的祈祷..."
       COLOR: RANDOM
       STYLE: RANDOM
 
-# 在这里详细规定 PRIZE-SET 内的所执行项
-PRIZE-DO:
   A:
     EFFECTS:
       - "slow;20;5"
@@ -457,130 +562,155 @@ PRIZE-DO:
       COLOR: RANDOM
       STYLE: RANDOM
 
-# 当玩家许愿一次后没有等待最终奖品发放便尝试二次许愿时
-CANT-WISH-AGAIN:
-  EFFECTS:
-    - ""
-  TITLE:
-    MAIN-TITLE: "&7虚弱..."
-    SUB-TITLE: "&7我现在无法再次进行许愿..."
-    FADE-IN: 20
-    FADE-OUT: 20
-    STAY: 20
-  MESSAGE:
-    - "   "
-    - "&7[我] &7太虚弱了... 我已经耗尽了力量，目前没有办法再次许愿..."
-    - "   "
-  PARTICLE:
-    - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;FALSE"
-  COMMANDS:
-    PLAYER:
-      - ""
-    CONSOLE:
-      - ""
-  SOUNDS:
-    - "ENTITY_IRON_GOLEM_DAMAGE;1;1"
-  HEALTH: 0
-  HUNGER: 0
-  EXP: 0
-  ACTION-BAR:
-    TIME: 1
-    MESSAGE: "&7虚弱..."
-  BOSS-BAR:
-    TIME: 3
-    MESSAGE: "&7虚弱..."
-    COLOR: RANDOM
-    STYLE: RANDOM
-
-# 当玩家没有满足许愿条件但是尝试许愿时
-CANT-WISH:
-  EFFECTS:
-    - ""
-  TITLE:
-    MAIN-TITLE: "&7不行..."
-    SUB-TITLE: "&7我没有足够的力量向神明祈祷..."
-    FADE-IN: 20
-    FADE-OUT: 20
-    STAY: 20
-  MESSAGE:
-    - "   "
-    - "&7[我] &7不行... 我没有足够的力量向神明祈祷..."
-    - "&7[&e提示&7] &7您没有达到此许愿池许愿的要求。"
-    - "   "
-  PARTICLE:
-    - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;FALSE"
-  COMMANDS:
-    PLAYER:
-      - ""
-    CONSOLE:
-      - ""
-  SOUNDS:
-    - "ENTITY_IRON_GOLEM_DAMAGE;1;1"
-  HEALTH: 0
-  HUNGER: 0
-  EXP: 0
-  ACTION-BAR:
-    TIME: 1
-    MESSAGE: "&7不行..."
-  BOSS-BAR:
-    TIME: 3
-    MESSAGE: "&7不行..."
-    COLOR: RANDOM
-    STYLE: RANDOM
-
-# 禁止玩家在加载缓存时许愿
-CANT-WISH-LOADING-CACHE:
-  EFFECTS:
-    - ""
-  TITLE:
-    MAIN-TITLE: ""
-    SUB-TITLE: ""
-    FADE-IN: 20
-    FADE-OUT: 20
-    STAY: 20
-  MESSAGE:
-    - "   "
-    - "&7[&e提示&7] &7服务器正在加载您的缓存数据，在此期间您无法进行许愿!"
-    - "   "
-  PARTICLE:
-    - ""
-  COMMANDS:
-    PLAYER:
-      - ""
-    CONSOLE:
-      - ""
-  SOUNDS:
-    - ""
-  HEALTH: 0
-  HUNGER: 0
-  EXP: 0
-  ACTION-BAR:
-    TIME: 1
-    MESSAGE: ""
-  BOSS-BAR:
-    TIME: 3
-    MESSAGE: ""
-    COLOR: RANDOM
-    STYLE: RANDOM
-
-# 缓存设置，这里只会在 Redis 数据库关闭时有用
-CACHE-SETTINGS:
-  WAIT: 2 # 我们将延迟多久发放上次关服未发放完成的奖励 - 单位秒 - 不可小数 - 支持算数
-  WAIT-JOIN: 2 # 我们应该在玩家进入多久后发送 WISH-CACHE 里面的效果内容 - 单位秒 - 不可小数 - 支持算数
-
-  # 当玩家有未发放完成的奖励时当玩家进服显示的提示内容
-  WISH-CACHE:
+  CANT-WISH:
     EFFECTS:
       - ""
     TITLE:
-      MAIN-TITLE: "&a奖励补发!"
-      SUB-TITLE: "&7服务器将在 2 秒后重新补发奖励!"
+      MAIN-TITLE: "&7不行..."
+      SUB-TITLE: "&7我没有足够的力量向神明祈祷..."
       FADE-IN: 20
       FADE-OUT: 20
       STAY: 20
     MESSAGE:
       - "   "
-      - "&7[&e提示&7] &7服务器将每隔 2 秒后发送上次服务器关闭时未发送的奖励!"
+      - "&7[我] &7不行... 我没有足够的力量向神明祈祷..."
+      - "&7[&e提示&7] &7您没有达到此许愿池许愿的要求。"
+      - "   "
+    PARTICLE:
+      - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;FALSE"
+    COMMANDS:
+      PLAYER:
+        - ""
+      CONSOLE:
+        - ""
+    SOUNDS:
+      - "ENTITY_IRON_GOLEM_DAMAGE;1;1"
+    HEALTH: 0
+    HUNGER: 0
+    EXP: 0
+    ACTION-BAR:
+      TIME: 1
+      MESSAGE: "&7不行..."
+    BOSS-BAR:
+      TIME: 3
+      MESSAGE: "&7不行..."
+      COLOR: RANDOM
+      STYLE: RANDOM
+
+  CANT-WISH-AGAIN-EFFECT:
+    EFFECTS:
+      - ""
+    TITLE:
+      MAIN-TITLE: "&7虚弱..."
+      SUB-TITLE: "&7我现在无法再次进行许愿..."
+      FADE-IN: 20
+      FADE-OUT: 20
+      STAY: 20
+    MESSAGE:
+      - "   "
+      - "&7[我] &7太虚弱了... 我已经耗尽了力量，目前没有办法再次许愿..."
+      - "   "
+    PARTICLE:
+      - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;FALSE"
+    COMMANDS:
+      PLAYER:
+        - ""
+      CONSOLE:
+        - ""
+    SOUNDS:
+      - "ENTITY_IRON_GOLEM_DAMAGE;1;1"
+    HEALTH: 0
+    HUNGER: 0
+    EXP: 0
+    ACTION-BAR:
+      TIME: 1
+      MESSAGE: "&7虚弱..."
+    BOSS-BAR:
+      TIME: 3
+      MESSAGE: "&7虚弱..."
+      COLOR: RANDOM
+      STYLE: RANDOM
+
+  CANT-WISH-LOADING-CACHE:
+    EFFECTS:
+      - ""
+    TITLE:
+      MAIN-TITLE: ""
+      SUB-TITLE: ""
+      FADE-IN: 20
+      FADE-OUT: 20
+      STAY: 20
+    MESSAGE:
+      - "   "
+      - "&7[&e提示&7] &7服务器正在加载您的缓存数据，在此期间您无法进行许愿!"
+      - "   "
+    PARTICLE:
+      - ""
+    COMMANDS:
+      PLAYER:
+        - ""
+      CONSOLE:
+        - ""
+    SOUNDS:
+      - ""
+    HEALTH: 0
+    HUNGER: 0
+    EXP: 0
+    ACTION-BAR:
+      TIME: 1
+      MESSAGE: ""
+    BOSS-BAR:
+      TIME: 3
+      MESSAGE: ""
+      COLOR: RANDOM
+      STYLE: RANDOM
+
+  CANT-WISH-WAITING-LOADING-CACHE:
+    EFFECTS:
+      - ""
+    TITLE:
+      MAIN-TITLE: ""
+      SUB-TITLE: ""
+      FADE-IN: 20
+      FADE-OUT: 20
+      STAY: 20
+    MESSAGE:
+      - "   "
+      - "&7[&e提示&7] &7服务器正在等待加载您的缓存数据，在此期间您无法进行许愿!"
+      - "   "
+    PARTICLE:
+      - ""
+    COMMANDS:
+      PLAYER:
+        - ""
+      CONSOLE:
+        - ""
+    SOUNDS:
+      - ""
+    HEALTH: 0
+    HUNGER: 0
+    EXP: 0
+    ACTION-BAR:
+      TIME: 1
+      MESSAGE: ""
+    BOSS-BAR:
+      TIME: 3
+      MESSAGE: ""
+      COLOR: RANDOM
+      STYLE: RANDOM
+
+  WISH-CACHE:
+    EFFECTS:
+      - ""
+    TITLE:
+      MAIN-TITLE: "&a进度恢复!"
+      SUB-TITLE: "&7服务器将在 2 秒后继续执行上次遗留的许愿任务!"
+      FADE-IN: 20
+      FADE-OUT: 20
+      STAY: 20
+    MESSAGE:
+      - "   "
+      - "&7[&e提示&7] &7服务器将在 2 秒后继续执行上次遗留的许愿任务!"
       - "   "
     PARTICLE:
       - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;FALSE"
@@ -603,139 +733,71 @@ CACHE-SETTINGS:
       COLOR: RANDOM
       STYLE: RANDOM
 
-# 高级设置，当您试图编辑这里时候，您应该明白您正在做什么
-ADVANCED-SETTINGS:
-  # 许愿券 (如果不想使用此功能则留空)
-  #  当玩家尝试进行一次许愿时，我们会遍历此玩家的背包物品
-  #  如果背包物品内的物品 含有 Lore 且 Lore 的某一行含有 COUPON 项所写的，那么就会绕过许愿要求检查
-  #  而是扣除指定数量的许愿券，开始此次许愿
-  #
-  # 格式: 扣除的数量;判断是否为许愿券的 Lore (区分大小写)
-  #
-  # 注意:
-  #  扣除的数量支持 与 判断是否为许愿券的 Lore 都支持使用 Papi 变量
-  #
-  # 更新注意:
-  #  在 0.0.3.2-SNAPSHOT 版本后 (包括 0.0.3.2-SNAPSHOT)，可以使用 "&" 来表示颜色
-  #  而在 0.0.3.2-SNAPSHOT 版本之前则需要使用 "§" 来表示颜色
-  COUPON:
-    - ""
-
-  # 数据同步 (连抽使用，如果不想使用此功能则留空)
-  #  此功能旨在两个或多个奖池同步玩家的保底率与抽奖次数，防止连抽奖池与单抽奖池数据分开的问题
-  #  具体实现原理: 如果此功能关闭插件会将此奖池的名称转换为 unicode 编码进行保存
-  #  如果开启此功能则不会使用此奖池的名称，而是使用此处规定的名称转换为 unicode 编码进行保存，来实现多奖池数据同步
-  #  此功能仅仅有效于记录玩家的保底率与抽奖次数，而不会影响到未使用 Redis 时的关服 Json 缓存
-  DATA-SYNC: "基础许愿池"
-
-  # 玩家许愿后增加多少的许愿次数 - 不可小数 - 支持算数
-  #  此功能为玩家进行一次随机抽奖增加的许愿次数。
-  #  对应 Issue -> https://gitee.com/A2000000/advanced-wish/issues/I68DOU
-  INCREASED-WISH-AMOUNT: "1"
-
-  # 玩家许愿数限制 (单个许愿池限制)
-  #  此功能用于实现限制在一定时间内的许愿次数。
-  #  具体实现原理: 当服务器开启时经过 RESET-LIMIT-START 所规定的秒数后重置玩家的许愿次数
-  #  随后每隔 RESET-LIMIT-CYCLE 所规定的秒数进行一次许愿次数的重置，这只会重置这一个许愿池的许愿次数
-  #
-  #  例子:
-  #   若 RESET-LIMIT-START 为 5， RESET-LIMIT-CYCLE 为 10，则服务器开启 5 秒后会对许愿次数进行一次重置，随后每隔 10 秒对玩家许愿次数进行重置。
-  #
-  #  许愿券:
-  #   若 COUPON-LIMIT 为 false，那么许愿券将不会增加许愿数，使用了许愿卷会无视许愿数的限制，直接进行许愿
-  #   若为 true，则会检查许愿数量，若此次许愿后增加的许愿数大于限制许愿数则取消这次许愿，返回 REACH-LIMIT 效果，并且不会消除许愿卷，若小于则增加数量并且许愿
-  #
-  # 注意: 此处的重置许愿次数并不是玩家的总许愿次数，而是限制次数。
-  # 重载注意: 此部分并不支持自动重载，为了避免一些问题，您在重载时比如要用指令进行重载。
-  #
-  # 支持的算数部分有: MAX-WISH-AMOUNT / RESET-LIMIT-START / RESET-LIMIT-CYCLE / REACH-LIMIT RESET-COMPLETE 部分 (与其他部分一样)
-  WISH-LIMIT:
-    LIMIT-AMOUNT: 0 # 最多许愿次数 (大于) - 单位秒不可小数 - 若关闭则填写 0，若开启则填写自己想要的数
-    RESET-LIMIT-START: 0 # 服务器开启后多少秒后重置 - 单位秒不可小数 - 0 则为立即重置
-    RESET-LIMIT-CYCLE: 0 # 服务器开启后重置完成后每隔多少秒进行一次重置 - 单位秒不可小数 - 0 则为立即重置
-    COUPON-LIMIT: false # 如果玩家使用许愿卷许愿，是否增加一次许愿限制次数
-    INCREASED-AMOUNT: 1 # 当玩家许愿一次，增加多少的许愿限制次数
-    RESET-COMPLETE-SEND: false # 当次许愿池许愿次数重置完毕后是否给所有在线玩家发送效果? 效果为下面的 RESET-COMPLETE
-    RESET-COMPLETE-SEND-CONSOLE: false # 当许愿池许愿次数重置完毕后是否给控制台发送提示信息?
-
-    # 当玩家到达许愿次数限制后尝试许愿的效果
-    REACH-LIMIT:
-      EFFECTS:
+  REACH-LIMIT:
+    EFFECTS:
+      - ""
+    TITLE:
+      MAIN-TITLE: "&7虚弱..."
+      SUB-TITLE: "&7我现在无法再次进行许愿..."
+      FADE-IN: 20
+      FADE-OUT: 20
+      STAY: 20
+    MESSAGE:
+      - "   "
+      - "&7[我] &7太虚弱了... 我已经耗尽了力量，目前没有办法再次许愿..."
+      - "&7[&e提示&7] &e您已到达许愿次数限制，您目前无法再次许愿，请稍后重试。"
+      - "   "
+    PARTICLE:
+      - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;FALSE"
+    COMMANDS:
+      PLAYER:
         - ""
-      TITLE:
-        MAIN-TITLE: "&7虚弱..."
-        SUB-TITLE: "&7我现在无法再次进行许愿..."
-        FADE-IN: 20
-        FADE-OUT: 20
-        STAY: 20
-      MESSAGE:
-        - "   "
-        - "&7[我] &7太虚弱了... 我已经耗尽了力量，目前没有办法再次许愿..."
-        - "&7[&e提示&7] &e您已到达许愿次数限制，您目前无法再次许愿，请稍后重试。"
-        - "   "
-      PARTICLE:
-        - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;FALSE"
-      COMMANDS:
-        PLAYER:
-          - ""
-        CONSOLE:
-          - ""
-      SOUNDS:
-        - "ENTITY_IRON_GOLEM_DAMAGE;1;1"
-      HEALTH: 0
-      HUNGER: 0
-      EXP: 0
-      ACTION-BAR:
-        TIME: 1
-        MESSAGE: "&7虚弱..."
-      BOSS-BAR:
-        TIME: 3
-        MESSAGE: "&7虚弱..."
-        COLOR: RANDOM
-        STYLE: RANDOM
-
-    # 当次许愿池重置次数时给所有玩家发送的效果
-    #
-    # 使用技巧:
-    #  此消息只会在此许愿池被重置的时候发送，这意味着如果有较多的许愿池的重置时间都是一样的。
-    #  那么就会一次性发送非常多的效果，玩家视角混乱不堪，您可以为不同的许愿池设置不同的重置时间，将其间隔增加几秒。
-    #  这样就会整齐一些，这个许愿池发送完毕发送另一个，看起来十分舒适整洁。
-    RESET-COMPLETE:
-      EFFECTS:
+      CONSOLE:
         - ""
-      TITLE:
-        MAIN-TITLE: "&6重置次数..!"
-        SUB-TITLE: "&7基础许愿池限制已重置!"
-        FADE-IN: 20
-        FADE-OUT: 20
-        STAY: 20
-      MESSAGE:
-        - "   "
-        - "&7[&e提示&7] &e基础许愿池限制已重置! 快来抽奖吧!"
-        - "   "
-      PARTICLE:
-        - "FLAME;1;1;1;50;PLAYER;FALSE"
-      COMMANDS:
-        PLAYER:
-          - ""
-        CONSOLE:
-          - ""
-      SOUNDS:
-        - "ENTITY_PLAYER_LEVELUP;1;1"
-      HEALTH: 0
-      HUNGER: 0
-      EXP: 0
-      ACTION-BAR:
-        TIME: 1
-        MESSAGE: "&6重置次数..!"
-      BOSS-BAR:
-        TIME: 3
-        MESSAGE: "&6重置次数..!"
-        COLOR: RANDOM
-        STYLE: RANDOM
+    SOUNDS:
+      - "ENTITY_IRON_GOLEM_DAMAGE;1;1"
+    HEALTH: 0
+    HUNGER: 0
+    EXP: 0
+    ACTION-BAR:
+      TIME: 1
+      MESSAGE: "&7虚弱..."
+    BOSS-BAR:
+      TIME: 3
+      MESSAGE: "&7虚弱..."
+      COLOR: RANDOM
+      STYLE: RANDOM
 
-  # 抽奖日志记录
-  #  具体实现原理: 当玩家许愿后创建对应计划任务时，我们会将此次抽奖的详细信息以 Json 或 Mongo 的形式进行记录。
-  #  若开启了 Mongo 数据库则记录在 Mongo 数据库内，反之则记录在 Json 文件内，Json 路径可在 advancedWish.yml 中 LOGS-PATH 项规定。
-  #  记录的日志文件是近乎不可读的，所以您需要在游戏内或者控制台使用指令获取详细日志。
-  RECORD-WISH: true
+  RESET-COMPLETE:
+    EFFECTS:
+      - ""
+    TITLE:
+      MAIN-TITLE: "&6重置次数..!"
+      SUB-TITLE: "&7基础许愿池限制已重置!"
+      FADE-IN: 20
+      FADE-OUT: 20
+      STAY: 20
+    MESSAGE:
+      - "   "
+      - "&7[&e提示&7] &e基础许愿池限制已重置! 快来抽奖吧!"
+      - "   "
+    PARTICLE:
+      - "FLAME;1;1;1;50;PLAYER;FALSE"
+    COMMANDS:
+      PLAYER:
+        - ""
+      CONSOLE:
+        - ""
+    SOUNDS:
+      - "ENTITY_PLAYER_LEVELUP;1;1"
+    HEALTH: 0
+    HUNGER: 0
+    EXP: 0
+    ACTION-BAR:
+      TIME: 1
+      MESSAGE: "&6重置次数..!"
+    BOSS-BAR:
+      TIME: 3
+      MESSAGE: "&6重置次数..!"
+      COLOR: RANDOM
+      STYLE: RANDOM

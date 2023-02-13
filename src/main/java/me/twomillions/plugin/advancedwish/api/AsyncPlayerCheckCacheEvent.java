@@ -13,8 +13,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public class AsyncPlayerCheckCacheEvent extends Event {
     @Getter private final Player player;
-    @Getter private final String path;
-    @Getter private final boolean hasCache;
+    @Getter private final String normalPath;
+    @Getter private final String doListCachePath;
 
     @Getter @Setter private boolean isCancelled;
 
@@ -23,17 +23,19 @@ public class AsyncPlayerCheckCacheEvent extends Event {
     /**
      * AsyncPlayerCheckCacheEvent 异步玩家缓存检查事件
      *
+     * <p>若玩家某一缓存不存在，则对应返回的 Path 为 null
+     *
      * @param player player
-     * @param path path
-     * @param hasCache hasCache
+     * @param normalPath path
+     * @param doListCachePath doListCachePath
      */
-    public AsyncPlayerCheckCacheEvent(Player player, String path, boolean hasCache) {
+    public AsyncPlayerCheckCacheEvent(Player player, String normalPath, String doListCachePath) {
         super(true);
 
         this.player = player;
-        this.path = path;
-        this.hasCache = hasCache;
-        this.isCancelled = !hasCache;
+        this.normalPath = normalPath;
+        this.doListCachePath = doListCachePath;
+        this.isCancelled = false;
     }
 
     public static HandlerList getHandlerList() {

@@ -5,17 +5,16 @@ import lombok.Getter;
 import lombok.Setter;
 import me.twomillions.plugin.advancedwish.enums.mongo.JsonTransformationMongoState;
 import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
-import me.twomillions.plugin.advancedwish.enums.redis.RedisConnectState;
 import me.twomillions.plugin.advancedwish.managers.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.RegisterManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
-import me.twomillions.plugin.advancedwish.managers.databases.RedisManager;
 import me.twomillions.plugin.advancedwish.tasks.PlayerCheckCacheTask;
 import me.twomillions.plugin.advancedwish.tasks.PlayerTimestampTask;
 import me.twomillions.plugin.advancedwish.tasks.UpdateCheckerTask;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Arrays;
@@ -26,9 +25,11 @@ import java.util.Arrays;
  */
 public final class Main extends JavaPlugin {
     @Getter @Setter private volatile static Main instance;
-    @Getter @Setter private volatile static String logsPath;
     @Getter @Setter private volatile static Double serverVersion;
+
+    @Getter @Setter private volatile static String logsPath;
     @Getter @Setter private volatile static String guaranteedPath;
+    @Getter @Setter private volatile static String doListCachePath;
 
     @Getter @Setter private volatile static boolean disabled;
 
@@ -52,20 +53,19 @@ public final class Main extends JavaPlugin {
         // 版本检查
         if (!ConfigManager.checkLastVersion(messageYaml) || !ConfigManager.checkLastVersion(advancedWishYaml)) return;
 
+        // 设置 Mongo
+        if (MongoManager.setupMongo(advancedWishYaml) == MongoConnectState.CannotConnect) return;
+
+        // 获取配置文件规定的路径
         String pluginPath = Main.getInstance().getDataFolder().toString();
 
         String logsConfig = advancedWishYaml.getString("LOGS-PATH");
         String guaranteedConfig = advancedWishYaml.getString("GUARANTEED-PATH");
+        String doListCacheConfig = advancedWishYaml.getString("DO-LIST-CACHE-PATH");
 
-        // 设置 Redis
-        if (RedisManager.setupRedis(advancedWishYaml) == RedisConnectState.CannotConnect) return;
-
-        // 设置 Mongo
-        if (MongoManager.setupMongo(advancedWishYaml) == MongoConnectState.CannotConnect) return;
-
-        // 获取保底率与日志文件的指定路径
         setLogsPath("".equals(logsConfig) ? pluginPath + "/PlayerLogs" : logsConfig);
         setGuaranteedPath("".equals(guaranteedConfig) ? pluginPath + "/PlayerGuaranteed" : guaranteedConfig);
+        setDoListCachePath("".equals(doListCacheConfig) ? pluginPath + "/PlayerCache" : doListCacheConfig);
 
         // 迁移检查
         if (MongoManager.playerGuaranteedJsonToMongo(advancedWishYaml) != JsonTransformationMongoState.TurnOff) { Bukkit.shutdown(); return; }
@@ -99,6 +99,7 @@ public final class Main extends JavaPlugin {
     @Override
     public void onDisable() {
         setDisabled(true);
-        if (RedisManager.getRedisConnectState() == RedisConnectState.Connected) RedisManager.getJedisPool().close(); else WishManager.savePlayerCacheData();
+
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) WishManager.savePlayerCacheData(onlinePlayer);
     }
 }

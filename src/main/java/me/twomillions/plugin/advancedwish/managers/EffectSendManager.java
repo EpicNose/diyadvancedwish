@@ -48,8 +48,10 @@ public class EffectSendManager {
      * @param path path
      * @param pathPrefix pathPrefix
      */
-    public static void sendEffect(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
+    public static void sendEffect(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix, boolean addDoListPrefix) {
         if (!targetPlayer.isOnline()) return;
+
+        if (addDoListPrefix) pathPrefix = "DO-LIST." + pathPrefix;
 
         // isCancelled
         if (QuickUtils.callAsyncEffectSendEvent(fileName, targetPlayer, replacePlayer, path, pathPrefix).isCancelled()) return;

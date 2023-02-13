@@ -171,7 +171,7 @@ public class QuickUtils {
      * @param randomSentence randomSentence
      * @return random sentence result
      */
-    public static String getRandomSentenceResult(String randomSentence) {
+    public static String randomSentence(String randomSentence) {
         if (!randomSentence.contains("randomSentence(") || !randomSentence.contains(")end")) return randomSentence;
 
         RandomUtils randomUtils = new RandomUtils();
@@ -197,6 +197,59 @@ public class QuickUtils {
         String randomElement = randomUtils.getResult().toString();
 
         return stringInterceptReplace(randomSentence, "randomSentence(", ")end", randomElement, true);
+    }
+
+    /**
+     * 延迟语句，sleepSentence(1000)end
+     *
+     * <p>这是不推荐使用的，在存储的计划任务在绝对不该使用这个
+     * 若存储的计划任务中使用则只会导致无法被缓存记录，这是危险的，它应该只出现于不需要被缓存记录的，不重要的提示信息发送
+     * 若需要于缓存中安全的使用 sleepSentence 则请使用 {@link QuickUtils#hasSleepSentenceMs(String)}
+     * {@link QuickUtils#getSleepSentenceMs(String)} 以及 {@link QuickUtils#removeSleepSentence(String)} 协作更改 time 完成
+     *
+     * @param sleepSentence sleepSentence
+     */
+    public static boolean sleepSentence(String sleepSentence) {
+        if (!sleepSentence.contains("sleepSentence(") || !sleepSentence.contains(")end")) return false;
+
+        try { Thread.sleep(Long.parseLong(replaceTranslateToPapiCount(StringUtils.substringBetween(sleepSentence, "sleepSentence(", ")end")))); return true; }
+        catch (Exception exception) { sendConsoleMessage("&c您填入的延迟语句 (sleepSentence) 语法错误! 请检查配置文件! 原语句: &e" + sleepSentence); return false; }
+    }
+
+    /**
+     * 获取延迟语句的延迟时长
+     *
+     * @param sleepSentence sleepSentence
+     */
+    public static Long getSleepSentenceMs(String sleepSentence) {
+        if (!sleepSentence.contains("sleepSentence(") || !sleepSentence.contains(")end")) return 0L;
+
+        try { return Long.parseLong(replaceTranslateToPapiCount(StringUtils.substringBetween(sleepSentence, "sleepSentence(", ")end"))); }
+        catch (Exception exception) { sendConsoleMessage("&c您填入的延迟语句 (sleepSentence) 语法错误! 请检查配置文件! 原语句: &e" + sleepSentence); return 0L; }
+    }
+
+    /**
+     * 移除 sleepSentence 语句内容
+     *
+     * @param sleepSentence sleepSentence
+     * @return string
+     */
+    public static String removeSleepSentence(String sleepSentence) {
+        /*
+         * .trim 去除空格
+         * "xx " 与 "xx" 不是一个意义
+         */
+        return stringInterceptReplace(sleepSentence, "sleepSentence(", ")end", "", true).trim();
+    }
+
+    /**
+     * 检查是否含有 sleepSentence 语句
+     *
+     * @param sleepSentence sleepSentence
+     * @return boolean
+     */
+    public static boolean hasSleepSentenceMs(String sleepSentence) {
+        return sleepSentence.contains("sleepSentence(") && sleepSentence.contains(")end");
     }
 
     /**
@@ -280,12 +333,12 @@ public class QuickUtils {
      * call AsyncPlayerCheckCacheEvent
      *
      * @param player player
-     * @param path path
-     * @param hasCache hasCache
+     * @param normalPath path
+     * @param doListCachePath doListCachePath
      * @return AsyncPlayerCheckCacheEvent
      */
-    public static AsyncPlayerCheckCacheEvent callAsyncPlayerCheckCacheEvent(Player player, String path, boolean hasCache) {
-        AsyncPlayerCheckCacheEvent asyncPlayerCheckCacheEvent = new AsyncPlayerCheckCacheEvent(player, path, hasCache);
+    public static AsyncPlayerCheckCacheEvent callAsyncPlayerCheckCacheEvent(Player player, String normalPath, String doListCachePath) {
+        AsyncPlayerCheckCacheEvent asyncPlayerCheckCacheEvent = new AsyncPlayerCheckCacheEvent(player, normalPath, doListCachePath);
         Bukkit.getPluginManager().callEvent(asyncPlayerCheckCacheEvent);
 
         return asyncPlayerCheckCacheEvent;

@@ -74,7 +74,7 @@ public class ConfigManager {
      *
      * @return 最新的配置文件版本
      */
-    public static int getLastConfigVersion() { return 44; }
+    public static int getLastConfigVersion() { return 50; }
 
     /**
      * 检查配置文件版本是否为最新版
