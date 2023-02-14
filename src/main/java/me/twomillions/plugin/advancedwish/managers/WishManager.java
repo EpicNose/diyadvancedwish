@@ -178,6 +178,7 @@ public class WishManager {
     /**
      * 删除指定计划任务
      *
+     * @param player player
      * @param wishScheduledTasksString wishScheduledTasksString
      */
     public static void removePlayerScheduledTasks(Player player, String wishScheduledTasksString) {
@@ -914,6 +915,8 @@ public class WishManager {
 
     /**
      * 保存玩家缓存数据
+     *
+     * @param player player
      */
     public static void savePlayerCacheData(Player player) {
         UUID uuid = player.getUniqueId();

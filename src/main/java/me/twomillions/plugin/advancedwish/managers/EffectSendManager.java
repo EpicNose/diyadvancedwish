@@ -47,6 +47,7 @@ public class EffectSendManager {
      * @param replacePlayer replacePlayer
      * @param path path
      * @param pathPrefix pathPrefix
+     * @param addDoListPrefix addDoListPrefix
      */
     public static void sendEffect(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix, boolean addDoListPrefix) {
         if (!targetPlayer.isOnline()) return;

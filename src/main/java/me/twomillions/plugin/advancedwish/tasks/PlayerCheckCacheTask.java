@@ -67,6 +67,7 @@ public class PlayerCheckCacheTask {
      * 设置玩家退出时间戳
      *
      * @param player player
+     * @param time time
      */
     public static void setPlayerQuitTime(Player player, Long time) {
         ConfigManager.createJson(player.getUniqueId().toString(), Main.getDoListCachePath(), true, false).set("QUIT-CACHE", time);

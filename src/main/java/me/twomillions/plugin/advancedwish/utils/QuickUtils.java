@@ -208,6 +208,7 @@ public class QuickUtils {
      * {@link QuickUtils#getSleepSentenceMs(String)} 以及 {@link QuickUtils#removeSleepSentence(String)} 协作更改 time 完成
      *
      * @param sleepSentence sleepSentence
+     * @return boolean
      */
     public static boolean sleepSentence(String sleepSentence) {
         if (!sleepSentence.contains("sleepSentence(") || !sleepSentence.contains(")end")) return false;
@@ -220,6 +221,7 @@ public class QuickUtils {
      * 获取延迟语句的延迟时长
      *
      * @param sleepSentence sleepSentence
+     * @return long
      */
     public static Long getSleepSentenceMs(String sleepSentence) {
         if (!sleepSentence.contains("sleepSentence(") || !sleepSentence.contains(")end")) return 0L;
