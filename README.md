@@ -70,9 +70,6 @@
 - aw_limit_amount_许愿池名_玩家名 - 获取指定玩家指定许愿池的限制许愿次数.
 ---
 ## 注意事项
-> Redis 跨服
-- 如果您想要了解 Redis 在此插件的具体作用，那么您可以去看默认许愿池配置文件内的 WAIT-SET 项注释，那里写的非常清除。
----
 > 可视化界面
 - 此插件不自带界面功能，您需要使用第三方的菜单插件制作。
 - 我们提供了 DeluxeMenu 界面预设，您可以参考此预设进行编写: [DeluxeMenu 预设](https://gitee.com/A2000000/advanced-wish/tree/main/DeluxeMenu%20%E9%85%8D%E5%A5%97%E8%8F%9C%E5%8D%95)
