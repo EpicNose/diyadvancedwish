@@ -163,21 +163,25 @@ WAIT-SET:
   - "GO-RANDOM sleepSentence(4000)end"
 
 # 当玩家许愿一次后没有等待最终奖品发放便尝试二次许愿时
+# 支持 sleepSentence 语句的部分有: 全部
 # 支持 randomSentence 语句的部分有: 全部
 CANT-WISH-AGAIN:
   - "CANT-WISH-AGAIN-EFFECT"
 
 # 当玩家没有满足许愿条件但是尝试许愿时
+# 支持 sleepSentence 语句的部分有: 全部
 # 支持 randomSentence 语句的部分有: 全部
 CANT-WISH:
   - "CANT-WISH"
 
 # 禁止玩家在处理缓存时许愿
+# 支持 sleepSentence 语句的部分有: 全部
 # 支持 randomSentence 语句的部分有: 全部
 CANT-WISH-LOADING-CACHE:
   - "CANT-WISH-LOADING-CACHE"
 
 # 禁止玩家在等待处理缓存时许愿
+# 支持 sleepSentence 语句的部分有: 全部
 # 支持 randomSentence 语句的部分有: 全部
 CANT-WISH-WAITING-LOADING-CACHE:
   - "CANT-WISH-WAITING-LOADING-CACHE"
@@ -187,6 +191,8 @@ CACHE-SETTINGS:
   WAIT-RECOVERY: 2 # 发送完毕 WISH-CACHE 后我们应该多久后恢复原本未执行的 DO-LIST 内容 - 单位秒 - 不可小数 - 支持算数
 
   # 当玩家有未执行完毕的执行项玩家进服显示的提示内容
+  # 支持 sleepSentence 语句的部分有: 全部
+  # 支持 randomSentence 语句的部分有: 全部
   WISH-CACHE:
     - "WISH-CACHE"
 
@@ -246,6 +252,8 @@ ADVANCED-SETTINGS:
     RESET-COMPLETE-SEND-CONSOLE: false # 当许愿池许愿次数重置完毕后是否给控制台发送提示信息?
 
     # 当玩家到达许愿次数限制后尝试许愿的效果
+    # 支持 sleepSentence 语句的部分有: 全部
+    # 支持 randomSentence 语句的部分有: 全部
     REACH-LIMIT:
       - "REACH-LIMIT"
 
@@ -255,6 +263,9 @@ ADVANCED-SETTINGS:
     #  此消息只会在此许愿池被重置的时候发送，这意味着如果有较多的许愿池的重置时间都是一样的。
     #  那么就会一次性发送非常多的效果，玩家视角混乱不堪，您可以为不同的许愿池设置不同的重置时间，将其间隔增加几秒。
     #  这样就会整齐一些，这个许愿池发送完毕发送另一个，看起来十分舒适整洁。
+    #
+    # 支持 sleepSentence 语句的部分有: 全部
+    # 支持 randomSentence 语句的部分有: 全部
     RESET-COMPLETE:
       - "RESET-COMPLETE"
 
