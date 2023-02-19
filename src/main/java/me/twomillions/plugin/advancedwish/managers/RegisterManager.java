@@ -3,10 +3,10 @@ package me.twomillions.plugin.advancedwish.managers;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import lombok.Setter;
+import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.commands.ConsoleCommand;
 import me.twomillions.plugin.advancedwish.commands.MainCommand;
 import me.twomillions.plugin.advancedwish.listener.PlayerListener;
-import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.tasks.WishLimitResetTask;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import net.milkbowl.vault.economy.Economy;
@@ -120,9 +120,11 @@ public class RegisterManager {
     private static void setupPlayerPoints() {
         if (Bukkit.getPluginManager().getPlugin("PlayerPoints") == null) return;
 
-        try { setPlayerPointsAPI(PlayerPoints.getInstance().getAPI()); }
+        // 兼容旧版本 PlayerPoints
+        try { setPlayerPointsAPI(((PlayerPoints) Bukkit.getPluginManager().getPlugin("PlayerPoints")).getAPI()); }
         catch (Throwable throwable) {
             QuickUtils.sendConsoleMessage("&c检查到服务器存在 &ePlayerPoints&c，但 &ePlayerPoints&c 设置错误，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/playerpoints.80745/&c，服务器即将关闭。");
+            throwable.printStackTrace();
             Bukkit.shutdown(); return;
         }
 
