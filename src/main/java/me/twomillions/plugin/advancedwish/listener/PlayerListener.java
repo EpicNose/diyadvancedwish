@@ -69,15 +69,15 @@ public class PlayerListener implements Listener {
          * 来防止玩家加入但缓存还未写入完毕的情况
          */
         Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), () -> {
-            PlayerCheckCacheTask.setWaitingLadingCache(uuid, true);
+            PlayerCheckCacheTask.setWaitingLoadingCache(uuid, true);
 
             int delay = Integer.parseInt(ConfigManager.getAdvancedWishYaml().getString("WAIT-LOADING"));
 
             try { Thread.sleep(delay * 1000L); }  catch (Exception ignore) { }
 
-            if (!player.isOnline()) { PlayerCheckCacheTask.setWaitingLadingCache(uuid, true); return; }
+            if (!player.isOnline()) { PlayerCheckCacheTask.setWaitingLoadingCache(uuid, true); return; }
 
-            PlayerCheckCacheTask.setWaitingLadingCache(uuid, false);
+            PlayerCheckCacheTask.setWaitingLoadingCache(uuid, false);
 
             PlayerCheckCacheTask.startTask(player);
             PlayerTimestampTask.startTask(player);

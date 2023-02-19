@@ -71,7 +71,7 @@ public final class Main extends JavaPlugin {
         if (MongoManager.playerGuaranteedJsonToMongo(advancedWishYaml) != JsonTransformationMongoState.TurnOff) { Bukkit.shutdown(); return; }
 
         // 注册
-        RegisterManager.registerListener();
+        RegisterManager.setupPlugins(true);
         RegisterManager.registerWish();
         RegisterManager.registerCommands();
 

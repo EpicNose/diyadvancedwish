@@ -12,6 +12,8 @@ import java.net.URL;
 import java.util.Scanner;
 
 /**
+ * 插件更新检查。
+ *
  * @author 2000000
  * @date 2022/11/24 16:49
  */
@@ -20,7 +22,8 @@ public class UpdateCheckerTask {
     @Getter private static boolean isLatestVersion = true;
 
     /**
-     * 检查插件更新
+     * 检查插件更新，并向控制台输出版本信息。
+     * 如果开启了更新检查并且获取最新版本信息失败，会向控制台输出信息。
      */
     public static void startTask() {
         if (Main.isDisabled()) return;
@@ -44,15 +47,16 @@ public class UpdateCheckerTask {
     }
 
     /**
-     * 获取网页内容
+     * 获取指定网址的页面内容。
+     * 如果获取失败，会将isLatestVersion置为false，并向控制台输出信息。
      *
-     * @return string
+     * @return 获取的网页内容，如果获取失败返回空字符串。
      */
     private static String getURLString() {
         StringBuilder stringBuilder = new StringBuilder();
 
-        try {
-            for (Scanner sc = new Scanner(new URL("http://update.twomillions.top/advancedwishupdate.html").openStream()); sc.hasNext();) stringBuilder.append(sc.nextLine()).append(' ');
+        try (Scanner sc = new Scanner(new URL("http://update.twomillions.top/advancedwishupdate.html").openStream())) {
+            while (sc.hasNextLine()) stringBuilder.append(sc.nextLine()).append(' ');
         } catch (IOException exception) {
             isLatestVersion = false;
 

@@ -1,63 +1,111 @@
 package me.twomillions.plugin.advancedwish.utils;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * 一个简单的工具类，用于根据指定的概率随机返回一个对象。
+ *
  * @author 2000000
  * @date 2023/2/8
+ *
+ * @param <T> 随机对象类型
  */
-public class RandomUtils {
-    private int totalProbability;
-
-    private final Random random;
-    private final Map<Object, Integer> randomObject;
+public class RandomUtils<T> {
 
     /**
-     * 无参构造
+     * 存储所有随机对象及其对应的概率。
+     */
+    private final List<RandomObject<T>> randomObjects;
+
+    /**
+     * 所有随机对象的总概率。
+     */
+    private double totalProbability;
+
+    /**
+     * 创建一个新的 RandomUtils 实例。
      */
     public RandomUtils() {
-        totalProbability = 0;
-
-        random = new Random();
-        randomObject = new ConcurrentHashMap<>();
+        this.randomObjects = new ArrayList<>();
+        this.totalProbability = 0;
     }
 
     /**
-     * 添加随机对象
+     * 向工具类中添加一个随机对象及其对应的概率。
      *
-     * @param object object
-     * @param probability probability
+     * @param object 随机对象
+     * @param probability 对应的概率
      */
-    public void addRandomObject(Object object, int probability) {
-        randomObject.put(object, probability);
-        totalProbability = totalProbability + probability;
+    public void addRandomObject(T object, double probability) {
+        RandomObject<T> randomObject = new RandomObject<>(object, probability);
+        randomObjects.add(randomObject);
+        totalProbability += probability;
     }
 
     /**
-     * 获取随机结果
+     * 根据当前所有随机对象的概率，随机返回其中的一个对象。
      *
-     * @return Object
+     * @return 随机对象
+     * @throws RuntimeException 如果未选中任何随机对象
      */
-    public Object getResult() {
-        if (randomObject.size() == 0) {
-            QuickUtils.sendConsoleMessage("&c随机错误! 没有足够的对象进行随机! 请检查配置文件!");
-            throw new RuntimeException("Not enough objects to randomize!");
+    public T getResult() {
+        double randomNumber = new Random().nextDouble() * totalProbability;
+        double cumulativeProbability = 0;
+
+        for (RandomObject<T> randomObject : randomObjects) {
+            cumulativeProbability += randomObject.getProbability();
+            if (randomNumber < cumulativeProbability) return randomObject.getObject();
         }
 
-        int quantity = random.nextInt(totalProbability) + 1;
+        throw new RuntimeException("未选中任何随机对象。");
+    }
 
-        Object resultObject = null;
+    /**
+     * 表示一个随机对象及其对应的概率。
+     *
+     * @param <T> 随机对象类型
+     */
+    private static class RandomObject<T> {
 
-        for (Map.Entry<Object, Integer> entry : randomObject.entrySet()) {
-            resultObject = entry.getKey();
-            quantity = quantity - entry.getValue();
+        /**
+         * 随机对象。
+         */
+        private final T object;
 
-            if (quantity <= 0) return resultObject;
+        /**
+         * 随机对象的概率。
+         */
+        private final double probability;
+
+        /**
+         * 创建一个新的 RandomObject 实例。
+         *
+         * @param object 随机对象
+         * @param probability 对应的概率
+         */
+        public RandomObject(T object, double probability) {
+            this.object = object;
+            this.probability = probability;
         }
 
-        // 并不可能返回为 null，但如果为 null 则返回第一个元素
-        return resultObject == null ? randomObject.keySet().iterator().next() : resultObject;
+        /**
+         * 获取随机对象。
+         *
+         * @return 随机对象
+         */
+        public T getObject() {
+            return object;
+        }
+
+        /**
+         * 获取随机对象的概率。
+         *
+         * @return 随机对象的概率
+         */
+        public double getProbability() {
+            return probability;
+        }
     }
 }

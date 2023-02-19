@@ -84,9 +84,9 @@ CONDITION:
   #  %playerlist_online,normal,yes,amount% 这将返回目前在线为玩家的数量，返回的内容为 "1" "2" "5" 等等数字
   #  我们使用 ">=" 判断，"%playerlist_online,normal,yes,amount%;>=;50" 完成
   #
-  #  假设还有一个需求，我们不想要 PlayerPoints 的点券来主导一切，我想要 SkillAPI 的积分扣除
-  #  那么我们只需要这样写一个条件，通过 %skillapi_skill_points_<skillName>% 来获取积分，并且对其进行判断
-  #  "%skillapi_skill_points_<skillName>%;>=;500"，若此判断通过了，那么我们只需要使用指令扣除该玩家的点券即可，但请注意，扣除点券应该是实时发生的，它不应该被延迟
+  #  假设还有一个需求，我们不想要 PlayerPoints 的点券来主导一切，我想要 SkillAPI 的技能点扣除
+  #  那么我们只需要这样写一个条件，通过 %skillapi_skill_points_<skillName>% 来获取技能点，并且对其进行判断
+  #  "%skillapi_skill_points_<skillName>%;>=;500"，若此判断通过了，那么我们只需要使用指令扣除该玩家的技能点即可，但请注意，扣除技能点应该是实时发生的，它不应该被延迟
   CUSTOM:
     - ""
 

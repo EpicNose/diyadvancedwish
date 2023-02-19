@@ -13,7 +13,9 @@ import me.twomillions.plugin.advancedwish.tasks.PlayerCheckCacheTask;
 import me.twomillions.plugin.advancedwish.utils.ItemUtils;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import me.twomillions.plugin.advancedwish.utils.RandomUtils;
+import me.twomillions.plugin.advancedwish.utils.UnicodeUtils;
 import net.milkbowl.vault.economy.Economy;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.Material;
@@ -25,8 +27,11 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
+ * 许愿管理器，提供许愿功能相关的方法
+ *
  * @author 2000000
  * @date 2022/11/24 16:53
  */
@@ -35,54 +40,53 @@ public class WishManager {
     private static final boolean usingMongo = MongoManager.getMongoConnectState() == MongoConnectState.Connected;
 
     /**
-     * 检查是否含有指定的许愿池
+     * 玩家许愿记录。
+     */
+    private static final List<UUID> wishPlayers = new ArrayList<>();
+
+    /**
+     * 检查是否含有指定的许愿池。
      *
-     * @param wishName wishName
-     * @return boolean
+     * @param wishName 许愿池名称
+     * @return 若存在则返回 true，否则返回 false
      */
     public static boolean hasWish(String wishName) {
-        for (String registerWish : RegisterManager.getRegisterWish()) if (registerWish.equals(wishName)) return true;
-        return false;
+        return RegisterManager.getRegisterWish().contains(wishName);
     }
 
     /**
-     * 玩家许愿状态记录
-     */
-    @Getter private static final List<UUID> wishPlayers = new ArrayList<>();
-
-    /**
-     * 检查玩家是否正在许愿
+     * 检查玩家是否正在许愿。
      *
-     * @param player player
-     * @return boolean
+     * @param player 玩家对象
+     * @return 若该玩家正在许愿，则返回 true，否则返回 false
      */
     public static boolean isPlayerInWishList(Player player) {
         return wishPlayers.contains(player.getUniqueId());
     }
 
     /**
-     * 添加玩家到许愿列表
+     * 添加玩家到许愿列表。
      *
-     * @param player player
+     * @param player 玩家对象
      */
     public static void addPlayerToWishList(Player player) {
         if (!isPlayerInWishList(player)) wishPlayers.add(player.getUniqueId());
     }
 
     /**
-     * 从许愿列表删除玩家
+     * 从许愿列表删除玩家。
      *
-     * @param player player
+     * @param player 玩家对象
      */
     public static void removePlayerWithWishList(Player player) {
         wishPlayers.remove(player.getUniqueId());
     }
 
     /**
-     * 获取指定许愿池 WAIT-SET 计划任务
+     * 获取指定许愿池 WAIT-SET 计划任务。
      *
-     * @param wishName wishName
-     * @return wishScheduledTasks
+     * @param wishName 许愿池名称
+     * @return 返回指定许愿池 WAIT-SET 计划任务的列表
      */
     public static List<String> getWishWaitSetScheduledTasks(String wishName) {
         Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
@@ -90,11 +94,10 @@ public class WishManager {
     }
 
     /**
-     * 获取许愿池奖品
-     * 格式为: 几率[0];Do-List[1];增加的增率 (保底率) [2];是否清零保底率[3]
+     * 获取许愿池奖品列表，格式为：几率[0];Do-List[1];增加的保底率[2]（保底率）;是否清零保底率[3]。
      *
-     * @param wishName wishName
-     * @return wishPrizeSetString List
+     * @param wishName 许愿池名称
+     * @return 奖品列表
      */
     public static List<String> getWishPrizeSetList(String wishName) {
         Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
@@ -102,51 +105,67 @@ public class WishManager {
     }
 
     /**
-     * 获取 Do-List 执行项
+     * 获取 Do-List 执行项。
      *
-     * @param wishPrizeSetStringOrWishGuaranteedString wishPrizeSetString Or WishGuaranteedString
-     * @return doList or guaranteed
+     * @param wishPrizeSetString 许愿奖品字符串，格式为：几率[0];Do-List[1];增加的保底率[2]（保底率）;是否清零保底率[3]。
+     * @return Do-List 执行项
      */
-    public static String getProbabilityWishDoList(String wishPrizeSetStringOrWishGuaranteedString) {
-        return QuickUtils.randomSentence(wishPrizeSetStringOrWishGuaranteedString.split(";") [1]);
+    public static String getProbabilityWishDoList(String wishPrizeSetString) {
+        return QuickUtils.randomSentence(wishPrizeSetString.split(";")[1]);
     }
 
     /**
-     * 获取许愿概率
+     * 获取许愿概率。
      *
-     * @param wishPrizeSetString wishPrizeSetString
-     * @return probability
+     * @param wishPrizeSetString 许愿奖品字符串，格式为：几率[0];Do-List[1];增加的保底率[2]（保底率）;是否清零保底率[3]。
+     * @return 许愿概率
      */
     public static int getWishPrizeSetProbability(String wishPrizeSetString) {
-        return Integer.parseInt(QuickUtils.count(QuickUtils.randomSentence(wishPrizeSetString.split(";") [0])).toString());
+        String probabilityString = wishPrizeSetString.split(";")[0];
+        return Integer.parseInt(QuickUtils.count(QuickUtils.randomSentence(probabilityString)).toString());
     }
 
     /**
-     * 获取增加的保底率
+     * 获取增加的保底率。
      *
-     * @param wishPrizeSetString wishPrizeSetString
-     * @return added guaranteed
+     * @param wishPrizeSetString 许愿奖品字符串，格式为：几率[0];Do-List[1];增加的保底率[2]（保底率）;是否清零保底率[3]。
+     * @return 增加的保底率
      */
     public static double getWishPrizeSetGuaranteed(String wishPrizeSetString) {
-        return Double.parseDouble(QuickUtils.count(QuickUtils.randomSentence(wishPrizeSetString.split(";") [2])).toString());
+        String guaranteedString = wishPrizeSetString.split(";")[2];
+        return Double.parseDouble(QuickUtils.count(QuickUtils.randomSentence(guaranteedString)).toString());
     }
 
     /**
-     * 是否清零保底率
+     * 是否清零保底率。
      *
-     * @param wishPrizeSetString wishPrizeSetString
-     * @return clear guaranteed
+     * @param wishPrizeSetString 许愿奖品字符串，格式为：几率[0];Do-List[1];增加的保底率[2]（保底率）;是否清零保底率[3]。
+     * @return 是否清零保底率
      */
     public static boolean isWishPrizeSetClearGuaranteed(String wishPrizeSetString) {
-        return Boolean.parseBoolean(QuickUtils.randomSentence(wishPrizeSetString.split(";") [3]));
+        String clearGuaranteedString = wishPrizeSetString.split(";")[3];
+        return Boolean.parseBoolean(QuickUtils.randomSentence(clearGuaranteedString));
     }
 
     /**
-     * 获取 wishGuaranteedString List
-     * 格式: 保底率[0];Do-List[1];增加的保底率[2];是否清空保底率[3]
+     * 获取指定许愿池的自定义许愿数量增加。
      *
-     * @param wishName wishName
-     * @return wishGuaranteedString List
+     * @param wishName 许愿池名称
+     * @param player 玩家
+     * @return 许愿所需数量的增量
+     */
+    public static int getWishNeedIncreasedAmount(String wishName, Player player) {
+        Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
+        String increasedAmountStr = yaml.getString("ADVANCED-SETTINGS.INCREASED-WISH-AMOUNT");
+        return Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(increasedAmountStr, player));
+    }
+
+    /**
+     * 获取许愿池的保底信息。
+     * 返回的格式为：保底率;Do-List;增加的保底率;是否清空保底率。
+     *
+     * @param wishName 许愿池名称
+     * @return 包含保底信息的列表
      */
     public static List<String> getWishGuaranteedList(String wishName) {
         Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
@@ -154,120 +173,127 @@ public class WishManager {
     }
 
     /**
-     * 获取保底率
+     * 获取许愿池的保底率。
      *
-     * @param wishGuaranteedString wishGuaranteedString
-     * @return wishGuaranteed
+     * @param wishGuaranteedString 包含保底信息的字符串
+     * @return 许愿池的保底率
      */
     public static double getWishGuaranteed(String wishGuaranteedString) {
-        return Double.parseDouble(QuickUtils.count(QuickUtils.randomSentence(wishGuaranteedString.split(";") [0])).toString());
+        String[] parts = wishGuaranteedString.split(";");
+        String guaranteedStr = parts[0];
+        return Double.parseDouble(QuickUtils.count(QuickUtils.randomSentence(guaranteedStr)).toString());
     }
 
     /**
-     * 获取增加的保底率
+     * 获取许愿池的增加的保底率。
      *
-     * @param wishGuaranteedString wishGuaranteedString
-     * @return added guaranteed
+     * @param wishGuaranteedString 包含保底信息的字符串
+     * @return 许愿池增加的保底率
      */
     public static double getWishGuaranteedMinimumRate(String wishGuaranteedString) {
-        return Double.parseDouble(QuickUtils.count(QuickUtils.randomSentence(wishGuaranteedString.split(";") [2])).toString());
+        String[] parts = wishGuaranteedString.split(";");
+        String addedGuaranteedStr = parts[2];
+        return Double.parseDouble(QuickUtils.count(QuickUtils.randomSentence(addedGuaranteedStr)).toString());
     }
 
     /**
-     * 是否清空保底率
+     * 获取许愿池是否清空保底率。
      *
-     * @param wishGuaranteedString wishGuaranteedString
-     * @return clear guaranteed
+     * @param wishGuaranteedString 包含保底信息的字符串
+     * @return 如果清空保底率则返回 true，否则返回 false
      */
     public static boolean isWishGuaranteedClearGuaranteed(String wishGuaranteedString) {
-        return Boolean.parseBoolean(QuickUtils.randomSentence(wishGuaranteedString.split(";") [3]));
+        String[] parts = wishGuaranteedString.split(";");
+        String clearGuaranteedStr = parts[3];
+        return Boolean.parseBoolean(QuickUtils.randomSentence(clearGuaranteedStr));
     }
 
     /**
-     * 获取指定许愿池的自定义许愿数量增加
+     * 获取此许愿池的许愿结果。
      *
-     * @param wishName wishName
-     * @param player player
-     * @return wish need increased amount
-     */
-    public static int getWishNeedIncreasedAmount(String wishName, Player player) {
-        Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
-        return Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getOrDefault("ADVANCED-SETTINGS.INCREASED-WISH-AMOUNT", "1"), player));
-    }
-
-    /**
-     * 获取此许愿池的许愿结果
-     *
-     * @param wishName wishName
-     * @param player player
-     * @return 未触发保底为: wishPrizeSetString 几率[0];PRIZE-DO内所执行项[1];增加的增率 (保底率) [2];是否清零保底率[3]
-     *         触发保底则为: wishGuaranteedString 增率 (保底率) [0];PRIZE-DO内所执行项[1];增加的增率 (保底率) [2];是否清空保底率[3]
+     * @param wishName 许愿池的名称。
+     * @param player 玩家。
+     * @return 未触发保底的返回值为：wishPrizeSetString，对应的几率为几率[0];PRIZE-DO 内所执行项为[1];
+     *         增加的增率（保底率）为[2];是否清零保底率为[3]。触发保底的返回值为：wishGuaranteedString，
+     *         增加的增率（保底率）为[0];PRIZE-DO 内所执行项为[1];增加的增率（保底率）为[2];是否清空保底率为[3]。
      */
     public static String getFinalProbabilityWish(Player player, String wishName) {
-        // 检查保底
+        // 获取玩家此奖池的许愿数
+        int wishAmount = getPlayerWishAmount(player, wishName);
+
+        // 获取玩家此奖池的保底率
+        double wishGuaranteed = getPlayerWishGuaranteed(player, wishName);
+
+        // 依次检查保底
         for (String wishGuaranteedString : getWishGuaranteedList(wishName)) {
+            // 替换字符串中的占位符
             wishGuaranteedString = QuickUtils.replaceTranslateToPapi(wishGuaranteedString, player);
 
-            if (getPlayerWishGuaranteed(player, wishName) == getWishGuaranteed(wishGuaranteedString)) {
-                // 保底率的增加与清空
+            // 检查玩家此奖池的保底率是否与当前保底相等
+            if (wishGuaranteed == getWishGuaranteed(wishGuaranteedString)) {
+                // 增加保底率
                 setPlayerWishGuaranteed(player, wishName, wishGuaranteedString, true);
-                // 设置玩家此奖池的许愿数
-                setPlayerWishAmount(player, wishName, getPlayerWishAmount(player, wishName) + getWishNeedIncreasedAmount(wishName, player));
+
+                // 增加许愿数
+                setPlayerWishAmount(player, wishName, wishAmount + getWishNeedIncreasedAmount(wishName, player));
 
                 return wishGuaranteedString;
             }
         }
 
-        // 如果没有保底再随机
-        RandomUtils randomUtils = new RandomUtils();
+        // 如果没有触发保底，则进行随机
+        RandomUtils<String> randomUtils = new RandomUtils<>();
 
         for (String wishPrizeSetString : getWishPrizeSetList(wishName)) {
+            // 替换字符串中的占位符
             wishPrizeSetString = QuickUtils.replaceTranslateToPapi(wishPrizeSetString, player);
+
+            // 将奖励与对应的概率加入随机工具
             randomUtils.addRandomObject(wishPrizeSetString, getWishPrizeSetProbability(wishPrizeSetString));
         }
 
-        String randomElement = randomUtils.getResult().toString();
+        // 随机出结果
+        String randomElement = randomUtils.getResult();
 
-        // 保底率的增加与清空
+        // 增加保底率
         setPlayerWishGuaranteed(player, wishName, randomElement, false);
 
-        // 设置玩家此奖池的许愿数
-        setPlayerWishAmount(player, wishName, getPlayerWishAmount(player, wishName) + getWishNeedIncreasedAmount(wishName, player));
+        // 增加许愿数
+        setPlayerWishAmount(player, wishName, wishAmount + getWishNeedIncreasedAmount(wishName, player));
 
         return randomElement;
     }
 
     /**
-     * 通过 finalProbabilityWish 返回 wishPrizeSetString / wishGuaranteedString 设置玩家保底值
+     * 设置玩家的保底值，通过 finalProbabilityWish 返回 wishPrizeSetString / wishGuaranteedString 设置.
      *
-     * @param player player
-     * @param wishName wishName
-     * @param finalProbabilityWish wishPrizeSetString or wishGuaranteedString
-     * @param guaranteed guaranteed
+     * @param player 玩家
+     * @param wishName 许愿池名
+     * @param finalProbabilityWish 许愿结果
+     * @param guaranteed 是否为保底
      */
     public static void setPlayerWishGuaranteed(Player player, String wishName, String finalProbabilityWish, boolean guaranteed) {
-        // 检查是否保底
         if (guaranteed) {
-            // 这里调整了顺序，将会先检查是否清除，再添加对应的保底率
+            // 检查是否清除保底
             if (isWishGuaranteedClearGuaranteed(finalProbabilityWish)) setPlayerWishGuaranteed(player, wishName, 0);
             setPlayerWishGuaranteed(player, wishName, getPlayerWishGuaranteed(player, wishName) + getWishGuaranteedMinimumRate(finalProbabilityWish));
-            return;
+        } else {
+            // 检查是否清除祈愿
+            if (isWishPrizeSetClearGuaranteed(finalProbabilityWish)) setPlayerWishGuaranteed(player, wishName, 0);
+            setPlayerWishGuaranteed(player, wishName, getPlayerWishGuaranteed(player, wishName) + getWishPrizeSetGuaranteed(finalProbabilityWish));
         }
-
-        if (isWishPrizeSetClearGuaranteed(finalProbabilityWish)) setPlayerWishGuaranteed(player, wishName, 0);
-        setPlayerWishGuaranteed(player, wishName, getPlayerWishGuaranteed(player, wishName) + getWishPrizeSetGuaranteed(finalProbabilityWish));
     }
 
     /**
-     * 许愿
+     * 许愿功能。
      *
-     * @param player player
-     * @param wishName wishName
-     * @param force force
+     * @param player 玩家
+     * @param wishName 许愿的名称
+     * @param force 是否强制许愿
      */
     public static void makeWish(Player player, String wishName, boolean force) {
         // 许愿状态
-        PlayerWishState playerWishState = checkWish(player, wishName);
+        PlayerWishState playerWishState = canPlayerWish(player, wishName);
         Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
 
         // 当玩家许愿一次后没有等待最终奖品发放便尝试二次许愿时
@@ -331,245 +357,250 @@ public class WishManager {
     }
 
     /**
-     * 设置玩家指定许愿池保底率
-     * 如果是中文许愿池名的话会有乱码问题，这里直接使用 unicode 编码
+     * 设置玩家指定许愿池的保底率。
+     * 如果许愿池名为中文，将会出现乱码问题，因此建议使用 Unicode 编码传入许愿池名。
      *
-     * @param player player
-     * @param wishName wishName
-     * @param guaranteed guaranteed
+     * @param player 玩家对象
+     * @param wishName 许愿池名
+     * @param guaranteed 保底率
      */
     public static void setPlayerWishGuaranteed(Player player, String wishName, double guaranteed) {
-        String wishDataSync = getWishDataSync(wishName);
-        String dataSync = QuickUtils.stringToUnicode("".equals(wishDataSync) ? wishName : wishDataSync);
+        String dataSync = getWishDataSync(wishName);
 
-        if (usingMongo) { MongoManager.update(player, dataSync, String.valueOf(guaranteed), MongoCollections.PlayerGuaranteed); return; }
+        if (dataSync.isEmpty()) dataSync = UnicodeUtils.stringToUnicode(wishName);
+
+        dataSync += "_guaranteed";
+
+        if (usingMongo) {
+            MongoManager.update(player, dataSync, String.valueOf(guaranteed), MongoCollections.PlayerGuaranteed);
+            return;
+        }
 
         Json json = ConfigManager.createJson(player.getUniqueId().toString(), Main.getGuaranteedPath(), true, false);
-
         json.set(dataSync, guaranteed);
     }
 
     /**
-     * 获取玩家指定许愿池保底率
+     * 获取玩家指定许愿池的保底率。
      *
-     * @param player player
-     * @param wishName wishName
-     * @return player wish guaranteed
+     * @param player 玩家对象
+     * @param wishName 许愿池名
+     * @return 返回玩家在指定许愿池的保底率
      */
     public static double getPlayerWishGuaranteed(Player player, String wishName) {
-        String wishDataSync = getWishDataSync(wishName);
-        String dataSync = QuickUtils.stringToUnicode("".equals(wishDataSync) ? wishName : wishDataSync);
+        String dataSync = getWishDataSync(wishName);
+
+        if (dataSync.isEmpty()) dataSync = UnicodeUtils.stringToUnicode(wishName);
+
+        dataSync += "_guaranteed";
 
         if (usingMongo) return Double.parseDouble(MongoManager.getOrDefault(player, dataSync, "0", MongoCollections.PlayerGuaranteed).toString());
 
         Json json = ConfigManager.createJson(player.getUniqueId().toString(), Main.getGuaranteedPath(), true, false);
-
         return json.getDouble(dataSync);
     }
 
     /**
-     * 设置玩家指定许愿池的许愿数
+     * 设置玩家在指定许愿池的许愿次数。
      *
-     * @param player player
-     * @param wishName wishName
-     * @param amount amount
+     * @param player 玩家对象
+     * @param wishName 许愿池名
+     * @param amount 许愿次数
      */
     public static void setPlayerWishAmount(Player player, String wishName, int amount) {
-        String wishDataSync = getWishDataSync(wishName);
-        String dataSync = QuickUtils.stringToUnicode("".equals(wishDataSync) ? wishName + "_amount" : wishDataSync + "_amount");
+        String dataSync = getWishDataSync(wishName);
 
-        if (usingMongo) { MongoManager.update(player, dataSync, String.valueOf(amount), MongoCollections.PlayerGuaranteed); return; }
+        if (dataSync.isEmpty()) dataSync = UnicodeUtils.stringToUnicode(wishName);
+
+        dataSync += "_amount";
+
+        if (usingMongo) {
+            MongoManager.update(player, dataSync, String.valueOf(amount), MongoCollections.PlayerGuaranteed);
+            return;
+        }
 
         Json json = ConfigManager.createJson(player.getUniqueId().toString(), Main.getGuaranteedPath(), true, false);
-
         json.set(dataSync, amount);
     }
 
     /**
-     * 获取玩家指定许愿池的许愿数
+     * 获取玩家在指定许愿池中的许愿次数。
      *
-     * @param player player
-     * @param wishName wishName
-     * @return player wish amount
+     * @param player 玩家
+     * @param wishName 许愿池名称
+     * @return 玩家在许愿池中的许愿次数
      */
-    public static Integer getPlayerWishAmount(Player player, String wishName) {
-        String wishDataSync = getWishDataSync(wishName);
-        String dataSync = QuickUtils.stringToUnicode("".equals(wishDataSync) ? wishName + "_amount" : wishDataSync + "_amount");
+    public static int getPlayerWishAmount(Player player, String wishName) {
+        String dataSync = getWishDataSync(wishName) + "_amount";
 
         if (usingMongo) return Integer.parseInt(MongoManager.getOrDefault(player, dataSync, "0", MongoCollections.PlayerGuaranteed).toString());
-
-        Json json = ConfigManager.createJson(player.getUniqueId().toString(), Main.getGuaranteedPath(), true, false);
-
-        return json.getInt(dataSync);
+        else {
+            Json json = ConfigManager.createJson(player.getUniqueId().toString(), Main.getGuaranteedPath(), true, false);
+            return json.getInt(dataSync);
+        }
     }
 
     /**
-     * 设置玩家指定许愿池的限制许愿数
+     * 设置玩家在指定许愿池中的许愿次数上限。
      *
-     * @param player player
-     * @param wishName wishName
-     * @param amount amount
+     * @param player 玩家
+     * @param wishName 许愿池名称
+     * @param amount 许愿次数上限
      */
     public static void setPlayerWishLimitAmount(Player player, String wishName, int amount) {
-        wishName = QuickUtils.stringToUnicode(wishName + "_limit_amount");
+        wishName = wishName + "_limit_amount";
 
-        if (usingMongo) { MongoManager.update(player, wishName, String.valueOf(amount), MongoCollections.PlayerGuaranteed); return; }
-
-        Json json = ConfigManager.createJson(player.getUniqueId().toString(), Main.getGuaranteedPath(), true, false);
-
-        json.set(wishName, amount);
+        if (usingMongo) MongoManager.update(player, wishName, String.valueOf(amount), MongoCollections.PlayerGuaranteed);
+        else {
+            Json json = ConfigManager.createJson(player.getUniqueId().toString(), Main.getGuaranteedPath(), true, false);
+            json.set(wishName, amount);
+        }
     }
 
     /**
-     * 获取玩家指定许愿池的限制许愿数
+     * 获取玩家在指定许愿池中的许愿次数上限。
      *
-     * @param player player
-     * @param wishName wishName
-     * @return player wish limit amount
+     * @param player 玩家
+     * @param wishName 许愿池名称
+     * @return 玩家在许愿池中的许愿次数上限
      */
-    public static Integer getPlayerWishLimitAmount(Player player, String wishName) {
-        // 如果没有开启就不用查询浪费资源
+    public static int getPlayerWishLimitAmount(Player player, String wishName) {
         if (!isEnabledWishLimit(wishName)) return 0;
 
-        wishName = QuickUtils.stringToUnicode(wishName + "_limit_amount");
+        String dataSync = wishName + "_limit_amount";
 
-        if (usingMongo) return Integer.parseInt(MongoManager.getOrDefault(player, wishName, "0", MongoCollections.PlayerGuaranteed).toString());
-
-        Json json = ConfigManager.createJson(player.getUniqueId().toString(), Main.getGuaranteedPath(), true, false);
-
-        return json.getInt(wishName);
+        if (usingMongo) return Integer.parseInt(MongoManager.getOrDefault(player, dataSync, "0", MongoCollections.PlayerGuaranteed).toString());
+        else {
+            Json json = ConfigManager.createJson(player.getUniqueId().toString(), Main.getGuaranteedPath(), true, false);
+            return json.getInt(dataSync);
+        }
     }
 
     /**
-     * 重置指定许愿池的所有玩家的限制许愿数
+     * 重置指定许愿池所有玩家的许愿次数上限。
      *
-     * @param wishName wishName
+     * @param wishName 许愿池名称
      */
     public static void resetWishLimitAmount(String wishName) {
-        wishName = QuickUtils.stringToUnicode(wishName + "_limit_amount");
+        String dataSync = wishName + "_limit_amount";
 
-        // Mongo
-        if (usingMongo) { MongoManager.getMongoDatabase().getCollection("PlayerGuaranteed").deleteMany(Filters.gte(wishName, "0")); return; }
-
-        // Json
-        String path = Main.getGuaranteedPath();
-        for (String fileName : ConfigManager.getAllFileName(path)) { Json json = ConfigManager.createJson(fileName, path, true, false); json.remove(wishName); }
+        if (usingMongo) MongoManager.getMongoDatabase().getCollection("PlayerGuaranteed").deleteMany(Filters.gte(dataSync, "0"));
+        else {
+            String path = Main.getGuaranteedPath();
+            for (String fileName : ConfigManager.getAllFileNames(path)) {
+                Json json = ConfigManager.createJson(fileName, path, true, false);
+                json.remove(dataSync);
+            }
+        }
     }
 
     /**
-     * 是否开启数据同步
+     * 获取愿望数据同步状态。
      *
-     * @param wishName wishName
-     * @return get or ""
+     * @param wishName 愿望名
+     * @return 数据同步状态或空字符串
      */
     public static String getWishDataSync(String wishName) {
         Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
-
         return QuickUtils.replaceTranslateToPapi(yaml.getString("ADVANCED-SETTINGS.DATA-SYNC"));
     }
 
     /**
-     * 是否开启许愿池玩家许愿数限制功能
+     * 判断是否开启了许愿池玩家许愿数限制功能。
      *
-     * @param wishName wishName
-     * @return boolean
+     * @param wishName 许愿池名称
+     * @return 如果开启了许愿数限制，则返回 {@code true};否则返回 {@code false}。
      */
     public static boolean isEnabledWishLimit(String wishName) {
-        return getWishLimitAmount(wishName) != 0;
+        return getWishLimitAmount(wishName) > 0;
     }
 
     /**
-     * 获取限制许愿数
+     * 获取许愿池限制的许愿数。
      *
-     * @param wishName wishName
-     * @return wish limit amount
+     * @param wishName 许愿池名称
+     * @return 许愿池限制的许愿数，如果未设置限制，则返回 {@code 0}。
      */
     public static int getWishLimitAmount(String wishName) {
         Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
-
         return Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.LIMIT-AMOUNT")));
     }
 
     /**
-     * 获取服务器开启重置秒数
+     * 获取许愿池重置限制的开始秒数。
      *
-     * @param wishName wishName
-     * @return wish reset limit start
+     * @param wishName 许愿池名称
+     * @return 许愿池重置限制的开始秒数，如果未设置限制，则返回 {@code 0}。
      */
     public static int getWishResetLimitStart(String wishName) {
         Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
-
         return Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-LIMIT-START")));
     }
 
     /**
-     * 获取服务器开启重置完成后循环秒数间隔
+     * 获取许愿池重置完成后循环秒数间隔。
      *
-     * @param wishName wishName
-     * @return wish reset limit cycle
+     * @param wishName 许愿池名称
+     * @return 许愿池重置完成后循环秒数间隔，如果未设置，则返回 {@code 0}。
      */
     public static int getWishResetLimitCycle(String wishName) {
         Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
-
         return Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-LIMIT-CYCLE")));
     }
 
     /**
-     * 许愿卷是否增加限制数
+     * 判断许愿卷是否增加限制数。
      *
-     * @param wishName wishName
-     * @return boolean
+     * @param wishName 许愿池名称
+     * @return 如果许愿卷增加限制数，则返回 {@code true};否则返回 {@code false}。
      */
     public static boolean isEnabledCouponLimit(String wishName) {
         Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
-
-        return Boolean.parseBoolean(QuickUtils.replaceTranslateToPapi(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-LIMIT-CYCLE")));
+        return Boolean.parseBoolean(QuickUtils.replaceTranslateToPapi(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.COUPON-LIMIT-ENABLE")));
     }
 
     /**
-     * 获取增加的许愿限制次数
+     * 获取增加的许愿限制次数。
      *
-     * @param wishName wishName
-     * @return wish increased amount
+     * @param wishName 许愿池名称
+     * @return 增加的许愿限制次数，如果未设置，则返回 {@code 0}。
      */
     public static int getWishIncreasedAmount(String wishName) {
         Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
-
         return Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.INCREASED-AMOUNT")));
     }
 
     /**
-     * 限制许愿次数重置是否发送效果
+     * 判断是否启用了重置后发送效果。
      *
-     * @param wishName wishName
-     * @return boolean
+     * @param wishName 许愿名称
+     * @return 启用状态
      */
-    public static boolean isEnabledResetCompleteSend(String wishName) {
+    public static boolean isResetCompleteSendEnabled(String wishName) {
         Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
-
         return Boolean.parseBoolean(QuickUtils.replaceTranslateToPapi(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-COMPLETE-SEND")));
     }
 
     /**
-     * 限制许愿次数重置是否在控制台发送提醒
+     * 判断是否启用了重置后发送控制台消息。
      *
-     * @param wishName wishName
-     * @return boolean
+     * @param wishName 许愿名称
+     * @return 启用状态
      */
-    public static boolean isEnabledResetCompleteSendConsole(String wishName) {
+    public static boolean isResetCompleteSendConsoleEnabled(String wishName) {
         Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
-
         return Boolean.parseBoolean(QuickUtils.replaceTranslateToPapi(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-COMPLETE-SEND-CONSOLE")));
     }
 
+
     /**
-     * 检查玩家是否满足许愿条件
+     * 检查玩家是否满足许愿条件。
      *
      * @param player player
      * @param wishName wishName
      * @return PlayerWishState
      */
-    public static PlayerWishState checkWish(Player player, String wishName) {
+    public static PlayerWishState canPlayerWish(Player player, String wishName) {
         UUID uuid = player.getUniqueId();
 
         // 检查玩家是否正在许愿
@@ -584,8 +615,7 @@ public class WishManager {
         Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
         yaml.setPathPrefix("CONDITION");
 
-        String perm = QuickUtils.replaceTranslateToPapi(yaml.getString("PERM"), player);
-
+        String permission = QuickUtils.replaceTranslateToPapi(yaml.getString("PERM"), player);
         int level = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("LEVEL"), player));
         int point = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("POINT"), player));
         double money = Double.parseDouble(QuickUtils.replaceTranslateToPapiCount(yaml.getString("MONEY"), player));
@@ -594,7 +624,7 @@ public class WishManager {
         yaml.setPathPrefix("ADVANCED-SETTINGS");
 
         for (String coupon : yaml.getStringList("COUPON")) {
-            if ("".equals(coupon)) break;
+            if (coupon.isEmpty()) break;
 
             coupon = QuickUtils.replaceTranslateToPapi(coupon, player);
 
@@ -617,15 +647,12 @@ public class WishManager {
 
                     if (itemAmount < checkAmount) break;
 
-                    // 如果开启了许愿次数限制，并且开启了许愿券增加许愿次数
                     if (isEnabledWishLimit(wishName) && isEnabledCouponLimit(wishName)) {
                         int wishLimitAmount = getWishLimitAmount(wishName);
                         int playerWishLimitAmount = getPlayerWishLimitAmount(player, wishName) + getWishIncreasedAmount(wishName);
 
-                        // 如果增加许愿次数但增加后的许愿次数到达极限，那么返回并不增加限制次数
                         if (playerWishLimitAmount > wishLimitAmount) return PlayerWishState.ReachLimit;
 
-                        // 增加限制次数
                         setPlayerWishLimitAmount(player, wishName, playerWishLimitAmount);
                     }
 
@@ -639,7 +666,7 @@ public class WishManager {
         yaml.setPathPrefix("CONDITION");
 
         // 权限检查
-        if (!"".equals(perm) && !player.hasPermission(perm)) return PlayerWishState.RequirementsNotMet;
+        if (!permission.isEmpty() && !player.hasPermission(permission)) return PlayerWishState.RequirementsNotMet;
 
         // 等级检查
         if (player.getLevel() < level) return PlayerWishState.RequirementsNotMet;
@@ -652,110 +679,101 @@ public class WishManager {
 
             String[] configInventoryHaveSplit = configInventoryHave.toUpperCase(Locale.ROOT).split(";");
 
-            int itemAmount = 0;
             int checkAmount = Integer.parseInt(QuickUtils.count(configInventoryHaveSplit[1]).toString());
 
             Material material = ItemUtils.materialValueOf(configInventoryHaveSplit[0], wishName);
 
             // 数量检查
-            for (ItemStack itemStack : player.getInventory().all(material).values()) {
-                if (itemStack != null && itemStack.getType() == material) itemAmount = itemAmount + itemStack.getAmount();
-            }
+            int itemAmount = player.getInventory().all(material).values().stream()
+                    .filter(itemStack -> itemStack != null && itemStack.getType() == material)
+                    .mapToInt(ItemStack::getAmount).sum();
 
             if (!player.getInventory().contains(material) || itemAmount < checkAmount) return PlayerWishState.RequirementsNotMet;
         }
 
-        // 药水效果检查
-        for (String configPotionEffectsHave : yaml.getStringList("PLAYER-HAVE-EFFECTS")) {
-            if (configPotionEffectsHave == null || configPotionEffectsHave.length() <= 1) continue;
+        // 检查玩家是否拥有指定的药水效果
+        for (String effect : yaml.getStringList("PLAYER-HAVE-EFFECTS")) {
+            if (effect == null || effect.length() <= 1) continue;
 
-            configPotionEffectsHave = QuickUtils.replaceTranslateToPapi(configPotionEffectsHave, player);
+            effect = QuickUtils.replaceTranslateToPapi(effect, player);
 
-            String[] effect = configPotionEffectsHave.toUpperCase(Locale.ROOT).split(";");
+            String[] effectInfo = effect.split(";");
+            String effectType = effectInfo[0].toUpperCase(Locale.ROOT);
+            PotionEffectType potionEffectType = PotionEffectType.getByName(effectType);
+            int effectAmplifier = Integer.parseInt(QuickUtils.count(effectInfo[1]).toString());
 
-            int amplifier = Integer.parseInt(QuickUtils.count(effect[1]).toString());
-
-            String effectString = effect[0];
-            PotionEffectType effectType = PotionEffectType.getByName(effectString);
-
-            if (effectType == null) {
-                QuickUtils.sendUnknownWarn("药水效果", wishName, effectString);
+            if (potionEffectType == null) {
+                QuickUtils.sendUnknownWarn("药水效果", wishName, effectType);
                 return PlayerWishState.RequirementsNotMet;
             }
 
-            if (!player.hasPotionEffect(effectType) || player.getPotionEffect(effectType).getAmplifier() < amplifier) return PlayerWishState.RequirementsNotMet;
+            if (!player.hasPotionEffect(potionEffectType) || player.getPotionEffect(potionEffectType).getAmplifier() < effectAmplifier) return PlayerWishState.RequirementsNotMet;
         }
-        
-        // 自定义检查
+
+        // 检查自定义条件
         for (String custom : yaml.getStringList("CUSTOM")) {
-            if (custom == null || custom.length() <= 1) continue;
+            if ("".equals(custom) || custom.length() <= 1 || StringUtils.isBlank(custom)) continue;
 
             String[] customSplit = custom.split(";");
 
-            // 对比值[0];条件[1];值[2]
-            String value = QuickUtils.replaceTranslateToPapi(customSplit[2], player);
-            String condition = QuickUtils.replaceTranslateToPapi(customSplit[1], player);
+            if (customSplit.length != 3) continue;
+
             String contrastValue = QuickUtils.replaceTranslateToPapi(customSplit[0], player);
+            String condition = QuickUtils.replaceTranslateToPapi(customSplit[1], player);
+            String value = QuickUtils.replaceTranslateToPapi(customSplit[2], player);
 
-            if (NumberUtils.isNumber(value)) value = QuickUtils.count(value).toString();
+            // 数字类型的对比值和条件都需要做类型转换
             if (NumberUtils.isNumber(contrastValue)) contrastValue = QuickUtils.count(contrastValue).toString();
+            if (NumberUtils.isNumber(value)) value = QuickUtils.count(value).toString();
 
-            if (condition.equals(">")) {
-                double value1 = Double.parseDouble(value);
-                double contrastValue1 = Double.parseDouble(contrastValue);
-                if (!(contrastValue1 > value1)) return PlayerWishState.RequirementsNotMet;
-                continue;
-            }
-
-            if (condition.equals(">=")) {
-                double value1 = Double.parseDouble(value);
-                double contrastValue1 = Double.parseDouble(contrastValue);
-                if (!(contrastValue1 >= value1)) return PlayerWishState.RequirementsNotMet;
-                continue;
-            }
-
-            if (condition.equals("=")) {
-                double value1 = Double.parseDouble(value);
-                double contrastValue1 = Double.parseDouble(contrastValue);
-                if (!(contrastValue1 == value1)) return PlayerWishState.RequirementsNotMet;
-                continue;
-            }
-
-            if (condition.equals("<")) {
-                double value1 = Double.parseDouble(value);
-                double contrastValue1 = Double.parseDouble(contrastValue);
-                if (!(contrastValue1 < value1)) return PlayerWishState.RequirementsNotMet;
-                continue;
-            }
-
-            if (condition.equals("<=")) {
-                double value1 = Double.parseDouble(value);
-                double contrastValue1 = Double.parseDouble(contrastValue);
-                if (!(contrastValue1 <= value1)) return PlayerWishState.RequirementsNotMet;
-                continue;
-            }
-
-            if (condition.equals("EQUALS")) {
-                if (!(contrastValue.equals(value))) return PlayerWishState.RequirementsNotMet;
-                continue;
-            }
-
-            if (condition.equals("CONTAINS")) {
-                if (!(contrastValue.contains(value))) return PlayerWishState.RequirementsNotMet;
+            // 判断条件是否满足
+            switch (condition.toUpperCase(Locale.ROOT)) {
+                case ">":
+                    if (Double.parseDouble(contrastValue) <= Double.parseDouble(value)) {
+                        return PlayerWishState.RequirementsNotMet;
+                    }
+                    break;
+                case ">=":
+                    if (Double.parseDouble(contrastValue) < Double.parseDouble(value)) {
+                        return PlayerWishState.RequirementsNotMet;
+                    }
+                    break;
+                case "=":
+                    if (Double.parseDouble(contrastValue) != Double.parseDouble(value)) {
+                        return PlayerWishState.RequirementsNotMet;
+                    }
+                    break;
+                case "<":
+                    if (Double.parseDouble(contrastValue) >= Double.parseDouble(value)) {
+                        return PlayerWishState.RequirementsNotMet;
+                    }
+                    break;
+                case "<=":
+                    if (Double.parseDouble(contrastValue) > Double.parseDouble(value)) {
+                        return PlayerWishState.RequirementsNotMet;
+                    }
+                    break;
+                case "EQUALS":
+                    if (!contrastValue.equals(value)) {
+                        return PlayerWishState.RequirementsNotMet;
+                    }
+                    break;
+                case "CONTAINS":
+                    if (!contrastValue.contains(value)) {
+                        return PlayerWishState.RequirementsNotMet;
+                    }
+                    break;
+                default:
+                    QuickUtils.sendUnknownWarn("自定义条件", wishName, condition);
+                    return PlayerWishState.RequirementsNotMet;
             }
         }
 
-        // 点券检查，扣除点券
-        boolean takePoints = false;
-        PlayerPointsAPI playerPointsAPI = RegisterManager.getPlayerPointsAPI();
-        if (point != 0 && playerPointsAPI != null && playerPointsAPI.look(player.getUniqueId()) >= point) takePoints = true;
-        else if (point != 0 && playerPointsAPI != null) return PlayerWishState.RequirementsNotMet;
-
-        // 金币检查
-        boolean withdrawPlayer = false;
         Economy economy = RegisterManager.getEconomy();
-        if (money != 0 && economy != null && economy.hasAccount(player) && economy.has(player, money)) withdrawPlayer = true;
-        else if (money != 0 && economy != null) return PlayerWishState.RequirementsNotMet;
+        PlayerPointsAPI playerPointsAPI = RegisterManager.getPlayerPointsAPI();
+
+        if (economy != null && money > 0 && !economy.has(player, money)) return PlayerWishState.RequirementsNotMet;
+        if (playerPointsAPI != null && point > 0 && playerPointsAPI.look(player.getUniqueId()) < point) return PlayerWishState.RequirementsNotMet;
 
         // 如果开启了许愿次数限制
         if (isEnabledWishLimit(wishName)) {
@@ -769,24 +787,22 @@ public class WishManager {
             setPlayerWishLimitAmount(player, wishName, playerWishLimitAmount);
         }
 
-        // 扣除点券
-        if (takePoints) playerPointsAPI.take(player.getUniqueId(), point);
-
-        // 修复 https://gitee.com/A2000000/advanced-wish/issues/I67LOV
-        if (withdrawPlayer) economy.withdrawPlayer(player, money);
+        if (economy != null && money > 0) economy.withdrawPlayer(player, money);
+        if (playerPointsAPI != null && point > 0) playerPointsAPI.take(player.getUniqueId(), point);
 
         return PlayerWishState.Allow;
     }
 
     /**
-     * 用于玩家退出保存缓存状态
+     * 用于保存玩家的许愿缓存数据。
      */
-    @Getter private static Map<UUID, Boolean> savingCache = new ConcurrentHashMap<>();
+    @Getter
+    private static final Map<UUID, Boolean> savingCache = new ConcurrentHashMap<>();
 
     /**
-     * 保存玩家缓存数据
+     * 保存玩家缓存数据。
      *
-     * @param player player
+     * @param player 玩家
      */
     public static void savePlayerCacheData(Player player) {
         UUID uuid = player.getUniqueId();
@@ -795,13 +811,16 @@ public class WishManager {
 
         PlayerCheckCacheTask.setPlayerQuitTime(player);
 
-        List<String> newPlayerDoList = new ArrayList<>();
         List<String> playerDoList = ScheduledTaskManager.getPlayerScheduledTasks(player);
 
-        if (playerDoList.size() == 0) { savingCache.put(uuid, false); return; }
+        if (playerDoList.isEmpty()) {
+            savingCache.put(uuid, false);
+            return;
+        }
 
-        // 转换 Unicode 防止乱码
-        for (String playerWishDoListString : playerDoList) newPlayerDoList.add(QuickUtils.stringToUnicode(playerWishDoListString));
+        List<String> newPlayerDoList = playerDoList.stream()
+                .map(UnicodeUtils::stringToUnicode)
+                .collect(Collectors.toList());
 
         ConfigManager.createJson(uuid.toString(), Main.getDoListCachePath(), true, false).set("CACHE", newPlayerDoList);
 
@@ -811,14 +830,14 @@ public class WishManager {
     }
 
     /**
-     * 安全措施，使用 OP 指令的数据缓存
+     * 设置玩家的 OP 指令缓存数据。
      *
-     * @param player player
-     * @param doOpCommand doOpCommand
+     * @param player 玩家
+     * @param doOpCommand 是否允许使用 OP 指令
      */
-    public static void setPlayerCacheOpData(Player player, Boolean doOpCommand) {
-        Json playerCacheJson = ConfigManager.createJson(player.getUniqueId().toString(), "/PlayerCache", false, false);
-
-        playerCacheJson.set("DO-OP-COMMAND", doOpCommand);
+    public static void setPlayerCacheOpData(Player player, boolean doOpCommand) {
+        ConfigManager.createJson(player.getUniqueId().toString(), "/PlayerCache", false, false)
+                .set("DO-OP-COMMAND", doOpCommand);
     }
+
 }

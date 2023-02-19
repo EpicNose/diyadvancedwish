@@ -8,6 +8,7 @@ import me.twomillions.plugin.advancedwish.managers.RegisterManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
+import me.twomillions.plugin.advancedwish.utils.UnicodeUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -355,7 +356,7 @@ public class ConsoleCommand implements CommandExecutor {
                             ConfigManager.getPlayerWishLog(queryPlayerUUID, startNumber, endNumber);
 
                     int allLogsSize = MongoManager.getMongoConnectState() == MongoConnectState.Connected ?
-                            MongoManager.getWishLogsSize(queryPlayerUUID) : ConfigManager.getWishLogsSize(queryPlayerUUID);
+                            MongoManager.getWishLogsSize(queryPlayerUUID) : ConfigManager.getPlayerWishLogCount(queryPlayerUUID);
 
                     if (logs.size() == 0 || allLogsSize <= 0)
                     { for (String queryPrefix : messageYaml.getStringList("QUERY-WISH.LOGS-NULL")) sender.sendMessage(QuickUtils.replaceTranslateToPapi(queryPrefix)); return; }
@@ -374,7 +375,7 @@ public class ConsoleCommand implements CommandExecutor {
 
                         String queryLogTime = queryLogSplit[0].replace("-", " ");
                         String queryLogPlayerName = queryLogSplit[1];
-                        String queryLogWishName = QuickUtils.unicodeToString(queryLogSplit[3]);
+                        String queryLogWishName = UnicodeUtils.unicodeToString(queryLogSplit[3]);
                         String queryLogDoList = queryLogSplit[4];
 
                         for (String queryQuery : messageYaml.getStringList("QUERY-WISH.QUERY")) {

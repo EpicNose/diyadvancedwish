@@ -16,256 +16,255 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
+ * 实用工具类。
+ *
  * @author 2000000
  * @date 2022/11/21 12:39
  */
 public class QuickUtils {
+
     private static final Plugin plugin = Main.getInstance();
     private static final JexlEngine jexlEngine = new JexlBuilder().create();
+    private static final String CHAT_BAR = ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "------------------------------------------------";
 
-    public static final String CHAT_BAR = ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "------------------------------------------------";
-
+    /**
+     * 将颜色代码翻译为实际的颜色。
+     *
+     * @param message 要翻译的字符串
+     * @return 翻译后的字符串
+     */
     public static String translate(String message) {
         return ChatColor.translateAlternateColorCodes('&', message);
     }
 
     /**
-     * 向控制台发送消息
+     * 向控制台发送消息。
      *
-     * @param message message
+     * @param message 要发送的消息
      */
     public static void sendConsoleMessage(String message) {
         Bukkit.getConsoleSender().sendMessage(translate("&e[Advanced Wish] " + message));
     }
 
     /**
-     * 替换方法
+     * 替换字符串中的变量并翻译颜色代码。
      *
-     * @param message message
-     * @param player player
-     * @param replacePlayer replacePlayer
-     * @return replaced translated
+     * @param message 要替换和翻译的字符串
+     * @param player  玩家
+     * @param replacePlayer 要替换的玩家
+     * @return 替换后和翻译后的字符串
      */
     public static String replaceTranslate(String message, Player player, Player replacePlayer) {
-        if (message.contains("<version>")) message = message.replaceAll("<version>", plugin.getDescription().getVersion());
-        if (message.contains("<wishlist>")) message = message.replaceAll("<wishlist>", RegisterManager.getRegisterWish().toString());
+        message = message
+                .replaceAll("<version>", plugin.getDescription().getVersion())
+                .replaceAll("<wishlist>", RegisterManager.getRegisterWish().toString())
+                .replaceAll("<CHAT_BAR>", CHAT_BAR);
 
-        if (message.contains("<player>") && player != null) message = message.replaceAll("<player>", player.getName());
-        if (message.contains("<rplayer>") && replacePlayer != null) message = message.replaceAll("<rplayer>", replacePlayer.getName());
-        if (message.contains("<CHAT_BAR>")) message = message.replaceAll("<CHAT_BAR>", CHAT_BAR);
+        if (player != null) message = message.replaceAll("<player>", player.getName());
+        if (replacePlayer != null) message = message.replaceAll("<rplayer>", replacePlayer.getName());
 
         return translate(message);
     }
 
     /**
-     * String to Unicode
+     * 进行算术运算，并返回结果。
      *
-     * @param string string
-     * @return unicode
-     */
-    public static String stringToUnicode(String string) {
-        char[] utfBytes = string.toCharArray();
-        StringBuilder unicodeBytes = new StringBuilder();
-
-        for (char utfByte : utfBytes) {
-            String hexB = Integer.toHexString(utfByte);
-            if (hexB.length() <= 2) hexB = "00" + hexB;
-            unicodeBytes.append("\\u").append(hexB);
-        }
-
-        return unicodeBytes.toString();
-    }
-
-    /**
-     * Unicode to String
-     *
-     * @param string unicode
-     * @return string
-     */
-    public static String unicodeToString(String string) {
-        Pattern pattern = Pattern.compile("(\\\\u(\\p{XDigit}{4}))");
-        Matcher matcher = pattern.matcher(string);
-
-        while (matcher.find()) {
-            char ch = (char) Integer.parseInt(matcher.group(2), 16);
-            string = string.replace(matcher.group(1), ch + "");
-        }
-
-        return string;
-    }
-
-    /**
-     * replace translate and to papi
-     *
-     * @param string string
-     * @param player player
-     * @param replacePlayer replacePlayer
-     * @return replaced translated and to papi
-     */
-    public static String replaceTranslateToPapi(String string, Player player, Player replacePlayer) {
-        if (RegisterManager.isUsingPapi()) return PlaceholderAPI.setPlaceholders(player, replaceTranslate(string, player, replacePlayer));
-        else return replaceTranslate(string, player, replacePlayer);
-    }
-
-    /**
-     * replaceTranslateToPapi but replacePlayer and player null
-     *
-     * @param string string
-     * @return replaced translated and to papi
-     */
-    public static String replaceTranslateToPapi(String string) {
-        return replaceTranslateToPapi(string, null, null);
-    }
-
-    /**
-     * replaceTranslateToPapi but replacePlayer null
-     *
-     * @param string string
-     * @param player player
-     * @return replaced translated and to papi
-     */
-    public static String replaceTranslateToPapi(String string, Player player) {
-        return replaceTranslateToPapi(string, player, null);
-    }
-
-    /**
-     * replaceTranslateToPapi but replacePlayer and player null
-     *
-     * @param string string
-     * @return replaced translated and to papi and calculated
-     */
-    public static String replaceTranslateToPapiCount(String string) {
-        return count(replaceTranslateToPapi(string, null, null)).toString();
-    }
-
-    /**
-     * replaceTranslateToPapi but replacePlayer null
-     *
-     * @param string string
-     * @param player player
-     * @return replaced translated and to papi and calculated
-     */
-    public static String replaceTranslateToPapiCount(String string, Player player) {
-        return count(replaceTranslateToPapi(string, player, null)).toString();
-    }
-
-    /**
-     * replaceTranslateToPapi and calculated
-     *
-     * @param string string
-     * @param player player
-     * @param replacePlayer replacePlayer
-     * @return replaced translated and to papi and calculated
-     */
-    public static String replaceTranslateToPapiCount(String string, Player player, Player replacePlayer) {
-        return count(replaceTranslateToPapi(string, player, replacePlayer)).toString();
-    }
-
-    /**
-     * 随机语句，randomSentence(A#10~B#20~C#30)end
-     *
-     * @param randomSentence randomSentence
-     * @return random sentence result
-     */
-    public static String randomSentence(String randomSentence) {
-        if (!randomSentence.contains("randomSentence(") || !randomSentence.contains(")end")) return randomSentence;
-
-        RandomUtils randomUtils = new RandomUtils();
-
-        try {
-            String[] randomSentenceSplit = StringUtils.substringBetween(randomSentence, "randomSentence(", ")end").split("~");
-
-            for (String randomSentenceSplitString : randomSentenceSplit) {
-                String[] random = randomSentenceSplitString.split("#");
-
-                Object randomObject = random[0];
-                int probability = Integer.parseInt(random[1]);
-
-                randomUtils.addRandomObject(randomObject, probability);
-            }
-
-        } catch (Exception exception) {
-            sendConsoleMessage("&c您填入的随机语句 (randomSentence) 语法错误! 请检查配置文件! 原语句: &e" + randomSentence);
-
-            return randomSentence;
-        }
-
-        String randomElement = randomUtils.getResult().toString();
-
-        return stringInterceptReplace(randomSentence, "randomSentence(", ")end", randomElement, true);
-    }
-
-    /**
-     * 延迟语句，sleepSentence(1000)end
-     *
-     * @param sleepSentence sleepSentence
-     * @deprecated <p>弃用的，在存储的计划任务在绝对不该使用这个
-     *          若存储的计划任务中使用则只会导致无法被缓存记录，这是危险的，它应该只出现于不需要被缓存记录的，不重要的提示信息发送
-     *          若需要于缓存中安全的使用 sleepSentence 则请使用 {@link QuickUtils#hasSleepSentenceMs(String)}
-     *          {@link QuickUtils#getSleepSentenceMs(String)} 以及 {@link QuickUtils#removeSleepSentence(String)} 协作更改 time 完成
-     * @return boolean
-     */
-    @Deprecated
-    public static boolean sleepSentence(String sleepSentence) {
-        if (!sleepSentence.contains("sleepSentence(") || !sleepSentence.contains(")end")) return false;
-
-        try { Thread.sleep(Long.parseLong(replaceTranslateToPapiCount(StringUtils.substringBetween(sleepSentence, "sleepSentence(", ")end")))); return true; }
-        catch (Exception exception) { sendConsoleMessage("&c您填入的延迟语句 (sleepSentence) 语法错误! 请检查配置文件! 原语句: &e" + sleepSentence); return false; }
-    }
-
-    /**
-     * 获取延迟语句的延迟时长
-     *
-     * @param sleepSentence sleepSentence
-     * @return long
-     */
-    public static Long getSleepSentenceMs(String sleepSentence) {
-        if (!sleepSentence.contains("sleepSentence(") || !sleepSentence.contains(")end")) return 0L;
-
-        try { return Long.parseLong(replaceTranslateToPapiCount(StringUtils.substringBetween(sleepSentence, "sleepSentence(", ")end"))); }
-        catch (Exception exception) { sendConsoleMessage("&c您填入的延迟语句 (sleepSentence) 语法错误! 请检查配置文件! 原语句: &e" + sleepSentence); return 0L; }
-    }
-
-    /**
-     * 移除 sleepSentence 语句内容
-     *
-     * @param sleepSentence sleepSentence
-     * @return string
-     */
-    public static String removeSleepSentence(String sleepSentence) {
-        /*
-         * .trim 去除空格
-         * "xx " 与 "xx" 不是一个意义
-         */
-        return stringInterceptReplace(sleepSentence, "sleepSentence(", ")end", "", true).trim();
-    }
-
-    /**
-     * 检查是否含有 sleepSentence 语句
-     *
-     * @param sleepSentence sleepSentence
-     * @return boolean
-     */
-    public static boolean hasSleepSentenceMs(String sleepSentence) {
-        return sleepSentence.contains("sleepSentence(") && sleepSentence.contains(")end");
-    }
-
-    /**
-     * 算数
-     *
-     * @param countString countString
-     * @return object
+     * @param countString 待运算的字符串表达式
+     * @return 返回运算结果
      */
     public static Object count(String countString) {
         return jexlEngine.createExpression(countString).evaluate(null);
     }
 
     /**
-     * 快捷发送警告信息
+     * 根据是否启用 PlaceholderAPI 将文本进行翻译和变量替换。
+     *
+     * @param string 要处理的字符串
+     * @param player 可选的玩家对象，用于变量替换
+     * @param replacePlayer 可选的玩家对象，用于文本中部分变量的替换
+     * @return 处理后的字符串
+     */
+    public static String replaceTranslateToPapi(String string, Player player, Player replacePlayer) {
+        if (RegisterManager.isUsingPapi()) {
+            String translated = replaceTranslate(string, player, replacePlayer);
+            return PlaceholderAPI.setPlaceholders(player, translated);
+        }
+
+        return replaceTranslate(string, player, replacePlayer);
+    }
+
+    /**
+     * 将文本进行翻译和变量替换，但不包括玩家变量。
+     *
+     * @param string 要处理的字符串
+     * @return 处理后的字符串
+     */
+    public static String replaceTranslateToPapi(String string) {
+        return replaceTranslateToPapi(string, null, null);
+    }
+
+    /**
+     * 根据给定的玩家对象，将文本进行翻译和变量替换。
+     *
+     * @param string 要处理的字符串
+     * @param player 玩家对象，用于变量替换
+     * @return 处理后的字符串
+     */
+    public static String replaceTranslateToPapi(String string, Player player) {
+        return replaceTranslateToPapi(string, player, null);
+    }
+
+    /**
+     * 将文本进行翻译和变量替换，计算结果并返回。
+     *
+     * @param string 要处理的字符串
+     * @return 计算后的结果字符串
+     */
+    public static String replaceTranslateToPapiCount(String string) {
+        String processed = replaceTranslateToPapi(string, null, null);
+        return count(processed).toString();
+    }
+
+    /**
+     * 根据给定的玩家对象，将文本进行翻译和变量替换，计算结果并返回。
+     *
+     * @param string 要处理的字符串
+     * @param player 玩家对象，用于变量替换
+     * @return 计算后的结果字符串
+     */
+    public static String replaceTranslateToPapiCount(String string, Player player) {
+        String processed = replaceTranslateToPapi(string, player, null);
+        return count(processed).toString();
+    }
+
+    /**
+     * 根据给定的玩家对象与可选的玩家对象，将文本进行翻译和变量替换，计算结果并返回。
+     *
+     * @param string 要处理的字符串
+     * @param player 玩家对象，用于变量替换
+     * @param replacePlayer 可选的玩家对象，用于文本中部分变量的替换
+     * @return 计算后的结果字符串
+     */
+    public static String replaceTranslateToPapiCount(String string, Player player, Player replacePlayer) {
+        String processed = replaceTranslateToPapi(string, player, replacePlayer);
+        return count(processed).toString();
+    }
+
+    /**
+     * 解析随机语句。
+     *
+     * @param randomSentence 包含随机语句的字符串
+     * @return 生成后的字符串
+     */
+    public static String randomSentence(String randomSentence) {
+        // 如果字符串中不包含随机语句，则直接返回该字符串
+        if (!randomSentence.contains("randomSentence(") || !randomSentence.contains(")end")) {
+            return randomSentence;
+        }
+
+        RandomUtils<String> randomUtils = new RandomUtils<>();
+
+        try {
+            // 获取随机语句的部分并按照"~"符号分隔
+            String[] randomSentenceSplit = StringUtils.substringBetween(randomSentence, "randomSentence(", ")end").split("~");
+
+            // 循环处理每个随机语句元素
+            for (String randomSentenceSplitString : randomSentenceSplit) {
+                // 每个随机语句元素由语句内容和出现概率组成，用"#"分隔
+                String[] random = randomSentenceSplitString.split("#");
+
+                String randomString = random[0];
+                int probability = Integer.parseInt(random[1]);
+
+                // 将语句内容和概率加入随机工具类
+                randomUtils.addRandomObject(randomString, probability);
+            }
+
+        } catch (Exception exception) {
+            // 如果出现异常，说明语法错误，打印错误信息并返回原字符串
+            sendConsoleMessage("&c您填入的随机语句 (randomSentence) 语法错误! 请检查配置文件! 原语句: &e" + randomSentence);
+            return randomSentence;
+        }
+
+        // 从随机工具类中获取生成的随机语句
+        String randomElement = randomUtils.getResult();
+
+        // 将原字符串中的随机语句部分替换为生成的随机语句
+        return stringInterceptReplace(randomSentence, "randomSentence(", ")end", randomElement, true);
+    }
+
+    /**
+     * 延迟指定毫秒数的执行。
+     *
+     * <p>此方法已被弃用，仅在不需要缓存记录的无关紧要的提示信息中使用。
+     * 在存储的计划任务中绝不能使用此方法，否则将导致无法被缓存记录。
+     * 若要在缓存中安全地使用 sleepSentence，请使用以下三个方法协作更改 time 完成：
+     *
+     * <p>{@link QuickUtils#hasSleepSentenceMs(String)} 用于检查字符串中是否存在 sleepSentence
+     * {@link QuickUtils#getSleepSentenceMs(String)} 用于获取字符串中的 sleepSentence
+     * {@link QuickUtils#removeSleepSentence(String)} 用于从字符串中删除 sleepSentence
+     *
+     * @param sleepSentence 要执行的延迟语句，格式为 sleepSentence(time)end
+     * @return 如果执行成功，则返回 true;否则返回 false
+     * @deprecated
+     */
+    @Deprecated
+    public static boolean sleepSentence(String sleepSentence) {
+        if (!sleepSentence.contains("sleepSentence(") || !sleepSentence.contains(")end")) return false;
+
+        try {
+            long time = Long.parseLong(replaceTranslateToPapiCount(StringUtils.substringBetween(sleepSentence, "sleepSentence(", ")end")));
+            Thread.sleep(time);
+            return true;
+        } catch (NumberFormatException e) {
+            sendConsoleMessage("&c您填入的延迟语句 (sleepSentence) 语法错误! 请检查配置文件! 原语句: &e" + sleepSentence);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            sendConsoleMessage("&c线程被中断, 无法完成延迟! 原语句: &e" + sleepSentence);
+        }
+        return false;
+    }
+
+
+    /**
+     * 获取 sleepSentence 语句中的延迟时长。
+     *
+     * @param sleepSentence 要获取时长的 sleepSentence 语句。
+     * @return sleepSentence 语句中的延迟时长（单位：毫秒）。
+     */
+    public static Long getSleepSentenceMs(String sleepSentence) {
+        if (!sleepSentence.contains("sleepSentence(") || !sleepSentence.contains(")end")) return 0L;
+
+        try { return Long.parseLong(StringUtils.substringBetween(sleepSentence, "sleepSentence(", ")end")); }
+        catch (Exception exception) {
+            sendConsoleMessage("&c您填入的延迟语句 (sleepSentence) 语法错误! 请检查配置文件! 原语句: &e" + sleepSentence);
+            return 0L;
+        }
+    }
+
+    /**
+     * 移除 sleepSentence 语句内容。
+     *
+     * @param sleepSentence 要移除的 sleepSentence 语句。
+     * @return 移除后的字符串。
+     */
+    public static String removeSleepSentence(String sleepSentence) {
+        return stringInterceptReplace(sleepSentence, "sleepSentence(", ")end", "", true).trim();
+    }
+
+    /**
+     * 检查字符串中是否含有 sleepSentence 语句。
+     *
+     * @param sleepSentence 要检查的字符串。
+     * @return 如果字符串中包含 sleepSentence 语句，返回 true;否则返回 false。
+     */
+    public static boolean hasSleepSentenceMs(String sleepSentence) {
+        return sleepSentence.contains("sleepSentence(") && sleepSentence.contains(")end");
+    }
+
+    /**
+     * 快捷发送警告信息。
      *
      * @param unknown unknown
      * @param fileName fileName
@@ -347,14 +346,14 @@ public class QuickUtils {
     }
 
     /**
-     * stringInterceptReplace
+     * 替换字符串中位于指定区间的文本为指定的字符串。
      *
-     * @param string string
-     * @param start start
-     * @param end end
-     * @param replace replace
-     * @param removeStartEndString removeStartEndString
-     * @return replaced string
+     * @param string 要替换的字符串
+     * @param start 要替换的区间的起始字符串
+     * @param end 要替换的区间的结束字符串
+     * @param replace 要替换成的字符串
+     * @param removeStartEndString 是否移除起始和结束字符串
+     * @return 替换后的字符串
      */
     private static String stringInterceptReplace(String string, String start, String end, String replace, boolean removeStartEndString) {
         int startIndex = string.indexOf(start);
@@ -370,4 +369,5 @@ public class QuickUtils {
         if (removeStartEndString) return replacedString.replace(start, "").replace(end, "");
         else return beforeStart + replace + afterEnd;
     }
+
 }

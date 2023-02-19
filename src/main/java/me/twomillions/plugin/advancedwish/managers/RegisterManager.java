@@ -26,22 +26,51 @@ import java.util.List;
  */
 public class RegisterManager {
     private static final Plugin plugin = Main.getInstance();
+
+    /**
+     * 注册的许愿池列表。
+     */
     @Getter private static final List<String> registerWish = new ArrayList<>();
 
+    /**
+     * Economy 对象。
+     */
     @Getter @Setter private volatile static Economy economy;
+
+    /**
+     * 是否使用了 PlaceholderAPI.
+     */
     @Getter @Setter private volatile static boolean usingPapi;
+
+    /**
+     * 是否使用了 Vulpecula.
+     */
     @Getter @Setter private volatile static boolean usingVulpecula;
+
+    /**
+     * PlayerPointsAPI 对象。
+     */
     @Getter @Setter private volatile static PlayerPointsAPI playerPointsAPI;
 
     /**
-     * 注册监听器
+     * 注册指令
      */
-    public static void registerListener() {
+    public static void registerCommands() {
+        Main.getInstance().getCommand("advancedwish").setExecutor(new MainCommand());
+        Main.getInstance().getCommand("advancedwish").setTabCompleter(new MainCommand());
+        Main.getInstance().getCommand("awc").setExecutor(new ConsoleCommand());
+    }
+
+    /**
+     * 设置 Vault 和 PlayerPoints 注册监听器等等。
+     *
+     * @param registerEvents 是否注册监听器
+     */
+    public static void setupPlugins(boolean registerEvents) {
         PluginManager manager = Bukkit.getPluginManager();
 
-        setupEconomy();
+        setupVault();
         setupPlayerPoints();
-        manager.registerEvents(new PlayerListener(), plugin);
 
         // PlaceholderAPI
         if (manager.isPluginEnabled("PlaceholderAPI")) {
@@ -58,81 +87,78 @@ public class RegisterManager {
 
             QuickUtils.sendConsoleMessage("&a检查到服务器存在 &eVulpecula&a，已支持使用 &eKether&a 脚本。");
         }
+
+        if (registerEvents) manager.registerEvents(new PlayerListener(), plugin);
     }
 
     /**
-     * 注册指令
+     * 设置 Vault.
      */
-    public static void registerCommands() {
-        Main.getInstance().getCommand("advancedwish").setExecutor(new MainCommand());
-        Main.getInstance().getCommand("advancedwish").setTabCompleter(new MainCommand());
-        Main.getInstance().getCommand("awc").setExecutor(new ConsoleCommand());
+    private static void setupVault() {
+        Plugin vault = Bukkit.getPluginManager().getPlugin("Vault");
+        if (vault == null) return;
+
+        RegisteredServiceProvider<Economy> rsp = Bukkit.getServicesManager().getRegistration(Economy.class);
+
+        if (rsp == null) {
+            QuickUtils.sendConsoleMessage("&c检查到服务器存在 &eVault&c，但并没有实际插件进行操作? 取消对于 &eVault&c 的设置。");
+            return;
+        }
+
+        try {
+            setEconomy(rsp.getProvider());
+            QuickUtils.sendConsoleMessage("&a检查到服务器存在 &eVault&a，已成功设置 &eVault&a。");
+        } catch (Throwable e) {
+            QuickUtils.sendConsoleMessage("&c检查到服务器存在 &eVault&c，但 &eVault&c 设置错误，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/vault.34315/&c，服务器即将关闭。");
+            Bukkit.shutdown();
+        }
     }
 
     /**
-     * 注册所有的许愿池
+     * 设置 PlayerPoints.
+     */
+    private static void setupPlayerPoints() {
+        Plugin playerPoints = Bukkit.getPluginManager().getPlugin("PlayerPoints");
+
+        if (playerPoints == null) return;
+
+        try {
+            setPlayerPointsAPI(((PlayerPoints) playerPoints).getAPI());
+            QuickUtils.sendConsoleMessage("&a检查到服务器存在 &ePlayerPoints&a，已成功设置 &ePlayerPoints&a。");
+        } catch (Throwable e) {
+            QuickUtils.sendConsoleMessage("&c检查到服务器存在 &ePlayerPoints&c，但 &ePlayerPoints&c 设置错误，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/playerpoints.80745/&c，服务器即将关闭。");
+            Bukkit.shutdown();
+        }
+    }
+
+    /**
+     * 注册所有许愿池，并检查许愿池是否启用许愿限制，启用则创建异步计划任务。
      */
     public static void registerWish() {
         registerWish.clear();
+        List<String> wishList = ConfigManager.getAdvancedWishYaml().getStringList("WISH");
 
-        for (String wishName : ConfigManager.getAdvancedWishYaml().getStringList("WISH")) {
-            if (wishName == null || "".equals(wishName) || wishName.equals(" ")) return;
+        for (String wishName : wishList) {
+            if (wishName == null || wishName.trim().isEmpty()) continue;
 
             Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, true);
 
-            if (!ConfigManager.checkLastVersion(yaml)) return;
+            if (!ConfigManager.checkLastVersion(yaml)) continue;
 
             registerWish.add(wishName);
 
             QuickUtils.sendConsoleMessage("&a已成功加载许愿池! 许愿池文件名称: &e" + wishName);
 
             // 许愿限制
-            if (!WishManager.isEnabledWishLimit(wishName)) continue;
-
-            WishLimitResetTask.startTask(wishName);
-
-            QuickUtils.sendConsoleMessage("&a检查到许愿池启用了许愿限制，已成功创建对应异步计划任务! 许愿池文件名称: &e" + wishName);
+            if (WishManager.isEnabledWishLimit(wishName)) {
+                WishLimitResetTask.startTask(wishName);
+                QuickUtils.sendConsoleMessage("&a检查到许愿池启用了许愿限制，已成功创建对应异步计划任务! 许愿池文件名称: &e" + wishName);
+            }
         }
     }
 
     /**
-     * 设置 Economy
-     */
-    private static void setupEconomy() {
-        if (Bukkit.getPluginManager().getPlugin("Vault") == null) return;
-
-        RegisteredServiceProvider<Economy> registeredServiceProvider = Bukkit.getServer().getServicesManager().getRegistration(Economy.class);
-
-        if (registeredServiceProvider == null) { QuickUtils.sendConsoleMessage("&c检查到服务器存在 &eVault&c，但并没有实际插件进行操作? 取消对于 &eVault&c 的设置。"); return; }
-
-        try { setEconomy(registeredServiceProvider.getProvider()); }
-        catch (Throwable throwable) {
-            QuickUtils.sendConsoleMessage("&c检查到服务器存在 &eVault&c，但 &eVault&c 设置错误，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/vault.34315/&c，服务器即将关闭。");
-            Bukkit.shutdown(); return;
-        }
-
-        QuickUtils.sendConsoleMessage("&a检查到服务器存在 &eVault&a，已成功设置 &eVault&a。");
-    }
-
-    /**
-     * 设置 PlayerPoints
-     */
-    private static void setupPlayerPoints() {
-        if (Bukkit.getPluginManager().getPlugin("PlayerPoints") == null) return;
-
-        // 兼容旧版本 PlayerPoints
-        try { setPlayerPointsAPI(((PlayerPoints) Bukkit.getPluginManager().getPlugin("PlayerPoints")).getAPI()); }
-        catch (Throwable throwable) {
-            QuickUtils.sendConsoleMessage("&c检查到服务器存在 &ePlayerPoints&c，但 &ePlayerPoints&c 设置错误，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/playerpoints.80745/&c，服务器即将关闭。");
-            throwable.printStackTrace();
-            Bukkit.shutdown(); return;
-        }
-
-        QuickUtils.sendConsoleMessage("&a检查到服务器存在 &ePlayerPoints&a，已成功设置 &ePlayerPoints&a。");
-    }
-
-    /**
-     * Reload
+     * Reload 方法。
      */
     public static void reload() {
         // 取消任务
@@ -148,11 +174,6 @@ public class RegisterManager {
             catch (Throwable throwable) { QuickUtils.sendConsoleMessage("&ePlaceholder&c 重载异常，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/placeholderapi.6245/&c，已取消 &ePlaceholder&c 重载。"); }
         });
 
-        // 设置 Vault 以及 PlayerPoints
-        setupEconomy();
-        setupPlayerPoints();
-
-        // 注册许愿池
-        RegisterManager.registerWish();
+        setupPlugins(false);
     }
 }

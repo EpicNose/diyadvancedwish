@@ -3,60 +3,40 @@ package me.twomillions.plugin.advancedwish.utils;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 
+import java.util.Random;
+
 /**
+ * 随机获取 BossBar 的颜色和样式。
+ *
  * @author 2000000
- * @date 2022/12/3 19:27
+ * @date 2023/2/8
  */
 public class BossBarRandomUtils {
+    private static final Random RANDOM = new Random();
+
+    private static final BarColor[] BAR_COLORS = {
+            BarColor.PINK, BarColor.BLUE, BarColor.RED, BarColor.GREEN, BarColor.YELLOW, BarColor.PURPLE, BarColor.WHITE
+    };
+
+    private static final BarStyle[] BAR_STYLES = {
+            BarStyle.SOLID, BarStyle.SEGMENTED_6, BarStyle.SEGMENTED_10, BarStyle.SEGMENTED_12, BarStyle.SEGMENTED_20
+    };
+
     /**
-     * 获取随机 Bar Color
+     * 随机获取一个 {@link BarColor} 颜色
      *
-     * @return BarColor
+     * @return 随机颜色
      */
     public static BarColor randomColor() {
-        int num = (int) (Math.random() * 6);
-
-        switch (num) {
-            case 0:
-                return BarColor.PINK;
-            case 1:
-                return BarColor.BLUE;
-            case 2:
-                return BarColor.RED;
-            case 3:
-                return BarColor.GREEN;
-            case 4:
-                return BarColor.YELLOW;
-            case 5:
-                return BarColor.PURPLE;
-            case 6:
-                return BarColor.WHITE;
-        }
-
-        return BarColor.WHITE;
+        return BAR_COLORS[RANDOM.nextInt(BAR_COLORS.length)];
     }
 
     /**
-     * 获取随机 Bar Style
+     * 随机获取一个 {@link BarStyle} 样式
      *
-     * @return BarStyle
+     * @return 随机样式
      */
     public static BarStyle randomStyle() {
-        int num = (int) (Math.random() * 4);
-
-        switch (num) {
-            case 0:
-                return BarStyle.SOLID;
-            case 1:
-                return BarStyle.SEGMENTED_6;
-            case 2:
-                return BarStyle.SEGMENTED_10;
-            case 3:
-                return BarStyle.SEGMENTED_12;
-            case 4:
-                return BarStyle.SEGMENTED_20;
-        }
-
-        return BarStyle.SEGMENTED_20;
+        return BAR_STYLES[RANDOM.nextInt(BAR_STYLES.length)];
     }
 }

@@ -3,32 +3,29 @@ package me.twomillions.plugin.advancedwish.utils;
 import org.bukkit.entity.Player;
 
 /**
- * A utility for managing player experience. Slightly modified by 2000000.
- * by <a href="https://gist.github.com/Jikoo/30ec040443a4701b8980">Jikoo</a>
+ * 玩家经验管理工具，由 2000000 进行修改。
+ * 参考实现: <a href="https://gist.github.com/Jikoo/30ec040443a4701b8980">Jikoo</a>
  */
 public final class ExpUtils {
     /**
-     * 计算玩家总经验
+     * 计算玩家总经验。
      *
-     * @param player player
-     * @return player exp
+     * @param player 玩家
+     * @return 玩家总经验
      *
-     * @see <a href=http://minecraft.gamepedia.com/Experience#Leveling_up>Experience#Leveling_up</a>
+     * @see <a href=http://minecraft.gamepedia.com/Experience#Leveling_up>经验值#升级</a>
      */
     public static int getExp(Player player) {
         return levelToExp(player.getLevel()) + Math.round(getNextLevelExp(player.getLevel()) * player.getExp());
     }
 
     /**
-     * Total experience =
-     *  level2 + 6 × level (at levels 0–16)
-     *  2.5 × level2 – 40.5 × level + 360 (at levels 17–31)
-     *  4.5 × level2 – 162.5 × level + 2220 (at levels 32+)
+     * 根据等级计算经验值。
      *
-     * @param level level
-     * @return Total experience
+     * @param level 等级
+     * @return 总经验值
      *
-     * @see <a href=http://minecraft.gamepedia.com/Experience#Leveling_up>Experience#Leveling_up</a>
+     * @see <a href=http://minecraft.gamepedia.com/Experience#Leveling_up>经验值#升级</a>
      */
     public static int levelToExp(int level) {
         if (level <= 16) return level * level + 6 * level;
@@ -37,10 +34,10 @@ public final class ExpUtils {
     }
 
     /**
-     * Calculate level (including progress to next level) based on total experience.
+     * 根据经验值计算等级和升级进度。
      *
-     * @param exp the total experience
-     * @return the level calculated
+     * @param exp 经验值
+     * @return 玩家等级和升级进度
      */
     public static double getLevelFromExp(long exp) {
         int level = expToLevel(exp);
@@ -53,12 +50,12 @@ public final class ExpUtils {
     }
 
     /**
-     * exp tp level
+     * 根据经验值计算等级。
      *
-     * @param exp exp
-     * @return level
+     * @param exp 经验值
+     * @return 等级
      *
-     * @see <a href=http://minecraft.gamepedia.com/Experience#Leveling_up>Experience#Leveling_up</a>
+     * @see <a href=http://minecraft.gamepedia.com/Experience#Leveling_up>经验值#升级</a>
      */
     public static int expToLevel(long exp) {
         if (exp > 1508) return (int) ((Math.sqrt(72 * exp - 54215) + 325) / 18);
@@ -67,14 +64,10 @@ public final class ExpUtils {
     }
 
     /**
-     * Experience required =
-     *  2 × current_level + 7 (for levels 0–15)
-     *  5 × current_level – 38 (for levels 16–30)
-     *  9 × current_level – 158 (for levels 31+)
+     * 根据等级获取升级所需经验值。
      *
-     * @param level level
-     * @return exp
-     *
+     * @param level 等级
+     * @return 升级所需经验值
      * @see <a href=http://minecraft.gamepedia.com/Experience#Leveling_up>Experience#Leveling_up</a>
      */
     private static int getNextLevelExp(int level) {
