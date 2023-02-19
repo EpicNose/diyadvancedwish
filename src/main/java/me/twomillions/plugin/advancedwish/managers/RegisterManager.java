@@ -30,6 +30,7 @@ public class RegisterManager {
 
     @Getter @Setter private volatile static Economy economy;
     @Getter @Setter private volatile static boolean usingPapi;
+    @Getter @Setter private volatile static boolean usingVulpecula;
     @Getter @Setter private volatile static PlayerPointsAPI playerPointsAPI;
 
     /**
@@ -46,9 +47,16 @@ public class RegisterManager {
         if (manager.isPluginEnabled("PlaceholderAPI")) {
             setUsingPapi(true);
 
-            QuickUtils.sendConsoleMessage("&a检查到服务器存在 &ePlaceholderAPI&a，已注册 &ePlaceholderAPI&a 变量。");
-
             new PapiManager().register();
+
+            QuickUtils.sendConsoleMessage("&a检查到服务器存在 &ePlaceholderAPI&a，已注册 &ePlaceholderAPI&a 变量。");
+        }
+
+        // Vulpecula - Kether
+        if (manager.isPluginEnabled("Vulpecula")) {
+            setUsingVulpecula(true);
+
+            QuickUtils.sendConsoleMessage("&a检查到服务器存在 &eVulpecula&a，已支持使用 &eKether&a 脚本。");
         }
     }
 
@@ -98,10 +106,9 @@ public class RegisterManager {
         if (registeredServiceProvider == null) { QuickUtils.sendConsoleMessage("&c检查到服务器存在 &eVault&c，但并没有实际插件进行操作? 取消对于 &eVault&c 的设置。"); return; }
 
         try { setEconomy(registeredServiceProvider.getProvider()); }
-        catch (Exception exception) {
+        catch (Throwable throwable) {
             QuickUtils.sendConsoleMessage("&c检查到服务器存在 &eVault&c，但 &eVault&c 设置错误，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/vault.34315/&c，服务器即将关闭。");
-            Bukkit.shutdown();
-            return;
+            Bukkit.shutdown(); return;
         }
 
         QuickUtils.sendConsoleMessage("&a检查到服务器存在 &eVault&a，已成功设置 &eVault&a。");
@@ -114,10 +121,9 @@ public class RegisterManager {
         if (Bukkit.getPluginManager().getPlugin("PlayerPoints") == null) return;
 
         try { setPlayerPointsAPI(PlayerPoints.getInstance().getAPI()); }
-        catch (Exception exception) {
+        catch (Throwable throwable) {
             QuickUtils.sendConsoleMessage("&c检查到服务器存在 &ePlayerPoints&c，但 &ePlayerPoints&c 设置错误，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/playerpoints.80745/&c，服务器即将关闭。");
-            Bukkit.shutdown();
-            return;
+            Bukkit.shutdown(); return;
         }
 
         QuickUtils.sendConsoleMessage("&a检查到服务器存在 &ePlayerPoints&a，已成功设置 &ePlayerPoints&a。");
@@ -137,7 +143,7 @@ public class RegisterManager {
         // 低版本 Papi 没有 unregister 方法，捕获异常以取消 Papi 重载
         if (isUsingPapi()) Bukkit.getScheduler().runTask(plugin, () -> {
             try { new PapiManager().unregister(); new PapiManager().register(); }
-            catch (Exception exception) { QuickUtils.sendConsoleMessage("&ePlaceholder&c 重载异常，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/placeholderapi.6245/&c，已取消 &ePlaceholder&c 重载。"); }
+            catch (Throwable throwable) { QuickUtils.sendConsoleMessage("&ePlaceholder&c 重载异常，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/placeholderapi.6245/&c，已取消 &ePlaceholder&c 重载。"); }
         });
 
         // 设置 Vault 以及 PlayerPoints

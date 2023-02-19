@@ -14,6 +14,7 @@ import me.twomillions.plugin.advancedwish.utils.ItemUtils;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import me.twomillions.plugin.advancedwish.utils.RandomUtils;
 import net.milkbowl.vault.economy.Economy;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -78,163 +79,14 @@ public class WishManager {
     }
 
     /**
-     * 玩家计划任务记录
-     */
-    private static final Map<UUID, ArrayList<String>> playerScheduledTasks = new ConcurrentHashMap<>();
-
-    /**
-     * 快速转换为 ScheduledTaskString
-     * 格式为: 时间[0];许愿池文件名[1];Do-List[2]
-     *
-     * @param time time
-     * @param wishName wishName
-     * @param doList doList
-     * @return scheduledTaskString
-     */
-    public static String toPlayerScheduledTaskString(Long time, String wishName, String doList) {
-        return time + ";" + wishName + ";" + doList;
-    }
-
-    /**
-     * ScheduledTaskString 获取计划任务时间
-     *
-     * @param scheduledTaskString scheduledTaskString
-     * @return time
-     */
-    public static String getPlayerScheduledTaskStringTime(String scheduledTaskString) {
-        return scheduledTaskString.split(";") [0];
-    }
-
-    /**
-     * ScheduledTaskString 获取计划任务许愿池文件命名
-     *
-     * @param scheduledTaskString scheduledTaskString
-     * @return wishName
-     */
-    public static String getPlayerScheduledTaskStringWishName(String scheduledTaskString) {
-        return scheduledTaskString.split(";") [1];
-    }
-
-    /**
-     * ScheduledTaskString 获取计划任务对应 Do-List
-     *
-     * @param scheduledTaskString scheduledTaskString
-     * @return doList
-     */
-    public static String getPlayerScheduledTaskStringDoList(String scheduledTaskString) {
-        return scheduledTaskString.split(";") [2];
-    }
-
-    /**
      * 获取指定许愿池 WAIT-SET 计划任务
      *
      * @param wishName wishName
-     * @return wishScheduledTasksString
+     * @return wishScheduledTasks
      */
     public static List<String> getWishWaitSetScheduledTasks(String wishName) {
         Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
         return yaml.getStringList("WAIT-SET");
-    }
-
-    /**
-     * 添加玩家指定计划任务
-     *
-     * @param player player
-     * @param scheduledTask scheduledTask
-     */
-    public static void addPlayerScheduledTasks(Player player, String scheduledTask) {
-        UUID uuid = player.getUniqueId();
-
-        ArrayList<String> list = playerScheduledTasks.getOrDefault(uuid, new ArrayList<>());
-
-        if (!list.contains(scheduledTask)) {
-            list.add(scheduledTask);
-            playerScheduledTasks.put(uuid, list);
-        }
-    }
-
-    /**
-     * 添加玩家指定计划任务
-     *
-     * @param player player
-     * @param time time
-     * @param wishName wishName
-     * @param doList doList
-     */
-    public static void addPlayerScheduledTasks(Player player, Long time, String wishName, String doList) {
-        if (!doList.contains("DO-LIST.")) doList = "DO-LIST." + doList;
-
-        UUID uuid = player.getUniqueId();
-        String scheduledTask = toPlayerScheduledTaskString(time, wishName, doList);
-
-        ArrayList<String> list = playerScheduledTasks.getOrDefault(uuid, new ArrayList<>());
-
-        if (!list.contains(scheduledTask)) {
-            list.add(scheduledTask);
-            playerScheduledTasks.put(uuid, list);
-        }
-    }
-
-    /**
-     * 删除指定计划任务
-     *
-     * @param player player
-     * @param wishScheduledTasksString wishScheduledTasksString
-     */
-    public static void removePlayerScheduledTasks(Player player, String wishScheduledTasksString) {
-        playerScheduledTasks.getOrDefault(player.getUniqueId(), new ArrayList<>()).remove(wishScheduledTasksString);
-    }
-
-    /**
-     * 删除指定玩家所有计划任务
-     *
-     * @param player player
-     */
-    public static void removePlayerScheduledTasks(Player player) {
-        playerScheduledTasks.remove(player.getUniqueId());
-    }
-
-    /**
-     * 获取指定玩家计划任务
-     *
-     * @param player player
-     * @return wishScheduledTasksStringList
-     */
-    public static List<String> getPlayerScheduledTasks(Player player) {
-        return playerScheduledTasks.getOrDefault(player.getUniqueId(), new ArrayList<>());
-    }
-
-    /**
-     * 创建此许愿池的玩家计划任务
-     *
-     * @param player player
-     * @param wishName wishName
-     * @param finalProbabilityWish finalProbabilityWish
-     */
-    public static void createPlayerScheduledTasks(Player player, String wishName, String finalProbabilityWish) {
-        for (String wishWaitSetScheduledTask : getWishWaitSetScheduledTasks(wishName)) {
-            wishWaitSetScheduledTask = QuickUtils.randomSentence(QuickUtils.replaceTranslateToPapi(wishWaitSetScheduledTask, player));
-
-            Long time = System.currentTimeMillis();
-
-            if (QuickUtils.hasSleepSentenceMs(wishWaitSetScheduledTask)) {
-                time = time + QuickUtils.getSleepSentenceMs(wishWaitSetScheduledTask);
-                wishWaitSetScheduledTask = QuickUtils.removeSleepSentence(wishWaitSetScheduledTask);
-            }
-
-            if (wishWaitSetScheduledTask.equals("GO-RANDOM")) {
-                addPlayerScheduledTasks(player, time, wishName, getProbabilityWishDoList(finalProbabilityWish));
-                continue;
-            }
-
-            if (wishWaitSetScheduledTask.equals("RANDOM-AGAIN")) {
-                String randomFinalProbabilityWish = getFinalProbabilityWish(player, wishName);
-                addPlayerScheduledTasks(player, time, wishName, getProbabilityWishDoList(randomFinalProbabilityWish));
-                continue;
-            }
-
-            addPlayerScheduledTasks(player, time, wishName, wishWaitSetScheduledTask);
-        }
     }
 
     /**
@@ -422,13 +274,7 @@ public class WishManager {
         if (playerWishState == PlayerWishState.InProgress) {
             // isCancelled
             if (!QuickUtils.callAsyncPlayerWishEvent(player, PlayerWishState.InProgress, wishName, force).isCancelled()) {
-                for (String cantWishAgainTasks : yaml.getStringList("CANT-WISH-AGAIN")) {
-                    cantWishAgainTasks = QuickUtils.randomSentence(QuickUtils.replaceTranslateToPapi(cantWishAgainTasks, player));
-
-                    if (QuickUtils.sleepSentence(cantWishAgainTasks)) continue;
-
-                    EffectSendManager.sendEffect(wishName, player, null, "/Wish", cantWishAgainTasks, true);
-                }
+                ScheduledTaskManager.createPlayerScheduledTasks(player, wishName, "/Wish", yaml.getStringList("CANT-WISH-AGAIN"));
             }
 
             return;
@@ -438,13 +284,7 @@ public class WishManager {
         if (playerWishState == PlayerWishState.LoadingCache) {
             // isCancelled
             if (!QuickUtils.callAsyncPlayerWishEvent(player, PlayerWishState.LoadingCache, wishName, force).isCancelled()) {
-                for (String cantWishLoadingCacheTask : yaml.getStringList("CANT-WISH-LOADING-CACHE")) {
-                    cantWishLoadingCacheTask = QuickUtils.randomSentence(QuickUtils.replaceTranslateToPapi(cantWishLoadingCacheTask, player));
-
-                    if (QuickUtils.sleepSentence(cantWishLoadingCacheTask)) continue;
-
-                    EffectSendManager.sendEffect(wishName, player, null, "/Wish", cantWishLoadingCacheTask, true);
-                }
+                ScheduledTaskManager.createPlayerScheduledTasks(player, wishName, "/Wish", yaml.getStringList("CANT-WISH-LOADING-CACHE"));
             }
 
             return;
@@ -454,13 +294,7 @@ public class WishManager {
         if (playerWishState == PlayerWishState.WaitingLoadingCache) {
             // isCancelled
             if (!QuickUtils.callAsyncPlayerWishEvent(player, PlayerWishState.WaitingLoadingCache, wishName, force).isCancelled()) {
-                for (String cantWishWaitingLoadingCacheTask : yaml.getStringList("CANT-WISH-WAITING-LOADING-CACHE")) {
-                    cantWishWaitingLoadingCacheTask = QuickUtils.randomSentence(QuickUtils.replaceTranslateToPapi(cantWishWaitingLoadingCacheTask, player));
-
-                    if (QuickUtils.sleepSentence(cantWishWaitingLoadingCacheTask)) continue;
-
-                    EffectSendManager.sendEffect(wishName, player, null, "/Wish", cantWishWaitingLoadingCacheTask, true);
-                }
+                ScheduledTaskManager.createPlayerScheduledTasks(player, wishName, "/Wish", yaml.getStringList("CANT-WISH-WAITING-LOADING-CACHE"));
             }
 
             return;
@@ -470,13 +304,7 @@ public class WishManager {
         if (playerWishState == PlayerWishState.RequirementsNotMet && !force) {
             // isCancelled
             if (!QuickUtils.callAsyncPlayerWishEvent(player, PlayerWishState.RequirementsNotMet, wishName, false).isCancelled()) {
-                for (String cantWishTask : yaml.getStringList("CANT-WISH")) {
-                    cantWishTask = QuickUtils.randomSentence(QuickUtils.replaceTranslateToPapi(cantWishTask, player));
-
-                    if (QuickUtils.sleepSentence(cantWishTask)) continue;
-
-                    EffectSendManager.sendEffect(wishName, player, null, "/Wish", cantWishTask, true);
-                }
+                ScheduledTaskManager.createPlayerScheduledTasks(player, wishName, "/Wish", yaml.getStringList("CANT-WISH"));
             }
 
             return;
@@ -486,13 +314,7 @@ public class WishManager {
         if (playerWishState == PlayerWishState.ReachLimit && !force) {
             // isCancelled
             if (!QuickUtils.callAsyncPlayerWishEvent(player, PlayerWishState.ReachLimit, wishName, false).isCancelled()) {
-                for (String reachLimitTask : yaml.getStringList("ADVANCED-SETTINGS.WISH-LIMIT.REACH-LIMIT")) {
-                    reachLimitTask = QuickUtils.randomSentence(QuickUtils.replaceTranslateToPapi(reachLimitTask, player));
-
-                    if (QuickUtils.sleepSentence(reachLimitTask)) continue;
-
-                    EffectSendManager.sendEffect(wishName, player, null, "/Wish", reachLimitTask, true);
-                }
+                ScheduledTaskManager.createPlayerScheduledTasks(player, wishName, "/Wish", yaml.getStringList("ADVANCED-SETTINGS.WISH-LIMIT.REACH-LIMIT"));
             }
 
             return;
@@ -505,7 +327,7 @@ public class WishManager {
         String finalProbabilityWish = getFinalProbabilityWish(player, wishName);
 
         addPlayerToWishList(player);
-        createPlayerScheduledTasks(player, wishName, finalProbabilityWish);
+        ScheduledTaskManager.createPlayerScheduledTasks(player, wishName, finalProbabilityWish);
     }
 
     /**
@@ -739,17 +561,6 @@ public class WishManager {
 
         return Boolean.parseBoolean(QuickUtils.replaceTranslateToPapi(yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-COMPLETE-SEND-CONSOLE")));
     }
-    /**
-     * 是否开启抽奖日志记录
-     *
-     * @param wishName wishName
-     * @return boolean
-     */
-    public static boolean isEnabledRecordWish(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
-
-        return Boolean.parseBoolean(QuickUtils.replaceTranslateToPapi(yaml.getString("ADVANCED-SETTINGS.RECORD-WISH")));
-    }
 
     /**
      * 检查玩家是否满足许愿条件
@@ -766,7 +577,7 @@ public class WishManager {
 
         // 检查玩家是否正在处理缓存
         if (PlayerCheckCacheTask.isLoadingCache(uuid)) return PlayerWishState.LoadingCache;
-        
+
         // 检查玩家是否正在等待处理缓存
         if (PlayerCheckCacheTask.isWaitingLoadingCache(uuid)) return PlayerWishState.WaitingLoadingCache;
 
@@ -874,6 +685,65 @@ public class WishManager {
 
             if (!player.hasPotionEffect(effectType) || player.getPotionEffect(effectType).getAmplifier() < amplifier) return PlayerWishState.RequirementsNotMet;
         }
+        
+        // 自定义检查
+        for (String custom : yaml.getStringList("CUSTOM")) {
+            if (custom == null || custom.length() <= 1) continue;
+
+            String[] customSplit = custom.split(";");
+
+            // 对比值[0];条件[1];值[2]
+            String value = QuickUtils.replaceTranslateToPapi(customSplit[2], player);
+            String condition = QuickUtils.replaceTranslateToPapi(customSplit[1], player);
+            String contrastValue = QuickUtils.replaceTranslateToPapi(customSplit[0], player);
+
+            if (NumberUtils.isNumber(value)) value = QuickUtils.count(value).toString();
+            if (NumberUtils.isNumber(contrastValue)) contrastValue = QuickUtils.count(contrastValue).toString();
+
+            if (condition.equals(">")) {
+                double value1 = Double.parseDouble(value);
+                double contrastValue1 = Double.parseDouble(contrastValue);
+                if (!(contrastValue1 > value1)) return PlayerWishState.RequirementsNotMet;
+                continue;
+            }
+
+            if (condition.equals(">=")) {
+                double value1 = Double.parseDouble(value);
+                double contrastValue1 = Double.parseDouble(contrastValue);
+                if (!(contrastValue1 >= value1)) return PlayerWishState.RequirementsNotMet;
+                continue;
+            }
+
+            if (condition.equals("=")) {
+                double value1 = Double.parseDouble(value);
+                double contrastValue1 = Double.parseDouble(contrastValue);
+                if (!(contrastValue1 == value1)) return PlayerWishState.RequirementsNotMet;
+                continue;
+            }
+
+            if (condition.equals("<")) {
+                double value1 = Double.parseDouble(value);
+                double contrastValue1 = Double.parseDouble(contrastValue);
+                if (!(contrastValue1 < value1)) return PlayerWishState.RequirementsNotMet;
+                continue;
+            }
+
+            if (condition.equals("<=")) {
+                double value1 = Double.parseDouble(value);
+                double contrastValue1 = Double.parseDouble(contrastValue);
+                if (!(contrastValue1 <= value1)) return PlayerWishState.RequirementsNotMet;
+                continue;
+            }
+
+            if (condition.equals("EQUALS")) {
+                if (!(contrastValue.equals(value))) return PlayerWishState.RequirementsNotMet;
+                continue;
+            }
+
+            if (condition.equals("CONTAINS")) {
+                if (!(contrastValue.contains(value))) return PlayerWishState.RequirementsNotMet;
+            }
+        }
 
         // 点券检查，扣除点券
         boolean takePoints = false;
@@ -926,7 +796,7 @@ public class WishManager {
         PlayerCheckCacheTask.setPlayerQuitTime(player);
 
         List<String> newPlayerDoList = new ArrayList<>();
-        List<String> playerDoList = WishManager.getPlayerScheduledTasks(player);
+        List<String> playerDoList = ScheduledTaskManager.getPlayerScheduledTasks(player);
 
         if (playerDoList.size() == 0) { savingCache.put(uuid, false); return; }
 
@@ -935,7 +805,7 @@ public class WishManager {
 
         ConfigManager.createJson(uuid.toString(), Main.getDoListCachePath(), true, false).set("CACHE", newPlayerDoList);
 
-        WishManager.removePlayerScheduledTasks(player);
+        ScheduledTaskManager.removePlayerScheduledTasks(player);
 
         savingCache.put(uuid, false);
     }

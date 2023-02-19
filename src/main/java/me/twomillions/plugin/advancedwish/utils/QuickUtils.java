@@ -1,12 +1,12 @@
 package me.twomillions.plugin.advancedwish.utils;
 
 import me.clip.placeholderapi.PlaceholderAPI;
+import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.api.AsyncEffectSendEvent;
 import me.twomillions.plugin.advancedwish.api.AsyncPlayerCheckCacheEvent;
 import me.twomillions.plugin.advancedwish.api.AsyncPlayerWishEvent;
 import me.twomillions.plugin.advancedwish.api.AsyncWishLimitResetEvent;
 import me.twomillions.plugin.advancedwish.enums.wish.PlayerWishState;
-import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.managers.RegisterManager;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
@@ -202,14 +202,14 @@ public class QuickUtils {
     /**
      * 延迟语句，sleepSentence(1000)end
      *
-     * <p>这是不推荐使用的，在存储的计划任务在绝对不该使用这个
-     * 若存储的计划任务中使用则只会导致无法被缓存记录，这是危险的，它应该只出现于不需要被缓存记录的，不重要的提示信息发送
-     * 若需要于缓存中安全的使用 sleepSentence 则请使用 {@link QuickUtils#hasSleepSentenceMs(String)}
-     * {@link QuickUtils#getSleepSentenceMs(String)} 以及 {@link QuickUtils#removeSleepSentence(String)} 协作更改 time 完成
-     *
      * @param sleepSentence sleepSentence
+     * @deprecated <p>弃用的，在存储的计划任务在绝对不该使用这个
+     *          若存储的计划任务中使用则只会导致无法被缓存记录，这是危险的，它应该只出现于不需要被缓存记录的，不重要的提示信息发送
+     *          若需要于缓存中安全的使用 sleepSentence 则请使用 {@link QuickUtils#hasSleepSentenceMs(String)}
+     *          {@link QuickUtils#getSleepSentenceMs(String)} 以及 {@link QuickUtils#removeSleepSentence(String)} 协作更改 time 完成
      * @return boolean
      */
+    @Deprecated
     public static boolean sleepSentence(String sleepSentence) {
         if (!sleepSentence.contains("sleepSentence(") || !sleepSentence.contains(")end")) return false;
 

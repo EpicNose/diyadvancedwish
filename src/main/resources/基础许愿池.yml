@@ -1,5 +1,5 @@
 # 配置版本 请不要擅自更改，插件将在启动时检查配置文件版本，并告诉您您是否应该重新生成来防止错误
-CONFIG-VERSION: 50
+CONFIG-VERSION: 51
 
 # 自动重载:
 #  除了 ADVANCED-SETTINGS WISH-LIMIT 以外
@@ -17,14 +17,16 @@ CONFIG-VERSION: 50
 #  从 0.0.5-SNAPSHOT 后配置文件的格式进行了变化，格式如下:
 #
 #   WAIT-SET:
-#    - "START"
-#    - "C1 sleepSentence(1000)end"
-#    - "C2 sleepSentence(2000)end"
-#    - "C3 sleepSentence(3000)end"
+#    - "DO-LIST.START"
+#    - "DO-LIST.C1 sleepSentence(1000)end"
+#    - "DO-LIST.C2 sleepSentence(2000)end"
+#    - "DO-LIST.C3 sleepSentence(3000)end"
 #    - "GO-RANDOM sleepSentence(4000)end"
 #
 #  这里使用 WAIT-SET 部分进行举例，sleepSentence 语句在下文拥有介绍，此写法将会被解读为
 #  即刻发送 DO-LIST 内的 START 效果，1000ms 延迟发送 DO-LIST 内的 C1 效果，以此类推
+#  您还可以使用 "D:/MinecraftTestServers/测试群组/1.19 - Server1/plugins/AdvancedWish/Wish;wtf;DO-LIST.START" 这种高级写法
+#  其格式为 “文件路径;文件名;执行效果节点”，这意味着您可以从其他文件中读取您想要的数据，您可以将重复的数据存储至统一一个文件内来提高配置速度，节省空间
 #
 # 语句介绍:
 #  randomSentence 语句:
@@ -38,30 +40,55 @@ CONFIG-VERSION: 50
 #  sleepSentence 语句:
 #   sleepSentence 语句是在 0.0.5-SNAPSHOT 版本后新加入的延迟语句。
 #   它由 “sleepSentence(” 开头，由 ")end" 结尾，括号内则为延迟毫秒，实例: sleepSentence(1000)end
-#   sleepSentence 有两种写法，一种紧跟在效果后，意味发送效果的时间会延迟，但是我们会先进行记录，这只是增加了执行时间，这种写法只能用于 WAIT-SET 部分
-#   一种是在单独一行进行书写，这意味着遇到这个语句会先进行延迟，等待延迟结束之后才会记录它，我们强烈不建议您在 WAIT-SET 部分使用这种写法，这只会导致数据丢失
-#
+#   sleepSentence 写法为紧跟在效果后，意味发送效果的时间会延迟，但是我们会先进行记录，这只是增加了执行时间
 
-# 使用限制
+# 使用限制 (若里面有任意一项没有通过则视为无法进行许愿)
 CONDITION:
   # 权限检查，玩家必须含有什么权限
   # 若不想启用，则填入空，即 ""
   PERM: ""
+
   # 玩家背包内必须含有什么物品
   # 格式: 物品;数量
   #
   # 支持算数的部分有: 数量
   INVENTORY-HAVE:
     - ""
+
   # 玩家身上必须含有什么药水效果
   # 格式: 药水;等级 (等级是大于等于)
   #
   # 支持算数的部分有: 等级
   PLAYER-HAVE-EFFECTS:
     - ""
+
   LEVEL: 10 # 等级限制，大于等于，不会扣除等级 - 不可小数 - 支持算数
   MONEY: 0.0 # 这里指的是扣除，如果您不想启用的话则设置为0. 此功能需要用到 Vault 插件 - 可小数 - 支持算数
   POINT: 0 # 这里指的是扣除，如果您不想启用的话则设置为0. 此功能需要用到 PlayerPoints 插件 - 不可小数 - 支持算数
+
+  # 自定义条件
+  # 格式: 对比值;条件;值
+  #
+  # 条件:
+  #  ">" 大于
+  #  ">=" 大于等于
+  #  “=” 等于
+  #  "<" 小于
+  #  "<=" 小于等于
+  #  "EQUALS" 字符串 - 等于 (区分大小写)
+  #  "CONTAINS" 字符串 - 包含 (区分大小写)
+  #
+  # 例子:
+  #  假设我将设置，若此服务器玩家在线数大于等于 50 人，则可以在此奖池许愿，那么可以这样写
+  #  我们将通过 PlayerList 变量来获取在线玩家数量 (https://github.com/PlaceholderAPI/PlaceholderAPI/wiki/Placeholders#playerlist)
+  #  %playerlist_online,normal,yes,amount% 这将返回目前在线为玩家的数量，返回的内容为 "1" "2" "5" 等等数字
+  #  我们使用 ">=" 判断，"%playerlist_online,normal,yes,amount%;>=;50" 完成
+  #
+  #  假设还有一个需求，我们不想要 PlayerPoints 的点券来主导一切，我想要 SkillAPI 的积分扣除
+  #  那么我们只需要这样写一个条件，通过 %skillapi_skill_points_<skillName>% 来获取积分，并且对其进行判断
+  #  "%skillapi_skill_points_<skillName>%;>=;500"，若此判断通过了，那么我们只需要使用指令扣除该玩家的点券即可，但请注意，扣除点券应该是实时发生的，它不应该被延迟
+  CUSTOM:
+    - ""
 
 # 设置奖品
 # 格式: 几率;执行项 (DO-LIST);增加的增率 (保底率);是否清零保底率 (插件会先检查清空，再检查是否增加保底率)
@@ -81,9 +108,9 @@ CONDITION:
 # 支持 randomSentence 语句的部分有: 全部
 # 支持的算数部分有: 几率 / 增加的增率 (保底率)
 PRIZE-SET:
-  - "5;A;0;true"
-  - "20;B;1;false"
-  - "75;C;1;false"
+  - "5;DO-LIST.A;0;true"
+  - "20;DO-LIST.B;1;false"
+  - "75;DO-LIST.C;1;false"
 
 # 保底，即当 增率 (保底率) 到多少了触发对应的保底机制
 # 格式: 增率 (保底率);执行项 (DO-LIST);增加的增率 (保底率);是否清空保底率 (插件会先检查清空，再检查是否增加保底率)
@@ -116,8 +143,8 @@ PRIZE-SET:
 # 支持 randomSentence 语句的部分有: 全部
 # 支持的算数部分有: 增率 (保底率) / 增加的增率 (保底率)
 GUARANTEED:
-  - "30;randomSentence(A#50~B#10)end;0;true" # 这里是大保底，有 1/6 的几率歪到 B，5/6 的几率是 A
-  - "15;B;1;false" # 这里是小保底
+  - "30;randomSentence(DO-LIST.A#50~DO-LIST.B#10)end;0;true" # 这里是大保底，有 1/6 的几率歪到 B，5/6 的几率是 A
+  - "15;DO-LIST.B;1;false" # 这里是小保底
 
 # 我们应该怎么样写等待时间，这里将以秒为单位 (此任务支持跨服执行)
 # 格式: 执行项 (DO-LIST)
@@ -141,13 +168,13 @@ GUARANTEED:
 #  但是需要注意的是: 如果您要运行 RANDOM-AGAIN，并且 WAIT-SET 中还存在 GO-RANDOM 执行操作
 #  那么您应该首先执行 GO-RANDOM 后执行 RANDOM-AGAIN，而不是直接执行 RANDOM-AGAIN
 #  下面我将展示一个三连抽的示例配置文件以供您参考。
-#  (如果您的连抽池与单抽许愿池等不相同，那么您需要去看 高级设置内的数据同步 选项来保证玩家数据在每个奖池相同!)
+#  (如果您的连抽池与单抽许愿池等不相同，那么您需要去看 高级设置内的数据同步 选项来保证玩家数据在每个奖池相同)
 #
 # 三连抽示例:
-#   - "START"
-#   - "C1 sleepSentence(1000)end"
-#   - "C2 sleepSentence(2000)end"
-#   - "C3 sleepSentence(3000)end"
+#   - "DO-LIST.START"
+#   - "DO-LIST.C1 sleepSentence(1000)end"
+#   - "DO-LIST.C2 sleepSentence(2000)end"
+#   - "DO-LIST.C3 sleepSentence(3000)end"
 #   - "GO-RANDOM sleepSentence(4000)end"
 #   - "RANDOM-AGAIN sleepSentence(5000)end"
 #   - "RANDOM-AGAIN sleepSentence(6000)end"
@@ -156,35 +183,35 @@ GUARANTEED:
 # 支持 sleepSentence 语句的部分有: 全部
 # 支持 randomSentence 语句的部分有: 全部
 WAIT-SET:
-  - "START"
-  - "C1 sleepSentence(1000)end"
-  - "C2 sleepSentence(2000)end"
-  - "C3 sleepSentence(3000)end"
+  - "DO-LIST.START"
+  - "DO-LIST.C1 sleepSentence(1000)end"
+  - "DO-LIST.C2 sleepSentence(2000)end"
+  - "DO-LIST.C3 sleepSentence(3000)end"
   - "GO-RANDOM sleepSentence(4000)end"
 
 # 当玩家许愿一次后没有等待最终奖品发放便尝试二次许愿时
 # 支持 sleepSentence 语句的部分有: 全部
 # 支持 randomSentence 语句的部分有: 全部
 CANT-WISH-AGAIN:
-  - "CANT-WISH-AGAIN-EFFECT"
+  - "DO-LIST.CANT-WISH-AGAIN-EFFECT"
 
 # 当玩家没有满足许愿条件但是尝试许愿时
 # 支持 sleepSentence 语句的部分有: 全部
 # 支持 randomSentence 语句的部分有: 全部
 CANT-WISH:
-  - "CANT-WISH"
+  - "DO-LIST.CANT-WISH"
 
 # 禁止玩家在处理缓存时许愿
 # 支持 sleepSentence 语句的部分有: 全部
 # 支持 randomSentence 语句的部分有: 全部
 CANT-WISH-LOADING-CACHE:
-  - "CANT-WISH-LOADING-CACHE"
+  - "DO-LIST.CANT-WISH-LOADING-CACHE"
 
 # 禁止玩家在等待处理缓存时许愿
 # 支持 sleepSentence 语句的部分有: 全部
 # 支持 randomSentence 语句的部分有: 全部
 CANT-WISH-WAITING-LOADING-CACHE:
-  - "CANT-WISH-WAITING-LOADING-CACHE"
+  - "DO-LIST.CANT-WISH-WAITING-LOADING-CACHE"
 
 # 缓存设置
 CACHE-SETTINGS:
@@ -194,7 +221,7 @@ CACHE-SETTINGS:
   # 支持 sleepSentence 语句的部分有: 全部
   # 支持 randomSentence 语句的部分有: 全部
   WISH-CACHE:
-    - "WISH-CACHE"
+    - "DO-LIST.WISH-CACHE"
 
 # 高级设置，当您试图编辑这里时候，您应该明白您正在做什么
 ADVANCED-SETTINGS:
@@ -255,7 +282,7 @@ ADVANCED-SETTINGS:
     # 支持 sleepSentence 语句的部分有: 全部
     # 支持 randomSentence 语句的部分有: 全部
     REACH-LIMIT:
-      - "REACH-LIMIT"
+      - "DO-LIST.REACH-LIMIT"
 
     # 当次许愿池重置次数时给所有玩家发送的效果
     #
@@ -267,16 +294,9 @@ ADVANCED-SETTINGS:
     # 支持 sleepSentence 语句的部分有: 全部
     # 支持 randomSentence 语句的部分有: 全部
     RESET-COMPLETE:
-      - "RESET-COMPLETE"
+      - "DO-LIST.RESET-COMPLETE"
 
-  # 抽奖日志记录
-  #  具体实现原理: 当玩家许愿后创建对应计划任务时，我们会将此次抽奖的详细信息以 Json 或 Mongo 的形式进行记录。
-  #  若开启了 Mongo 数据库则记录在 Mongo 数据库内，反之则记录在 Json 文件内，Json 路径可在 advancedWish.yml 中 LOGS-PATH 项规定。
-  #  记录的日志文件是近乎不可读的，所以您需要在游戏内或者控制台使用指令获取详细日志。
-  RECORD-WISH: true
-
-# 在新版本中， PRIZE-DO / WAIT-DO 将被全部合并为 DO-LIST
-# 在其余需要发送效果的地方需直接引用 DO-LIST 中的内容，这样极大程度简化配置文件
+# 自定义执行节点
 DO-LIST:
   C1:
     # 给予的药水效果
@@ -285,6 +305,7 @@ DO-LIST:
     # 支持算数的部分有: 药水时间 / 等级
     EFFECTS:
       - ""
+
     # 显示的标题
     # 注意: Title 在 1.7.10 以下无法使用 (因为低版本没有此功能，包括 1.7.10)
     TITLE:
@@ -293,6 +314,7 @@ DO-LIST:
       FADE-IN: 20 # 淡入 (单位ticks 20ticks = 1s) - 支持算数
       FADE-OUT: 0 # 淡出 - 支持算数
       STAY: 21 # 显示 (这里我添加了 1ticks 使得衔接更加平滑) - 支持算数
+
     # 执行的指令 (使用 <player> 作为玩家名)
     #  PLAYER 以为玩家身份执行，CONSOLE 为以控制台身份执行
     #
@@ -305,15 +327,18 @@ DO-LIST:
         - ""
       CONSOLE:
         - ""
+
     # 发送的公告
     # 注意:
     #  由于公告与信息会进行检查，如果其为空或长度小于等于1则会无视，所以想要发送全空格则多打几个
     #  例子: "   "
     ANNOUNCEMENT:
       - ""
+
     # 发送的消息
     MESSAGE:
       - ""
+
     # 显示的粒子效果
     #
     # 格式:
@@ -330,20 +355,25 @@ DO-LIST:
     # 支持算数的部分有: 偏移X / 偏移Y / 偏移Z / 数量
     PARTICLE:
       - ""
+
     # 音效
     # 格式: 音效;音量;音高
     SOUNDS:
       - "ENTITY_PLAYER_LEVELUP;1;1"
+
     # 回复的饱食度与生命值
     HEALTH: 0
     HUNGER: 0
+
     # 增加的 EXP
     EXP: 0
+
     # Action Bar
     # 注意: Action Bar 在 1.7.10 以下无法使用 (因为低版本没有此功能，包括 1.7.10)
     ACTION-BAR:
       TIME: 0 # time 为 0 或者 message 为空则自动关闭
       MESSAGE: ""
+
     # Boss Bar
     # 注意: Boss Bar 在 1.8 以下无法使用 (包括 1.8)
     BOSS-BAR:
@@ -352,6 +382,17 @@ DO-LIST:
       # 注意，此处严格区分大小写
       COLOR: RANDOM # PINK / BLUE / RED / GREEN / YELLOW / PURPLE / WHITE / RANDOM (随机)
       STYLE: RANDOM # SOLID / SEGMENTED_6 / SEGMENTED_10 / SEGMENTED_12 / SEGMENTED_20 / RANDOM (随机)
+
+    # 执行记录
+    #  当玩家执行了此效果，我们会将此次执行的详细信息以 Json 或 Mongo 的形式进行记录。
+    #  若开启了 Mongo 数据库则记录在 Mongo 数据库内，反之则记录在 Json 文件内，Json 路径可在 advancedWish.yml 中 LOGS-PATH 项规定。
+    #  记录的日志文件是近乎不可读的，所以您需要在游戏内或者控制台使用指令获取详细日志。
+    RECORD: false
+
+    # Kether 必须使用 Vulpecula (https://www.yuque.com/lanscarlos/vulpecula-doc)
+    KETHER: |-
+      print "Hello! Advanced Wish!"
+      print "This is Kether, based Vulpecula, so cool, right?"
 
   C2:
     EFFECTS:
@@ -386,6 +427,8 @@ DO-LIST:
       MESSAGE: ""
       COLOR: RANDOM
       STYLE: RANDOM
+    RECORD: false
+    KETHER: |-
 
   C3:
     EFFECTS:
@@ -420,6 +463,8 @@ DO-LIST:
       MESSAGE: ""
       COLOR: RANDOM
       STYLE: RANDOM
+    RECORD: false
+    KETHER: |-
 
   START:
     EFFECTS:
@@ -458,6 +503,8 @@ DO-LIST:
       MESSAGE: "&7您虔诚的祈祷..."
       COLOR: RANDOM
       STYLE: RANDOM
+    RECORD: false
+    KETHER: |-
 
   A:
     EFFECTS:
@@ -496,6 +543,8 @@ DO-LIST:
       MESSAGE: "&e这是... 钻石!"
       COLOR: RANDOM
       STYLE: RANDOM
+    RECORD: true
+    KETHER: |-
 
   B:
     EFFECTS:
@@ -534,6 +583,8 @@ DO-LIST:
       MESSAGE: "&7这是... 铁锭!"
       COLOR: RANDOM
       STYLE: RANDOM
+    RECORD: true
+    KETHER: |-
 
   C:
     EFFECTS:
@@ -572,6 +623,8 @@ DO-LIST:
       MESSAGE: "&7这是... 金币!"
       COLOR: RANDOM
       STYLE: RANDOM
+    RECORD: true
+    KETHER: |-
 
   CANT-WISH:
     EFFECTS:
@@ -607,6 +660,8 @@ DO-LIST:
       MESSAGE: "&7不行..."
       COLOR: RANDOM
       STYLE: RANDOM
+    RECORD: false
+    KETHER: |-
 
   CANT-WISH-AGAIN-EFFECT:
     EFFECTS:
@@ -641,6 +696,8 @@ DO-LIST:
       MESSAGE: "&7虚弱..."
       COLOR: RANDOM
       STYLE: RANDOM
+    RECORD: false
+    KETHER: |-
 
   CANT-WISH-LOADING-CACHE:
     EFFECTS:
@@ -675,6 +732,8 @@ DO-LIST:
       MESSAGE: ""
       COLOR: RANDOM
       STYLE: RANDOM
+    RECORD: false
+    KETHER: |-
 
   CANT-WISH-WAITING-LOADING-CACHE:
     EFFECTS:
@@ -709,6 +768,8 @@ DO-LIST:
       MESSAGE: ""
       COLOR: RANDOM
       STYLE: RANDOM
+    RECORD: false
+    KETHER: |-
 
   WISH-CACHE:
     EFFECTS:
@@ -743,6 +804,8 @@ DO-LIST:
       MESSAGE: "&a奖励补发!"
       COLOR: RANDOM
       STYLE: RANDOM
+    RECORD: false
+    KETHER: |-
 
   REACH-LIMIT:
     EFFECTS:
@@ -778,6 +841,8 @@ DO-LIST:
       MESSAGE: "&7虚弱..."
       COLOR: RANDOM
       STYLE: RANDOM
+    RECORD: false
+    KETHER: |-
 
   RESET-COMPLETE:
     EFFECTS:
@@ -812,3 +877,5 @@ DO-LIST:
       MESSAGE: "&6重置次数..!"
       COLOR: RANDOM
       STYLE: RANDOM
+    RECORD: false
+    KETHER: |-

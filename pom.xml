@@ -6,7 +6,7 @@
 
     <groupId>me.twomillions.plugin</groupId>
     <artifactId>AdvancedWish</artifactId>
-    <version>0.0.5-SNAPSHOT</version>
+    <version>0.0.5.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>AdvancedWish</name>
@@ -44,11 +44,6 @@
                                 <relocation>
                                     <pattern>de.leonhard.storage</pattern>
                                     <shadedPattern>me.twomillions.plugin.advancedwish.storage</shadedPattern>
-                                </relocation>
-
-                                <relocation>
-                                    <pattern>redis.clients.jedis</pattern>
-                                    <shadedPattern>me.twomillions.plugin.advancedwish.jedis</shadedPattern>
                                 </relocation>
 
                                 <relocation>
@@ -150,11 +145,13 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Jedis -->
+        <!-- Vulpecula-2.0.10 - 本地 -->
         <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
-            <version>4.3.0</version>
+            <groupId>top.lanscarlos.vulpecula.taboolib.platform</groupId>
+            <artifactId>Vulpecula</artifactId>
+            <version>2.0.10</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/Vulpecula-2.0.10.jar</systemPath>
         </dependency>
 
         <!-- Player Points - 本地 -->

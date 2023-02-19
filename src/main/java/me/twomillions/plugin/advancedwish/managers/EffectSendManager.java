@@ -3,6 +3,8 @@ package me.twomillions.plugin.advancedwish.managers;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import me.twomillions.plugin.advancedwish.Main;
+import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
+import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
 import me.twomillions.plugin.advancedwish.utils.BossBarRandomUtils;
 import me.twomillions.plugin.advancedwish.utils.ExpUtils;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
@@ -19,10 +21,13 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import top.lanscarlos.vulpecula.utils.ScriptUtilKt;
 import xyz.xenondevs.particle.ParticleBuilder;
 import xyz.xenondevs.particle.ParticleEffect;
 
 import java.awt.*;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,16 +52,26 @@ public class EffectSendManager {
      * @param replacePlayer replacePlayer
      * @param path path
      * @param pathPrefix pathPrefix
-     * @param addDoListPrefix addDoListPrefix
      */
-    public static void sendEffect(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix, boolean addDoListPrefix) {
+    public static void sendEffect(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         if (!targetPlayer.isOnline()) return;
-
-        if (addDoListPrefix) pathPrefix = "DO-LIST." + pathPrefix;
-
+        
         // isCancelled
         if (QuickUtils.callAsyncEffectSendEvent(fileName, targetPlayer, replacePlayer, path, pathPrefix).isCancelled()) return;
 
+        String targetPlayerUUIDString = targetPlayer.getUniqueId().toString();
+
+        // Logs
+        if (isRecordEffectSend(fileName, path, pathPrefix)) {
+            String logTime = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss").format(System.currentTimeMillis());
+
+            String finalLogString = logTime + ";" + targetPlayer.getName() + ";" + targetPlayer.getUniqueId() + ";" + QuickUtils.stringToUnicode(fileName) + ";" + pathPrefix + ";";
+
+            if (MongoManager.getMongoConnectState() == MongoConnectState.Connected) MongoManager.addPlayerWishLog(targetPlayerUUIDString, finalLogString);
+            else ConfigManager.addPlayerWishLog(targetPlayerUUIDString, finalLogString);
+        }
+
+        // Send
         sendTitle(fileName, targetPlayer, replacePlayer, path, pathPrefix);
         sendParticle(fileName, targetPlayer, replacePlayer, path, pathPrefix);
         sendSounds(fileName, targetPlayer, replacePlayer, path, pathPrefix);
@@ -68,6 +83,18 @@ public class EffectSendManager {
         sendExp(fileName, targetPlayer, replacePlayer, path, pathPrefix);
         sendActionBar(fileName, targetPlayer, replacePlayer, path, pathPrefix);
         sendBossBar(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+        sendKether(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+    }
+
+    /**
+     * 是否开启效果发送日志记录
+     *
+     * @param fileName fileName
+     * @return boolean
+     */
+    public static boolean isRecordEffectSend(String fileName, String path, String pathPrefix) {
+        Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
+        return Boolean.parseBoolean(QuickUtils.replaceTranslateToPapi(yaml.getOrDefault(pathPrefix + ".RECORD", "false")));
     }
 
     /**
@@ -83,8 +110,6 @@ public class EffectSendManager {
         // 如果是 1.7 服务器则不发送 Title (因为 1.7 没有)
         if (Main.getServerVersion() <= 107) return;
 
-        path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
-
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix == null ? "TITLE" : pathPrefix + ".TITLE");
 
@@ -97,8 +122,10 @@ public class EffectSendManager {
         int fadeOut = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("FADE-OUT"), targetPlayer, replacePlayer));
         int stay = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("STAY"), targetPlayer, replacePlayer));
 
-        // 在 1.9 中由于此方法无法定义 fadeIn stay fadeOut 所以使用不同的方法
-        // 我没有使用 NMS Spigot API 提供了一种发送标题的方法 旨在跨不同的 Minecraft 版本工作
+        /*
+         * 在 1.9 中由于此方法无法定义 fadeIn stay fadeOut 所以使用不同的方法
+         * 没有使用 NMS, Spigot API 提供了一种发送标题的方法 旨在跨不同的 Minecraft 版本工作
+         */
         if (Main.getServerVersion() == 109) targetPlayer.sendTitle(mainTitle, subTitle);
         else targetPlayer.sendTitle(mainTitle, subTitle, fadeIn, stay, fadeOut);
     }
@@ -113,8 +140,6 @@ public class EffectSendManager {
      * @param pathPrefix pathPrefix
      */
     private static void sendParticle(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
-        path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
-
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
@@ -207,8 +232,6 @@ public class EffectSendManager {
      * @param pathPrefix pathPrefix
      */
     private static void sendSounds(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
-        path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
-
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
@@ -242,8 +265,6 @@ public class EffectSendManager {
      * @param pathPrefix pathPrefix
      */
     private static void sendCommands(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
-        path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
-
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix == null ? "COMMANDS" : pathPrefix + ".COMMANDS");
 
@@ -299,8 +320,6 @@ public class EffectSendManager {
      * @param pathPrefix pathPrefix
      */
     private static void sendMessage(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
-        path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
-
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
@@ -327,8 +346,6 @@ public class EffectSendManager {
      * @param pathPrefix pathPrefix
      */
     private static void sendAnnouncement(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
-        path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
-
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
@@ -349,8 +366,6 @@ public class EffectSendManager {
      * @param pathPrefix pathPrefix
      */
     private static void sendPotion(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
-        path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
-
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
@@ -389,8 +404,6 @@ public class EffectSendManager {
      * @param pathPrefix pathPrefix
      */
     private static void sendHealthAndHunger(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
-        path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
-
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
@@ -418,8 +431,6 @@ public class EffectSendManager {
      * @param pathPrefix pathPrefix
      */
     private static void sendExp(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
-        path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
-
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         yaml.setPathPrefix(pathPrefix);
 
@@ -441,9 +452,7 @@ public class EffectSendManager {
         // 如果是 1.7 服务器则不发送 Action Bar (因为 1.7 没有)
         if (Main.getServerVersion() <= 107) return;
 
-        path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
-
         yaml.setPathPrefix(pathPrefix == null ? "ACTION-BAR" : pathPrefix + ".ACTION-BAR");
 
         String actionBarMessage = QuickUtils.replaceTranslateToPapi(yaml.getString("MESSAGE"), targetPlayer, replacePlayer);
@@ -483,9 +492,7 @@ public class EffectSendManager {
         // Boss Bar 支持 1.7 / 1.8 会使用到 NMS 所以我选择直接放弃对于 1.7 / 1.8 的 Boss Bar 支持
         if (Main.getServerVersion() <= 108) return;
 
-        path = path == null ? plugin.getDataFolder().toString() : plugin.getDataFolder() + "/" + path;
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
-
         yaml.setPathPrefix(pathPrefix == null ? "BOSS-BAR" : pathPrefix + ".BOSS-BAR");
 
         String bossBarMessage = QuickUtils.replaceTranslateToPapi(yaml.getString("MESSAGE"), targetPlayer, replacePlayer);
@@ -519,5 +526,26 @@ public class EffectSendManager {
                 bossBar.setProgress(timeLeft / bossBarTime);
             }
         }.runTaskTimerAsynchronously(plugin, 0, 1);
+    }
+
+    /**
+     * 运行 Kether
+     *
+     * @param fileName fileName
+     * @param targetPlayer targetPlayer
+     * @param replacePlayer replacePlayer
+     * @param path path
+     * @param pathPrefix pathPrefix
+     */
+    private static void sendKether(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
+        if (!RegisterManager.isUsingVulpecula()) return;
+
+        Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
+
+        String kether = QuickUtils.replaceTranslateToPapi(yaml.getString(pathPrefix + ".KETHER"), targetPlayer, replacePlayer);
+
+        if ("".equals(kether)) return;
+
+        ScriptUtilKt.eval(kether, targetPlayer, new ArrayList<>(), null, false);
     }
 }

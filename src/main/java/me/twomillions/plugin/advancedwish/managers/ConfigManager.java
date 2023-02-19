@@ -74,7 +74,7 @@ public class ConfigManager {
      *
      * @return 最新的配置文件版本
      */
-    public static int getLastConfigVersion() { return 50; }
+    public static int getLastConfigVersion() { return 51; }
 
     /**
      * 检查配置文件版本是否为最新版
@@ -109,17 +109,12 @@ public class ConfigManager {
      * @return yaml
      */
     public static Yaml createYaml(String fileName, String path, boolean originalPath, boolean inputStreamFromResource) {
-        String dataFolder;
-
         if (fileName.contains(".yml")) fileName = fileName.split(".yml")[0];
 
-        if (path == null) dataFolder = plugin.getDataFolder().toString();
-        else {
-            if (!originalPath) dataFolder = plugin.getDataFolder() + path;
-            else dataFolder = path;
-        }
+        if (path == null) path = plugin.getDataFolder().toString();
+        else if (!originalPath) { path = plugin.getDataFolder() + path; }
 
-        File file = new File(dataFolder, fileName + ".yml");
+        File file = new File(path, fileName + ".yml");
 
         // 如果这个文件已经是存在的状态，那么如果 inputStreamFromResource 为 true 则改为 false
         if (file.exists()) { if (inputStreamFromResource) inputStreamFromResource = false; }
@@ -152,17 +147,12 @@ public class ConfigManager {
      * @return json
      */
     public static Json createJson(String fileName, String path, boolean originalPath, boolean inputStreamFromResource) {
-        String dataFolder;
-
         if (fileName.contains(".json")) fileName = fileName.split(".json")[0];
 
-        if (path == null) dataFolder = plugin.getDataFolder().toString();
-        else {
-            if (!originalPath) dataFolder = plugin.getDataFolder() + path;
-            else dataFolder = path;
-        }
+        if (path == null) path = plugin.getDataFolder().toString();
+        else if (!originalPath) { path = plugin.getDataFolder() + path; }
 
-        File file = new File(dataFolder, fileName + ".json");
+        File file = new File(path, fileName + ".json");
 
         // 如果这个文件已经是存在的状态，那么如果 inputStreamFromResource 为 true 则改为 false
         if (file.exists()) { if (inputStreamFromResource) inputStreamFromResource = false; }

@@ -4,14 +4,16 @@ import de.leonhard.storage.Json;
 import de.leonhard.storage.Yaml;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.managers.ConfigManager;
-import me.twomillions.plugin.advancedwish.managers.EffectSendManager;
-import me.twomillions.plugin.advancedwish.managers.WishManager;
+import me.twomillions.plugin.advancedwish.managers.ScheduledTaskManager;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -160,20 +162,15 @@ public class PlayerCheckCacheTask {
             for (String playerWishDoListString : playerDoListCache) {
                 playerWishDoListString = QuickUtils.unicodeToString(playerWishDoListString);
 
-                String doList = WishManager.getPlayerScheduledTaskStringDoList(playerWishDoListString);
-                String wishName = WishManager.getPlayerScheduledTaskStringWishName(playerWishDoListString);
+                String doList = ScheduledTaskManager.getScheduledTaskNode(playerWishDoListString);
+                String wishName = ScheduledTaskManager.getScheduledTaskFileName(playerWishDoListString);
 
                 Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
 
                 // 第一次进入发送信息
                 if (firstSentEffect) {
-                    for (String wishCacheTask : yaml.getStringList("CACHE-SETTINGS.WISH-CACHE")) {
-                        wishCacheTask = QuickUtils.randomSentence(QuickUtils.replaceTranslateToPapi(wishCacheTask, player));
-
-                        if (QuickUtils.sleepSentence(wishCacheTask)) continue;
-
-                        EffectSendManager.sendEffect(wishName, player, null, "/Wish", wishCacheTask, true);
-                    }
+                    // 创建任务
+                    ScheduledTaskManager.createPlayerScheduledTasks(player, wishName, "/Wish", yaml.getStringList("CACHE-SETTINGS.WISH-CACHE"));
 
                     if (!player.isOnline()) break;
 
@@ -192,9 +189,9 @@ public class PlayerCheckCacheTask {
                 if (player.isOnline()) {
                     long nowTime = System.currentTimeMillis();
                     long quitTime = getPlayerQuitTime(player);
-                    long oldTime = Long.parseLong(WishManager.getPlayerScheduledTaskStringTime(playerWishDoListString));
+                    long oldTime = Long.parseLong(ScheduledTaskManager.getScheduledTaskTime(playerWishDoListString));
 
-                    WishManager.addPlayerScheduledTasks(player, oldTime - quitTime + nowTime, wishName, doList);
+                    ScheduledTaskManager.addPlayerScheduledTasks(player, oldTime - quitTime + nowTime, wishName, "/Wish", false, doList);
                     playerDoListCacheClone.remove(QuickUtils.stringToUnicode(playerWishDoListString));
                 }
 
@@ -206,7 +203,6 @@ public class PlayerCheckCacheTask {
             }
         }
 
-        System.out.println("set");
         setLoadingCache(uuid, false);
     }
 }

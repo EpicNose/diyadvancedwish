@@ -350,11 +350,6 @@ public class ConsoleCommand implements CommandExecutor {
                         return;
                     }
 
-                    if (!WishManager.isEnabledRecordWish(queryWishName)) {
-                        messageYaml.getStringList("WISH-NOT-ENABLED-LIMIT").forEach(message -> sender.sendMessage(QuickUtils.replaceTranslateToPapi(message)));
-                        return;
-                    }
-
                     List<String> logs = MongoManager.getMongoConnectState() == MongoConnectState.Connected ?
                             MongoManager.getPlayerWishLog(queryPlayerUUID, startNumber, endNumber) :
                             ConfigManager.getPlayerWishLog(queryPlayerUUID, startNumber, endNumber);
@@ -388,8 +383,8 @@ public class ConsoleCommand implements CommandExecutor {
                             if (queryQuery.contains("<targetPlayer>")) queryQuery = queryQuery.replaceAll("<targetPlayer>", queryLogPlayerName);
                             if (queryQuery.contains("<targetPlayerUUID>")) queryQuery = queryQuery.replaceAll("<targetPlayerUUID>", queryPlayerUUID);
                             if (queryQuery.contains("<time>")) queryQuery = queryQuery.replaceAll("<time>", queryLogTime);
-                            if (queryQuery.contains("<wish>")) queryQuery = queryQuery.replaceAll("<wish>", queryLogWishName);
-                            if (queryQuery.contains("<doList>")) queryQuery = queryQuery.replaceAll("<doList>", queryLogDoList);
+                            if (queryQuery.contains("<file>")) queryQuery = queryQuery.replaceAll("<file>", queryLogWishName);
+                            if (queryQuery.contains("<node>")) queryQuery = queryQuery.replaceAll("<node>", queryLogDoList);
                             if (queryQuery.contains("<size>")) queryQuery = queryQuery.replaceAll("<size>", String.valueOf(logs.size()));
 
                             sender.sendMessage(queryQuery);
