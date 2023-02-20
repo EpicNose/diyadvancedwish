@@ -14,8 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * 许愿池限制次数重置的管理器。
@@ -25,7 +24,7 @@ import java.util.List;
  */
 public class WishLimitResetTask {
     private static final Plugin plugin = Main.getInstance();
-    @Getter private static List<BukkitTask> wishLimitResetTaskList = new ArrayList<>();
+    @Getter private static ConcurrentLinkedQueue<BukkitTask> wishLimitResetTaskList = new ConcurrentLinkedQueue<>();
 
     /**
      * 开始为指定的许愿池创建一个限制许愿次数的定时器。

@@ -1,15 +1,15 @@
 package me.twomillions.plugin.advancedwish.managers;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import me.twomillions.plugin.advancedwish.Main;
+import me.twomillions.plugin.advancedwish.utils.CaffeineUtils;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * 提供计划任务的增删查操作
@@ -23,7 +23,7 @@ public class ScheduledTaskManager {
     /**
      * 用 Map 存储每个玩家的计划任务，key 为玩家的 UUID，value 为 List，存储每个计划任务的字符串表示。
      */
-    private static final Map<UUID, List<String>> playerScheduledTasks = new ConcurrentHashMap<>();
+    private static final Cache<UUID, ConcurrentLinkedQueue<String>> playerScheduledTasks = CaffeineUtils.buildCaffeineCache();
 
     /**
      * 将计划任务的各项信息转换为字符串。
@@ -48,7 +48,9 @@ public class ScheduledTaskManager {
      */
     public static void addPlayerScheduledTask(Player player, String scheduledTask) {
         UUID uuid = player.getUniqueId();
-        List<String> tasks = playerScheduledTasks.computeIfAbsent(uuid, k -> new ArrayList<>());
+
+        // 使用 Caffeine 的 get 方法替代 ConcurrentHashMap 的 computeIfAbsent 方法，key 不存在时，使用 ValueLoader 加载值
+        ConcurrentLinkedQueue<String> tasks = playerScheduledTasks.get(uuid, k -> new ConcurrentLinkedQueue<>());
 
         if (!tasks.contains(scheduledTask)) tasks.add(scheduledTask);
     }
@@ -181,7 +183,7 @@ public class ScheduledTaskManager {
      * @param wishScheduledTaskString 待删除的计划任务的字符串表示，格式为 "时间;文件名;文件路径;true/false;node"
      */
     public static void removePlayerScheduledTask(Player player, String wishScheduledTaskString) {
-        List<String> scheduledTasks = playerScheduledTasks.get(player.getUniqueId());
+        ConcurrentLinkedQueue<String> scheduledTasks = playerScheduledTasks.get(player.getUniqueId(), k -> null);
         if (scheduledTasks != null) scheduledTasks.remove(wishScheduledTaskString);
     }
 
@@ -191,7 +193,7 @@ public class ScheduledTaskManager {
      * @param player 玩家对象
      */
     public static void removePlayerScheduledTasks(Player player) {
-        playerScheduledTasks.remove(player.getUniqueId());
+        playerScheduledTasks.invalidate(player.getUniqueId());
     }
 
     /**
@@ -200,7 +202,7 @@ public class ScheduledTaskManager {
      * @param player 玩家对象
      * @return 指定玩家的所有计划任务的字符串表示列表
      */
-    public static List<String> getPlayerScheduledTasks(Player player) {
-        return playerScheduledTasks.getOrDefault(player.getUniqueId(), new ArrayList<>());
+    public static ConcurrentLinkedQueue<String> getPlayerScheduledTasks(Player player) {
+        return playerScheduledTasks.get(player.getUniqueId(), k -> new ConcurrentLinkedQueue<>());
     }
 }

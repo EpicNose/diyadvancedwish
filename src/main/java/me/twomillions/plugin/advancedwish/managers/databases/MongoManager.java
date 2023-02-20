@@ -18,9 +18,9 @@ import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * @author 2000000
@@ -38,7 +38,7 @@ public class MongoManager {
     @Getter @Setter private volatile static MongoCustomUrlState mongoCustomUrlState;
 
     /**
-     * 设置 MongoDB 数据库连接
+     * 设置 MongoDB 数据库连接。
      *
      * @param yaml 配置文件
      * @return MongoDB 连接状态
@@ -169,7 +169,7 @@ public class MongoManager {
      * @param mongoCollections 查询的 MongoDB 集合
      * @return 对应的 List 值
      */
-    public static List<String> getOrDefaultList(Player player, String key, List<String> defaultValue, MongoCollections mongoCollections) {
+    public static ConcurrentLinkedQueue<String> getOrDefaultList(Player player, String key, ConcurrentLinkedQueue<String> defaultValue, MongoCollections mongoCollections) {
         String uuid = player.getUniqueId().toString();
         MongoCollection<Document> collection = getMongoDatabase().getCollection(mongoCollections.toString());
 
@@ -183,10 +183,10 @@ public class MongoManager {
             return defaultValue;
         }
 
-        List<String> value = document.getList(key, String.class);
+        ConcurrentLinkedQueue<String> value = new ConcurrentLinkedQueue<>(document.getList(key, String.class));
 
         // 如果找到的值为 null，则更新为默认值
-        if (value == null) {
+        if (value.size() == 0) {
             collection.updateOne(filter, new Document("$set", new Document(key, defaultValue)));
             return defaultValue;
         }
@@ -203,7 +203,7 @@ public class MongoManager {
      * @param mongoCollections 查询的 MongoDB 集合
      * @return 对应的 List 值
      */
-    public static List<String> getOrDefaultList(String uuid, String key, List<String> defaultValue, MongoCollections mongoCollections) {
+    public static ConcurrentLinkedQueue<String> getOrDefaultList(String uuid, String key, ConcurrentLinkedQueue<String> defaultValue, MongoCollections mongoCollections) {
         MongoCollection<Document> collection = getMongoDatabase().getCollection(mongoCollections.toString());
 
         Document filter = new Document("uuid", uuid);
@@ -216,10 +216,10 @@ public class MongoManager {
             return defaultValue;
         }
 
-        List<String> value = document.getList(key, String.class);
+        ConcurrentLinkedQueue<String> value = new ConcurrentLinkedQueue<>(document.getList(key, String.class));
 
         // 如果找到的值为 null，则更新为默认值
-        if (value == null) {
+        if (value.size() == 0) {
             collection.updateOne(filter, new Document("$set", new Document(key, defaultValue)));
             return defaultValue;
         }
@@ -266,7 +266,7 @@ public class MongoManager {
      * @param logString 许愿日志
      */
     public static void addPlayerWishLog(Player player, String logString) {
-        List<String> logs = getOrDefaultList(player, "logs", new ArrayList<>(), MongoCollections.PlayerLogs);
+        ConcurrentLinkedQueue<String> logs = getOrDefaultList(player, "logs", new ConcurrentLinkedQueue<>(), MongoCollections.PlayerLogs);
         logs.add(logString);
         update(player, "logs", logs, MongoCollections.PlayerLogs);
     }
@@ -278,7 +278,7 @@ public class MongoManager {
      * @param logString 许愿日志
      */
     public static void addPlayerWishLog(String uuid, String logString) {
-        List<String> logs = getOrDefaultList(uuid, "logs", new ArrayList<>(), MongoCollections.PlayerLogs);
+        ConcurrentLinkedQueue<String> logs = getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), MongoCollections.PlayerLogs);
         logs.add(logString);
         update(uuid, "logs", logs, MongoCollections.PlayerLogs);
     }
@@ -291,8 +291,8 @@ public class MongoManager {
      * @param findMax 要查询的日志的最大编号
      * @return 返回查询出来的日志列表
      */
-    public static List<String> getPlayerWishLog(Player player, int findMin, int findMax) {
-        List<String> logs = getOrDefaultList(player, "logs", new ArrayList<>(), MongoCollections.PlayerLogs);
+    public static ConcurrentLinkedQueue<String> getPlayerWishLog(Player player, int findMin, int findMax) {
+        ConcurrentLinkedQueue<String> logs = getOrDefaultList(player, "logs", new ConcurrentLinkedQueue<>(), MongoCollections.PlayerLogs);
 
         return getLogsInRange(logs, findMin, findMax);
     }
@@ -305,8 +305,8 @@ public class MongoManager {
      * @param findMax 要查询的日志的最大编号
      * @return 返回查询出来的日志列表
      */
-    public static List<String> getPlayerWishLog(String uuid, int findMin, int findMax) {
-        List<String> logs = getOrDefaultList(uuid, "logs", new ArrayList<>(), MongoCollections.PlayerLogs);
+    public static ConcurrentLinkedQueue<String> getPlayerWishLog(String uuid, int findMin, int findMax) {
+        ConcurrentLinkedQueue<String> logs = getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), MongoCollections.PlayerLogs);
 
         return getLogsInRange(logs, findMin, findMax);
     }
@@ -318,7 +318,7 @@ public class MongoManager {
      * @return 返回日志条目数
      */
     public static int getWishLogsSize(Player player) {
-        return getOrDefaultList(player, "logs", new ArrayList<>(), MongoCollections.PlayerLogs).size();
+        return getOrDefaultList(player, "logs", new ConcurrentLinkedQueue<>(), MongoCollections.PlayerLogs).size();
     }
 
     /**
@@ -328,29 +328,38 @@ public class MongoManager {
      * @return 返回日志条目数
      */
     public static int getWishLogsSize(String uuid) {
-        return getOrDefaultList(uuid, "logs", new ArrayList<>(), MongoCollections.PlayerLogs).size();
+        return getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), MongoCollections.PlayerLogs).size();
     }
 
     /**
-     * 获取在指定范围内的日志列表。
+     * 获取给定列表的指定范围内的子列表。
      *
-     * @param logs 日志列表
-     * @param min 最小编号
-     * @param max 最大编号
-     * @return 返回指定范围内的日志列表
+     * @param logs 给定的日志列表
+     * @param min 子列表的最小索引（从1开始）
+     * @param max 子列表的最大索引
+     * @return 给定列表的指定范围内的子列表
      */
-    private static List<String> getLogsInRange(List<String> logs, int min, int max) {
-        List<String> result = new ArrayList<>();
+    public static ConcurrentLinkedQueue<String> getLogsInRange(ConcurrentLinkedQueue<String> logs, int min, int max) {
+        ConcurrentLinkedQueue<String> result = new ConcurrentLinkedQueue<>();
 
-        for (int i = min - 1; i < Math.min(logs.size(), max); i++) {
-            result.add(logs.get(i));
+        // 使用 Iterator 来遍历队列实现线程安全
+        Iterator<String> iterator = logs.iterator();
+
+        int i = 1;
+        while (iterator.hasNext() && i <= max) {
+            if (i >= min) {
+                result.add(iterator.next());
+            }
+
+            i++;
         }
 
         return result;
     }
 
+
     /**
-     * 将 YAML 格式的 JSON 转换为 MongoDB 数据。
+     * 将 JSON 转换为 MongoDB 数据。
      *
      * @param yaml 包含转换信息的 YAML 对象
      * @return 返回数据迁移状态
@@ -370,8 +379,9 @@ public class MongoManager {
         // 获取文件路径和文件名列表
         String logsPath = Main.getLogsPath();
         String guaranteedPath = Main.getGuaranteedPath();
-        List<String> logsFileNames = ConfigManager.getAllFileNames(logsPath);
-        List<String> guaranteedFileNames = ConfigManager.getAllFileNames(guaranteedPath);
+
+        ConcurrentLinkedQueue<String> logsFileNames = ConfigManager.getAllFileNames(logsPath);
+        ConcurrentLinkedQueue<String> guaranteedFileNames = ConfigManager.getAllFileNames(guaranteedPath);
 
         // 检查是否有需要转换的文件
         if (logsFileNames.isEmpty() && guaranteedFileNames.isEmpty()) {

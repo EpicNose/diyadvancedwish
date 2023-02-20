@@ -1,14 +1,12 @@
 package me.twomillions.plugin.advancedwish.managers;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
 import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
-import me.twomillions.plugin.advancedwish.utils.BossBarRandomUtils;
-import me.twomillions.plugin.advancedwish.utils.ExpUtils;
-import me.twomillions.plugin.advancedwish.utils.QuickUtils;
-import me.twomillions.plugin.advancedwish.utils.UnicodeUtils;
+import me.twomillions.plugin.advancedwish.utils.*;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
@@ -31,8 +29,6 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author 2000000
@@ -44,7 +40,7 @@ public class EffectSendManager {
     /**
      * 用于储存需要玩家以 OP 身份执行的命令。
      */
-    @Getter private volatile static Map<Player, String> opSentCommand = new ConcurrentHashMap<>();
+    @Getter private volatile static Cache<Player, String> opSentCommand = CaffeineUtils.buildCaffeineCache();
 
     /**
      * 发送效果。
@@ -57,6 +53,8 @@ public class EffectSendManager {
      */
     public static void sendEffect(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         if (!targetPlayer.isOnline()) return;
+
+        System.out.println("1");
         
         // isCancelled
         if (QuickUtils.callAsyncEffectSendEvent(fileName, targetPlayer, replacePlayer, path, pathPrefix).isCancelled()) return;
@@ -341,7 +339,8 @@ public class EffectSendManager {
                     // 执行完指令后移除临时 OP 权限
                     Bukkit.getScheduler().runTask(plugin, () -> targetPlayer.setOp(false));
 
-                    getOpSentCommand().remove(targetPlayer);
+                    getOpSentCommand().invalidate(targetPlayer);
+
                     WishManager.setPlayerCacheOpData(targetPlayer, false);
                 }
             }

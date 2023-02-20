@@ -17,8 +17,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * @author 2000000
@@ -351,7 +351,7 @@ public class ConsoleCommand implements CommandExecutor {
                         return;
                     }
 
-                    List<String> logs = MongoManager.getMongoConnectState() == MongoConnectState.Connected ?
+                    ConcurrentLinkedQueue<String> logs = MongoManager.getMongoConnectState() == MongoConnectState.Connected ?
                             MongoManager.getPlayerWishLog(queryPlayerUUID, startNumber, endNumber) :
                             ConfigManager.getPlayerWishLog(queryPlayerUUID, startNumber, endNumber);
 

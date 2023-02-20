@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * @author 2000000
@@ -442,7 +443,7 @@ public class MainCommand implements TabExecutor {
                     }
 
                     // 查询
-                    List<String> logs = MongoManager.getMongoConnectState() == MongoConnectState.Connected ?
+                    ConcurrentLinkedQueue<String> logs = MongoManager.getMongoConnectState() == MongoConnectState.Connected ?
                             MongoManager.getPlayerWishLog(queryPlayerUUID, startNumber, endNumber) :
                             ConfigManager.getPlayerWishLog(queryPlayerUUID, startNumber, endNumber);
 

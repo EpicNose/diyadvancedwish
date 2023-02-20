@@ -13,9 +13,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
 /**
@@ -226,11 +226,11 @@ public class ConfigManager {
      * @param findMax 返回列表中日志的最大索引
      * @return 包含查询到的日志的列表
      */
-    public static List<String> getPlayerWishLog(Player player, int findMin, int findMax) {
+    public static ConcurrentLinkedQueue<String> getPlayerWishLog(Player player, int findMin, int findMax) {
         Json json = createJson(player.getUniqueId().toString(), Main.getLogsPath(), true, false);
 
-        List<String> returnLogs = new ArrayList<>();
         List<String> logs = json.getStringList("logs");
+        ConcurrentLinkedQueue<String> returnLogs = new ConcurrentLinkedQueue<>();
 
         // 计算查询范围
         int start = Math.max(0, findMin - 1);  // 从 0 开始，所以需要减去 1
@@ -250,11 +250,11 @@ public class ConfigManager {
      * @param findMax 返回列表中日志的最大索引
      * @return 包含查询到的日志的列表
      */
-    public static List<String> getPlayerWishLog(String uuid, int findMin, int findMax) {
+    public static ConcurrentLinkedQueue<String> getPlayerWishLog(String uuid, int findMin, int findMax) {
         Json json = createJson(uuid, Main.getLogsPath(), true, false);
 
-        List<String> returnLogs = new ArrayList<>();
         List<String> logs = json.getStringList("logs");
+        ConcurrentLinkedQueue<String> returnLogs = new ConcurrentLinkedQueue<>();
 
         // 计算查询范围
         int start = Math.max(0, findMin - 1);  // 从 0 开始，所以需要减去 1
@@ -300,23 +300,23 @@ public class ConfigManager {
      * @param path 指定路径
      * @return 文件名列表
      */
-    public static List<String> getAllFileNames(String path) {
+    public static ConcurrentLinkedQueue<String> getAllFileNames(String path) {
         // 创建文件对象
         File directory = new File(path);
 
         // 判断目录是否存在，如果不存在直接返回空列表
         if (!directory.exists() || !directory.isDirectory()) {
-            return new ArrayList<>();
+            return new ConcurrentLinkedQueue<>();
         }
 
-        // 获取目录下的所有文件，并将文件名添加到列表中
+        // 获取目录下的所有文件，并将文件名添加到队列中
         File[] files = directory.listFiles();
         if (files == null) {
-            return new ArrayList<>();
+            return new ConcurrentLinkedQueue<>();
         }
 
         return Arrays.stream(files)
                 .map(File::getName)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ConcurrentLinkedQueue::new));
     }
 }

@@ -17,8 +17,8 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * @author 2000000
@@ -30,7 +30,7 @@ public class RegisterManager {
     /**
      * 注册的许愿池列表。
      */
-    @Getter private static final List<String> registerWish = new ArrayList<>();
+    @Getter private static final ConcurrentLinkedQueue<String> registerWish = new ConcurrentLinkedQueue<>();
 
     /**
      * Economy 对象。

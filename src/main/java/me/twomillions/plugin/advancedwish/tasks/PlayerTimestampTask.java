@@ -8,8 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * 玩家任务执行类。
@@ -33,7 +32,7 @@ public class PlayerTimestampTask {
                 if (!player.isOnline()) { cancel(); return; }
 
                 // 获取玩家的任务列表
-                List<String> playerScheduledTasks = ScheduledTaskManager.getPlayerScheduledTasks(player);
+                ConcurrentLinkedQueue<String> playerScheduledTasks = ScheduledTaskManager.getPlayerScheduledTasks(player);
 
                 // 检查修复和移除任务
                 checkRepairAndRemove(playerScheduledTasks, player);
@@ -50,7 +49,7 @@ public class PlayerTimestampTask {
      * @param playerScheduledTasks 玩家任务列表
      * @param player 玩家
      */
-    private static void checkRepairAndRemove(List<String> playerScheduledTasks, Player player) {
+    private static void checkRepairAndRemove(ConcurrentLinkedQueue<String> playerScheduledTasks, Player player) {
         if (playerScheduledTasks.size() > 0 && !WishManager.isPlayerInWishList(player)) WishManager.addPlayerToWishList(player);
         if (playerScheduledTasks.size() == 0 && WishManager.isPlayerInWishList(player)) WishManager.removePlayerWithWishList(player);
     }
@@ -61,8 +60,8 @@ public class PlayerTimestampTask {
      * @param playerScheduledTasks 玩家任务列表
      * @param player 玩家
      */
-    private static void executeScheduledTasks(List<String> playerScheduledTasks, Player player) {
-        for (String scheduledTask : new ArrayList<>(playerScheduledTasks)) {
+    private static void executeScheduledTasks(ConcurrentLinkedQueue<String> playerScheduledTasks, Player player) {
+        for (String scheduledTask : new ConcurrentLinkedQueue<>(playerScheduledTasks)) {
             long currentTimeMillis = System.currentTimeMillis();
             long time = Long.parseLong(ScheduledTaskManager.getScheduledTaskTime(scheduledTask));
 

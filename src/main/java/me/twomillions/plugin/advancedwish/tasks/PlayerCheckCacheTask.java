@@ -1,21 +1,21 @@
 package me.twomillions.plugin.advancedwish.tasks;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import de.leonhard.storage.Json;
 import de.leonhard.storage.Yaml;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.managers.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.ScheduledTaskManager;
+import me.twomillions.plugin.advancedwish.utils.CaffeineUtils;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import me.twomillions.plugin.advancedwish.utils.UnicodeUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * 玩家缓存的管理器。
@@ -25,8 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class PlayerCheckCacheTask {
     private static final Plugin plugin = Main.getInstance();
-    private static final Map<UUID, Boolean> loadingCache = new ConcurrentHashMap<>();
-    private static final Map<UUID, Boolean> waitingLoadingCache = new ConcurrentHashMap<>();
+    private static final Cache<UUID, Boolean> loadingCache = CaffeineUtils.buildCaffeineCache();
+    private static final Cache<UUID, Boolean> waitingLoadingCache = CaffeineUtils.buildCaffeineCache();
 
     /**
      * 设置指定玩家的缓存加载状态。
@@ -45,7 +45,7 @@ public class PlayerCheckCacheTask {
      * @return 缓存加载状态，如果玩家未在缓存中，则返回false
      */
     public static boolean isLoadingCache(UUID uuid) {
-        return loadingCache.getOrDefault(uuid, false);
+        return loadingCache.get(uuid, k -> false);
     }
 
     /**
@@ -65,7 +65,7 @@ public class PlayerCheckCacheTask {
      * @return 等待缓存加载状态，如果玩家未在缓存中，则返回false
      */
     public static boolean isWaitingLoadingCache(UUID uuid) {
-        return waitingLoadingCache.getOrDefault(uuid, false);
+        return waitingLoadingCache.get(uuid, k -> false);
     }
 
     /**
@@ -161,7 +161,7 @@ public class PlayerCheckCacheTask {
 
             // 获取玩家任务缓存列表并克隆
             List<String> playerDoListCache = doListCacheJson.getStringList("CACHE");
-            List<String> playerDoListCacheClone = new ArrayList<>(playerDoListCache);
+            ConcurrentLinkedQueue<String> playerDoListCacheClone = new ConcurrentLinkedQueue<>(playerDoListCache);
 
             // 如果没有缓存项则退出
             if (playerDoListCache.size() == 0) { setLoadingCache(uuid, false); return; }

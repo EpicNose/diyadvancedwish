@@ -1,8 +1,7 @@
 package me.twomillions.plugin.advancedwish.utils;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * 一个简单的工具类，用于根据指定的概率随机返回一个对象。
@@ -17,7 +16,7 @@ public class RandomUtils<T> {
     /**
      * 存储所有随机对象及其对应的概率。
      */
-    private final List<RandomObject<T>> randomObjects;
+    private final ConcurrentLinkedQueue<RandomObject<T>> randomObjects;
 
     /**
      * 所有随机对象的总概率。
@@ -28,7 +27,7 @@ public class RandomUtils<T> {
      * 创建一个新的 RandomUtils 实例。
      */
     public RandomUtils() {
-        this.randomObjects = new ArrayList<>();
+        this.randomObjects = new ConcurrentLinkedQueue<>();
         this.totalProbability = 0;
     }
 
