@@ -23,7 +23,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -43,15 +42,7 @@ public class WishManager {
     /**
      * 玩家许愿记录。
      *
-     * <p>{@link ArrayList} 不是线程安全的数据结构，多个线程在同时读取、写入一个 {@link ArrayList} 时可能会发生竞态条件（race condition）导致数据不一致或抛出异常
-     * 在读多写多的情况下，{@link java.util.concurrent.CopyOnWriteArrayList} 的性能开销可能会比较高，因为每次写操作都会创建一个新的数组来保存数据
-     * 这可能会对内存使用产生一定的影响，而且由于写操作会进行复制，所以写操作的速度也会比较慢，为了保证在读多写多的情况下保证线程安全并且获得更好的性能
-     * 考虑使用 {@link java.util.concurrent.ConcurrentLinkedQueue} 或 {@link java.util.concurrent.ConcurrentLinkedDeque}
-     * {@link java.util.concurrent.ConcurrentLinkedQueue} 是一个线程安全的队列，支持高并发的读写操作。它是基于链表实现的，因此插入和删除元素的开销较小
-     * 但是，由于它只支持在队尾插入元素和在队头删除元素，因此它不能像 {@link java.util.concurrent.ConcurrentLinkedDeque}
-     * 那样在队头和队尾同时进行插入和删除操作，{@link java.util.concurrent.ConcurrentLinkedDeque} 也是一个线程安全的队列，同样支持高并发的读写操作。它也是基于链表实现的
-     * 但是相比于 {@link java.util.concurrent.ConcurrentLinkedQueue}，它支持在队头和队尾同时进行插入和删除操作
-     * 因此在某些特定场景下可能比 {@link java.util.concurrent.ConcurrentLinkedQueue} 更加适用
+     * @see <a href="https://www.mcbbs.net/thread-1429293-1-1.html">[杂谈] Java 容器的线程安全性杂谈</a>
      */
     private static final ConcurrentLinkedQueue<UUID> wishPlayers = new ConcurrentLinkedQueue<>();
 
@@ -809,6 +800,8 @@ public class WishManager {
      *
      * <p>不再使用 ConcurrentHashMap，Caffeine 提供了一个高性能的线程安全哈希表实现，它比 ConcurrentHashMap 更快
      * 并且使用的内存更少，Caffeine 通过使用非常快的 Hash 函数，以及高效的数据结构和算法，来实现快速地并发访问，是一个非常强大的缓存库
+     *
+     * @see <a href="https://www.mcbbs.net/thread-1429293-1-1.html">[杂谈] Java 容器的线程安全性杂谈</a>
      */
     @Getter private static final Cache<UUID, Boolean> savingCache = CaffeineUtils.buildCaffeineCache();
 
