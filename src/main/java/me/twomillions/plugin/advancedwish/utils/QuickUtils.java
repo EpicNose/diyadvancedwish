@@ -39,6 +39,16 @@ public class QuickUtils {
     }
 
     /**
+     * 去除颜色。
+     *
+     * @param message 要去除颜色的字符串
+     * @return 去除颜色后的字符串
+     */
+    public static String stripColor(String message) {
+        return ChatColor.stripColor(message);
+    }
+
+    /**
      * 向控制台发送消息。
      *
      * @param message 要发送的消息
@@ -199,11 +209,7 @@ public class QuickUtils {
      *
      * <p>此方法已被弃用，仅在不需要缓存记录的无关紧要的提示信息中使用。
      * 在存储的计划任务中绝不能使用此方法，否则将导致无法被缓存记录。
-     * 若要在缓存中安全地使用 sleepSentence，请使用以下三个方法协作更改 time 完成：
-     *
-     * <p>{@link QuickUtils#hasSleepSentenceMs(String)} 用于检查字符串中是否存在 sleepSentence
-     * {@link QuickUtils#getSleepSentenceMs(String)} 用于获取字符串中的 sleepSentence
-     * {@link QuickUtils#removeSleepSentence(String)} 用于从字符串中删除 sleepSentence
+     * 若要在缓存中安全地使用 sleepSentence，请使用 {@link QuickUtils#getAndRemoveSleepSentenceMs(String)}
      *
      * @param sleepSentence 要执行的延迟语句，格式为 sleepSentence(time)end
      * @return 如果执行成功，则返回 true;否则返回 false
@@ -226,41 +232,23 @@ public class QuickUtils {
         return false;
     }
 
-
     /**
-     * 获取 sleepSentence 语句中的延迟时长。
+     * 获取 sleepSentence 语句中的延迟时长并移除 sleepSentence 语句。
      *
-     * @param sleepSentence 要获取时长的 sleepSentence 语句。
-     * @return sleepSentence 语句中的延迟时长（单位：毫秒）。
+     * @param sleepSentence 包含 sleepSentence 语句的字符串
+     * @return sleepSentence 语句中的延迟时长（单位：毫秒）;移除后的 sleepSentence 语句。如果字符串中不包含 sleepSentence 语句则返回 ""。
      */
-    public static Long getSleepSentenceMs(String sleepSentence) {
-        if (!sleepSentence.contains("sleepSentence(") || !sleepSentence.contains(")end")) return 0L;
+    public static String getAndRemoveSleepSentenceMs(String sleepSentence) {
+        if (!sleepSentence.contains("sleepSentence(") || !sleepSentence.contains(")end")) return "";
 
-        try { return Long.parseLong(StringUtils.substringBetween(sleepSentence, "sleepSentence(", ")end")); }
-        catch (Exception exception) {
+        try {
+            Long delay = Long.parseLong(StringUtils.substringBetween(sleepSentence, "sleepSentence(", ")end"));
+            sleepSentence = stringInterceptReplace(sleepSentence, "sleepSentence(", ")end", "", true).trim();
+            return delay + ";" + sleepSentence;
+        } catch (Exception exception) {
             sendConsoleMessage("&c您填入的延迟语句 (sleepSentence) 语法错误! 请检查配置文件! 原语句: &e" + sleepSentence);
-            return 0L;
+            return "";
         }
-    }
-
-    /**
-     * 移除 sleepSentence 语句内容。
-     *
-     * @param sleepSentence 要移除的 sleepSentence 语句。
-     * @return 移除后的字符串。
-     */
-    public static String removeSleepSentence(String sleepSentence) {
-        return stringInterceptReplace(sleepSentence, "sleepSentence(", ")end", "", true).trim();
-    }
-
-    /**
-     * 检查字符串中是否含有 sleepSentence 语句。
-     *
-     * @param sleepSentence 要检查的字符串。
-     * @return 如果字符串中包含 sleepSentence 语句，返回 true;否则返回 false。
-     */
-    public static boolean hasSleepSentenceMs(String sleepSentence) {
-        return sleepSentence.contains("sleepSentence(") && sleepSentence.contains(")end");
     }
 
     /**

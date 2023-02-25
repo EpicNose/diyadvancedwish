@@ -4,7 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 
 /**
- * 用于构建 Caffeine 缓存的工具类。
+ * Caffeine 缓存工具类。
  *
  * @see Caffeine
  *

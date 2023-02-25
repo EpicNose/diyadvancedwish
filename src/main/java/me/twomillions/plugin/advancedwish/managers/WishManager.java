@@ -628,27 +628,59 @@ public class WishManager {
         for (String coupon : yaml.getStringList("COUPON")) {
             if (coupon.isEmpty()) break;
 
-            coupon = QuickUtils.replaceTranslateToPapi(coupon, player);
+            coupon = QuickUtils.stripColor(QuickUtils.replaceTranslateToPapi(coupon, player));
 
             String[] couponSplit = coupon.split(";");
 
-            for (ItemStack itemStack : player.getInventory()) {
+            int removeAmount = Integer.parseInt(QuickUtils.count(couponSplit[0]).toString());
+            String itemLoreContains = couponSplit[1];
+
+            ConcurrentLinkedQueue<ItemStack> toRemove = new ConcurrentLinkedQueue<>();
+
+            for (ItemStack itemStack : player.getInventory().getContents()) {
                 if (itemStack == null || itemStack.getType() == Material.AIR) continue;
 
-                ItemMeta meta = itemStack.getItemMeta();
+                ItemMeta itemMeta = itemStack.getItemMeta();
 
-                if (meta == null || meta.getLore() == null) continue;
+                if (itemMeta == null) continue;
 
-                for (String lore : meta.getLore()) {
-                    lore = QuickUtils.replaceTranslateToPapi(lore, player);
+                // 包含文本匹配
+                if (!itemLoreContains.isEmpty()) {
+                    List<String> lore = itemMeta.getLore();
+                    if (lore == null || lore.stream().noneMatch(line -> QuickUtils.stripColor(line).contains(itemLoreContains))) {
+                        continue;
+                    }
+                }
 
-                    if (!lore.contains(couponSplit[1])) continue;
+                toRemove.add(itemStack);
+            }
 
-                    int itemAmount = itemStack.getAmount();
-                    int checkAmount = Integer.parseInt(QuickUtils.count(couponSplit[0]).toString());
+            if (toRemove.size() == 0) break;
 
-                    if (itemAmount < checkAmount) break;
+            // 数量检查
+            int itemAmount = toRemove.stream().mapToInt(ItemStack::getAmount).sum();
 
+            if (itemAmount < removeAmount) break;
+
+            // 物品移除
+            if (removeAmount > 0) {
+                int removedAmount = 0;
+
+                for (ItemStack item : toRemove) {
+                    if (removedAmount >= removeAmount) break;
+
+                    int amountToRemove = Math.min(item.getAmount(), removeAmount - removedAmount);
+
+                    if (amountToRemove <= 0) continue;
+
+                    item.setAmount(item.getAmount() - amountToRemove);
+
+                    if (item.getAmount() <= 0) player.getInventory().removeItem(item);
+
+                    removedAmount += amountToRemove;
+                }
+
+                if (removedAmount >= removeAmount) {
                     if (isEnabledWishLimit(wishName) && isEnabledCouponLimit(wishName)) {
                         int wishLimitAmount = getWishLimitAmount(wishName);
                         int playerWishLimitAmount = getPlayerWishLimitAmount(player, wishName) + getWishIncreasedAmount(wishName);
@@ -657,8 +689,6 @@ public class WishManager {
 
                         setPlayerWishLimitAmount(player, wishName, playerWishLimitAmount);
                     }
-
-                    itemStack.setAmount(itemAmount - checkAmount);
 
                     return PlayerWishState.Allow;
                 }
@@ -677,11 +707,12 @@ public class WishManager {
         for (String configInventoryHave : yaml.getStringList("INVENTORY-HAVE")) {
             if (configInventoryHave == null || configInventoryHave.length() <= 1) continue;
 
-            configInventoryHave = QuickUtils.replaceTranslateToPapi(configInventoryHave, player);
+            configInventoryHave = QuickUtils.stripColor(QuickUtils.replaceTranslateToPapi(configInventoryHave, player));
 
             String[] configInventoryHaveSplit = configInventoryHave.toUpperCase(Locale.ROOT).split(";");
 
             int checkAmount = Integer.parseInt(QuickUtils.count(configInventoryHaveSplit[1]).toString());
+            int removeAmount = Integer.parseInt(QuickUtils.count(configInventoryHaveSplit[2]).toString());
 
             Material material = ItemUtils.materialValueOf(configInventoryHaveSplit[0], wishName);
 
@@ -690,7 +721,105 @@ public class WishManager {
                     .filter(itemStack -> itemStack != null && itemStack.getType() == material)
                     .mapToInt(ItemStack::getAmount).sum();
 
-            if (!player.getInventory().contains(material) || itemAmount < checkAmount) return PlayerWishState.RequirementsNotMet;
+            if (checkAmount > itemAmount || removeAmount > itemAmount) return PlayerWishState.RequirementsNotMet;
+
+            // 物品移除
+            if (removeAmount > 0) {
+                int removedAmount = 0;
+
+                ItemStack[] toRemove = player.getInventory().all(material).values().toArray(new ItemStack[0]);
+
+                for (ItemStack item : toRemove) {
+                    if (removedAmount >= removeAmount) break;
+
+                    int itemToRemove = Math.min(item.getAmount(), removeAmount - removedAmount);
+                    removedAmount += itemToRemove;
+
+                    if (item.getAmount() == itemToRemove) {
+                        player.getInventory().removeItem(item);
+                    } else {
+                        item.setAmount(item.getAmount() - itemToRemove);
+                    }
+                }
+
+                if (removedAmount < removeAmount) {
+                    return PlayerWishState.RequirementsNotMet;
+                }
+            }
+        }
+
+        // 背包物品检查 - 自定义物品
+        for (String configInventoryHaveCustom : yaml.getStringList("INVENTORY-HAVE-CUSTOM")) {
+            if (configInventoryHaveCustom == null || configInventoryHaveCustom.length() <= 1) continue;
+
+            configInventoryHaveCustom = QuickUtils.stripColor(QuickUtils.replaceTranslateToPapi(configInventoryHaveCustom, player));
+
+            String[] configInventoryHaveCustomSplit = configInventoryHaveCustom.toUpperCase(Locale.ROOT).split(";");
+
+            String itemName = configInventoryHaveCustomSplit[0];
+            String itemLoreContains = configInventoryHaveCustomSplit.length > 1 ? configInventoryHaveCustomSplit[1] : "";
+            int checkAmount = Integer.parseInt(QuickUtils.count(configInventoryHaveCustomSplit[2]).toString());
+            int removeAmount = Integer.parseInt(QuickUtils.count(configInventoryHaveCustomSplit[3]).toString());
+
+            // 物品数据
+            ConcurrentLinkedQueue<ItemStack> toRemove = new ConcurrentLinkedQueue<>();
+
+            for (ItemStack itemStack : player.getInventory().getContents()) {
+                if (itemStack == null) continue;
+
+                ItemMeta itemMeta = itemStack.getItemMeta();
+
+                if (itemMeta == null) continue;
+
+                // 物品名称匹配
+                if (!itemMeta.hasDisplayName() || !QuickUtils.stripColor(itemMeta.getDisplayName()).equals(itemName)) {
+                    continue;
+                }
+
+                // 包含文本匹配
+                if (!itemLoreContains.isEmpty()) {
+                    List<String> lore = itemMeta.getLore();
+                    if (lore == null || lore.stream().noneMatch(line -> QuickUtils.stripColor(line).contains(itemLoreContains))) {
+                        continue;
+                    }
+                }
+
+                toRemove.add(itemStack);
+            }
+
+            if (toRemove.size() == 0) {
+                return PlayerWishState.RequirementsNotMet;
+            }
+
+            // 数量检查
+            int itemAmount = toRemove.stream().mapToInt(ItemStack::getAmount).sum();
+
+            if (itemAmount < checkAmount) {
+                return PlayerWishState.RequirementsNotMet;
+            }
+
+            // 物品移除
+            if (removeAmount > 0) {
+                int removedAmount = 0;
+
+                for (ItemStack item : toRemove) {
+                    if (removedAmount >= removeAmount) break;
+
+                    int amountToRemove = Math.min(item.getAmount(), removeAmount - removedAmount);
+
+                    if (amountToRemove <= 0) continue;
+
+                    item.setAmount(item.getAmount() - amountToRemove);
+
+                    if (item.getAmount() <= 0) player.getInventory().removeItem(item);
+
+                    removedAmount += amountToRemove;
+                }
+
+                if (removedAmount < removeAmount) {
+                    return PlayerWishState.RequirementsNotMet;
+                }
+            }
         }
 
         // 检查玩家是否拥有指定的药水效果
@@ -845,5 +974,4 @@ public class WishManager {
         ConfigManager.createJson(player.getUniqueId().toString(), "/PlayerCache", false, false)
                 .set("DO-OP-COMMAND", doOpCommand);
     }
-
 }

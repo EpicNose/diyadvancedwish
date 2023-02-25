@@ -27,4 +27,19 @@ public class ItemUtils {
             return Material.AIR;
         }
     }
+
+    /**
+     * 将字符串转换为 Material 对象，如果字符串无法转换则发送错误信息并返回 Material.AIR。
+     *
+     * @param materialString 要转换的字符串，不支持 null
+     * @return 对应的 Material，或 Material.AIR 如果字符串无法转换
+     * @throws NullPointerException 如果 materialString 为 null
+     */
+    public static Material materialValueOf(String materialString) throws NullPointerException {
+        try {
+            return Material.valueOf(materialString.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            return Material.AIR;
+        }
+    }
 }

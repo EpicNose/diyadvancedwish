@@ -88,9 +88,16 @@ public class ScheduledTaskManager {
             fileName = taskElements.length > 1 ? taskElements[1] : fileName;
             scheduledTask = QuickUtils.randomSentence(QuickUtils.replaceTranslateToPapi(taskElements[taskElements.length - 1], player));
 
-            if (QuickUtils.hasSleepSentenceMs(scheduledTask)) {
-                time += QuickUtils.getSleepSentenceMs(scheduledTask);
-                scheduledTask = QuickUtils.removeSleepSentence(scheduledTask);
+            String sleepSentence = QuickUtils.getAndRemoveSleepSentenceMs(scheduledTask);
+
+            if (!"".equals(sleepSentence)) {
+                String[] sleepSentenceSplit = sleepSentence.split(";");
+
+                long sleepSentenceMs = Long.parseLong(sleepSentenceSplit[0]);
+                String sleepSentenceRemoved = sleepSentenceSplit[1];
+
+                time += sleepSentenceMs;
+                scheduledTask = sleepSentenceRemoved;
             }
 
             if (scheduledTask.equals("GO-RANDOM")) {
@@ -117,9 +124,16 @@ public class ScheduledTaskManager {
             long time = System.currentTimeMillis();
             scheduledTask = QuickUtils.randomSentence(QuickUtils.replaceTranslateToPapi(scheduledTask, player));
 
-            if (QuickUtils.hasSleepSentenceMs(scheduledTask)) {
-                time += QuickUtils.getSleepSentenceMs(scheduledTask);
-                scheduledTask = QuickUtils.removeSleepSentence(scheduledTask);
+            String sleepSentence = QuickUtils.getAndRemoveSleepSentenceMs(scheduledTask);
+
+            if (!"".equals(sleepSentence)) {
+                String[] sleepSentenceSplit = sleepSentence.split(";");
+
+                long sleepSentenceMs = Long.parseLong(sleepSentenceSplit[0]);
+                String sleepSentenceRemoved = sleepSentenceSplit[1];
+
+                time += sleepSentenceMs;
+                scheduledTask = sleepSentenceRemoved;
             }
 
             ScheduledTaskManager.addPlayerScheduledTask(player, time, fileName, path, false, scheduledTask);
