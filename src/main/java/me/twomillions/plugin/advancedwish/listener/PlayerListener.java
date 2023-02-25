@@ -13,11 +13,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.*;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.util.ArrayList;
 import java.util.UUID;
 
 /**
@@ -118,21 +118,5 @@ public class PlayerListener implements Listener {
         if (player.isOp() || getCommand == null) return;
 
         if (!command.equals(getCommand)) event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void chat(AsyncPlayerChatEvent event) {
-        ItemStack itemStack = event.getPlayer().getInventory().getItemInMainHand();
-        ItemMeta itemMeta = itemStack.getItemMeta();
-
-        ArrayList<String> n = new ArrayList<>();
-
-        n.add("123123");
-        n.add("asdasdasd");
-        n.add("测试抽奖啊啊啊");
-
-        itemMeta.setLore(n);
-
-        itemStack.setItemMeta(itemMeta);
     }
 }

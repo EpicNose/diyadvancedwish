@@ -53,8 +53,6 @@ public class EffectSendManager {
      */
     public static void sendEffect(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
         if (!targetPlayer.isOnline()) return;
-
-        System.out.println("1");
         
         // isCancelled
         if (QuickUtils.callAsyncEffectSendEvent(fileName, targetPlayer, replacePlayer, path, pathPrefix).isCancelled()) return;
