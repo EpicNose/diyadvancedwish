@@ -125,3 +125,21 @@ QUERY-WISH:
 
   LOGS-NULL:
     - "&c没有查询到对应的日志记录, 此玩家没有抽奖? 开始条数或结束条数填写错误?"
+
+GET-AMOUNT:
+  - "&a您的<wish>抽奖次数为: <amount>"
+
+GET-GUARANTEED:
+  - "&a您的<wish>保底率为: <guaranteed>"
+
+GET-LIMIT-AMOUNT:
+  - "&a您的<wish>抽奖限制次数为: <playerLimitAmount>/<limitAmount>"
+
+GET-OTHER-PLAYER-AMOUNT:
+  - "&a此玩家的<wish>抽奖次数为: <amount>"
+
+GET-OTHER-PLAYER-GUARANTEED:
+  - "&a此玩家的<wish>保底率为: <guaranteed>"
+
+GET-OTHER-PLAYER-LIMIT-AMOUNT:
+  - "&a您的<wish>抽奖限制次数为: <playerLimitAmount>/<limitAmount>"

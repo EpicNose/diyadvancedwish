@@ -46,15 +46,18 @@ public final class Main extends JavaPlugin {
                 .replace("_", "0").replace("[", "").replace("]", "")));
 
         ConfigManager.createDefaultConfig();
-
         Yaml messageYaml = ConfigManager.getMessageYaml();
         Yaml advancedWishYaml = ConfigManager.getAdvancedWishYaml();
 
         // 版本检查
-        if (!ConfigManager.checkLastVersion(messageYaml) || !ConfigManager.checkLastVersion(advancedWishYaml)) return;
+        if (!ConfigManager.checkLastVersion(messageYaml) || !ConfigManager.checkLastVersion(advancedWishYaml)) {
+            return;
+        }
 
         // 设置 Mongo
-        if (MongoManager.setupMongo(advancedWishYaml) == MongoConnectState.CannotConnect) return;
+        if (MongoManager.setupMongo(advancedWishYaml) == MongoConnectState.CannotConnect) {
+            return;
+        }
 
         // 获取配置文件规定的路径
         String pluginPath = Main.getInstance().getDataFolder().toString();
@@ -68,7 +71,10 @@ public final class Main extends JavaPlugin {
         setDoListCachePath("".equals(doListCacheConfig) ? pluginPath + "/PlayerCache" : doListCacheConfig);
 
         // 迁移检查
-        if (MongoManager.playerGuaranteedJsonToMongo(advancedWishYaml) != JsonTransformationMongoState.TurnOff) { Bukkit.shutdown(); return; }
+        if (MongoManager.playerGuaranteedJsonToMongo(advancedWishYaml) != JsonTransformationMongoState.TurnOff) {
+            Bukkit.shutdown();
+            return;
+        }
 
         // 注册
         RegisterManager.setupPlugins(true);
@@ -76,7 +82,9 @@ public final class Main extends JavaPlugin {
         RegisterManager.registerCommands();
 
         // bStats
-        if (!ConfigManager.getAdvancedWishYaml().contains("BSTATS") || ConfigManager.getAdvancedWishYaml().getBoolean("BSTATS")) new bStats(this, 16990);
+        if (!advancedWishYaml.getOrDefault("BSTATS", true)) {
+            new bStats(this, 16990);
+        }
 
         // 网页更新
         UpdateCheckerTask.startTask();
@@ -86,14 +94,15 @@ public final class Main extends JavaPlugin {
          * 这里检查服内是否有此玩家，如果有的话那么就为所有玩家启动 PlayerTimestampRunnable
          * 并且如果此玩家在线那么直接检查缓存数据，而不是需要玩家重新进入服务器
          */
-        if (Bukkit.getOnlinePlayers().size() != 0) {
+        if (!Bukkit.getOnlinePlayers().isEmpty()) {
             Bukkit.getOnlinePlayers().forEach(onlinePlayer -> {
                 PlayerTimestampTask.startTask(onlinePlayer);
                 PlayerCheckCacheTask.startTask(onlinePlayer);
             });
         }
 
-        QuickUtils.sendConsoleMessage("&aAdvanced Wish 插件已成功加载! 感谢您使用此插件! 版本: &e" + this.getDescription().getVersion() + "&a, 作者: &e2000000&a。");
+
+        QuickUtils.sendConsoleMessage("&aAdvanced Wish 插件已成功加载! 感谢您使用此插件! 版本: &e" + getDescription().getVersion() + "&a, 作者: &e2000000&a。");
     }
 
     @Override

@@ -38,18 +38,18 @@ public class PlayerListener implements Listener {
     public void onPlayerLogin(AsyncPlayerPreLoginEvent event) {
         UUID uuid = event.getUniqueId();
 
-        if (WishManager.getSavingCache().get(uuid, k -> false)) {
-            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, QuickUtils.replaceTranslateToPapi(ConfigManager.getAdvancedWishYaml().getString("CANCEL-LOGIN-REASONS.SAVING-CACHE")));
+        if (Boolean.TRUE.equals(WishManager.getSavingCache().get(uuid, k -> false))) {
+            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, QuickUtils.handleString(ConfigManager.getAdvancedWishYaml().getString("CANCEL-LOGIN-REASONS.SAVING-CACHE")));
             return;
         }
 
         if (PlayerCheckCacheTask.isLoadingCache(uuid)) {
-            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, QuickUtils.replaceTranslateToPapi(ConfigManager.getAdvancedWishYaml().getString("CANCEL-LOGIN-REASONS.LOADING-CACHE")));
+            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, QuickUtils.handleString(ConfigManager.getAdvancedWishYaml().getString("CANCEL-LOGIN-REASONS.LOADING-CACHE")));
             return;
         }
 
         if (PlayerCheckCacheTask.isWaitingLoadingCache(uuid)) {
-            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, QuickUtils.replaceTranslateToPapi(ConfigManager.getAdvancedWishYaml().getString("CANCEL-LOGIN-REASONS.WAITING-LOADING-CACHE")));
+            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, QuickUtils.handleString(ConfigManager.getAdvancedWishYaml().getString("CANCEL-LOGIN-REASONS.WAITING-LOADING-CACHE")));
         }
     }
 

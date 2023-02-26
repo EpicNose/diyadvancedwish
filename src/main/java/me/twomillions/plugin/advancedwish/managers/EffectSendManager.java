@@ -92,7 +92,7 @@ public class EffectSendManager {
      */
     public static boolean isRecordEffectSend(String fileName, String path, String pathPrefix) {
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
-        return Boolean.parseBoolean(QuickUtils.replaceTranslateToPapi(yaml.getOrDefault(pathPrefix + ".RECORD", "false")));
+        return QuickUtils.handleBoolean(yaml.getOrDefault(pathPrefix + ".RECORD", "false"));
     }
 
     /**
@@ -113,16 +113,16 @@ public class EffectSendManager {
         yaml.setPathPrefix(pathPrefix == null ? "TITLE" : pathPrefix + ".TITLE");
 
         // 替换标题的主副文本中的占位符
-        String mainTitle = QuickUtils.replaceTranslateToPapi(yaml.getString("MAIN-TITLE"), targetPlayer, replacePlayer);
-        String subTitle = QuickUtils.replaceTranslateToPapi(yaml.getString("SUB-TITLE"), targetPlayer, replacePlayer);
+        String mainTitle = QuickUtils.handleString(yaml.getString("MAIN-TITLE"), targetPlayer, replacePlayer);
+        String subTitle = QuickUtils.handleString(yaml.getString("SUB-TITLE"), targetPlayer, replacePlayer);
 
         // 如果标题文本为空，直接返回
         if ("".equals(mainTitle) && "".equals(subTitle)) return;
 
         // 替换并获取标题淡入、停留和淡出时间
-        int fadeIn = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("FADE-IN"), targetPlayer, replacePlayer));
-        int fadeOut = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("FADE-OUT"), targetPlayer, replacePlayer));
-        int stay = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("STAY"), targetPlayer, replacePlayer));
+        int fadeIn = QuickUtils.handleInt(yaml.getString("FADE-IN"), targetPlayer, replacePlayer);
+        int fadeOut = QuickUtils.handleInt(yaml.getString("FADE-OUT"), targetPlayer, replacePlayer);
+        int stay = QuickUtils.handleInt(yaml.getString("STAY"), targetPlayer, replacePlayer);
 
         /*
          * 为不同版本的 Minecraft 使用不同的发送标题方法
@@ -156,11 +156,9 @@ public class EffectSendManager {
         yaml.getStringList("PARTICLE").forEach(particleConfig -> {
             if (particleConfig == null || particleConfig.length() <= 1) return;
 
-            // 替换所有可替换的字符串
-            particleConfig = QuickUtils.replaceTranslateToPapi(particleConfig, targetPlayer, replacePlayer);
-
             // 解析粒子效果配置
-            String[] particleConfigSplit = particleConfig.toUpperCase(Locale.ROOT).split(";");
+            String[] particleConfigSplit = QuickUtils.handleStrings(particleConfig.toUpperCase(Locale.ROOT).split(";"), targetPlayer, replacePlayer);
+
             ParticleEffect particleEffect;
             String particleString = particleConfigSplit[0];
 
@@ -174,10 +172,10 @@ public class EffectSendManager {
             }
 
             // 解析x、y、z、amount参数
-            double x = Double.parseDouble(QuickUtils.count(particleConfigSplit[1]).toString());
-            double y = Double.parseDouble(QuickUtils.count(particleConfigSplit[2]).toString());
-            double z = Double.parseDouble(QuickUtils.count(particleConfigSplit[3]).toString());
-            int amount = Integer.parseInt(QuickUtils.count(particleConfigSplit[4]).toString());
+            double x = Double.parseDouble(particleConfigSplit[1]);
+            double y = Double.parseDouble(particleConfigSplit[2]);
+            double z = Double.parseDouble(particleConfigSplit[3]);
+            int amount = Integer.parseInt(particleConfigSplit[4]);
 
             // 是否为 Note 粒子效果，是否对所有玩家生效，是否具有颜色属性
             boolean isNote = particleEffect == ParticleEffect.NOTE;
@@ -267,11 +265,8 @@ public class EffectSendManager {
         soundConfigs.forEach(soundConfig -> {
             if (soundConfig == null || soundConfig.length() <= 1) return;
 
-            // 替换占位符
-            soundConfig = QuickUtils.replaceTranslateToPapi(soundConfig, targetPlayer, replacePlayer);
-
             // 解析音效配置
-            String[] soundConfigSplit = soundConfig.toUpperCase(Locale.ROOT).split(";");
+            String[] soundConfigSplit = QuickUtils.handleStrings(soundConfig.toUpperCase(Locale.ROOT).split(";"), targetPlayer, replacePlayer);
 
             Sound sound;
             String soundString = soundConfigSplit[0];
@@ -284,8 +279,8 @@ public class EffectSendManager {
                 return;
             }
 
-            int volume = Integer.parseInt(QuickUtils.count(soundConfigSplit[1]).toString());
-            int pitch = Integer.parseInt(QuickUtils.count(soundConfigSplit[2]).toString());
+            int volume = Integer.parseInt(soundConfigSplit[1]);
+            int pitch = Integer.parseInt(soundConfigSplit[2]);
 
             // 播放音效
             targetPlayer.playSound(targetPlayer.getLocation(), sound, volume, pitch);
@@ -311,8 +306,7 @@ public class EffectSendManager {
         yaml.getStringList("PLAYER").forEach(commandConfig -> {
             if (commandConfig == null || commandConfig.length() <= 1) return;
 
-            // 替换翻译占位符，并转化为小写
-            commandConfig = QuickUtils.replaceTranslateToPapi(commandConfig, targetPlayer, replacePlayer).toLowerCase(Locale.ROOT);
+            commandConfig = QuickUtils.handleString(commandConfig, targetPlayer, replacePlayer);
 
             // 判断指令是否需要 OP 权限
             if (!commandConfig.startsWith("[op]:") || targetPlayer.isOp()) {
@@ -351,7 +345,7 @@ public class EffectSendManager {
             ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
 
             // 替换翻译占位符并执行控制台指令
-            String finalCommandConfig = QuickUtils.replaceTranslateToPapi(commandConfig, targetPlayer, replacePlayer);
+            String finalCommandConfig = QuickUtils.handleString(commandConfig, targetPlayer, replacePlayer);
             Bukkit.getScheduler().runTask(plugin, () -> Bukkit.dispatchCommand(console, finalCommandConfig));
         });
     }
@@ -384,7 +378,7 @@ public class EffectSendManager {
         // 向目标玩家发送消息
         messageConfigs.stream()
                 .filter(messageConfig -> messageConfig != null && messageConfig.length() > 1)
-                .map(messageConfig -> QuickUtils.replaceTranslateToPapi(messageConfig, targetPlayer, replacePlayer))
+                .map(messageConfig -> QuickUtils.handleString(messageConfig, targetPlayer, replacePlayer))
                 .forEach(targetPlayer::sendMessage);
     }
 
@@ -409,7 +403,7 @@ public class EffectSendManager {
 
             // 广播公告
             Bukkit.getScheduler().runTask(plugin, () -> {
-                Bukkit.broadcastMessage(QuickUtils.replaceTranslateToPapi(announcementConfig, targetPlayer, replacePlayer));
+                Bukkit.broadcastMessage(QuickUtils.handleString(announcementConfig, targetPlayer, replacePlayer));
             });
         });
     }
@@ -433,17 +427,14 @@ public class EffectSendManager {
         yaml.getStringList("EFFECTS").forEach(effectConfig -> {
             if (effectConfig == null || effectConfig.length() <= 1) return;
 
-            // 将占位符替换为实际值
-            effectConfig = QuickUtils.replaceTranslateToPapi(effectConfig, targetPlayer, replacePlayer);
-
             // 解析药水效果配置
-            String[] effectConfigSplit = effectConfig.split(";");
+            String[] effectConfigSplit = QuickUtils.handleStrings(effectConfig.split(";"), targetPlayer, replacePlayer);
             String effectString = effectConfigSplit[0];
 
             PotionEffectType effectType = PotionEffectType.getByName(effectString);
 
-            int duration = Integer.parseInt(QuickUtils.count(effectConfigSplit[1]).toString());
-            int amplifier = Integer.parseInt(QuickUtils.count(effectConfigSplit[2]).toString());
+            int duration = Integer.parseInt(effectConfigSplit[1]);
+            int amplifier = Integer.parseInt(effectConfigSplit[2]);
 
             // 如果药水效果为空，则发送未知警告并返回
             if (effectType == null) { QuickUtils.sendUnknownWarn("药水效果", fileName, effectString); return; }
@@ -469,8 +460,8 @@ public class EffectSendManager {
         yaml.setPathPrefix(pathPrefix);
 
         // 解析配置
-        int hunger = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("HUNGER"), targetPlayer, replacePlayer));
-        double health = Double.parseDouble(QuickUtils.replaceTranslateToPapiCount(yaml.getString("HEALTH"), targetPlayer, replacePlayer));
+        int hunger = QuickUtils.handleInt(yaml.getString("HUNGER"), targetPlayer, replacePlayer);
+        double health = QuickUtils.handleDouble(yaml.getString("HEALTH"), targetPlayer, replacePlayer);
 
         if (health != 0) {
             double playerHealth = targetPlayer.getHealth();
@@ -499,7 +490,7 @@ public class EffectSendManager {
         yaml.setPathPrefix(pathPrefix);
 
         // 解析配置
-        int exp = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("EXP"), targetPlayer, replacePlayer));
+        int exp = QuickUtils.handleInt(yaml.getString("EXP"), targetPlayer, replacePlayer);
 
         if (exp != 0) ExpUtils.addExp(targetPlayer, exp);
     }
@@ -523,8 +514,8 @@ public class EffectSendManager {
         yaml.setPathPrefix(pathPrefix == null ? "ACTION-BAR" : pathPrefix + ".ACTION-BAR");
 
         // 解析配置
-        String actionBarMessage = QuickUtils.replaceTranslateToPapi(yaml.getString("MESSAGE"), targetPlayer, replacePlayer);
-        int actionBarTime = Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("TIME"), targetPlayer, replacePlayer));
+        String actionBarMessage = QuickUtils.handleString(yaml.getString("MESSAGE"), targetPlayer, replacePlayer);
+        int actionBarTime = QuickUtils.handleInt(yaml.getString("TIME"), targetPlayer, replacePlayer);
 
         if (actionBarMessage.isEmpty() || actionBarTime == 0) return;
 
@@ -560,10 +551,10 @@ public class EffectSendManager {
         yaml.setPathPrefix(pathPrefix == null ? "BOSS-BAR" : pathPrefix + ".BOSS-BAR");
 
         // 解析配置
-        String bossBarMessage = QuickUtils.replaceTranslateToPapi(yaml.getString("MESSAGE"), targetPlayer, replacePlayer);
-        double bossBarTime = Double.parseDouble(QuickUtils.replaceTranslateToPapiCount(yaml.getString("TIME"), targetPlayer, replacePlayer));
-        String barColorString = QuickUtils.replaceTranslateToPapi(yaml.getString("COLOR"), targetPlayer, replacePlayer);
-        String barStyleString = QuickUtils.replaceTranslateToPapi(yaml.getString("STYLE"), targetPlayer, replacePlayer);
+        String bossBarMessage = QuickUtils.handleString(yaml.getString("MESSAGE"), targetPlayer, replacePlayer);
+        double bossBarTime = QuickUtils.handleDouble(yaml.getString("TIME"), targetPlayer, replacePlayer);
+        String barColorString = QuickUtils.handleString(yaml.getString("COLOR"), targetPlayer, replacePlayer);
+        String barStyleString = QuickUtils.handleString(yaml.getString("STYLE"), targetPlayer, replacePlayer);
 
         // 判断 Boss Bar 的信息是否为空
         if ("".equals(bossBarMessage) || bossBarTime == 0) return;
@@ -603,7 +594,7 @@ public class EffectSendManager {
 
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
 
-        String ketherCode = QuickUtils.replaceTranslateToPapi(yaml.getString(pathPrefix + ".KETHER"), targetPlayer, replacePlayer);
+        String ketherCode = QuickUtils.handleString(yaml.getString(pathPrefix + ".KETHER"), targetPlayer, replacePlayer);
 
         if (ketherCode.isEmpty()) return;
 

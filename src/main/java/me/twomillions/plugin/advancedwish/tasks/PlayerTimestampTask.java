@@ -4,6 +4,7 @@ import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.managers.EffectSendManager;
 import me.twomillions.plugin.advancedwish.managers.ScheduledTaskManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
+import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -62,17 +63,19 @@ public class PlayerTimestampTask {
      */
     private static void executeScheduledTasks(ConcurrentLinkedQueue<String> playerScheduledTasks, Player player) {
         for (String scheduledTask : new ConcurrentLinkedQueue<>(playerScheduledTasks)) {
+            String[] scheduledTaskSplit = QuickUtils.handleStrings(scheduledTask.split(";"), player);
+
             long currentTimeMillis = System.currentTimeMillis();
-            long time = Long.parseLong(ScheduledTaskManager.getScheduledTaskTime(scheduledTask));
+            long time = QuickUtils.handleLong(scheduledTaskSplit[0], player);
 
             // 若任务时间戳大于当前时间则跳过
             if (time > currentTimeMillis) continue;
 
             ScheduledTaskManager.removePlayerScheduledTask(player, scheduledTask);
 
-            String fileName = ScheduledTaskManager.getScheduledTaskFileName(scheduledTask);
-            String path = ScheduledTaskManager.getScheduledTaskPath(scheduledTask);
-            String node = ScheduledTaskManager.getScheduledTaskNode(scheduledTask);
+            String fileName = scheduledTaskSplit[1];
+            String path = scheduledTaskSplit[2];
+            String node = scheduledTaskSplit[4];
 
             // 发送任务效果
             EffectSendManager.sendEffect(fileName, player, null, path, node);

@@ -21,7 +21,7 @@ public class RandomUtils<T> {
     /**
      * 所有随机对象的总概率。
      */
-    private double totalProbability;
+    private int totalProbability;
 
     /**
      * 创建一个新的 RandomUtils 实例。
@@ -37,7 +37,7 @@ public class RandomUtils<T> {
      * @param object 随机对象
      * @param probability 对应的概率
      */
-    public void addRandomObject(T object, double probability) {
+    public void addRandomObject(T object, int probability) {
         RandomObject<T> randomObject = new RandomObject<>(object, probability);
         randomObjects.add(randomObject);
         totalProbability += probability;
@@ -46,19 +46,20 @@ public class RandomUtils<T> {
     /**
      * 根据当前所有随机对象的概率，随机返回其中的一个对象。
      *
-     * @return 随机对象
-     * @throws RuntimeException 如果未选中任何随机对象
+     * @return 随机对象，若没有随机对象则返回 null
      */
     public T getResult() {
-        double randomNumber = new Random().nextDouble() * totalProbability;
-        double cumulativeProbability = 0;
+        int randomNumber = new Random().nextInt(totalProbability);
+        int cumulativeProbability = 0;
 
         for (RandomObject<T> randomObject : randomObjects) {
             cumulativeProbability += randomObject.getProbability();
-            if (randomNumber < cumulativeProbability) return randomObject.getObject();
+            if (randomNumber < cumulativeProbability) {
+                return randomObject.getObject();
+            }
         }
 
-        throw new RuntimeException("未选中任何随机对象。");
+        return null;
     }
 
     /**
@@ -76,7 +77,7 @@ public class RandomUtils<T> {
         /**
          * 随机对象的概率。
          */
-        private final double probability;
+        private final int probability;
 
         /**
          * 创建一个新的 RandomObject 实例。
@@ -84,7 +85,7 @@ public class RandomUtils<T> {
          * @param object 随机对象
          * @param probability 对应的概率
          */
-        public RandomObject(T object, double probability) {
+        public RandomObject(T object, int probability) {
             this.object = object;
             this.probability = probability;
         }
@@ -103,7 +104,7 @@ public class RandomUtils<T> {
          *
          * @return 随机对象的概率
          */
-        public double getProbability() {
+        public int getProbability() {
             return probability;
         }
     }

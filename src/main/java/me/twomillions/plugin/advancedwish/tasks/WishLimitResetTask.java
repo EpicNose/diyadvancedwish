@@ -34,14 +34,14 @@ public class WishLimitResetTask {
      */
     public static void startTask(String wishName) {
         // 读取
-        int wishResetLimitStart = WishManager.getWishResetLimitStart(wishName) * 20;
-        int wishResetLimitCycle = WishManager.getWishResetLimitCycle(wishName) * 20;
+        int wishResetLimitStart = QuickUtils.handleInt(WishManager.getWishResetLimitStart(wishName)) * 20;
+        int wishResetLimitCycle = QuickUtils.handleInt(WishManager.getWishResetLimitCycle(wishName)) * 20;
 
         // 异步删除
         BukkitTask resetBukkitTask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
             // 读取
-            boolean isResetCompleteSendEnabled = WishManager.isResetCompleteSendEnabled(wishName);
-            boolean isResetCompleteSendConsoleEnabled = WishManager.isResetCompleteSendConsoleEnabled(wishName);
+            boolean isResetCompleteSendEnabled = QuickUtils.handleBoolean(WishManager.isResetCompleteSendEnabled(wishName));
+            boolean isResetCompleteSendConsoleEnabled = QuickUtils.handleBoolean(WishManager.isResetCompleteSendConsoleEnabled(wishName));
 
             String storeMode = MongoManager.getMongoConnectState() == MongoConnectState.Connected ? "Mongo" : "Json";
 

@@ -269,7 +269,7 @@ public class ConfigManager {
     /**
      * 获取指定玩家的许愿日志条目数。
      *
-     * @param player 玩家对象
+     * @param player 玩家
      * @return 许愿日志条目数
      */
     public static int getPlayerWishLogCount(Player player) {

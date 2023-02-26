@@ -16,6 +16,10 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.function.Function;
+
 /**
  * 实用工具类。
  *
@@ -29,23 +33,13 @@ public class QuickUtils {
     private static final String CHAT_BAR = ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "------------------------------------------------";
 
     /**
-     * 将颜色代码翻译为实际的颜色。
+     * 将传入字符串颜色代码翻译为实际的颜色。
      *
-     * @param message 要翻译的字符串
+     * @param string 要翻译的字符串
      * @return 翻译后的字符串
      */
-    public static String translate(String message) {
-        return ChatColor.translateAlternateColorCodes('&', message);
-    }
-
-    /**
-     * 去除颜色。
-     *
-     * @param message 要去除颜色的字符串
-     * @return 去除颜色后的字符串
-     */
-    public static String stripColor(String message) {
-        return ChatColor.stripColor(message);
+    public static String translate(String string) {
+        return ChatColor.translateAlternateColorCodes('&', string);
     }
 
     /**
@@ -58,14 +52,36 @@ public class QuickUtils {
     }
 
     /**
-     * 替换字符串中的变量并翻译颜色代码。
+     * 去除输入字符串中的颜色代码。
+     *
+     * @param string 待处理的字符串
+     * @return 去除颜色代码后的新字符串
+     */
+    public static String stripColor(String string) {
+        return ChatColor.stripColor(string);
+    }
+
+    /**
+     * 去除输入字符串数组中的颜色代码。
+     *
+     * @param strings 待处理的字符串数组
+     * @return 去除颜色代码后的新字符串数组
+     */
+    public static String[] stripColor(String[] strings) {
+        return Arrays.stream(strings)
+                .map(ChatColor::stripColor)
+                .toArray(String[]::new);
+    }
+
+    /**
+     * 将传入的字符串替换变量。
      *
      * @param message 要替换和翻译的字符串
-     * @param player  玩家
-     * @param replacePlayer 要替换的玩家
-     * @return 替换后和翻译后的字符串
+     * @param player  可选用于变量替换的第一玩家
+     * @param replacePlayer 可选用于变量替换的第二玩家
+     * @return 替换后的字符串
      */
-    public static String replaceTranslate(String message, Player player, Player replacePlayer) {
+    public static String replace(String message, Player player, Player replacePlayer) {
         message = message
                 .replaceAll("<version>", plugin.getDescription().getVersion())
                 .replaceAll("<wishlist>", RegisterManager.getRegisterWish().toString())
@@ -74,11 +90,23 @@ public class QuickUtils {
         if (player != null) message = message.replaceAll("<player>", player.getName());
         if (replacePlayer != null) message = message.replaceAll("<rplayer>", replacePlayer.getName());
 
-        return translate(message);
+        return message;
     }
 
     /**
-     * 进行算术运算，并返回结果。
+     * 将传入的字符串替换变量并翻译颜色代码。
+     *
+     * @param string 要替换和翻译的字符串
+     * @param player  可选用于变量替换的第一玩家
+     * @param replacePlayer 可选用于变量替换的第二玩家
+     * @return 替换后和翻译后的字符串
+     */
+    public static String replaceTranslate(String string, Player player, Player replacePlayer) {
+        return translate(replace(string, player, replacePlayer));
+    }
+
+    /**
+     * 将传入的字符串进行算术运算，并返回结果。
      *
      * @param countString 待运算的字符串表达式
      * @return 返回运算结果
@@ -88,77 +116,306 @@ public class QuickUtils {
     }
 
     /**
-     * 根据是否启用 PlaceholderAPI 将文本进行翻译和变量替换。
+     * 将输入字符串转换为 PlaceholderAPI 字符串，如果当前服务器已经安装了 PlaceholderAPI 插件，则使用该插件进行转换。
      *
-     * @param string 要处理的字符串
-     * @param player 可选的玩家对象，用于变量替换
-     * @param replacePlayer 可选的玩家对象，用于文本中部分变量的替换
-     * @return 处理后的字符串
+     * @param string 待转换的字符串
+     * @return 如果当前服务器已经安装了 PlaceholderAPI 插件，则返回转换后的字符串，否则返回原始字符串。
      */
-    public static String replaceTranslateToPapi(String string, Player player, Player replacePlayer) {
+    public static String toPapi(String string) {
         if (RegisterManager.isUsingPapi()) {
-            String translated = replaceTranslate(string, player, replacePlayer);
-            return PlaceholderAPI.setPlaceholders(player, translated);
+            return PlaceholderAPI.setPlaceholders(null, string);
         }
 
-        return replaceTranslate(string, player, replacePlayer);
+        return string;
     }
 
     /**
-     * 将文本进行翻译和变量替换，但不包括玩家变量。
+     * 将输入字符串转换为 PlaceholderAPI 字符串，如果当前服务器已经安装了 PlaceholderAPI 插件，则使用该插件进行转换。
      *
-     * @param string 要处理的字符串
+     * @param string 待转换的字符串
+     * @param player 转换过程中使用的玩家
+     * @return 如果当前服务器已经安装了 PlaceholderAPI 插件，则返回转换后的字符串，否则返回原始字符串。
+     */
+    public static String toPapi(String string, Player player) {
+        if (RegisterManager.isUsingPapi()) {
+            return PlaceholderAPI.setPlaceholders(player, string);
+        }
+
+        return string;
+    }
+
+    /**
+     * 对传入的字符串进行处理，包括替换、翻译和随机语句支持等操作。
+     *
+     * @param string 待处理的字符串
      * @return 处理后的字符串
      */
-    public static String replaceTranslateToPapi(String string) {
-        return replaceTranslateToPapi(string, null, null);
+    public static String handleString(String string) {
+        return randomSentence(toPapi(replaceTranslate(string, null, null)));
     }
 
     /**
-     * 根据给定的玩家对象，将文本进行翻译和变量替换。
+     * 对传入的字符串进行处理，包括替换、翻译和随机语句支持等操作。
      *
-     * @param string 要处理的字符串
-     * @param player 玩家对象，用于变量替换
+     * @param string 待处理的字符串
+     * @param player  可选用于变量替换的第一玩家
      * @return 处理后的字符串
      */
-    public static String replaceTranslateToPapi(String string, Player player) {
-        return replaceTranslateToPapi(string, player, null);
+    public static String handleString(String string, Player player) {
+        return randomSentence(toPapi(replaceTranslate(string, player, null), player));
     }
 
     /**
-     * 将文本进行翻译和变量替换，计算结果并返回。
+     * 对传入的字符串进行处理，包括替换、翻译和随机语句支持等操作。
      *
-     * @param string 要处理的字符串
-     * @return 计算后的结果字符串
+     * @param string 待处理的字符串
+     * @param player  可选用于变量替换的第一玩家
+     * @param replacePlayer 可选用于变量替换的第二玩家
+     * @return 处理后的字符串
      */
-    public static String replaceTranslateToPapiCount(String string) {
-        String processed = replaceTranslateToPapi(string, null, null);
-        return count(processed).toString();
+    public static String handleString(String string, Player player, Player replacePlayer) {
+        return randomSentence(toPapi(replaceTranslate(string, player, replacePlayer), player));
     }
 
     /**
-     * 根据给定的玩家对象，将文本进行翻译和变量替换，计算结果并返回。
+     * 对传入的字符串进行处理，包括替换、翻译和随机语句支持，算数等操作。
      *
-     * @param string 要处理的字符串
-     * @param player 玩家对象，用于变量替换
-     * @return 计算后的结果字符串
+     * @param string 待处理的字符串
+     * @return 处理后的整数
      */
-    public static String replaceTranslateToPapiCount(String string, Player player) {
-        String processed = replaceTranslateToPapi(string, player, null);
-        return count(processed).toString();
+    public static int handleInt(String string) {
+        return Integer.parseInt(count(randomSentence(toPapi(replaceTranslate(string, null, null)))).toString());
     }
 
     /**
-     * 根据给定的玩家对象与可选的玩家对象，将文本进行翻译和变量替换，计算结果并返回。
+     * 对传入的字符串进行处理，包括替换、翻译和随机语句支持，算数等操作。
      *
-     * @param string 要处理的字符串
-     * @param player 玩家对象，用于变量替换
-     * @param replacePlayer 可选的玩家对象，用于文本中部分变量的替换
-     * @return 计算后的结果字符串
+     * @param string 待处理的字符串
+     * @param player  可选用于变量替换的第一玩家
+     * @return 处理后的整数
      */
-    public static String replaceTranslateToPapiCount(String string, Player player, Player replacePlayer) {
-        String processed = replaceTranslateToPapi(string, player, replacePlayer);
-        return count(processed).toString();
+    public static int handleInt(String string, Player player) {
+        return Integer.parseInt(count(randomSentence(toPapi(replaceTranslate(string, player, null), player))).toString());
+    }
+
+    /**
+     * 对传入的字符串进行处理，包括替换、翻译和随机语句支持，算数等操作。
+     *
+     * @param string 待处理的字符串
+     * @param player  可选用于变量替换的第一玩家
+     * @param replacePlayer 可选用于变量替换的第二玩家
+     * @return 处理后的整数
+     */
+    public static int handleInt(String string, Player player, Player replacePlayer) {
+        return Integer.parseInt(count(randomSentence(toPapi(replaceTranslate(string, player, replacePlayer), player))).toString());
+    }
+
+    /**
+     * 对传入的字符串进行处理，包括替换、翻译和随机语句支持，算数等操作。
+     *
+     * @param string 待处理的字符串
+     * @return 处理后的长整数
+     */
+    public static long handleLong(String string) {
+        return Long.parseLong(count(randomSentence(toPapi(replaceTranslate(string, null, null)))).toString());
+    }
+
+    /**
+     * 对传入的字符串进行处理，包括替换、翻译和随机语句支持，算数等操作。
+     *
+     * @param string 待处理的字符串
+     * @param player  可选用于变量替换的第一玩家
+     * @return 处理后的长整数
+     */
+    public static long handleLong(String string, Player player) {
+        return Long.parseLong(count(randomSentence(toPapi(replaceTranslate(string, player, null), player))).toString());
+    }
+
+    /**
+     * 对传入的字符串进行处理，包括替换、翻译和随机语句支持，算数等操作。
+     *
+     * @param string 待处理的字符串
+     * @param player  可选用于变量替换的第一玩家
+     * @param replacePlayer 可选用于变量替换的第二玩家
+     * @return 处理后的长整数
+     */
+    public static long handleLong(String string, Player player, Player replacePlayer) {
+        return Long.parseLong(count(randomSentence(toPapi(replaceTranslate(string, player, replacePlayer), player))).toString());
+    }
+
+    /**
+     * 对传入的字符串进行处理，包括替换、翻译和随机语句支持，算数等操作。
+     *
+     * @param string 待处理的字符串
+     * @return 处理后的浮点数
+     */
+    public static double handleDouble(String string) {
+        return Double.parseDouble(count(randomSentence(toPapi(replaceTranslate(string, null, null)))).toString());
+    }
+
+    /**
+     * 对传入的字符串进行处理，包括替换、翻译和随机语句支持，算数等操作。
+     *
+     * @param string 待处理的字符串
+     * @param player  可选用于变量替换的第一玩家
+     * @return 处理后的浮点数
+     */
+    public static double handleDouble(String string, Player player) {
+        return Double.parseDouble(count(randomSentence(toPapi(replaceTranslate(string, player, null), player))).toString());
+    }
+
+    /**
+     * 对传入的字符串进行处理，包括替换、翻译和随机语句支持，算数等操作。
+     *
+     * @param string 待处理的字符串
+     * @param player  可选用于变量替换的第一玩家
+     * @param replacePlayer 可选用于变量替换的第二玩家
+     * @return 处理后的浮点数
+     */
+    public static double handleDouble(String string, Player player, Player replacePlayer) {
+        return Double.parseDouble(count(randomSentence(toPapi(replaceTranslate(string, player, replacePlayer), player))).toString());
+    }
+
+    /**
+     * 对传入的字符串进行处理，包括替换、翻译和随机语句支持，算数等操作。
+     *
+     * @param string 待处理的字符串
+     * @return 处理后的布尔值
+     */
+    public static boolean handleBoolean(String string) {
+        return Boolean.parseBoolean(randomSentence(toPapi(replaceTranslate(string, null, null))));
+    }
+
+    /**
+     * 对传入的字符串进行处理，包括替换、翻译和随机语句支持，算数等操作。
+     *
+     * @param string 待处理的字符串
+     * @param player  可选用于变量替换的第一玩家
+     * @return 处理后的布尔值
+     */
+    public static boolean handleBoolean(String string, Player player) {
+        return Boolean.parseBoolean(randomSentence(toPapi(replaceTranslate(string, player, null), player)));
+    }
+
+    /**
+     * 对传入的字符串进行处理，包括替换、翻译和随机语句支持，算数等操作。
+     *
+     * @param string 待处理的字符串
+     * @param player  可选用于变量替换的第一玩家
+     * @param replacePlayer 可选用于变量替换的第二玩家
+     * @return 处理后的布尔值
+     */
+    public static boolean handleBoolean(String string, Player player, Player replacePlayer) {
+        return Boolean.parseBoolean(randomSentence(toPapi(replaceTranslate(string, player, replacePlayer), player)));
+    }
+
+    /**
+     * 对传入的字符串数组进行处理，包括替换、翻译和随机语句支持，算数等操作。
+     *
+     * @param strings 待处理的字符串数组
+     * @return 处理后的字符串数组
+     */
+    public static String[] handleStrings(String[] strings) {
+        Function<String, String> handleFunction = string -> {
+            if (isInt(string)) {
+                return String.valueOf(handleInt(string));
+            } else if (isLong(string)) {
+                return String.valueOf(handleLong(string));
+            } else if (isDouble(string)) {
+                return String.valueOf(handleDouble(string));
+            } else {
+                return handleString(string);
+            }
+        };
+
+        return Arrays.stream(strings)
+                .map(handleFunction)
+                .toArray(String[]::new);
+    }
+
+    /**
+     * 对传入的字符串数组进行处理，包括替换、翻译和随机语句支持，算数等操作。
+     *
+     * @param strings 待处理的字符串数组
+     * @param player  可选用于变量替换的第一玩家
+     * @return 处理后的字符串数组
+     */
+    public static String[] handleStrings(String[] strings, Player player) {
+        Function<String, String> handleFunction = string -> {
+            if (isInt(string)) {
+                return String.valueOf(handleInt(string, player));
+            } else if (isLong(string)) {
+                return String.valueOf(handleLong(string, player));
+            } else if (isDouble(string)) {
+                return String.valueOf(handleDouble(string, player));
+            } else {
+                return handleString(string, player);
+            }
+        };
+
+        return Arrays.stream(strings)
+                .map(handleFunction)
+                .toArray(String[]::new);
+    }
+
+    /**
+     * 对传入的字符串数组进行处理，包括替换、翻译和随机语句支持，算数等操作。
+     *
+     * @param strings 待处理的字符串数组
+     * @param player  可选用于变量替换的第一玩家
+     * @param replacePlayer 可选用于变量替换的第二玩家
+     * @return 处理后的字符串数组
+     */
+    public static String[] handleStrings(String[] strings, Player player, Player replacePlayer) {
+        Function<String, String> handleFunction = string -> {
+            if (isInt(string)) {
+                return String.valueOf(handleInt(string, player, replacePlayer));
+            } else if (isLong(string)) {
+                return String.valueOf(handleLong(string, player, replacePlayer));
+            } else if (isDouble(string)) {
+                return String.valueOf(handleDouble(string, player, replacePlayer));
+            } else {
+                return handleString(string, player, replacePlayer);
+            }
+        };
+
+        return Arrays.stream(strings)
+                .map(handleFunction)
+                .toArray(String[]::new);
+    }
+
+    /**
+     * 判断输入字符串是否为 long 类型。
+     *
+     * @param string 待检查的字符串
+     * @return 如果字符串为long类型且值大于 Integer.MAX_VALUE，则返回 true，否则返回 false。如果输入字符串不能被解析为数字，则返回 false。
+     */
+    public static boolean isLong(String string) {
+        try {
+            return string.matches("^-?\\d+$") && Long.parseLong(string) > Integer.MAX_VALUE;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    /**
+     * 判断输入字符串是否为 int 类型。
+     *
+     * @param string 待检查的字符串
+     * @return 如果字符串为 int 类型，则返回 true，否则返回 false。
+     */
+    public static boolean isInt(String string) {
+        return string.matches("^-?\\d+$") && !isLong(string);
+    }
+
+    /**
+     * 判断输入字符串是否为 double 类型，包括可选的负号、至少一个整数位和可选的小数位。
+     *
+     * @param string 待检查的字符串
+     * @return 如果字符串为 double 类型，则返回 true，否则返回 false。
+     */
+    public static boolean isDouble(String string) {
+        return string.matches("^-?\\d+(\\.\\d+)?$");
     }
 
     /**
@@ -220,7 +477,7 @@ public class QuickUtils {
         if (!sleepSentence.contains("sleepSentence(") || !sleepSentence.contains(")end")) return false;
 
         try {
-            long time = Long.parseLong(replaceTranslateToPapiCount(StringUtils.substringBetween(sleepSentence, "sleepSentence(", ")end")));
+            long time = handleLong(StringUtils.substringBetween(sleepSentence, "sleepSentence(", ")end"));
             Thread.sleep(time);
             return true;
         } catch (NumberFormatException e) {
@@ -252,6 +509,87 @@ public class QuickUtils {
     }
 
     /**
+     * 对比两个字符串的值是否满足指定的条件。
+     *
+     * @param contrastValue 待比较的字符串
+     * @param condition 比较条件，可以是 ">", ">=", "=", "<", "<=", "EQUALS", "CONTAINS" 中的一个
+     * @param value 用于比较的字符串值
+     * @return 如果满足指定的条件则返回 true，否则返回 false
+     * @throws IllegalArgumentException 如果条件参数无效或待比较的字符串无法转换为数字则抛出此异常
+     */
+    public static boolean conditionalExpressionCheck(String contrastValue, String condition, String value) throws IllegalArgumentException {
+        try {
+            switch (condition.toUpperCase(Locale.ROOT)) {
+                case ">":
+                    if (Double.parseDouble(contrastValue) > Double.parseDouble(value)) {
+                        return true;
+                    }
+                    break;
+                case ">=":
+                    if (Double.parseDouble(contrastValue) >= Double.parseDouble(value)) {
+                        return true;
+                    }
+                    break;
+                case "=":
+                    if (Double.parseDouble(contrastValue) == Double.parseDouble(value)) {
+                        return true;
+                    }
+                    break;
+                case "<":
+                    if (Double.parseDouble(contrastValue) < Double.parseDouble(value)) {
+                        return true;
+                    }
+                    break;
+                case "<=":
+                    if (Double.parseDouble(contrastValue) <= Double.parseDouble(value)) {
+                        return true;
+                    }
+                    break;
+                case "EQUALS":
+                    if (contrastValue.equals(value)) {
+                        return true;
+                    }
+                    break;
+                case "CONTAINS":
+                    if (contrastValue.contains(value)) {
+                        return true;
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid condition: " + condition);
+            }
+        } catch (Throwable throwable) {
+            throw new IllegalArgumentException("Invalid conditional expression!");
+        }
+
+        return false;
+    }
+
+    /**
+     * 通过索引找到数组中的条件语句进行判断。
+     *
+     * @param sentence 数组
+     * @param contrastValueIndex 待比较的字符串索引
+     * @param conditionIndex 比较条件索引
+     * @param valueIndex 用于比较的字符串值索引
+     * @return 如果满足指定的条件则返回 true，否则返回 false
+     * @throws IllegalArgumentException 如果条件参数无效或待比较的字符串无法转换为数字则抛出此异常
+     */
+    public static boolean conditionalExpressionCheck(String[] sentence, int contrastValueIndex, int conditionIndex, int valueIndex) throws IllegalArgumentException {
+        try {
+            // 条件检查
+            String contrastValue = sentence[contrastValueIndex];
+            String condition = sentence[conditionIndex].toUpperCase();
+            String value = sentence[valueIndex];
+
+            // 判断条件是否满足
+            return QuickUtils.conditionalExpressionCheck(contrastValue, condition, value);
+        } catch (Throwable throwable) {
+            throw new IllegalArgumentException("Invalid conditional expression!");
+        }
+    }
+
+    /**
      * 快捷发送警告信息。
      *
      * @param unknown unknown
@@ -259,7 +597,7 @@ public class QuickUtils {
      * @param unknownName unknownName
      */
     public static void sendUnknownWarn(String unknown, String fileName, String unknownName) {
-        sendConsoleMessage("&c您填入了一个未知的" + unknown + "，位于: &e" + fileName + "&c，您填入的未知" + unknown + "为: &e" + unknownName);
+        sendConsoleMessage("&c您填入了一个无法被识别的 " + unknown + "，位于: &e" + fileName + "&c，您填入的 " + unknown + " 为: &e" + unknownName);
     }
 
     /**

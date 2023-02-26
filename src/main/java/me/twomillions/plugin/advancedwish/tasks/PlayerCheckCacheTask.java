@@ -102,7 +102,7 @@ public class PlayerCheckCacheTask {
      *
      * <p>自 0.0.3.4-SNAPSHOT 后，此方法将记录每次玩家的状态，以防止安全问题。
      *
-     * @param player 玩家对象
+     * @param player 玩家
      */
     public static void startTask(Player player) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
@@ -135,7 +135,7 @@ public class PlayerCheckCacheTask {
     /**
      * 检查玩家缓存数据，并执行相关操作。
      *
-     * @param player 玩家对象
+     * @param player 玩家
      * @param normalPath 正常缓存数据的文件路径
      * @param doListCachePath 任务缓存数据的文件路径
      */
@@ -188,7 +188,7 @@ public class PlayerCheckCacheTask {
                     if (!player.isOnline()) break;
 
                     // 等待一定时间再执行下一个任务
-                    try { Thread.sleep(Integer.parseInt(QuickUtils.replaceTranslateToPapiCount(yaml.getString("CACHE-SETTINGS.WAIT-RECOVERY"), player)) * 1000L); }
+                    try { Thread.sleep(QuickUtils.handleLong(yaml.getString("CACHE-SETTINGS.WAIT-RECOVERY"), player) * 1000L); }
                     catch (Exception ignore) { }
 
                     firstSentEffect = false;

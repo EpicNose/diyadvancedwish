@@ -230,7 +230,7 @@ public class MongoManager {
     /**
      * 更新玩家数据。
      *
-     * @param player 玩家对象
+     * @param player 玩家
      * @param key 数据的键
      * @param value 数据的值
      * @param collection 数据存储的集合
@@ -262,7 +262,7 @@ public class MongoManager {
     /**
      * 添加玩家许愿日志。
      *
-     * @param player 玩家对象
+     * @param player 玩家
      * @param logString 许愿日志
      */
     public static void addPlayerWishLog(Player player, String logString) {
@@ -286,7 +286,7 @@ public class MongoManager {
     /**
      * 获取玩家许愿日志。
      *
-     * @param player 玩家对象
+     * @param player 玩家
      * @param findMin 要查询的日志的最小编号
      * @param findMax 要查询的日志的最大编号
      * @return 返回查询出来的日志列表
@@ -314,7 +314,7 @@ public class MongoManager {
     /**
      * 获取玩家所有日志条目数。
      *
-     * @param player 玩家对象
+     * @param player 玩家
      * @return 返回日志条目数
      */
     public static int getWishLogsSize(Player player) {

@@ -9,6 +9,8 @@ import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 
 /**
@@ -60,40 +62,61 @@ public class PapiManager extends PlaceholderExpansion {
     @Override
     public String onRequest(OfflinePlayer player, @NotNull String params) {
         params = params.toLowerCase(Locale.ROOT);
-        Player targetPlayer = Bukkit.getPlayer(player.getUniqueId());
 
-        if (targetPlayer == null) return "&7Unknown";
-
-        for (String wishName : RegisterManager.getRegisterWish()) {
-            String[] wishParams = params.split("_");
-            if (wishParams.length > 3) continue;
-
-            Player targetPlayer2 = null;
-            String wishType = wishParams[0];
-            String wishName2 = wishParams[1];
-
-            if (!wishType.equals("amount") && !wishType.equals("guaranteed") && !wishType.equals("limit")) continue;
-
-            if (!wishName2.equals(wishName)) continue;
-
-            if (wishParams.length == 3) {
-                String playerName = wishParams[2];
-
-                targetPlayer2 = Bukkit.getPlayerExact(playerName);
-
-                if (targetPlayer2 == null) return "&7Unknown";
-            }
-
-            switch (wishType) {
-                case "amount":
-                    return Integer.toString(WishManager.getPlayerWishAmount(targetPlayer2 == null ? targetPlayer : targetPlayer2, wishName));
-                case "guaranteed":
-                    return Double.toString(WishManager.getPlayerWishGuaranteed(targetPlayer2 == null ? targetPlayer : targetPlayer2, wishName));
-                case "limit":
-                    return Integer.toString(WishManager.getPlayerWishLimitAmount(targetPlayer2 == null ? targetPlayer : targetPlayer2, wishName));
-            }
+        if (player == null || !player.isOnline()) {
+            return "&7Unknown";
         }
 
-        return "&7Unknown";
+        Player player1 = player.getPlayer();
+
+        String finalParams = params;
+        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> RegisterManager.getRegisterWish().stream()
+                .filter(wishName -> {
+                    String[] wishParams = finalParams.split("_");
+
+                    if (wishParams.length > 3) {
+                        return false;
+                    }
+
+                    String wishType = wishParams[0];
+                    String wishName2 = wishParams[1];
+
+                    if (!wishType.equals("amount") && !wishType.equals("guaranteed") && !wishType.equals("limit")) {
+                        return false;
+                    }
+
+                    return wishName2.equals(wishName);
+                })
+                .findFirst()
+                .map(wishName -> {
+                    String[] wishParams = finalParams.split("_");
+                    Player player2 = null;
+
+                    if (wishParams.length == 3) {
+                        player2 = Bukkit.getPlayerExact(wishParams[2]);
+                        if (player2 == null) {
+                            return "&7Unknown";
+                        }
+                    }
+
+                    switch (wishParams[0]) {
+                        case "amount":
+                            return Integer.toString(WishManager.getPlayerWishAmount(player2 == null ? player1 : player2, wishName));
+                        case "guaranteed":
+                            return Double.toString(WishManager.getPlayerWishGuaranteed(player2 == null ? player1 : player2, wishName));
+                        case "limit":
+                            return Integer.toString(WishManager.getPlayerWishLimitAmount(player2 == null ? player1 : player2, wishName));
+                        default:
+                            return "&7Unknown";
+                    }
+                })
+                .orElse("&7Unknown"));
+
+        try {
+            return future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return "&cError";
+        }
     }
 }

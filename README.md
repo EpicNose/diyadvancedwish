@@ -79,6 +79,7 @@
 ## 兼容性
 > 目前支持的经济插件
 - Vault / PlayerPoints
+- 但是您可以使用 Advanced Wish 的 Custom (自定义条件) 功能实现对于其他经济插件的兼容。
 ---
 > 目前支持的数据保存形式
 - 目前 Advanced Wish 支持使用 [MongoDB](https://www.mongodb.com/) 来存储插件数据，如果不开启则使用 Json 来存储玩家数据。

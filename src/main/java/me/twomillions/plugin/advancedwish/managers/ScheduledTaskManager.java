@@ -73,20 +73,25 @@ public class ScheduledTaskManager {
     /**
      * 根据许愿池文件名和玩家，创建玩家的许愿池计划任务。
      *
-     * @param player 玩家对象
+     * @param player 玩家
      * @param fileName 许愿池文件名
      * @param finalProbabilityWish 计划任务列表的执行概率和任务的执行顺序
      */
     public static void createPlayerScheduledTasks(Player player, String fileName, String finalProbabilityWish) {
         List<String> scheduledTasks = WishManager.getWishWaitSetScheduledTasks(fileName);
+
+        String[] finalProbabilityWishSplit = QuickUtils.handleStrings(finalProbabilityWish.split(";"), player);
+
         for (String scheduledTask : scheduledTasks) {
+            scheduledTask = QuickUtils.handleString(scheduledTask, player);
+
             long time = System.currentTimeMillis();
 
-            String[] taskElements = scheduledTask.split(";", 3);
-            String path = taskElements.length > 1 ? taskElements[0] : "/Wish";
+            String[] taskElements = scheduledTask.split(";");
 
+            String path = taskElements.length > 1 ? taskElements[0] : "/Wish";
             fileName = taskElements.length > 1 ? taskElements[1] : fileName;
-            scheduledTask = QuickUtils.randomSentence(QuickUtils.replaceTranslateToPapi(taskElements[taskElements.length - 1], player));
+            scheduledTask = taskElements[taskElements.length - 1];
 
             String sleepSentence = QuickUtils.getAndRemoveSleepSentenceMs(scheduledTask);
 
@@ -100,11 +105,14 @@ public class ScheduledTaskManager {
                 scheduledTask = sleepSentenceRemoved;
             }
 
+            String doList = finalProbabilityWishSplit[1];
+
             if (scheduledTask.equals("GO-RANDOM")) {
-                ScheduledTaskManager.addPlayerScheduledTask(player, time, fileName, path, !path.equals("/Wish"), WishManager.getProbabilityWishDoList(finalProbabilityWish));
+                ScheduledTaskManager.addPlayerScheduledTask(player, time, fileName, path, !path.equals("/Wish"), doList);
             } else if (scheduledTask.equals("RANDOM-AGAIN")) {
                 String randomFinalProbabilityWish = WishManager.getFinalProbabilityWish(player, fileName);
-                ScheduledTaskManager.addPlayerScheduledTask(player, time, fileName, path, !path.equals("/Wish"), WishManager.getProbabilityWishDoList(randomFinalProbabilityWish));
+                String randomFinalProbabilityWishSplit1 = QuickUtils.handleStrings(randomFinalProbabilityWish.split(";"), player)[1];
+                ScheduledTaskManager.addPlayerScheduledTask(player, time, fileName, path, !path.equals("/Wish"), randomFinalProbabilityWishSplit1);
             } else {
                 ScheduledTaskManager.addPlayerScheduledTask(player, time, fileName, path, !path.equals("/Wish"), scheduledTask);
             }
@@ -114,7 +122,7 @@ public class ScheduledTaskManager {
     /**
      * 根据许愿池文件名和玩家，创建玩家的许愿池计划任务。
      *
-     * @param player 玩家对象
+     * @param player 玩家
      * @param fileName 许愿池文件名
      * @param path 计划任务的路径
      * @param list 计划任务列表
@@ -122,7 +130,7 @@ public class ScheduledTaskManager {
     public static void createPlayerScheduledTasks(Player player, String fileName, String path, List<String> list) {
         for (String scheduledTask : list) {
             long time = System.currentTimeMillis();
-            scheduledTask = QuickUtils.randomSentence(QuickUtils.replaceTranslateToPapi(scheduledTask, player));
+            scheduledTask = QuickUtils.handleString(scheduledTask, player);
 
             String sleepSentence = QuickUtils.getAndRemoveSleepSentenceMs(scheduledTask);
 
@@ -193,7 +201,7 @@ public class ScheduledTaskManager {
     /**
      * 删除指定计划任务。
      *
-     * @param player 玩家对象
+     * @param player 玩家
      * @param wishScheduledTaskString 待删除的计划任务的字符串表示，格式为 "时间;文件名;文件路径;true/false;node"
      */
     public static void removePlayerScheduledTask(Player player, String wishScheduledTaskString) {
@@ -204,7 +212,7 @@ public class ScheduledTaskManager {
     /**
      * 删除指定玩家的所有计划任务。
      *
-     * @param player 玩家对象
+     * @param player 玩家
      */
     public static void removePlayerScheduledTasks(Player player) {
         playerScheduledTasks.invalidate(player.getUniqueId());
@@ -213,7 +221,7 @@ public class ScheduledTaskManager {
     /**
      * 获取指定玩家的所有计划任务。
      *
-     * @param player 玩家对象
+     * @param player 玩家
      * @return 指定玩家的所有计划任务的字符串表示列表
      */
     public static ConcurrentLinkedQueue<String> getPlayerScheduledTasks(Player player) {
