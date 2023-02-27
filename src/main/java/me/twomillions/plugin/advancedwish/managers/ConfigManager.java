@@ -15,6 +15,7 @@ import org.bukkit.plugin.Plugin;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
@@ -301,22 +302,11 @@ public class ConfigManager {
      * @return 文件名列表
      */
     public static ConcurrentLinkedQueue<String> getAllFileNames(String path) {
-        // 创建文件对象
-        File directory = new File(path);
-
-        // 判断目录是否存在，如果不存在直接返回空列表
-        if (!directory.exists() || !directory.isDirectory()) {
-            return new ConcurrentLinkedQueue<>();
-        }
-
-        // 获取目录下的所有文件，并将文件名添加到队列中
-        File[] files = directory.listFiles();
-        if (files == null) {
-            return new ConcurrentLinkedQueue<>();
-        }
-
-        return Arrays.stream(files)
-                .map(File::getName)
-                .collect(Collectors.toCollection(ConcurrentLinkedQueue::new));
+        return Optional.ofNullable(new File(path).listFiles())
+                .map(files -> Arrays.stream(files)
+                        .parallel()
+                        .map(File::getName)
+                        .collect(Collectors.toCollection(ConcurrentLinkedQueue::new)))
+                .orElse(new ConcurrentLinkedQueue<>());
     }
 }
