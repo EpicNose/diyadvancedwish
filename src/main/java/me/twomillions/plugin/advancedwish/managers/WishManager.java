@@ -793,7 +793,7 @@ public class WishManager {
         for (String configInventoryHave : yaml.getStringList("INVENTORY-HAVE")) {
             if (configInventoryHave == null || configInventoryHave.length() <= 1) continue;
 
-            String[] configInventoryHaveSplit = QuickUtils.stripColor(QuickUtils.handleStrings(configInventoryHave.toUpperCase(Locale.ROOT).split(";"), player));
+            String[] configInventoryHaveSplit = QuickUtils.stripColor(QuickUtils.handleStrings(configInventoryHave.split(";"), player));
 
             int checkAmount = Integer.parseInt(configInventoryHaveSplit[1]);
             int removeAmount = Integer.parseInt(configInventoryHaveSplit[2]);
@@ -836,7 +836,7 @@ public class WishManager {
         for (String configInventoryHaveCustom : yaml.getStringList("INVENTORY-HAVE-CUSTOM")) {
             if (configInventoryHaveCustom == null || configInventoryHaveCustom.length() <= 1) continue;
 
-            String[] configInventoryHaveCustomSplit = QuickUtils.stripColor(QuickUtils.handleStrings(configInventoryHaveCustom.toUpperCase(Locale.ROOT).split(";"), player));
+            String[] configInventoryHaveCustomSplit = QuickUtils.stripColor(QuickUtils.handleStrings(configInventoryHaveCustom.split(";"), player));
 
             String itemName = configInventoryHaveCustomSplit[0];
             String itemLoreContains = configInventoryHaveCustomSplit.length > 1 ? configInventoryHaveCustomSplit[1] : "";
