@@ -14,6 +14,9 @@
 > JavaDoc
 - http://advancedwish.javadoc.twomillions.top/
 ---
+> Wiki
+- https://gitee.com/A2000000/advanced-wish/wikis (Writing)
+---
 > 此插件的配置文件较多，但是非常简单，您可以通过查看配置文件内注释来了解此插件的各种信息。
 ---
 ## 开源协议
