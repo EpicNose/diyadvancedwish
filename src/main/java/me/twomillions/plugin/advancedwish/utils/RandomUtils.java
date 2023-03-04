@@ -1,7 +1,10 @@
 package me.twomillions.plugin.advancedwish.utils;
 
-import java.util.Random;
+import com.github.benmanes.caffeine.cache.Cache;
+
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 一个简单的工具类，用于根据指定的概率随机返回一个对象。
@@ -24,11 +27,17 @@ public class RandomUtils<T> {
     private int totalProbability;
 
     /**
+     * 随机数生成器。
+     */
+    private final ThreadLocalRandom random;
+
+    /**
      * 创建一个新的 RandomUtils 实例。
      */
     public RandomUtils() {
         this.randomObjects = new ConcurrentLinkedQueue<>();
         this.totalProbability = 0;
+        this.random = ThreadLocalRandom.current();
     }
 
     /**
@@ -43,6 +52,7 @@ public class RandomUtils<T> {
         }
 
         RandomObject<T> randomObject = new RandomObject<>(object, probability);
+
         randomObjects.add(randomObject);
         totalProbability += probability;
     }
@@ -53,7 +63,7 @@ public class RandomUtils<T> {
      * @return 随机对象，若没有随机对象则返回 null
      */
     public T getResult() {
-        int randomNumber = new Random().nextInt(totalProbability);
+        int randomNumber = random.nextInt(totalProbability);
         int cumulativeProbability = 0;
 
         for (RandomObject<T> randomObject : randomObjects) {
@@ -65,6 +75,38 @@ public class RandomUtils<T> {
 
         return null;
     }
+
+    /**
+     * 使用蒙特卡罗方法进行多次模拟，返回最终的随机对象。
+     *
+     * @param numberTrials 模拟次数
+     * @return 随机对象，若没有随机对象则返回 null
+     */
+    public T getResultWithMonteCarloMethod(int numberTrials) {
+        if (numberTrials <= 0) {
+            return null;
+        }
+
+        Cache<T, Integer> frequencyTable = CaffeineUtils.buildBukkitCache();
+
+        for (int i = 0; i < numberTrials; i++) {
+            T randomObject = getResult();
+            frequencyTable.put(randomObject, frequencyTable.asMap().getOrDefault(randomObject, 0) + 1);
+        }
+
+        T mostFrequentObject = null;
+        int maxFrequency = 0;
+
+        for (Map.Entry<T, Integer> entry : frequencyTable.asMap().entrySet()) {
+            if (entry.getValue() > maxFrequency) {
+                maxFrequency = entry.getValue();
+                mostFrequentObject = entry.getKey();
+            }
+        }
+
+        return mostFrequentObject;
+    }
+
 
     /**
      * 表示一个随机对象及其对应的概率。

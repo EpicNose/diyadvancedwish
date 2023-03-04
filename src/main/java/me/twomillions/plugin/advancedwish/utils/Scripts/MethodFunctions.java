@@ -89,4 +89,35 @@ public class MethodFunctions {
 
         return randomUtils.getResult();
     }
+
+    /**
+     * 随机返回一个对象。选择是否使用蒙特卡洛方法。
+     *
+     * @param monteCarloMethodNumberTrials 蒙特卡洛方法模拟次数
+     * @param values 由对象和概率值组成的数组，不能为空，长度必须为偶数
+     * @return 随机返回的对象
+     * @throws IllegalArgumentException 如果概率值不是整数或缺少概率值，则抛出该异常
+     */
+    public Object randomSentence(int monteCarloMethodNumberTrials, Object... values) {
+        RandomUtils<Object> randomUtils = new RandomUtils<>();
+
+        for (int i = 0; i < values.length; i += 2) {
+            if (i + 1 >= values.length) {
+                throw new IllegalArgumentException("Missing probability value for object: " + values[i]);
+            }
+
+            Object object = values[i];
+            Object probabilityValue = values[i + 1];
+
+            if (!QuickUtils.isInt(probabilityValue.toString())) {
+                throw new IllegalArgumentException("Probability value for object " + values[i] + " is not an integer.");
+            }
+
+            int probability = (int) probabilityValue;
+            randomUtils.addRandomObject(object, probability);
+        }
+
+        if (monteCarloMethodNumberTrials != 0) return randomUtils.getResultWithMonteCarloMethod(monteCarloMethodNumberTrials);
+        else return randomUtils.getResult();
+    }
 }

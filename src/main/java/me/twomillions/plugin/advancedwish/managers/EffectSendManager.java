@@ -43,7 +43,7 @@ public class EffectSendManager {
     /**
      * 用于储存需要玩家以 OP 身份执行的命令。
      */
-    @Getter private volatile static Cache<Player, String> opSentCommand = CaffeineUtils.buildCaffeineCache();
+    @Getter private volatile static Cache<Player, String> opSentCommand = CaffeineUtils.buildBukkitCache();
 
     /**
      * 发送效果。

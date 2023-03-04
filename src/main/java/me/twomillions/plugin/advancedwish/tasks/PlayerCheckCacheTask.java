@@ -25,8 +25,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class PlayerCheckCacheTask {
     private static final Plugin plugin = Main.getInstance();
-    private static final Cache<UUID, Boolean> loadingCache = CaffeineUtils.buildCaffeineCache();
-    private static final Cache<UUID, Boolean> waitingLoadingCache = CaffeineUtils.buildCaffeineCache();
+    private static final Cache<UUID, Boolean> loadingCache = CaffeineUtils.buildBukkitCache();
+    private static final Cache<UUID, Boolean> waitingLoadingCache = CaffeineUtils.buildBukkitCache();
 
     /**
      * 设置指定玩家的缓存加载状态。
@@ -45,7 +45,7 @@ public class PlayerCheckCacheTask {
      * @return 缓存加载状态，如果玩家未在缓存中，则返回false
      */
     public static boolean isLoadingCache(UUID uuid) {
-        return loadingCache.get(uuid, k -> false);
+        return Boolean.TRUE.equals(loadingCache.get(uuid, k -> false));
     }
 
     /**
@@ -65,7 +65,7 @@ public class PlayerCheckCacheTask {
      * @return 等待缓存加载状态，如果玩家未在缓存中，则返回false
      */
     public static boolean isWaitingLoadingCache(UUID uuid) {
-        return waitingLoadingCache.get(uuid, k -> false);
+        return Boolean.TRUE.equals(waitingLoadingCache.get(uuid, k -> false));
     }
 
     /**

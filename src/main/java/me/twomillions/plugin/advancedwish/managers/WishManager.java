@@ -328,8 +328,17 @@ public class WishManager {
         }
 
         // 随机出结果
-        String randomElement = randomUtils.getResult();
+        String randomElement;
 
+        int monteCarloMethodNumberTrials = QuickUtils.handleInt(yaml.getOrDefault("MONTE-CARLO-METHOD-NUMBER-TRIALS", "0"), player);
+
+        if (monteCarloMethodNumberTrials != 0) {
+            randomElement = randomUtils.getResultWithMonteCarloMethod(monteCarloMethodNumberTrials);
+        } else {
+            randomElement = randomUtils.getResult();
+        }
+
+        // 如果没有可用的随机奖品
         if (randomElement == null) {
             QuickUtils.sendConsoleMessage("&c许愿错误! 没有可随机的奖品! 这是配置的错误吗? 许愿池: " + wishName + "，许愿玩家: " + player.getName());
             throw new IllegalArgumentException("No prizes that can be randomized! Wish name: " + wishName);
@@ -985,7 +994,7 @@ public class WishManager {
      *
      * @see <a href="https://www.mcbbs.net/thread-1429293-1-1.html">[杂谈] Java 容器的线程安全性杂谈</a>
      */
-    @Getter private static final Cache<UUID, Boolean> savingCache = CaffeineUtils.buildCaffeineCache();
+    @Getter private static final Cache<UUID, Boolean> savingCache = CaffeineUtils.buildBukkitCache();
 
     /**
      * 保存玩家缓存数据。

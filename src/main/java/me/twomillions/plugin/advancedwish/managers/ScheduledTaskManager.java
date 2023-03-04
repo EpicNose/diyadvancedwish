@@ -24,7 +24,7 @@ public class ScheduledTaskManager {
     /**
      * 用 Map 存储每个玩家的计划任务，key 为玩家的 UUID，value 为 List，存储每个计划任务的字符串表示。
      */
-    private static final Cache<UUID, ConcurrentLinkedQueue<String>> playerScheduledTasks = CaffeineUtils.buildCaffeineCache();
+    private static final Cache<UUID, ConcurrentLinkedQueue<String>> playerScheduledTasks = CaffeineUtils.buildBukkitCache();
 
     /**
      * 将计划任务的各项信息转换为字符串。
@@ -68,7 +68,6 @@ public class ScheduledTaskManager {
      */
     public static void addPlayerScheduledTask(Player player, long time, String fileName, String path, boolean originalPath, String node) {
         String scheduledTask = toScheduledTask(time, fileName, path, originalPath, node);
-        System.out.println(scheduledTask);
         addPlayerScheduledTask(player, scheduledTask);
     }
 
