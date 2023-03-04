@@ -234,6 +234,8 @@ GUARANTEED:
     #
     #  您也可以用蒙特卡洛方法进行随机，自定义蒙特卡洛方法的试验次数。
     #  例: "method.randomSentence(1000, \"DO-LIST.A\", 5, \"DO-LIST.B\", 5)" - 1000 次蒙特卡洛方法试验次数。
+    #
+    #  此处需要的是字符串类型，使用了特殊语句，需要使用双引号进行包裹。
     EFFECT:
       - "method.randomSentence(\"DO-LIST.A\", 5, \"DO-LIST.B\", 5)"
 
@@ -273,13 +275,13 @@ GUARANTEED:
 #  若没有可用的随机奖品，getFinalWishPrize 将会返回一个空值 ("")。
 #
 # 三连抽示例:
-#   - "DO-LIST.START"
-#   - "DO-LIST.C1 sleepSentence(1000)end"
-#   - "DO-LIST.C2 sleepSentence(2000)end"
-#   - "DO-LIST.C3 sleepSentence(3000)end"
-#   - "GO-RANDOM sleepSentence(4000)end"
-#   - "RANDOM-AGAIN sleepSentence(5000)end"
-#   - "RANDOM-AGAIN sleepSentence(6000)end"
+#   - "method.addPlayerScheduledTask(\"基础许愿池\", \"/Wish\", \"DO-LIST.START\")"
+#   - "method.addPlayerScheduledTask(\"基础许愿池\", \"/Wish\", \"DO-LIST.C1\", 1000)"
+#   - "method.addPlayerScheduledTask(\"基础许愿池\", \"/Wish\", \"DO-LIST.C2\", 2000)"
+#   - "method.addPlayerScheduledTask(\"基础许愿池\", \"/Wish\", \"DO-LIST.C3\", 3000)"
+#   - "method.addPlayerScheduledTask(\"基础许愿池\", \"/Wish\", _node_, 4000)"
+#   - "method.addPlayerScheduledTask(\"基础许愿池\", \"/Wish\", method.getFinalWishPrize(\"基础许愿池\", true, true), 5000)"
+#   - "method.addPlayerScheduledTask(\"基础许愿池\", \"/Wish\", method.getFinalWishPrize(\"基础许愿池\", true, true), 6000)"
 WAIT-SET:
   # 发送 "/Wish" 路径下 "基础许愿池" 文件内的 "DO-LIST.START" 效果。
   - "method.addPlayerScheduledTask(\"基础许愿池\", \"/Wish\", \"DO-LIST.START\")"
