@@ -2,6 +2,7 @@ package me.twomillions.plugin.advancedwish.tasks;
 
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
+import me.twomillions.plugin.advancedwish.Constants;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.api.AsyncWishLimitResetEvent;
 import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
@@ -57,7 +58,7 @@ public class WishLimitResetTask {
 
             // 发送效果
             if (isResetCompleteSendEnabled) {
-                Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
+                Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
 
                 Bukkit.getOnlinePlayers().forEach(player ->
                         ScheduledTaskManager.createPlayerScheduledTasks(player,

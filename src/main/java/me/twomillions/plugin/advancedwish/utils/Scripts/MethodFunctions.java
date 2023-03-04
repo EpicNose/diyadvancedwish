@@ -1,6 +1,7 @@
 package me.twomillions.plugin.advancedwish.utils.Scripts;
 
 import lombok.Getter;
+import me.twomillions.plugin.advancedwish.Constants;
 import me.twomillions.plugin.advancedwish.managers.ScheduledTaskManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
@@ -33,7 +34,7 @@ public class MethodFunctions {
      */
     public void addPlayerScheduledTask(String fileName, String path, String pathPrefix) {
         long time = System.currentTimeMillis();
-        ScheduledTaskManager.addPlayerScheduledTask(targetPlayer, time, fileName, path, !path.equals("/Wish"), pathPrefix);
+        ScheduledTaskManager.addPlayerScheduledTask(targetPlayer, time, fileName, path, !path.equals(Constants.WISH), pathPrefix);
     }
 
     /**
@@ -46,7 +47,7 @@ public class MethodFunctions {
      */
     public void addPlayerScheduledTask(String fileName, String path, String pathPrefix, long delay) {
         long time = System.currentTimeMillis() + delay;
-        ScheduledTaskManager.addPlayerScheduledTask(targetPlayer, time, fileName, path, !path.equals("/Wish"), pathPrefix);
+        ScheduledTaskManager.addPlayerScheduledTask(targetPlayer, time, fileName, path, !path.equals(Constants.WISH), pathPrefix);
     }
 
     /**

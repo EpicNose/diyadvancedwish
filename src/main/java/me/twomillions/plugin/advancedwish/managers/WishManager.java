@@ -5,6 +5,7 @@ import com.mongodb.client.model.Filters;
 import de.leonhard.storage.Json;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
+import me.twomillions.plugin.advancedwish.Constants;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.enums.mongo.MongoCollections;
 import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
@@ -95,7 +96,7 @@ public class WishManager {
      * @return 返回指定许愿池 WAIT-SET 计划任务的列表
      */
     public static List<String> getWishWaitSetScheduledTasks(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
         return yaml.getStringList("WAIT-SET");
     }
 
@@ -108,7 +109,7 @@ public class WishManager {
      * @return 许愿所需数量的增量
      */
     public static String getWishNeedIncreasedAmount(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
         return yaml.getString("ADVANCED-SETTINGS.INCREASED-WISH-AMOUNT");
     }
 
@@ -123,7 +124,7 @@ public class WishManager {
      */
     @SuppressWarnings("unused")
     public static List<String> getWishGuaranteedList(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
         return yaml.getStringList("GUARANTEED");
     }
 
@@ -134,7 +135,7 @@ public class WishManager {
      * @return 数据同步状态或许愿池名称
      */
     public static String getWishDataSync(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
         return yaml.getOrDefault("ADVANCED-SETTINGS.DATA-SYNC", wishName);
     }
 
@@ -145,7 +146,7 @@ public class WishManager {
      * @return 如果开启了许愿数限制，则返回 true;否则返回 false。
      */
     public static boolean isEnabledWishLimit(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
         return !yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.LIMIT-AMOUNT").equals("0");
     }
 
@@ -156,7 +157,7 @@ public class WishManager {
      * @return 许愿池限制的许愿数，如果未设置限制，则返回 0。
      */
     public static String getWishLimitAmount(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
         return yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.LIMIT-AMOUNT");
     }
 
@@ -167,7 +168,7 @@ public class WishManager {
      * @return 许愿池重置限制的开始秒数，如果未设置限制，则返回 0。
      */
     public static String getWishResetLimitStart(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
         return yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-LIMIT-START");
     }
 
@@ -178,7 +179,7 @@ public class WishManager {
      * @return 许愿池重置完成后循环秒数间隔，如果未设置，则返回 0。
      */
     public static String getWishResetLimitCycle(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
         return yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-LIMIT-CYCLE");
     }
 
@@ -191,7 +192,7 @@ public class WishManager {
      * @return 如果许愿卷增加限制数，则返回 true;否则返回 false。
      */
     public static String isEnabledCouponLimit(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
         return yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.COUPON-LIMIT");
     }
 
@@ -204,7 +205,7 @@ public class WishManager {
      * @return 增加的许愿限制次数，如果未设置，则返回 0。
      */
     public static String getWishIncreasedAmount(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
         return yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.INCREASED-AMOUNT");
     }
 
@@ -217,7 +218,7 @@ public class WishManager {
      * @return 启用状态
      */
     public static String isResetCompleteSendEnabled(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
         return yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-COMPLETE-SEND");
     }
 
@@ -230,7 +231,7 @@ public class WishManager {
      * @return 启用状态
      */
     public static String isResetCompleteSendConsoleEnabled(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
         return yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-COMPLETE-SEND-CONSOLE");
     }
 
@@ -245,7 +246,7 @@ public class WishManager {
      * @throws IllegalArgumentException 如果没有可随机的奖品
      */
     public static String getFinalWishPrize(Player player, String wishName, boolean actualProcessing, boolean returnNode) {
-        Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
 
         // 获取玩家此奖池的许愿数
         int wishAmount = getPlayerWishAmount(player, wishName);
@@ -380,7 +381,7 @@ public class WishManager {
     public static void makeWish(Player player, String wishName, boolean force) {
         // 许愿状态
         PlayerWishState playerWishState = canPlayerWish(player, wishName);
-        Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
 
         // 当玩家许愿一次后没有等待最终奖品发放便尝试二次许愿时
         if (playerWishState == PlayerWishState.InProgress) {
@@ -724,7 +725,7 @@ public class WishManager {
         // 检查玩家是否正在等待处理缓存
         if (PlayerCheckCacheTask.isWaitingLoadingCache(uuid)) return PlayerWishState.WaitingLoadingCache;
 
-        Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
         yaml.setPathPrefix("CONDITION");
 
         String permission = QuickUtils.handleString(yaml.getString("PERM"), player);
@@ -1033,7 +1034,7 @@ public class WishManager {
      * @param doOpCommand 是否允许使用 OP 指令
      */
     public static void setPlayerCacheOpData(Player player, boolean doOpCommand) {
-        ConfigManager.createJson(player.getUniqueId().toString(), "/PlayerCache", false, false)
+        ConfigManager.createJson(player.getUniqueId().toString(), Constants.PLAYER_CACHE, false, false)
                 .set("DO-OP-COMMAND", doOpCommand);
     }
 }

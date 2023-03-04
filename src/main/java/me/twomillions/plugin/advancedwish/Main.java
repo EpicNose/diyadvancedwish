@@ -66,9 +66,9 @@ public final class Main extends JavaPlugin {
         String guaranteedConfig = advancedWishYaml.getString("GUARANTEED-PATH");
         String doListCacheConfig = advancedWishYaml.getString("DO-LIST-CACHE-PATH");
 
-        setLogsPath("".equals(logsConfig) ? pluginPath + "/PlayerLogs" : logsConfig);
-        setGuaranteedPath("".equals(guaranteedConfig) ? pluginPath + "/PlayerGuaranteed" : guaranteedConfig);
-        setDoListCachePath("".equals(doListCacheConfig) ? pluginPath + "/PlayerCache" : doListCacheConfig);
+        setLogsPath("".equals(logsConfig) ? pluginPath + Constants.PLAYER_LOGS : logsConfig);
+        setGuaranteedPath("".equals(guaranteedConfig) ? pluginPath + Constants.PLAYER_GUARANTEED : guaranteedConfig);
+        setDoListCachePath("".equals(doListCacheConfig) ? pluginPath + Constants.PLAYER_CACHE : doListCacheConfig);
 
         // 迁移检查
         if (MongoManager.playerGuaranteedJsonToMongo(advancedWishYaml) != JsonTransformationMongoState.TurnOff) {

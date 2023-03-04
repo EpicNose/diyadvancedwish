@@ -3,6 +3,7 @@ package me.twomillions.plugin.advancedwish.managers;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import lombok.Setter;
+import me.twomillions.plugin.advancedwish.Constants;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.commands.ConsoleCommand;
 import me.twomillions.plugin.advancedwish.commands.MainCommand;
@@ -144,7 +145,7 @@ public class RegisterManager {
         for (String wishName : wishList) {
             if (wishName == null || wishName.trim().isEmpty()) continue;
 
-            Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, true);
+            Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, true);
 
             if (!ConfigManager.checkLastVersion(yaml)) continue;
 
@@ -169,7 +170,7 @@ public class RegisterManager {
 
         // 设置玩家数据地址
         String guaranteedConfig = ConfigManager.getAdvancedWishYaml().getString("GUARANTEED-PATH");
-        Main.setGuaranteedPath("".equals(guaranteedConfig) ? Main.getInstance().getDataFolder() + "/PlayerGuaranteed" : guaranteedConfig);
+        Main.setGuaranteedPath("".equals(guaranteedConfig) ? Main.getInstance().getDataFolder() + Constants.PLAYER_GUARANTEED : guaranteedConfig);
 
         // 低版本 Papi 没有 unregister 方法，捕获异常以取消 Papi 重载
         if (isUsingPapi()) Bukkit.getScheduler().runTask(plugin, () -> {

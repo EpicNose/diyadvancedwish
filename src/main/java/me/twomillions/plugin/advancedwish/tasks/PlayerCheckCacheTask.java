@@ -3,6 +3,7 @@ package me.twomillions.plugin.advancedwish.tasks;
 import com.github.benmanes.caffeine.cache.Cache;
 import de.leonhard.storage.Json;
 import de.leonhard.storage.Yaml;
+import me.twomillions.plugin.advancedwish.Constants;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.managers.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.ScheduledTaskManager;
@@ -108,7 +109,7 @@ public class PlayerCheckCacheTask {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             UUID uuid = player.getUniqueId();
 
-            String normalPath = plugin.getDataFolder() + "/PlayerCache";
+            String normalPath = plugin.getDataFolder() + Constants.PLAYER_CACHE;
             String doListCachePath = Main.getDoListCachePath();
 
             // 遍历缓存文件，判断是否有正常缓存或操作缓存
@@ -178,7 +179,7 @@ public class PlayerCheckCacheTask {
                 String wishName = playerWishDoListStringSplit[1];
 
                 // 获取任务配置文件
-                Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
+                Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
 
                 // 发送任务执行效果
                 if (firstSentEffect) {
@@ -201,7 +202,7 @@ public class PlayerCheckCacheTask {
                     long quitTime = getPlayerQuitTime(player);
                     long oldTime = Long.parseLong(playerWishDoListStringSplit[0]);
 
-                    ScheduledTaskManager.addPlayerScheduledTask(player, oldTime - quitTime + nowTime, wishName, "/Wish", false, doList);
+                    ScheduledTaskManager.addPlayerScheduledTask(player, oldTime - quitTime + nowTime, wishName, Constants.WISH, false, doList);
                     playerDoListCacheClone.remove(UnicodeUtils.stringToUnicode(playerWishDoListString));
                 }
 
