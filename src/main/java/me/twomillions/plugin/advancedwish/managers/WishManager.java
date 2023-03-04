@@ -329,15 +329,7 @@ public class WishManager {
         }
 
         // 随机出结果
-        String randomElement;
-
-        int monteCarloMethodNumberTrials = QuickUtils.handleInt(yaml.getOrDefault("MONTE-CARLO-METHOD-NUMBER-TRIALS", "0"), player);
-
-        if (monteCarloMethodNumberTrials != 0) {
-            randomElement = randomUtils.getResultWithMonteCarloMethod(monteCarloMethodNumberTrials);
-        } else {
-            randomElement = randomUtils.getResult();
-        }
+        String randomElement = randomUtils.getResult();
 
         // 如果没有可用的随机奖品
         if (randomElement == null) {

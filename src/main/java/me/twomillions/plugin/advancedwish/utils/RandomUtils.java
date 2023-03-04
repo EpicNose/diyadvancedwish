@@ -1,8 +1,5 @@
 package me.twomillions.plugin.advancedwish.utils;
 
-import com.github.benmanes.caffeine.cache.Cache;
-
-import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -75,38 +72,6 @@ public class RandomUtils<T> {
 
         return null;
     }
-
-    /**
-     * 使用蒙特卡罗方法进行多次模拟，返回最终的随机对象。
-     *
-     * @param numberTrials 模拟次数
-     * @return 随机对象，若没有随机对象则返回 null
-     */
-    public T getResultWithMonteCarloMethod(int numberTrials) {
-        if (numberTrials <= 0) {
-            return null;
-        }
-
-        Cache<T, Integer> frequencyTable = CaffeineUtils.buildBukkitCache();
-
-        for (int i = 0; i < numberTrials; i++) {
-            T randomObject = getResult();
-            frequencyTable.put(randomObject, frequencyTable.asMap().getOrDefault(randomObject, 0) + 1);
-        }
-
-        T mostFrequentObject = null;
-        int maxFrequency = 0;
-
-        for (Map.Entry<T, Integer> entry : frequencyTable.asMap().entrySet()) {
-            if (entry.getValue() > maxFrequency) {
-                maxFrequency = entry.getValue();
-                mostFrequentObject = entry.getKey();
-            }
-        }
-
-        return mostFrequentObject;
-    }
-
 
     /**
      * 表示一个随机对象及其对应的概率。
