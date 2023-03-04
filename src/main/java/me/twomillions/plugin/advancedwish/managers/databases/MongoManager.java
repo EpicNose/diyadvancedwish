@@ -23,6 +23,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
+ * MongoDB 操作类。
+ *
  * @author 2000000
  * @date 2023/1/8 21:23
  */

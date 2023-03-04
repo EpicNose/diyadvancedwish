@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.utils.CaffeineUtils;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
+import me.twomillions.plugin.advancedwish.utils.Scripts.ScriptUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -12,7 +13,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * 提供计划任务的增删查操作
+ * 提供计划任务的增删查操作等等。
  *
  * @author 2000000
  * @date 2023/2/18
@@ -36,8 +37,8 @@ public class ScheduledTaskManager {
      * @return 计划任务字符串
      */
     public static String toScheduledTask(long time, String fileName, String path, boolean originalPath, String node) {
-        String taskPath = (path != null && !originalPath) ? plugin.getDataFolder() + path : plugin.getDataFolder().toString();
-        return String.format("%d;%s;%s;%b;%s", time, fileName, taskPath, originalPath, node);
+        if (!originalPath) path = plugin.getDataFolder() + path;
+        return String.format("%d;%s;%s;%b;%s", time, fileName, path, originalPath, node);
     }
 
     /**
@@ -52,7 +53,7 @@ public class ScheduledTaskManager {
         // 使用 Caffeine 的 get 方法替代 ConcurrentHashMap 的 computeIfAbsent 方法，key 不存在时，使用 ValueLoader 加载值
         ConcurrentLinkedQueue<String> tasks = playerScheduledTasks.get(uuid, k -> new ConcurrentLinkedQueue<>());
 
-        if (!tasks.contains(scheduledTask)) tasks.add(scheduledTask);
+        if (tasks != null && !tasks.contains(scheduledTask)) tasks.add(scheduledTask);
     }
 
     /**
@@ -67,135 +68,35 @@ public class ScheduledTaskManager {
      */
     public static void addPlayerScheduledTask(Player player, long time, String fileName, String path, boolean originalPath, String node) {
         String scheduledTask = toScheduledTask(time, fileName, path, originalPath, node);
+        System.out.println(scheduledTask);
         addPlayerScheduledTask(player, scheduledTask);
     }
 
     /**
-     * 根据许愿池文件名和玩家，创建玩家的许愿池计划任务。
+     * 解析 List JavaScript 语句，将 "_node_" 转换为 finalWishPrizeDoNode。
      *
      * @param player 玩家
      * @param fileName 许愿池文件名
-     * @param finalProbabilityWish 计划任务列表的执行概率和任务的执行顺序
+     * @param finalWishPrizeDoNode 最终许愿奖品
      */
-    public static void createPlayerScheduledTasks(Player player, String fileName, String finalProbabilityWish) {
+    public static void createPlayerScheduledTasks(Player player, String fileName, String finalWishPrizeDoNode) {
         List<String> scheduledTasks = WishManager.getWishWaitSetScheduledTasks(fileName);
 
-        String[] finalProbabilityWishSplit = QuickUtils.handleStrings(finalProbabilityWish.split(";"), player);
-
         for (String scheduledTask : scheduledTasks) {
-            scheduledTask = QuickUtils.handleString(scheduledTask, player);
-
-            long time = System.currentTimeMillis();
-
-            String[] taskElements = scheduledTask.split(";");
-
-            String path = taskElements.length > 1 ? taskElements[0] : "/Wish";
-            fileName = taskElements.length > 1 ? taskElements[1] : fileName;
-            scheduledTask = taskElements[taskElements.length - 1];
-
-            String sleepSentence = QuickUtils.getAndRemoveSleepSentenceMs(scheduledTask);
-
-            if (!"".equals(sleepSentence)) {
-                String[] sleepSentenceSplit = sleepSentence.split(";");
-
-                long sleepSentenceMs = Long.parseLong(sleepSentenceSplit[0]);
-                String sleepSentenceRemoved = sleepSentenceSplit[1];
-
-                time += sleepSentenceMs;
-                scheduledTask = sleepSentenceRemoved;
-            }
-
-            String doList = finalProbabilityWishSplit[1];
-
-            if (scheduledTask.equals("GO-RANDOM")) {
-                ScheduledTaskManager.addPlayerScheduledTask(player, time, fileName, path, !path.equals("/Wish"), doList);
-            } else if (scheduledTask.equals("RANDOM-AGAIN")) {
-                String randomFinalProbabilityWish = WishManager.getFinalProbabilityWish(player, fileName);
-                String randomFinalProbabilityWishSplit1 = QuickUtils.handleStrings(randomFinalProbabilityWish.split(";"), player)[1];
-                ScheduledTaskManager.addPlayerScheduledTask(player, time, fileName, path, !path.equals("/Wish"), randomFinalProbabilityWishSplit1);
-            } else {
-                ScheduledTaskManager.addPlayerScheduledTask(player, time, fileName, path, !path.equals("/Wish"), scheduledTask);
-            }
+            ScriptUtils.eval(scheduledTask, player, "_node_", finalWishPrizeDoNode);
         }
     }
 
     /**
-     * 根据许愿池文件名和玩家，创建玩家的许愿池计划任务。
+     * 解析 List JavaScript 语句。
      *
      * @param player 玩家
-     * @param fileName 许愿池文件名
-     * @param path 计划任务的路径
      * @param list 计划任务列表
      */
-    public static void createPlayerScheduledTasks(Player player, String fileName, String path, List<String> list) {
+    public static void createPlayerScheduledTasks(Player player, List<String> list) {
         for (String scheduledTask : list) {
-            long time = System.currentTimeMillis();
-            scheduledTask = QuickUtils.handleString(scheduledTask, player);
-
-            String sleepSentence = QuickUtils.getAndRemoveSleepSentenceMs(scheduledTask);
-
-            if (!"".equals(sleepSentence)) {
-                String[] sleepSentenceSplit = sleepSentence.split(";");
-
-                long sleepSentenceMs = Long.parseLong(sleepSentenceSplit[0]);
-                String sleepSentenceRemoved = sleepSentenceSplit[1];
-
-                time += sleepSentenceMs;
-                scheduledTask = sleepSentenceRemoved;
-            }
-
-            ScheduledTaskManager.addPlayerScheduledTask(player, time, fileName, path, false, scheduledTask);
+            QuickUtils.handleString(scheduledTask, player);
         }
-    }
-
-    /**
-     * 获取计划任务的时间。
-     *
-     * @param scheduledTask 计划任务的字符串表示，格式为 "时间;文件名;文件路径;true/false;node"
-     * @return 计划任务的时间
-     */
-    public static String getScheduledTaskTime(String scheduledTask) {
-        return scheduledTask.split(";")[0];
-    }
-
-    /**
-     * 获取计划任务的文件名。
-     *
-     * @param scheduledTask 计划任务的字符串表示，格式为 "时间;文件名;文件路径;true/false;node"
-     * @return 计划任务的文件名
-     */
-    public static String getScheduledTaskFileName(String scheduledTask) {
-        return scheduledTask.split(";")[1];
-    }
-
-    /**
-     * 获取计划任务的文件路径。
-     *
-     * @param scheduledTask 计划任务的字符串表示，格式为 "时间;文件名;文件路径;true/false;node"
-     * @return 计划任务的文件路径
-     */
-    public static String getScheduledTaskPath(String scheduledTask) {
-        return scheduledTask.split(";")[2];
-    }
-
-    /**
-     * 判断计划任务的文件路径是否为原始路径。
-     *
-     * @param scheduledTask 计划任务的字符串表示，格式为 "时间;文件名;文件路径;true/false;node"
-     * @return 计划任务的文件路径是否为原始路径
-     */
-    public static boolean isScheduledTaskOriginalPath(String scheduledTask) {
-        return Boolean.parseBoolean(scheduledTask.split(";")[3]);
-    }
-
-    /**
-     * 获取计划任务的 node.
-     *
-     * @param scheduledTask 计划任务的字符串表示，格式为 "时间;文件名;文件路径;true/false;node"
-     * @return 计划任务的 node
-     */
-    public static String getScheduledTaskNode(String scheduledTask) {
-        return scheduledTask.split(";")[4];
     }
 
     /**

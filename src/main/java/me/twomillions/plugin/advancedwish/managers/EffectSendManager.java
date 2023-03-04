@@ -31,9 +31,12 @@ import java.util.List;
 import java.util.Locale;
 
 /**
+ * 主要效果发送类。
+ *
  * @author 2000000
  * @date 2022/11/24 20:27
  */
+@SuppressWarnings("deprecation")
 public class EffectSendManager {
     private static final Plugin plugin = Main.getInstance();
 
@@ -47,19 +50,38 @@ public class EffectSendManager {
      *
      * @param fileName 配置文件名
      * @param targetPlayer 目标玩家
-     * @param replacePlayer 替换玩家
      * @param path 配置文件路径
      * @param pathPrefix 配置文件路径前缀
      */
-    public static void sendEffect(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
+    public static void sendEffect(String fileName, Player targetPlayer, String path, String pathPrefix) {
         if (!targetPlayer.isOnline()) return;
         
         // isCancelled
-        if (QuickUtils.callAsyncEffectSendEvent(fileName, targetPlayer, replacePlayer, path, pathPrefix).isCancelled()) return;
+        if (QuickUtils.callAsyncEffectSendEvent(fileName, targetPlayer, null, path, pathPrefix).isCancelled()) return;
 
-        String targetPlayerUUIDString = targetPlayer.getUniqueId().toString();
+        // Send
+        try {
+            sendTitle(fileName, targetPlayer, path, pathPrefix);
+            sendParticle(fileName, targetPlayer, path, pathPrefix);
+            sendSounds(fileName, targetPlayer, path, pathPrefix);
+            sendCommands(fileName, targetPlayer, path, pathPrefix);
+            sendMessage(fileName, targetPlayer, path, pathPrefix);
+            sendChat(fileName, targetPlayer, path, pathPrefix);
+            sendAnnouncement(fileName, targetPlayer, path, pathPrefix);
+            sendPotion(fileName, targetPlayer, path, pathPrefix);
+            sendHealthAndHunger(fileName, targetPlayer, path, pathPrefix);
+            sendExp(fileName, targetPlayer, path, pathPrefix);
+            sendActionBar(fileName, targetPlayer, path, pathPrefix);
+            sendBossBar(fileName, targetPlayer, path, pathPrefix);
+            runKether(fileName, targetPlayer, path, pathPrefix);
+        } catch (Exception exception) {
+            QuickUtils.sendConsoleMessage("&c效果发送错误! 配置是否完整? 奖池配置文件是否错误? 文件名: &e" + fileName + "&c，路径: &e" + path + "&c，节点: &e" + pathPrefix + "&c，目标玩家: &e" + targetPlayer.getName());
+            return;
+        }
 
         // Logs
+        String targetPlayerUUIDString = targetPlayer.getUniqueId().toString();
+
         if (isRecordEffectSend(fileName, path, pathPrefix)) {
             String logTime = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss").format(System.currentTimeMillis());
 
@@ -68,20 +90,6 @@ public class EffectSendManager {
             if (MongoManager.getMongoConnectState() == MongoConnectState.Connected) MongoManager.addPlayerWishLog(targetPlayerUUIDString, finalLogString);
             else ConfigManager.addPlayerWishLog(targetPlayerUUIDString, finalLogString);
         }
-
-        // Send
-        sendTitle(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        sendParticle(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        sendSounds(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        sendCommands(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        sendMessage(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        sendAnnouncement(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        sendPotion(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        sendHealthAndHunger(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        sendExp(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        sendActionBar(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        sendBossBar(fileName, targetPlayer, replacePlayer, path, pathPrefix);
-        runKether(fileName, targetPlayer, replacePlayer, path, pathPrefix);
     }
 
     /**
@@ -100,11 +108,10 @@ public class EffectSendManager {
      *
      * @param fileName 配置文件名
      * @param targetPlayer 目标玩家
-     * @param replacePlayer 替换玩家
      * @param path 配置文件路径
      * @param pathPrefix 配置文件路径前缀
      */
-    private static void sendTitle(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
+    private static void sendTitle(String fileName, Player targetPlayer, String path, String pathPrefix) {
         // 判断服务器版本，1.7 版本以下不支持标题发送
         if (Main.getServerVersion() <= 107) return;
 
@@ -113,16 +120,16 @@ public class EffectSendManager {
         yaml.setPathPrefix(pathPrefix == null ? "TITLE" : pathPrefix + ".TITLE");
 
         // 替换标题的主副文本中的占位符
-        String mainTitle = QuickUtils.handleString(yaml.getString("MAIN-TITLE"), targetPlayer, replacePlayer);
-        String subTitle = QuickUtils.handleString(yaml.getString("SUB-TITLE"), targetPlayer, replacePlayer);
+        String mainTitle = QuickUtils.handleString(yaml.getString("MAIN-TITLE"), targetPlayer);
+        String subTitle = QuickUtils.handleString(yaml.getString("SUB-TITLE"), targetPlayer);
 
         // 如果标题文本为空，直接返回
         if ("".equals(mainTitle) && "".equals(subTitle)) return;
 
         // 替换并获取标题淡入、停留和淡出时间
-        int fadeIn = QuickUtils.handleInt(yaml.getString("FADE-IN"), targetPlayer, replacePlayer);
-        int fadeOut = QuickUtils.handleInt(yaml.getString("FADE-OUT"), targetPlayer, replacePlayer);
-        int stay = QuickUtils.handleInt(yaml.getString("STAY"), targetPlayer, replacePlayer);
+        int fadeIn = QuickUtils.handleInt(yaml.getString("FADE-IN"), targetPlayer);
+        int fadeOut = QuickUtils.handleInt(yaml.getString("FADE-OUT"), targetPlayer);
+        int stay = QuickUtils.handleInt(yaml.getString("STAY"), targetPlayer);
 
         /*
          * 为不同版本的 Minecraft 使用不同的发送标题方法
@@ -142,11 +149,10 @@ public class EffectSendManager {
      *
      * @param fileName 配置文件名
      * @param targetPlayer 目标玩家
-     * @param replacePlayer 替换玩家
      * @param path 配置文件路径
      * @param pathPrefix 配置文件路径前缀
      */
-    private static void sendParticle(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
+    private static void sendParticle(String fileName, Player targetPlayer, String path, String pathPrefix) {
         // 创建配置文件
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         // 设置路径前缀
@@ -157,7 +163,7 @@ public class EffectSendManager {
             if (particleConfig == null || particleConfig.length() <= 1) return;
 
             // 解析粒子效果配置
-            String[] particleConfigSplit = QuickUtils.handleStrings(particleConfig.toUpperCase(Locale.ROOT).split(";"), targetPlayer, replacePlayer);
+            String[] particleConfigSplit = QuickUtils.handleStrings(particleConfig.toUpperCase(Locale.ROOT).split(";"), targetPlayer);
 
             ParticleEffect particleEffect;
             String particleString = particleConfigSplit[0];
@@ -249,11 +255,10 @@ public class EffectSendManager {
      *
      * @param fileName 配置文件名
      * @param targetPlayer 目标玩家
-     * @param replacePlayer 替换玩家
      * @param path 配置文件路径
      * @param pathPrefix 配置文件路径前缀
      */
-    private static void sendSounds(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
+    private static void sendSounds(String fileName, Player targetPlayer, String path, String pathPrefix) {
         // 创建配置文件
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         // 设置路径前缀
@@ -266,7 +271,7 @@ public class EffectSendManager {
             if (soundConfig == null || soundConfig.length() <= 1) return;
 
             // 解析音效配置
-            String[] soundConfigSplit = QuickUtils.handleStrings(soundConfig.toUpperCase(Locale.ROOT).split(";"), targetPlayer, replacePlayer);
+            String[] soundConfigSplit = QuickUtils.handleStrings(soundConfig.toUpperCase(Locale.ROOT).split(";"), targetPlayer);
 
             Sound sound;
             String soundString = soundConfigSplit[0];
@@ -292,11 +297,10 @@ public class EffectSendManager {
      *
      * @param fileName 配置文件名
      * @param targetPlayer 目标玩家
-     * @param replacePlayer 替换玩家
      * @param path 配置文件路径
      * @param pathPrefix 配置文件路径前缀
      */
-    private static void sendCommands(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
+    private static void sendCommands(String fileName, Player targetPlayer, String path, String pathPrefix) {
         // 创建配置文件
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         // 设置路径前缀
@@ -306,7 +310,7 @@ public class EffectSendManager {
         yaml.getStringList("PLAYER").forEach(commandConfig -> {
             if (commandConfig == null || commandConfig.length() <= 1) return;
 
-            commandConfig = QuickUtils.handleString(commandConfig, targetPlayer, replacePlayer);
+            commandConfig = QuickUtils.handleString(commandConfig, targetPlayer);
 
             // 判断指令是否需要 OP 权限
             if (!commandConfig.startsWith("[op]:") || targetPlayer.isOp()) {
@@ -345,7 +349,7 @@ public class EffectSendManager {
             ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
 
             // 替换翻译占位符并执行控制台指令
-            String finalCommandConfig = QuickUtils.handleString(commandConfig, targetPlayer, replacePlayer);
+            String finalCommandConfig = QuickUtils.handleString(commandConfig, targetPlayer);
             Bukkit.getScheduler().runTask(plugin, () -> Bukkit.dispatchCommand(console, finalCommandConfig));
         });
     }
@@ -355,11 +359,10 @@ public class EffectSendManager {
      *
      * @param fileName 配置文件名
      * @param targetPlayer 目标玩家
-     * @param replacePlayer 替换玩家
      * @param path 配置文件路径
      * @param pathPrefix 配置文件路径前缀
      */
-    private static void sendMessage(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
+    private static void sendMessage(String fileName, Player targetPlayer, String path, String pathPrefix) {
         // 创建配置文件
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         // 设置路径前缀
@@ -378,8 +381,32 @@ public class EffectSendManager {
         // 向目标玩家发送消息
         messageConfigs.stream()
                 .filter(messageConfig -> messageConfig != null && messageConfig.length() > 1)
-                .map(messageConfig -> QuickUtils.handleString(messageConfig, targetPlayer, replacePlayer))
+                .map(messageConfig -> QuickUtils.handleString(messageConfig, targetPlayer))
                 .forEach(targetPlayer::sendMessage);
+    }
+
+    /**
+     * 使玩家发送信息。
+     *
+     * @param fileName 配置文件名
+     * @param targetPlayer 目标玩家
+     * @param path 配置文件路径
+     * @param pathPrefix 配置文件路径前缀
+     */
+    private static void sendChat(String fileName, Player targetPlayer, String path, String pathPrefix) {
+        // 创建配置文件
+        Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
+        // 设置路径前缀
+        yaml.setPathPrefix(pathPrefix);
+
+        // 读取
+        List<String> messageConfigs = yaml.getStringList("CHAT");
+
+        // 使目标玩家发送信息
+        messageConfigs.stream()
+                .filter(messageConfig -> messageConfig != null && messageConfig.length() > 1)
+                .map(messageConfig -> QuickUtils.handleString(messageConfig, targetPlayer))
+                .forEach(targetPlayer::chat);
     }
 
     /**
@@ -387,11 +414,10 @@ public class EffectSendManager {
      *
      * @param fileName 配置文件名
      * @param targetPlayer 目标玩家
-     * @param replacePlayer 替换玩家
      * @param path 配置文件路径
      * @param pathPrefix 配置文件路径前缀
      */
-    private static void sendAnnouncement(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
+    private static void sendAnnouncement(String fileName, Player targetPlayer, String path, String pathPrefix) {
         // 创建配置文件
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         // 设置路径前缀
@@ -402,9 +428,7 @@ public class EffectSendManager {
             if (announcementConfig == null || announcementConfig.length() <= 1) return;
 
             // 广播公告
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                Bukkit.broadcastMessage(QuickUtils.handleString(announcementConfig, targetPlayer, replacePlayer));
-            });
+            Bukkit.getScheduler().runTask(plugin, () -> Bukkit.broadcastMessage(QuickUtils.handleString(announcementConfig, targetPlayer)));
         });
     }
 
@@ -413,11 +437,10 @@ public class EffectSendManager {
      *
      * @param fileName 配置文件名
      * @param targetPlayer 目标玩家
-     * @param replacePlayer 替换玩家
      * @param path 配置文件路径
      * @param pathPrefix 配置文件路径前缀
      */
-    private static void sendPotion(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
+    private static void sendPotion(String fileName, Player targetPlayer, String path, String pathPrefix) {
         // 创建配置文件
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         // 设置路径前缀
@@ -428,7 +451,7 @@ public class EffectSendManager {
             if (effectConfig == null || effectConfig.length() <= 1) return;
 
             // 解析药水效果配置
-            String[] effectConfigSplit = QuickUtils.handleStrings(effectConfig.split(";"), targetPlayer, replacePlayer);
+            String[] effectConfigSplit = QuickUtils.handleStrings(effectConfig.split(";"), targetPlayer);
             String effectString = effectConfigSplit[0];
 
             PotionEffectType effectType = PotionEffectType.getByName(effectString);
@@ -449,19 +472,18 @@ public class EffectSendManager {
      *
      * @param fileName 配置文件名
      * @param targetPlayer 目标玩家
-     * @param replacePlayer 替换玩家
      * @param path 配置文件路径
      * @param pathPrefix 配置文件路径前缀
      */
-    private static void sendHealthAndHunger(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
+    private static void sendHealthAndHunger(String fileName, Player targetPlayer, String path, String pathPrefix) {
         // 创建配置文件
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         // 设置路径前缀
         yaml.setPathPrefix(pathPrefix);
 
         // 解析配置
-        int hunger = QuickUtils.handleInt(yaml.getString("HUNGER"), targetPlayer, replacePlayer);
-        double health = QuickUtils.handleDouble(yaml.getString("HEALTH"), targetPlayer, replacePlayer);
+        int hunger = QuickUtils.handleInt(yaml.getString("HUNGER"), targetPlayer);
+        double health = QuickUtils.handleDouble(yaml.getString("HEALTH"), targetPlayer);
 
         if (health != 0) {
             double playerHealth = targetPlayer.getHealth();
@@ -479,18 +501,17 @@ public class EffectSendManager {
      *
      * @param fileName 配置文件名
      * @param targetPlayer 目标玩家
-     * @param replacePlayer 替换玩家
      * @param path 配置文件路径
      * @param pathPrefix 配置文件路径前缀
      */
-    private static void sendExp(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
+    private static void sendExp(String fileName, Player targetPlayer, String path, String pathPrefix) {
         // 创建配置文件
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
         // 设置路径前缀
         yaml.setPathPrefix(pathPrefix);
 
         // 解析配置
-        int exp = QuickUtils.handleInt(yaml.getString("EXP"), targetPlayer, replacePlayer);
+        int exp = QuickUtils.handleInt(yaml.getString("EXP"), targetPlayer);
 
         if (exp != 0) ExpUtils.addExp(targetPlayer, exp);
     }
@@ -500,11 +521,10 @@ public class EffectSendManager {
      *
      * @param fileName 配置文件名
      * @param targetPlayer 目标玩家
-     * @param replacePlayer 替换玩家
      * @param path 配置文件路径
      * @param pathPrefix 配置文件路径前缀
      */
-    private static void sendActionBar(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
+    private static void sendActionBar(String fileName, Player targetPlayer, String path, String pathPrefix) {
         // 如果是 1.7 服务器则不发送 Action Bar (因为 1.7 没有)
         if (Main.getServerVersion() <= 107) return;
 
@@ -514,8 +534,8 @@ public class EffectSendManager {
         yaml.setPathPrefix(pathPrefix == null ? "ACTION-BAR" : pathPrefix + ".ACTION-BAR");
 
         // 解析配置
-        String actionBarMessage = QuickUtils.handleString(yaml.getString("MESSAGE"), targetPlayer, replacePlayer);
-        int actionBarTime = QuickUtils.handleInt(yaml.getString("TIME"), targetPlayer, replacePlayer);
+        String actionBarMessage = QuickUtils.handleString(yaml.getString("MESSAGE"), targetPlayer);
+        int actionBarTime = QuickUtils.handleInt(yaml.getString("TIME"), targetPlayer);
 
         if (actionBarMessage.isEmpty() || actionBarTime == 0) return;
 
@@ -537,11 +557,10 @@ public class EffectSendManager {
      *
      * @param fileName 配置文件名
      * @param targetPlayer 目标玩家
-     * @param replacePlayer 替换玩家
      * @param path 配置文件路径
      * @param pathPrefix 配置文件路径前缀
      */
-    private static void sendBossBar(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
+    private static void sendBossBar(String fileName, Player targetPlayer, String path, String pathPrefix) {
         // 判断是否支持 Boss Bar
         if (Main.getServerVersion() <= 108) return;
 
@@ -551,10 +570,10 @@ public class EffectSendManager {
         yaml.setPathPrefix(pathPrefix == null ? "BOSS-BAR" : pathPrefix + ".BOSS-BAR");
 
         // 解析配置
-        String bossBarMessage = QuickUtils.handleString(yaml.getString("MESSAGE"), targetPlayer, replacePlayer);
-        double bossBarTime = QuickUtils.handleDouble(yaml.getString("TIME"), targetPlayer, replacePlayer);
-        String barColorString = QuickUtils.handleString(yaml.getString("COLOR"), targetPlayer, replacePlayer);
-        String barStyleString = QuickUtils.handleString(yaml.getString("STYLE"), targetPlayer, replacePlayer);
+        String bossBarMessage = QuickUtils.handleString(yaml.getString("MESSAGE"), targetPlayer);
+        double bossBarTime = QuickUtils.handleDouble(yaml.getString("TIME"), targetPlayer);
+        String barColorString = QuickUtils.handleString(yaml.getString("COLOR"), targetPlayer);
+        String barStyleString = QuickUtils.handleString(yaml.getString("STYLE"), targetPlayer);
 
         // 判断 Boss Bar 的信息是否为空
         if ("".equals(bossBarMessage) || bossBarTime == 0) return;
@@ -584,17 +603,16 @@ public class EffectSendManager {
      *
      * @param fileName 配置文件名
      * @param targetPlayer 目标玩家
-     * @param replacePlayer 替换玩家
      * @param path 配置文件路径
      * @param pathPrefix 配置文件路径前缀
      */
-    private static void runKether(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
+    private static void runKether(String fileName, Player targetPlayer, String path, String pathPrefix) {
         // 检查是否安装了 Vulpecula 插件
         if (!RegisterManager.isUsingVulpecula()) return;
 
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
 
-        String ketherCode = QuickUtils.handleString(yaml.getString(pathPrefix + ".KETHER"), targetPlayer, replacePlayer);
+        String ketherCode = QuickUtils.handleString(yaml.getString(pathPrefix + ".KETHER"), targetPlayer);
 
         if (ketherCode.isEmpty()) return;
 

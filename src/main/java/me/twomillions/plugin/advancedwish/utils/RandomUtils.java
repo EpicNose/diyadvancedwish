@@ -38,6 +38,10 @@ public class RandomUtils<T> {
      * @param probability 对应的概率
      */
     public void addRandomObject(T object, int probability) {
+        if (probability <= 0) {
+            return;
+        }
+
         RandomObject<T> randomObject = new RandomObject<>(object, probability);
         randomObjects.add(randomObject);
         totalProbability += probability;

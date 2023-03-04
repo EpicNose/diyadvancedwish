@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
+ *
+ *
  * @author 2000000
  * @date 2022/11/24 19:01
  */
@@ -55,6 +57,7 @@ public class RegisterManager {
     /**
      * 注册指令
      */
+    @SuppressWarnings("all")
     public static void registerCommands() {
         Main.getInstance().getCommand("advancedwish").setExecutor(new MainCommand());
         Main.getInstance().getCommand("advancedwish").setTabCompleter(new MainCommand());
@@ -175,5 +178,6 @@ public class RegisterManager {
         });
 
         setupPlugins(false);
+        registerWish();
     }
 }

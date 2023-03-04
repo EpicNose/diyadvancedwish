@@ -9,25 +9,6 @@ CONFIG-VERSION: 51
 #  本插件本体不提供任何 Gui 界面
 #  您需要使用其他菜单自行制作 Gui 界面以供玩家更好地许愿，当然您也可以选择使用指令进行许愿
 #
-# 更新注意:
-#  从 0.0.2.6-SNAPSHOT 后均支持使用 Papi，算数并未全部支持，若有支持算数的部分会进行标记，若没有标记则表示不支持
-#  从 0.0.3.2-SNAPSHOT 后新增 randomSentence 语句，若有支持的部分会进行标记，若没有标记则表示不支持
-#  从 0.0.5-SNAPSHOT 后新增 sleepSentence 语句，并大幅度修改配置文件，若有支持的部分会进行标记，若没有标记则表示不支持
-#
-#  从 0.0.5-SNAPSHOT 后配置文件的格式进行了变化，格式如下:
-#
-#   WAIT-SET:
-#    - "DO-LIST.START"
-#    - "DO-LIST.C1 sleepSentence(1000)end"
-#    - "DO-LIST.C2 sleepSentence(2000)end"
-#    - "DO-LIST.C3 sleepSentence(3000)end"
-#    - "GO-RANDOM sleepSentence(4000)end"
-#
-#  这里使用 WAIT-SET 部分进行举例，sleepSentence 语句在下文拥有介绍，此写法将会被解读为
-#  即刻发送 DO-LIST 内的 START 效果，1000ms 延迟发送 DO-LIST 内的 C1 效果，以此类推
-#  您还可以使用 "D:/MinecraftTestServers/测试群组/1.19 - Server1/plugins/AdvancedWish/Wish;wtf;DO-LIST.START" 这种高级写法
-#  其格式为 “文件路径;文件名;执行效果节点”，这意味着您可以从其他文件中读取您想要的数据，您可以将重复的数据存储至统一一个文件内来提高配置速度，节省空间
-#
 # 语句介绍:
 #  randomSentence 语句:
 #   randomSentence 语句是在 0.0.3.2-SNAPSHOT 版本后新加入的随机语句。
@@ -36,11 +17,6 @@ CONFIG-VERSION: 51
 #   而总概率则为 A 的概率 + B 的概率 + C 的概率，则为 60。这个语句可以无限随机，如: randomSentence(A#10~B#20~C#30~D#40~E#50)end
 #   您可以用 randomSentence 语句来进行保底的随机，奖品的二次随机，等等一系列复杂的操作。
 #   randomSentence 需要注意的是，您不能套娃这个语句，比如 randomSentence(randomSentence(A1#10~B1#20)end~B#20~C#30~D#40~E#50)end
-#
-#  sleepSentence 语句:
-#   sleepSentence 语句是在 0.0.5-SNAPSHOT 版本后新加入的延迟语句。
-#   它由 “sleepSentence(” 开头，由 ")end" 结尾，括号内则为延迟毫秒，实例: sleepSentence(1000)end
-#   sleepSentence 写法为紧跟在效果后，意味发送效果的时间会延迟，但是我们会先进行记录，这只是增加了执行时间
 
 # 使用限制 (若里面有任意一项没有通过则视为无法进行许愿)
 CONDITION:
@@ -50,8 +26,6 @@ CONDITION:
 
   # 玩家背包内必须含有什么物品
   # 格式: 物品;数量;扣除数量
-  #
-  # 支持算数的部分有: 数量 / 扣除数量
   INVENTORY-HAVE:
     - ""
 
@@ -60,15 +34,11 @@ CONDITION:
   #
   # 安全警告:
   #  由于物品名与 Lore 会先进行去色处理，所以如果没有 Lore 检查那么玩家可以通过铁砧改名来绕过物品名检查。请在使用此功能前务必进行安全性测试!
-  #
-  # 支持算数的部分有: 数量 / 扣除数量
   INVENTORY-HAVE-CUSTOM:
     - ""
 
   # 玩家身上必须含有什么药水效果
   # 格式: 药水;等级 (等级是大于等于)
-  #
-  # 支持算数的部分有: 等级
   PLAYER-HAVE-EFFECTS:
     - ""
 
@@ -77,34 +47,22 @@ CONDITION:
   POINT: 0 # 这里指的是扣除，如果您不想启用的话则设置为0. 此功能需要用到 PlayerPoints 插件 - 不可小数 - 支持算数
 
   # 自定义条件
-  # 格式: 对比值;条件;值
-  #
-  # 条件:
-  #  ">" 大于
-  #  ">=" 大于等于
-  #  “=” 等于
-  #  "<" 小于
-  #  "<=" 小于等于
-  #  "EQUALS" 字符串 - 等于 (区分大小写)
-  #  "CONTAINS" 字符串 - 包含 (区分大小写)
   #
   # 例子:
   #  假设我将设置，若此服务器玩家在线数大于等于 50 人，则可以在此奖池许愿，那么可以这样写
   #  我们将通过 PlayerList 变量来获取在线玩家数量 (https://github.com/PlaceholderAPI/PlaceholderAPI/wiki/Placeholders#playerlist)
   #  %playerlist_online,normal,yes,amount% 这将返回目前在线为玩家的数量，返回的内容为 "1" "2" "5" 等等数字
-  #  我们使用 ">=" 判断，"%playerlist_online,normal,yes,amount%;>=;50" 完成
+  #  我们使用 ">=" 判断，"%playerlist_online,normal,yes,amount% >= 50" 完成
   #
   #  假设还有一个需求，我们不想要 PlayerPoints 的点券来主导一切，我想要 SkillAPI 的技能点扣除
   #  那么我们只需要这样写一个条件，通过 %skillapi_skill_points_<skillName>% 来获取技能点，并且对其进行判断
-  #  "%skillapi_skill_points_<skillName>%;>=;500"，若此判断通过了，那么我们只需要使用指令扣除该玩家的技能点即可，但请注意，扣除技能点应该是实时发生的，它不应该被延迟
+  #  "%skillapi_skill_points_<skillName>% >= 500"，若此判断通过了，那么我们只需要使用指令扣除该玩家的技能点即可，但请注意，扣除技能点应该是实时发生的，它不应该被延迟
   #
-  # 支持 randomSentence 语句的部分有: 全部
-  # 支持的算数部分有: 若 对比值 / 值 为数字则支持
+  #  您也可以使用 "&&" 或 "||" 进行实现。
   CUSTOM:
     - ""
 
 # 设置奖品
-# 格式: 概率;执行项;增加的增率 (保底率);是否清零保底率 (插件会先检查清空，再检查是否增加保底率);对比值;条件;值
 #
 # 概率:
 #  此处的概率计算为，A 物品的概率为 5, B 为 20, C 为 75
@@ -113,11 +71,7 @@ CONDITION:
 # 使用技巧:
 #  您可以使用各种变量来达到一些高级的概率算法，比如纯伪随机数 (随着抽奖次数的增多，中奖概率会越来越大)。
 #  此处的变量解析玩家是抽奖玩家，这意味着您甚至可以使得每个玩家的中奖概率都不同，与您的概率算法挂钩。
-#  您还可以使用此选项设置额外条件，此条件表达式与 CUSTOM 项自定义条件相同，若不想要则直接留空即可。
-#
-#  示例，我想要玩家只能在服务器玩家在线数大于等于 50 人时才可以抽去到 S 项
-#  S 项的中奖概率为 1，执行 DO-LIST.S，增加的保底率为 0，清空保底率，则可以这样写:
-#  "1;DO-LIST.S;0;true;%playerlist_online,normal,yes,amount%;>=;50"
+#  您还可以使用此选项设置额外条件。
 #
 #  更多有趣的实现方式您可以自行进行探索!
 #
@@ -128,34 +82,71 @@ CONDITION:
 #   aw_amount_许愿池名_玩家名 - 获取指定玩家指定许愿池的许愿次数.
 #   aw_guaranteed_许愿池名_玩家名 - 获取指定玩家指定许愿池的保底率.
 #   aw_limit_amount_许愿池名_玩家名 - 获取指定玩家指定许愿池的限制许愿次数.
-#
-# 更新注意:
-#  自从 0.0.1.1-SNAPSHOT 后 (包括)，这里支持使用 Papi 变量以及算数
-#  例如: "5+1;A;0;true" 或者 "5*2;A;0;true" 或者 "5+%papi%;A;0;true" 等
-#  对应 Issue -> https://gitee.com/A2000000/advanced-wish/issues/I64GIA
-#
-#  自从 0.0.3.2-SNAPSHO`T 后 (包括)，我们将会先检查是否清空保底率，再去添加您指定的保底率。
-#  比如: "30;A;5;true"，那么将会先清除玩家的保底率，随后为玩家添加 5 点的保底率。
-#
-# 支持 randomSentence 语句的部分有: 全部
-# 支持的算数部分有: 概率 / 增加的增率 (保底率) / 若 对比值 / 值 为数字则支持
 PRIZE-SET:
-  # 使用条件判断来使得 A 的抽奖概率在大于 50 人的时候为 8，小于 50 人为 5
-  - "5;DO-LIST.A;0;true;%playerlist_online,normal,yes,amount%;<;50"
-  - "8;DO-LIST.A;0;true;%playerlist_online,normal,yes,amount%;>=;50"
+  # 随机项 - A
+  A:
+    # A 的随机概率，若多个则互相叠加。
+    # 此处使用 if else 返回多种状态下的动态概率。
+    PROBABILITY:
+      - "if (%player_level% > 100) {
+          0;
+         } else if (%player_level% <= 50) {
+          3;
+         } else {
+          2;
+        }"
 
-  - "20;DO-LIST.B;1;false;;;"
-  - "75;DO-LIST.C;1;false;;;"
+      # 这里使用二元运算符，若满足前面的条件则返回 ":" 前第一个值，否则第二个。
+      # 随机概率会与第一个 if else 进行叠加。
+      - "%playerlist_online,normal,yes,amount% < 50 ? 1 : 2"
+
+    # A 中奖后的执行节点。
+    # 效果只能有一个，若出现多个则按照顺序进行选择。
+    EFFECT:
+      - "DO-LIST.A"
+
+    # A 中奖后增加的保底率。 (先检查是否清除，后进行增加)
+    # 多条增加的报保底率将会叠加。
+    ADD-GUARANTEED:
+      - "0"
+
+    # A 中奖后是否清除保底率。 (先检查是否清除，后进行增加)
+    # 只能有一个 true 或一个 false，若出现多个则按照顺序进行选择。
+    CLEAR-GUARANTEED:
+      - "true"
+
+  # 随机项 - B
+  B:
+    # B 项的随机概率是固定的，固定返回 10。
+    PROBABILITY:
+      - "10"
+
+    # B 中奖后的执行节点。
+    # 效果只能有一个，若出现多个则按照顺序进行选择。
+    EFFECT:
+      - "DO-LIST.B"
+
+    # A 中奖后增加的保底率。 (先检查是否清除，后进行增加)
+    # 多条增加的报保底率将会叠加。
+    ADD-GUARANTEED:
+      - "1"
+
+    # A 中奖后是否清除保底率。 (先检查是否清除，后进行增加)
+    # 只能有一个 true 或一个 false，若出现多个则按照顺序进行选择。
+    CLEAR-GUARANTEED:
+      - "true"
+
+  C:
+    PROBABILITY:
+      - "20"
+    EFFECT:
+      - "DO-LIST.C"
+    ADD-GUARANTEED:
+      - "1"
+    CLEAR-GUARANTEED:
+      - "true"
 
 # 保底，即当 增率 (保底率) 到多少了触发对应的保底机制
-# 格式: 增率 (保底率);执行项 (DO-LIST);增加的增率 (保底率);是否清空保底率 (插件会先检查清空，再检查是否增加保底率);对比值;条件;值
-#
-# 使用技巧:
-#  您可以在这里设置玩家的小保底，或大保底。
-#  假设我想设置小保底为 B:
-#  那么我将在 GUARANTEED 内写入 "对应的增率;B"，并且在此处规定，抽到 B 不会清空保底率 "对应的增率;B;false"
-#  随后我想要设置大保底为 A:
-#  那么我将在 GUARANTEED 内写入 "对应的增率;A" 并且规定抽到此次保底清空保底率 "对应的增率;A;true"
 #
 # 注意事项:
 #  保底率为等于，而并非是大于等于。
@@ -165,54 +156,75 @@ PRIZE-SET:
 #  既 30 保底率有保底，玩家现在 29 保底值，那么此次抽奖不会触发保底，只有下一抽到达 30 才会有。
 #
 # 与 PRIZE-SET 的区别:
-#  当玩家触发保底后，不会触发对应的 PRIZE-SET 内容，只会触发此处所规定的内容。
-#  比如: 您在 PRIZE-SET 内设置 "5;A;0;true"，A 的概率为 5，抽到清空玩家保底率，后不增加保底率。
-#  而在此处，您设置的是 "30;A;5;true"，A 的保底为 30 保底率，抽到后清空玩家保底率，后增加 5 点保底率。
-#  那么插件将会遵守此处的写法，清空玩家保底率，后增加 5 点保底率，而不是 PRIZE-SET 所规定的。
-#
-# 更新注意:
-#  自从 0.0.1.1-SNAPSHOT 后 (包括)，这里支持使用 Papi 变量以及算数
-#  例如: "30+1;A;0;true" 或者 "30*2;A;0;true" 或者 "30+%papi%;A;0;true" 等
-#  对应 Issue -> https://gitee.com/A2000000/advanced-wish/issues/I64GIA
-#
-#  自从 0.0.3.2-SNAPSHOT 后 (包括)，我们将会先检查是否清空保底率，再去添加您指定的保底率。
-#  比如: "30;A;5;true"，那么将会先清除玩家的保底率，随后为玩家添加 5 点的保底率。
-#
-# 支持 randomSentence 语句的部分有: 全部
-# 支持的算数部分有: 增率 (保底率) / 增加的增率 (保底率) / 若 对比值 / 值 为数字则支持
+#  若触发保底，则使用的是此处规定的内容，而并非 PRIZE-SET 的内容。
 GUARANTEED:
-  # 新人首次抽奖百分之百抽到 A，使用保底、变量、条件判断语句完成首抽福利
-  - "0;DO-LIST.A;0;true;%aw_amount_基础许愿池%;=;0"
+  # 针对新玩家的保底机制，新玩家第一抽必定为 DO-LIST.B 项
+  NEW-PLAYER:
+    # 保底值为 0 时触发，若多个则互相叠加。
+    GUARANTEED:
+      - "0"
 
-  # 这里是大保底，有 1/6 的概率歪到 B，5/6 的概率是 A
-  - "30;randomSentence(DO-LIST.A#50~DO-LIST.B#10)end;0;true;;;"
+    # 如果 %aw_amount_基础许愿池% (目标玩家基础许愿池的许愿次数) 为 0，则返回 DO-LIST.B，否则返回空。
+    # 若返回为空则会判定为此保底无法被触发，则会检查下一个保底，若没有可用保底则进行正常抽奖随机。
+    # 此处 DO-LIST.B 使用了双引号进行包裹是因为此处使用了特殊的语句，既二元运算符，需要返回固定类型，若不进行包裹则会视为特殊语句进行解析并出现错误。
+    # 下方的保底不使用双引号进行包裹是因为其没有使用特殊语句，将会被直接当作字符串进行返回。
+    EFFECT:
+      - "%aw_amount_基础许愿池% == 0 ? DO-LIST.B : null"
 
-  # 这里是小保底
-  - "15;DO-LIST.B;1;false;;;"
+    # 此保底增加的保底率。 (先检查是否清除，后进行增加)
+    # 多条增加的报保底率将会叠加。
+    ADD-GUARANTEED:
+      - "0"
+
+    # 此保底触发后是否清除保底率。 (先检查是否清除，后进行增加)
+    # 只能有一个 true 或一个 false，若出现多个则按照顺序进行选择。
+    CLEAR-GUARANTEED:
+      - "true"
+
+  # 保底值到达 100 后的保底
+  GUARANTEED-100:
+    # 保底值为 100 时触发
+    GUARANTEED:
+      - "100"
+
+    # 必定返回 DO-LIST.A
+    EFFECT:
+      - "DO-LIST.A"
+
+    # 此保底增加的保底率。 (先检查是否清除，后进行增加)
+    ADD-GUARANTEED:
+      - "0"
+
+    # 此保底触发后是否清除保底率。 (先检查是否清除，后进行增加)
+    CLEAR-GUARANTEED:
+      - "true"
 
 # 我们应该怎么样写等待时间，这里将以秒为单位 (此任务支持跨服执行)
-# 格式: 执行项 (DO-LIST)
 #
-# 执行操作类型:
-#  GO-RANDOM - 执行随即完成的执行想
-#  RANDOM-AGAIN - 重新进行随机并设置计划任务，连抽使用 (下方有具体介绍)
+# 占位符:
+#  "_node_" - 解析为此次抽奖的执行结果。
+#  "_pluginPath_" - 解析为插件 plugins 文件夹的完整路径，例: D:\MinecraftTestServers\测试群组\1.12.2 - Sevrer3\plugins
 #
 # 使用技巧:
 #  这里可以延迟玩家的许愿时间，比如玩家需要等待十分钟，亦或者是五分钟才可以拿到最终地许愿奖品。
 #
 # 注意事项:
-#  如果玩家在许愿后，服务器被关闭，玩家掉线或者您没有使用此插件自带的重载指令，而是使用了其他第三方插件重载了此插件 (如 Yum Plugman)
-#  那么此时，Advanced Wish 会将玩家未执行完毕的抽奖执行项保存到缓存中，以便玩家在下次进入服务器或重载过后即使恢复进度
-#  当然还需要注意的是，这一切都是您没有更改 执行项 (DO-LIST) 名称的前提下
+#  如果玩家在许愿后，服务器被关闭，玩家掉线或者您没有使用此插件自带的重载指令，而是使用了其他第三方插件重载了此插件 (Yum Plugman 等)，
+#  那么此时，Advanced Wish 会将玩家未执行完毕的抽奖执行项保存到缓存中，以便玩家在下次进入服务器或重载过后即使恢复进度。
+#  当然还需要注意的是，这一切都是您没有更改 执行项 (DO-LIST) 名称的前提下。
 #
-# 更新注意:
-#  在 0.0.3.0-SNAPSHOT 版本后，插件新加入了 RANDOM-AGAIN 执行操作类型
-#  此操作类型用处在于实现连抽，此操作类型执行的内容为: 重新进行一次随机，设置计划任务
-#  RANDOM-AGAIN 同样会检查保底，以及增加保底率和抽奖次数，在 0.0.3.7-SNAPSHOT 后支持自定义增加抽奖次数
-#  但是需要注意的是: 如果您要运行 RANDOM-AGAIN，并且 WAIT-SET 中还存在 GO-RANDOM 执行操作
-#  那么您应该首先执行 GO-RANDOM 后执行 RANDOM-AGAIN，而不是直接执行 RANDOM-AGAIN
-#  下面我将展示一个三连抽的示例配置文件以供您参考。
-#  (如果您的连抽池与单抽许愿池等不相同，那么您需要去看 高级设置内的数据同步 选项来保证玩家数据在每个奖池相同)
+# 解析:
+#  这里使用了特殊语句 method.addPlayerScheduledTask 来添加玩家的执行项目，
+#  其中第一个参数为文件名，第二个参数为文件路径 (除 /Wish 外都需要填写完整路径，但是您可以用 "_pluginPath" 占位符简化它)，
+#  第三个为执行节点，第四个 (可选) 为延迟时间。
+#  由于使用了特殊语句，特殊语句内的文件名，路径等等都是字符串类型，需要使用引号进行包裹。占位符不需要进行包裹。
+#
+#  使用 "_pluginPath_" 示例: "method.addPlayerScheduledTask(\"基础许愿池\", _pluginPath_ + \"/AdvancedWish/Wish\", \"DO-LIST.CANT-WISH-AGAIN-EFFECT\")"
+#  使用原始路径示例: "method.addPlayerScheduledTask(\"基础许愿池\", \"D:/MinecraftTestServers/测试群组/1.12.2 - Sevrer3/plugins/AdvancedWish/Wish\", \"DO-LIST.CANT-WISH-AGAIN-EFFECT\")"
+#
+#  关于连抽，您可以使用特殊语句 method.getFinalWishPrize 进行再随机。
+#  method.getFinalWishPrize 需要传入三个参数，第一个为许愿池名，第二个为是否处理抽奖次数，保底率等，第三个为返回类型 (若为 true 则只返回执行节点，否则返回全语句)
+#  若没有可用的随机奖品，getFinalWishPrize 将会返回一个空值 ("")。
 #
 # 三连抽示例:
 #   - "DO-LIST.START"
@@ -222,50 +234,41 @@ GUARANTEED:
 #   - "GO-RANDOM sleepSentence(4000)end"
 #   - "RANDOM-AGAIN sleepSentence(5000)end"
 #   - "RANDOM-AGAIN sleepSentence(6000)end"
-#
-# 支持的算数部分有: 等待秒数
-# 支持 sleepSentence 语句的部分有: 全部
-# 支持 randomSentence 语句的部分有: 全部
 WAIT-SET:
-  - "DO-LIST.START"
-  - "DO-LIST.C1 sleepSentence(1000)end"
-  - "DO-LIST.C2 sleepSentence(2000)end"
-  - "DO-LIST.C3 sleepSentence(3000)end"
-  - "GO-RANDOM sleepSentence(4000)end"
+  # 发送 "/Wish" 路径下 "基础许愿池" 文件内的 "DO-LIST.START" 效果。
+  - "method.addPlayerScheduledTask(\"基础许愿池\", \"/Wish\", \"DO-LIST.START\")"
+
+  # 延迟 1000ms 发送 "/Wish" 路径下 "基础许愿池" 文件内的 "DO-LIST.C1" 效果。
+  - "method.addPlayerScheduledTask(\"基础许愿池\", \"/Wish\", \"DO-LIST.C1\", 1000)"
+  - "method.addPlayerScheduledTask(\"基础许愿池\", \"/Wish\", \"DO-LIST.C2\", 2000)"
+  - "method.addPlayerScheduledTask(\"基础许愿池\", \"/Wish\", \"DO-LIST.C3\", 3000)"
+
+  # 延迟 4000ms 发送 "/Wish" 路径下 "基础许愿池" 文件内最终随机到的效果。
+  - "method.addPlayerScheduledTask(\"基础许愿池\", \"/Wish\", _node_, 4000)"
 
 # 当玩家许愿一次后没有等待最终奖品发放便尝试二次许愿时
-# 支持 sleepSentence 语句的部分有: 全部
-# 支持 randomSentence 语句的部分有: 全部
 CANT-WISH-AGAIN:
-  - "DO-LIST.CANT-WISH-AGAIN-EFFECT"
+  - "method.addPlayerScheduledTask(\"基础许愿池\", _pluginPath_ + \"/AdvancedWish/PlayerLogs\", \"DO-LIST.CANT-WISH-AGAIN-EFFECT\")"
 
 # 当玩家没有满足许愿条件但是尝试许愿时
-# 支持 sleepSentence 语句的部分有: 全部
-# 支持 randomSentence 语句的部分有: 全部
 CANT-WISH:
-  - "DO-LIST.CANT-WISH"
+  - "method.addPlayerScheduledTask(\"基础许愿池\", \"/Wish\", \"DO-LIST.CANT-WISH\")"
 
 # 禁止玩家在处理缓存时许愿
-# 支持 sleepSentence 语句的部分有: 全部
-# 支持 randomSentence 语句的部分有: 全部
 CANT-WISH-LOADING-CACHE:
-  - "DO-LIST.CANT-WISH-LOADING-CACHE"
+  - "method.addPlayerScheduledTask(\"基础许愿池\", \"/Wish\", \"DO-LIST.CANT-WISH-LOADING-CACHE\")"
 
 # 禁止玩家在等待处理缓存时许愿
-# 支持 sleepSentence 语句的部分有: 全部
-# 支持 randomSentence 语句的部分有: 全部
 CANT-WISH-WAITING-LOADING-CACHE:
-  - "DO-LIST.CANT-WISH-WAITING-LOADING-CACHE"
+  - "method.addPlayerScheduledTask(\"基础许愿池\", \"/Wish\", \"DO-LIST.CANT-WISH-WAITING-LOADING-CACHE\")"
 
 # 缓存设置
 CACHE-SETTINGS:
   WAIT-RECOVERY: 2 # 发送完毕 WISH-CACHE 后我们应该多久后恢复原本未执行的 DO-LIST 内容 - 单位秒 - 不可小数 - 支持算数
 
   # 当玩家有未执行完毕的执行项玩家进服显示的提示内容
-  # 支持 sleepSentence 语句的部分有: 全部
-  # 支持 randomSentence 语句的部分有: 全部
   WISH-CACHE:
-    - "DO-LIST.WISH-CACHE"
+    - "method.addPlayerScheduledTask(\"基础许愿池\", \"/Wish\", \"DO-LIST.WISH-CACHE\")"
 
 # 高级设置，当您试图编辑这里时候，您应该明白您正在做什么
 ADVANCED-SETTINGS:
@@ -312,8 +315,6 @@ ADVANCED-SETTINGS:
   #
   # 注意: 此处的重置许愿次数并不是玩家的总许愿次数，而是限制次数。
   # 重载注意: 此部分并不支持自动重载，为了避免一些问题，您在重载时比如要用指令进行重载。
-  #
-  # 支持的算数部分有: MAX-WISH-AMOUNT / RESET-LIMIT-START / RESET-LIMIT-CYCLE / REACH-LIMIT RESET-COMPLETE 部分 (与其他部分一样)
   WISH-LIMIT:
     LIMIT-AMOUNT: 0 # 最多许愿次数 (大于) - 单位秒不可小数 - 若填写非 0 则视为开启
     RESET-LIMIT-START: 0 # 服务器开启后多少秒后重置 - 单位秒不可小数 - 0 则为立即重置
@@ -324,10 +325,8 @@ ADVANCED-SETTINGS:
     RESET-COMPLETE-SEND-CONSOLE: false # 当许愿池许愿次数重置完毕后是否给控制台发送提示信息?
 
     # 当玩家到达许愿次数限制后尝试许愿的效果
-    # 支持 sleepSentence 语句的部分有: 全部
-    # 支持 randomSentence 语句的部分有: 全部
     REACH-LIMIT:
-      - "DO-LIST.REACH-LIMIT"
+      - "method.addPlayerScheduledTask(\"基础许愿池\", \"/Wish\", \"DO-LIST.REACH-LIMIT\")"
 
     # 当次许愿池重置次数时给所有玩家发送的效果
     #
@@ -335,11 +334,8 @@ ADVANCED-SETTINGS:
     #  此消息只会在此许愿池被重置的时候发送，这意味着如果有较多的许愿池的重置时间都是一样的。
     #  那么就会一次性发送非常多的效果，玩家视角混乱不堪，您可以为不同的许愿池设置不同的重置时间，将其间隔增加几秒。
     #  这样就会整齐一些，这个许愿池发送完毕发送另一个，看起来十分舒适整洁。
-    #
-    # 支持 sleepSentence 语句的部分有: 全部
-    # 支持 randomSentence 语句的部分有: 全部
     RESET-COMPLETE:
-      - "DO-LIST.RESET-COMPLETE"
+      - "method.addPlayerScheduledTask(\"基础许愿池\", \"/Wish\", \"DO-LIST.RESET-COMPLETE\")"
 
 # 自定义执行节点
 DO-LIST:
@@ -384,6 +380,10 @@ DO-LIST:
     MESSAGE:
       - ""
 
+    # 玩家自行发送的消息 (0.0.6.1-SNAPSHOT 新加入)
+    CHAT:
+      - ""
+
     # 显示的粒子效果
     #
     # 格式:
@@ -396,8 +396,6 @@ DO-LIST:
     #  因为音符如果自定义颜色，则会导致 offset 偏移失效，全部粒子都在一个点上，所以音符为随机颜色
     #  如果您不想要颜色则填写 FALSE 如: "FLAME;1;1;1;50;PLAYER;FALSE"
     #  这对于大小写并不敏感，您甚至可以这样写，并不会有问题: FaLsE
-    #
-    # 支持算数的部分有: 偏移X / 偏移Y / 偏移Z / 数量
     PARTICLE:
       - ""
 
@@ -416,13 +414,13 @@ DO-LIST:
     # Action Bar
     # 注意: Action Bar 在 1.7.10 以下无法使用 (因为低版本没有此功能，包括 1.7.10)
     ACTION-BAR:
-      TIME: 0 # time 为 0 或者 message 为空则自动关闭
+      TIME: 0 # time 为 0 或者 message 为空则自动关闭，单位秒
       MESSAGE: ""
 
     # Boss Bar
     # 注意: Boss Bar 在 1.8 以下无法使用 (包括 1.8)
     BOSS-BAR:
-      TIME: 0 # time 为 0 或者 message 为空则自动关闭
+      TIME: 0 # time 为 0 或者 message 为空则自动关闭，单位秒
       MESSAGE: ""
       # 注意，此处严格区分大小写
       COLOR: RANDOM # PINK / BLUE / RED / GREEN / YELLOW / PURPLE / WHITE / RANDOM (随机)
@@ -456,6 +454,8 @@ DO-LIST:
     ANNOUNCEMENT:
       - ""
     MESSAGE:
+      - ""
+    CHAT:
       - ""
     PARTICLE:
       - ""
@@ -492,6 +492,8 @@ DO-LIST:
     ANNOUNCEMENT:
       - ""
     MESSAGE:
+      - ""
+    CHAT:
       - ""
     PARTICLE:
       - ""
@@ -533,6 +535,8 @@ DO-LIST:
       - "&7[&e提示&7] &e您在基础许愿池许愿一次..."
       - "&7[我] 万福玛利亚，你充满圣宠，主与你同在，你在妇女中受赞颂。你的圣子耶稣，同受赞颂。天主圣母玛利亚，求你现在和我们临终时，为我们罪人，祈求天主。阿门"
       - "   "
+    CHAT:
+      - ""
     PARTICLE:
       - ""
     SOUNDS:
@@ -573,6 +577,8 @@ DO-LIST:
       - "&7[我] &e这是... 钻石!"
       - "&7[&e提示&7] &e恭喜您，您获得了 五个钻石!"
       - "   "
+    CHAT:
+      - ""
     PARTICLE:
       - "FLAME;1;1;1;50;PLAYER;FALSE"
     SOUNDS:
@@ -613,6 +619,8 @@ DO-LIST:
       - "&7[我] &7这是... 铁锭!"
       - "&7[&e提示&7] &e恭喜您，您获得了 十个铁锭!"
       - "   "
+    CHAT:
+      - ""
     PARTICLE:
       - "FLAME;1;1;1;50;PLAYER;FALSE"
     SOUNDS:
@@ -653,6 +661,8 @@ DO-LIST:
       - "&7[我] &7这是... 金币!"
       - "&7[&e提示&7] &e恭喜您，您获得了 五十金币!"
       - "   "
+    CHAT:
+      - ""
     PARTICLE:
       - "FLAME;1;1;1;50;PLAYER;FALSE"
     SOUNDS:
@@ -685,6 +695,8 @@ DO-LIST:
       - "&7[我] &7不行... 我没有足够的力量向神明祈祷..."
       - "&7[&e提示&7] &7您没有达到此许愿池许愿的要求。"
       - "   "
+    CHAT:
+      - ""
     PARTICLE:
       - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;FALSE"
     COMMANDS:
@@ -721,6 +733,8 @@ DO-LIST:
       - "   "
       - "&7[我] &7太虚弱了... 我已经耗尽了力量，目前没有办法再次许愿..."
       - "   "
+    CHAT:
+      - ""
     PARTICLE:
       - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;FALSE"
     COMMANDS:
@@ -757,6 +771,8 @@ DO-LIST:
       - "   "
       - "&7[&e提示&7] &7服务器正在加载您的缓存数据，在此期间您无法进行许愿!"
       - "   "
+    CHAT:
+      - ""
     PARTICLE:
       - ""
     COMMANDS:
@@ -793,6 +809,8 @@ DO-LIST:
       - "   "
       - "&7[&e提示&7] &7服务器正在等待加载您的缓存数据，在此期间您无法进行许愿!"
       - "   "
+    CHAT:
+      - ""
     PARTICLE:
       - ""
     COMMANDS:
@@ -829,6 +847,8 @@ DO-LIST:
       - "   "
       - "&7[&e提示&7] &7服务器将在 2 秒后继续执行上次遗留的许愿任务!"
       - "   "
+    CHAT:
+      - ""
     PARTICLE:
       - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;FALSE"
     COMMANDS:
@@ -866,6 +886,8 @@ DO-LIST:
       - "&7[我] &7太虚弱了... 我已经耗尽了力量，目前没有办法再次许愿..."
       - "&7[&e提示&7] &e您已到达许愿次数限制，您目前无法再次许愿，请稍后重试。"
       - "   "
+    CHAT:
+      - ""
     PARTICLE:
       - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;FALSE"
     COMMANDS:
@@ -902,6 +924,8 @@ DO-LIST:
       - "   "
       - "&7[&e提示&7] &e基础许愿池限制已重置! 快来抽奖吧!"
       - "   "
+    CHAT:
+      - ""
     PARTICLE:
       - "FLAME;1;1;1;50;PLAYER;FALSE"
     COMMANDS:

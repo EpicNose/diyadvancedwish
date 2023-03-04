@@ -63,7 +63,7 @@ public class PlayerTimestampTask {
      */
     private static void executeScheduledTasks(ConcurrentLinkedQueue<String> playerScheduledTasks, Player player) {
         for (String scheduledTask : new ConcurrentLinkedQueue<>(playerScheduledTasks)) {
-            String[] scheduledTaskSplit = QuickUtils.handleStrings(scheduledTask.split(";"), player);
+            String[] scheduledTaskSplit = scheduledTask.split(";");
 
             long currentTimeMillis = System.currentTimeMillis();
             long time = QuickUtils.handleLong(scheduledTaskSplit[0], player);
@@ -78,7 +78,7 @@ public class PlayerTimestampTask {
             String node = scheduledTaskSplit[4];
 
             // 发送任务效果
-            EffectSendManager.sendEffect(fileName, player, null, path, node);
+            EffectSendManager.sendEffect(fileName, player, path, node);
         }
     }
 }

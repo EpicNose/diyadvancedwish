@@ -60,7 +60,7 @@ public class WishLimitResetTask {
                 Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
 
                 Bukkit.getOnlinePlayers().forEach(player ->
-                        ScheduledTaskManager.createPlayerScheduledTasks(player, wishName, "/Wish",
+                        ScheduledTaskManager.createPlayerScheduledTasks(player,
                                 yaml.getStringList("ADVANCED-SETTINGS.WISH-LIMIT.RESET-COMPLETE")));
             }
 

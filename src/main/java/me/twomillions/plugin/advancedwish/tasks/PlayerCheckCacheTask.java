@@ -172,9 +172,10 @@ public class PlayerCheckCacheTask {
             for (String playerWishDoListString : playerDoListCache) {
                 // 解析缓存执行项
                 playerWishDoListString = UnicodeUtils.unicodeToString(playerWishDoListString);
+                String[] playerWishDoListStringSplit = playerWishDoListString.split(";");
 
-                String doList = ScheduledTaskManager.getScheduledTaskNode(playerWishDoListString);
-                String wishName = ScheduledTaskManager.getScheduledTaskFileName(playerWishDoListString);
+                String doList = playerWishDoListStringSplit[4];
+                String wishName = playerWishDoListStringSplit[1];
 
                 // 获取任务配置文件
                 Yaml yaml = ConfigManager.createYaml(wishName, "/Wish", false, false);
@@ -182,7 +183,7 @@ public class PlayerCheckCacheTask {
                 // 发送任务执行效果
                 if (firstSentEffect) {
                     // 创建玩家任务
-                    ScheduledTaskManager.createPlayerScheduledTasks(player, wishName, "/Wish", yaml.getStringList("CACHE-SETTINGS.WISH-CACHE"));
+                    ScheduledTaskManager.createPlayerScheduledTasks(player, yaml.getStringList("CACHE-SETTINGS.WISH-CACHE"));
 
                     // 如果玩家离线则跳出循环
                     if (!player.isOnline()) break;
@@ -198,7 +199,7 @@ public class PlayerCheckCacheTask {
                 if (player.isOnline()) {
                     long nowTime = System.currentTimeMillis();
                     long quitTime = getPlayerQuitTime(player);
-                    long oldTime = Long.parseLong(ScheduledTaskManager.getScheduledTaskTime(playerWishDoListString));
+                    long oldTime = Long.parseLong(playerWishDoListStringSplit[0]);
 
                     ScheduledTaskManager.addPlayerScheduledTask(player, oldTime - quitTime + nowTime, wishName, "/Wish", false, doList);
                     playerDoListCacheClone.remove(UnicodeUtils.stringToUnicode(playerWishDoListString));

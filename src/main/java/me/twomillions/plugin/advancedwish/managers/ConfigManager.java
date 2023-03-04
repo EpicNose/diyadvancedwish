@@ -20,6 +20,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
 /**
+ * 文件操作类。
+ *
  * @author 2000000
  * @date 2022/11/21 12:41
  */
@@ -85,7 +87,7 @@ public class ConfigManager {
      * @return 最新的配置文件版本号
      */
     public static int getLastConfigVersion() {
-        return 51;
+        return 61;
     }
 
     /**

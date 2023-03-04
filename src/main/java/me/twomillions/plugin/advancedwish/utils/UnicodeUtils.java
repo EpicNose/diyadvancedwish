@@ -1,19 +1,19 @@
 package me.twomillions.plugin.advancedwish.utils;
 
 /**
- * 提供将字符串与Unicode互相转换的方法。
+ * 提供将字符串与 Unicode 互相转换的方法。
  *
  * @author 2000000
  * @date 2023/2/19
  */
 public class UnicodeUtils {
     /**
-     * 将字符串转换为Unicode表示形式。
+     * 将字符串转换为 Unicode 表示形式。
      *
      * <p>使用 String.format() 方法将每个字符转换为对应的 Unicode 编码，并将其添加到 Unicode 字符串中。
      *
      * @param string 待转换的字符串
-     * @return Unicode表示的字符串
+     * @return Unicode 表示的字符串
      */
     public static String stringToUnicode(String string) {
         if (string == null || string.isEmpty()) return "";
@@ -30,9 +30,9 @@ public class UnicodeUtils {
     }
 
     /**
-     * 将Unicode表示的字符串转换为正常字符串。
+     * 将 Unicode 表示的字符串转换为正常字符串。
      *
-     * @param unicode Unicode表示的字符串
+     * @param unicode Unicode 表示的字符串
      * @return 转换后的正常字符串
      */
     public static String unicodeToString(String unicode) {
