@@ -6,6 +6,7 @@ import de.leonhard.storage.Yaml;
 import de.leonhard.storage.internal.settings.ConfigSettings;
 import de.leonhard.storage.internal.settings.DataType;
 import de.leonhard.storage.internal.settings.ReloadSettings;
+import me.twomillions.plugin.advancedwish.Constants;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import org.bukkit.Bukkit;
@@ -44,7 +45,7 @@ public class ConfigManager {
      */
     public static Yaml getYaml(String fileName) {
         String dataFolder = plugin.getDataFolder().toString();
-        File file = new File(dataFolder, fileName + ".yml");
+        File file = new File(dataFolder, fileName + Constants.YAML);
 
         if (!file.exists()) {
             QuickUtils.sendConsoleMessage("&c运行有误，请检查配置文件是否被误删！开始重新创建配置文件！");
@@ -106,8 +107,9 @@ public class ConfigManager {
      * @param yaml 需要检查的 Yaml 配置文件对象
      * @return 若为最新版本返回 true，否则返回 false
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean checkLastVersion(Yaml yaml) {
-        String yamlFileName = yaml.getFile().getName().replace(".yml", "");
+        String yamlFileName = yaml.getFile().getName().replace(Constants.YAML, "");
 
         if (isLastConfigVersion(yaml)) {
             QuickUtils.sendConsoleMessage("&a检查到 &e" + yamlFileName + " &aYaml 配置文件为最新版本。已通过版本检查。");
@@ -130,14 +132,14 @@ public class ConfigManager {
      */
     public static Yaml createYaml(String fileName, String path, boolean originalPath, boolean inputStreamFromResource) {
         // 去除文件后缀
-        if (fileName.contains(".yml")) fileName = fileName.split(".yml")[0];
+        if (fileName.contains(Constants.YAML)) fileName = fileName.split(Constants.YAML)[0];
 
         // 设置文件路径
         if (path == null) path = plugin.getDataFolder().toString();
         else if (!originalPath) path = plugin.getDataFolder() + path;
 
         // 创建 Yaml 文件对象
-        File file = new File(path, fileName + ".yml");
+        File file = new File(path, fileName + Constants.YAML);
 
         // 如果文件已存在，且 inputStreamFromResource 为 true，则设置为 false
         if (file.exists() && inputStreamFromResource) {
@@ -152,7 +154,7 @@ public class ConfigManager {
                 .setConfigSettings(ConfigSettings.PRESERVE_COMMENTS)
                 .setReloadSettings(ReloadSettings.AUTOMATICALLY);
 
-        if (inputStreamFromResource) simplixBuilder.addInputStreamFromResource(fileName + ".yml");
+        if (inputStreamFromResource) simplixBuilder.addInputStreamFromResource(fileName + Constants.YAML);
 
         return simplixBuilder.createYaml();
     }
@@ -168,14 +170,14 @@ public class ConfigManager {
      */
     public static Json createJson(String fileName, String path, boolean originalPath, boolean inputStreamFromResource) {
         // 去除文件后缀
-        if (fileName.contains(".json")) fileName = fileName.split(".json")[0];
+        if (fileName.contains(Constants.JSON)) fileName = fileName.split(Constants.JSON)[0];
 
         // 设置文件路径
         if (path == null) path = plugin.getDataFolder().toString();
         else if (!originalPath) path = plugin.getDataFolder() + path;
 
         // 创建 Json 文件对象
-        File file = new File(path, fileName + ".json");
+        File file = new File(path, fileName + Constants.JSON);
 
         // 如果文件已存在，且 inputStreamFromResource 为 true，则设置为 false
         if (file.exists() && inputStreamFromResource) {
@@ -190,7 +192,7 @@ public class ConfigManager {
                 .setConfigSettings(ConfigSettings.PRESERVE_COMMENTS)
                 .setReloadSettings(ReloadSettings.AUTOMATICALLY);
 
-        if (inputStreamFromResource) simplixBuilder.addInputStreamFromResource(fileName + ".json");
+        if (inputStreamFromResource) simplixBuilder.addInputStreamFromResource(fileName + Constants.JSON);
 
         return simplixBuilder.createJson();
     }
@@ -201,6 +203,7 @@ public class ConfigManager {
      * @param player 要添加许愿日志的玩家
      * @param logString 要添加到许愿日志中的字符串
      */
+    @SuppressWarnings("unused")
     public static void addPlayerWishLog(Player player, String logString) {
         Json json = createJson(player.getUniqueId().toString(), Main.getLogsPath(), true, false);
         List<String> logs = json.getStringList("logs");
@@ -229,6 +232,7 @@ public class ConfigManager {
      * @param findMax 返回列表中日志的最大索引
      * @return 包含查询到的日志的列表
      */
+    @SuppressWarnings("unused")
     public static ConcurrentLinkedQueue<String> getPlayerWishLog(Player player, int findMin, int findMax) {
         Json json = createJson(player.getUniqueId().toString(), Main.getLogsPath(), true, false);
 
@@ -275,6 +279,7 @@ public class ConfigManager {
      * @param player 玩家
      * @return 许愿日志条目数
      */
+    @SuppressWarnings("unused")
     public static int getPlayerWishLogCount(Player player) {
         // 根据玩家 UUID 读取许愿日志 Json 文件
         Json json = createJson(player.getUniqueId().toString(), Main.getLogsPath(), true, false);

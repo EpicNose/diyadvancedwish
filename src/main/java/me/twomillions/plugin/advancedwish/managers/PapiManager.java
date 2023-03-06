@@ -116,6 +116,7 @@ public class PapiManager extends PlaceholderExpansion {
             return future.get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
+            Thread.currentThread().interrupt();
             return "&cError";
         }
     }

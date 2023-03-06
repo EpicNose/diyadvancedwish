@@ -113,8 +113,8 @@ public class PlayerCheckCacheTask {
             String doListCachePath = Main.getDoListCachePath();
 
             // 遍历缓存文件，判断是否有正常缓存或操作缓存
-            boolean hasNormalCache = ConfigManager.getAllFileNames(normalPath).contains(uuid + ".json");
-            boolean hasDoListCachePath = ConfigManager.getAllFileNames(doListCachePath).contains(uuid + ".json");
+            boolean hasNormalCache = ConfigManager.getAllFileNames(normalPath).contains(uuid + Constants.JSON);
+            boolean hasDoListCachePath = ConfigManager.getAllFileNames(doListCachePath).contains(uuid + Constants.JSON);
 
             // 如果没有相应的缓存，将其赋值为 null
             if (!hasNormalCache) normalPath = null;

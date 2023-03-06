@@ -11,4 +11,7 @@ public class Constants {
     public static final String PLAYER_CACHE = "/PlayerCache";
     public static final String PLAYER_GUARANTEED = "/PlayerGuaranteed";
     public static final String PLAYER_LOGS = "/PlayerLogs";
+    
+    public static final String JSON = ".json";
+    public static final String YAML = ".yaml";
 }

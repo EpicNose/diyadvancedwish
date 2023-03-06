@@ -10,6 +10,7 @@ import de.leonhard.storage.Json;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import lombok.Setter;
+import me.twomillions.plugin.advancedwish.Constants;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.enums.mongo.*;
 import me.twomillions.plugin.advancedwish.managers.ConfigManager;
@@ -267,6 +268,7 @@ public class MongoManager {
      * @param player 玩家
      * @param logString 许愿日志
      */
+    @SuppressWarnings("unused")
     public static void addPlayerWishLog(Player player, String logString) {
         ConcurrentLinkedQueue<String> logs = getOrDefaultList(player, "logs", new ConcurrentLinkedQueue<>(), MongoCollections.PlayerLogs);
         logs.add(logString);
@@ -293,6 +295,7 @@ public class MongoManager {
      * @param findMax 要查询的日志的最大编号
      * @return 返回查询出来的日志列表
      */
+    @SuppressWarnings("unused")
     public static ConcurrentLinkedQueue<String> getPlayerWishLog(Player player, int findMin, int findMax) {
         ConcurrentLinkedQueue<String> logs = getOrDefaultList(player, "logs", new ConcurrentLinkedQueue<>(), MongoCollections.PlayerLogs);
 
@@ -319,6 +322,7 @@ public class MongoManager {
      * @param player 玩家
      * @return 返回日志条目数
      */
+    @SuppressWarnings("unused")
     public static int getWishLogsSize(Player player) {
         return getOrDefaultList(player, "logs", new ConcurrentLinkedQueue<>(), MongoCollections.PlayerLogs).size();
     }
@@ -400,7 +404,7 @@ public class MongoManager {
                 Set<String> jsonKeySet = json.keySet();
                 jsonKeySetAmount += jsonKeySet.size();
                 for (String key : jsonKeySet) {
-                    update(guaranteedFileName.split(".json")[0], key, json.get(key), MongoCollections.PlayerGuaranteed);
+                    update(guaranteedFileName.split(Constants.JSON)[0], key, json.get(key), MongoCollections.PlayerGuaranteed);
                 }
             }
         } else {
@@ -413,7 +417,7 @@ public class MongoManager {
                 Set<String> jsonKeySet = json.keySet();
                 jsonKeySetAmount += jsonKeySet.size();
                 for (String key : jsonKeySet) {
-                    update(logsFileName.split(".json")[0], key, json.get(key), MongoCollections.PlayerLogs);
+                    update(logsFileName.split(Constants.JSON)[0], key, json.get(key), MongoCollections.PlayerLogs);
                 }
             }
         } else {
