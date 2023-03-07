@@ -13,5 +13,5 @@ public class Constants {
     public static final String PLAYER_LOGS = "/PlayerLogs";
     
     public static final String JSON = ".json";
-    public static final String YAML = ".yaml";
+    public static final String YAML = ".yml";
 }
