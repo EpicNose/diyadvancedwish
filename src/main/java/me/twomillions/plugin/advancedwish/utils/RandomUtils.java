@@ -58,8 +58,17 @@ public class RandomUtils<T> {
      * 根据当前所有随机对象的概率，随机返回其中的一个对象。
      *
      * @return 随机对象，若没有随机对象则返回 null
+     * @throws IllegalArgumentException 如果没有可供随机的项目或总概率为 0
      */
     public T getResult() {
+        if (randomObjects.size() == 0) {
+            throw new IllegalArgumentException("No objects to randomize!");
+        }
+
+        if (totalProbability <= 0) {
+            throw new IllegalArgumentException("Random probability of error, totalProbability: " + totalProbability);
+        }
+
         int randomNumber = random.nextInt(totalProbability);
         int cumulativeProbability = 0;
 

@@ -191,7 +191,10 @@ public class QuickUtils {
      * @return 处理后的整数
      */
     public static int handleInt(String string, Object... params) {
-        return Integer.parseInt(ScriptUtils.eval(string, null, params));
+        String result = ScriptUtils.eval(string, null, params);
+        if (result.contains(".")) result = result.split("\\.")[0];
+
+        return Integer.parseInt(result);
     }
 
     /**
@@ -202,7 +205,10 @@ public class QuickUtils {
      * @return 处理后的整数
      */
     public static int handleInt(String string, Player player, Object... params) {
-        return Integer.parseInt(ScriptUtils.eval(string, player, params));
+        String result = ScriptUtils.eval(string, player, params);
+        if (result.contains(".")) result = result.split("\\.")[0];
+
+        return Integer.parseInt(result);
     }
 
     /**
@@ -212,7 +218,10 @@ public class QuickUtils {
      * @return 处理后的长整数
      */
     public static long handleLong(String string, Object... params) {
-        return Long.parseLong(ScriptUtils.eval(string, null, params));
+        String result = ScriptUtils.eval(string, null, params);
+        if (result.contains(".")) result = result.split("\\.")[0];
+
+        return Long.parseLong(result);
     }
 
     /**
@@ -223,7 +232,10 @@ public class QuickUtils {
      * @return 处理后的长整数
      */
     public static long handleLong(String string, Player player, Object... params) {
-        return Long.parseLong(ScriptUtils.eval(string, player, params));
+        String result = ScriptUtils.eval(string, player, params);
+        if (result.contains(".")) result = result.split("\\.")[0];
+
+        return Long.parseLong(result);
     }
 
     /**
