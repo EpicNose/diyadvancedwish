@@ -101,8 +101,6 @@ public final class Main extends JavaPlugin {
             });
         }
 
-        Bukkit.getLogger().info(ConfigManager.getAdvancedWishYaml().getString("WTF"));
-
         QuickUtils.sendConsoleMessage("&aAdvanced Wish 插件已成功加载! 感谢您使用此插件! 版本: &e" + getDescription().getVersion() + "&a, 作者: &e2000000&a。");
     }
 
