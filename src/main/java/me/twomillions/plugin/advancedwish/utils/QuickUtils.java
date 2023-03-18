@@ -30,6 +30,12 @@ public class QuickUtils {
     private static final JexlEngine jexlEngine = new JexlBuilder().create();
     private static final String CHAT_BAR = ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "------------------------------------------------";
 
+    /**
+     * 科学技术法转换为普通字符串
+     *
+     * @param string 科学计数法
+     * @return 普通字符串
+     */
     public static String toPlainString(String string) {
         try {
             return new BigDecimal(string).toPlainString();
@@ -83,7 +89,8 @@ public class QuickUtils {
      * 将传入的字符串替换变量。
      *
      * @param message 要替换和翻译的字符串
-     * @param player  可选用于变量替换的第一玩家
+     * @param player 可选用于变量替换的第一玩家
+     * @param params 替换的可选参数
      * @return 替换后的字符串
      */
     public static String replace(String message, Player player, String... params) {
@@ -109,7 +116,7 @@ public class QuickUtils {
      * 将传入的字符串替换变量并翻译颜色代码。
      *
      * @param string 要替换和翻译的字符串
-     * @param player  可选用于变量替换的第一玩家
+     * @param player 可选用于变量替换的第一玩家
      * @return 替换后和翻译后的字符串
      */
     public static String replaceTranslate(String string, Player player) {
@@ -164,6 +171,7 @@ public class QuickUtils {
      * 对传入的字符串进行处理，包括替换、翻译和随机语句支持等操作。
      *
      * @param string 待处理的字符串
+     * @param params 替换的可选参数
      * @return 处理后的字符串
      */
     public static String handleString(String string, Object... params) {
@@ -174,7 +182,8 @@ public class QuickUtils {
      * 对传入的字符串进行处理，包括替换、翻译和随机语句支持等操作。
      *
      * @param string 待处理的字符串
-     * @param player  可选用于变量替换的第一玩家
+     * @param player 可选用于变量替换的第一玩家
+     * @param params 替换的可选参数
      * @return 处理后的字符串
      */
     public static String handleString(String string, Player player, Object... params) {
@@ -185,6 +194,7 @@ public class QuickUtils {
      * 对传入的字符串进行处理，包括替换、翻译和随机语句支持，算数等操作。
      *
      * @param string 待处理的字符串
+     * @param params 替换的可选参数
      * @return 处理后的整数
      */
     public static int handleInt(String string, Object... params) {
@@ -198,7 +208,8 @@ public class QuickUtils {
      * 对传入的字符串进行处理，包括替换、翻译和随机语句支持，算数等操作。
      *
      * @param string 待处理的字符串
-     * @param player  可选用于变量替换的第一玩家
+     * @param player 可选用于变量替换的第一玩家
+     * @param params 替换的可选参数
      * @return 处理后的整数
      */
     public static int handleInt(String string, Player player, Object... params) {
@@ -212,6 +223,7 @@ public class QuickUtils {
      * 对传入的字符串进行处理，包括替换、翻译和随机语句支持，算数等操作。
      *
      * @param string 待处理的字符串
+     * @param params 替换的可选参数
      * @return 处理后的长整数
      */
     public static long handleLong(String string, Object... params) {
@@ -225,7 +237,8 @@ public class QuickUtils {
      * 对传入的字符串进行处理，包括替换、翻译和随机语句支持，算数等操作。
      *
      * @param string 待处理的字符串
-     * @param player  可选用于变量替换的第一玩家
+     * @param player 可选用于变量替换的第一玩家
+     * @param params 替换的可选参数
      * @return 处理后的长整数
      */
     public static long handleLong(String string, Player player, Object... params) {
@@ -239,6 +252,7 @@ public class QuickUtils {
      * 对传入的字符串进行处理，包括替换、翻译和随机语句支持，算数等操作。
      *
      * @param string 待处理的字符串
+     * @param params 替换的可选参数
      * @return 处理后的浮点数
      */
     public static double handleDouble(String string, Object... params) {
@@ -249,7 +263,8 @@ public class QuickUtils {
      * 对传入的字符串进行处理，包括替换、翻译和随机语句支持，算数等操作。
      *
      * @param string 待处理的字符串
-     * @param player  可选用于变量替换的第一玩家
+     * @param player 可选用于变量替换的第一玩家
+     * @param params 替换的可选参数
      * @return 处理后的浮点数
      */
     public static double handleDouble(String string, Player player, Object... params) {
@@ -260,6 +275,7 @@ public class QuickUtils {
      * 对传入的字符串进行处理，包括替换、翻译和随机语句支持，算数等操作。
      *
      * @param string 待处理的字符串
+     * @param params 替换的可选参数
      * @return 处理后的布尔值
      */
     public static boolean handleBoolean(String string, Object... params) {
@@ -270,7 +286,8 @@ public class QuickUtils {
      * 对传入的字符串进行处理，包括替换、翻译和随机语句支持，算数等操作。
      *
      * @param string 待处理的字符串
-     * @param player  可选用于变量替换的第一玩家
+     * @param player 可选用于变量替换的第一玩家
+     * @param params 替换的可选参数
      * @return 处理后的布尔值
      */
     public static boolean handleBoolean(String string, Player player, Object... params) {
@@ -281,6 +298,7 @@ public class QuickUtils {
      * 对传入的字符串数组进行处理，包括替换、翻译和随机语句支持，算数等操作。
      *
      * @param strings 待处理的字符串数组
+     * @param params 替换的可选参数
      * @return 处理后的字符串数组
      */
     public static String[] handleStrings(String[] strings, Object... params) {
@@ -305,7 +323,8 @@ public class QuickUtils {
      * 对传入的字符串数组进行处理，包括替换、翻译和随机语句支持，算数等操作。
      *
      * @param strings 待处理的字符串数组
-     * @param player  可选用于变量替换的第一玩家
+     * @param player 可选用于变量替换的第一玩家
+     * @param params 替换的可选参数
      * @return 处理后的字符串数组
      */
     public static String[] handleStrings(String[] strings, Player player, Object... params) {
