@@ -20,23 +20,23 @@ public class ScriptUtils {
      * 分析 JavaScript 表达式，返回结果字符串。
      *
      * @param string JavaScript 表达式
-     * @param targetPlayer 表达式目标玩家
+     * @param player 表达式目标玩家
      * @param params 传递给 JavaScript 的可选参数
      * @return 结果的字符串表示。如果计算失败，则返回原始输入字符串
      */
-    public static String eval(String string, Player targetPlayer, Object... params) {
-        string = QuickUtils.toPapi(QuickUtils.replaceTranslate(string, targetPlayer), targetPlayer);
+    public static String eval(String string, Player player, Object... params) {
+        string = QuickUtils.toPapi(QuickUtils.replaceTranslate(string, player), player);
 
         ScriptEngineManager manager = new ScriptEngineManager();
         javax.script.ScriptEngine engine = manager.getEngineByName("JavaScript");
 
         engine.put("RandomUtils", new RandomUtils<>());
-        engine.put("method", new MethodFunctions(targetPlayer));
+        engine.put("method", new MethodFunctions(player));
 
         File pluginFolder = Main.getInstance().getDataFolder().getParentFile();
         String pluginFolderPath = pluginFolder.getAbsolutePath();
 
-        engine.put("_targetPlayer_", targetPlayer);
+        engine.put("_player_", player);
         engine.put("_pluginPath_", pluginFolderPath);
 
         for (int i = 0; i < params.length; i += 2) {

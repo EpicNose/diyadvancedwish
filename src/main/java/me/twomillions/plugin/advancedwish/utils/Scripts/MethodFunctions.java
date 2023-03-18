@@ -16,13 +16,13 @@ import org.bukkit.entity.Player;
  */
 @SuppressWarnings("UnusedDeclaration")
 public class MethodFunctions {
-    @Getter final Player targetPlayer;
+    @Getter final Player player;
 
     /**
      * 构造函数，用于创建 MethodFunctions 对象。
      */
-    public MethodFunctions(Player targetPlayer) {
-        this.targetPlayer = targetPlayer;
+    public MethodFunctions(Player player) {
+        this.player = player;
     }
 
     /**
@@ -34,7 +34,7 @@ public class MethodFunctions {
      */
     public void addPlayerScheduledTask(String fileName, String path, String pathPrefix) {
         long time = System.currentTimeMillis();
-        ScheduledTaskManager.addPlayerScheduledTask(targetPlayer, time, fileName, path, !path.equals(Constants.WISH), pathPrefix);
+        ScheduledTaskManager.addPlayerScheduledTask(player, time, fileName, path, !path.equals(Constants.WISH), pathPrefix);
     }
 
     /**
@@ -47,7 +47,7 @@ public class MethodFunctions {
      */
     public void addPlayerScheduledTask(String fileName, String path, String pathPrefix, long delay) {
         long time = System.currentTimeMillis() + delay;
-        ScheduledTaskManager.addPlayerScheduledTask(targetPlayer, time, fileName, path, !path.equals(Constants.WISH), pathPrefix);
+        ScheduledTaskManager.addPlayerScheduledTask(player, time, fileName, path, !path.equals(Constants.WISH), pathPrefix);
     }
 
     /**
@@ -59,7 +59,7 @@ public class MethodFunctions {
      * @return 若没有可随机的奖品，则返回值为 ""，若 actualProcessing 为 true 则只返回执行节点，否则返回全语句
      */
     public String getFinalWishPrize(String wishName, boolean actualProcessing, boolean returnNode) {
-        return WishManager.getFinalWishPrize(targetPlayer, wishName, actualProcessing, returnNode);
+        return WishManager.getFinalWishPrize(player, wishName, actualProcessing, returnNode);
     }
 
     /**

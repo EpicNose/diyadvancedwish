@@ -10,6 +10,7 @@ import java.util.Locale;
  * @author 2000000
  * @date 2022/12/15 13:47
  */
+@SuppressWarnings("unused")
 public class ItemUtils {
     /**
      * 将字符串转换为 Material 对象，如果字符串无法转换则发送错误信息并返回 Material.AIR。

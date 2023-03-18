@@ -78,7 +78,7 @@ public class MainCommand implements TabExecutor {
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             Player player = (Player) sender;
-            
+
             Yaml messageYaml = ConfigManager.getMessageYaml();
 
             boolean isAdmin = isAdmin(player);

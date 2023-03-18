@@ -2,10 +2,7 @@ package me.twomillions.plugin.advancedwish.utils;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.twomillions.plugin.advancedwish.Main;
-import me.twomillions.plugin.advancedwish.api.AsyncEffectSendEvent;
-import me.twomillions.plugin.advancedwish.api.AsyncPlayerCheckCacheEvent;
-import me.twomillions.plugin.advancedwish.api.AsyncPlayerWishEvent;
-import me.twomillions.plugin.advancedwish.api.AsyncWishLimitResetEvent;
+import me.twomillions.plugin.advancedwish.api.*;
 import me.twomillions.plugin.advancedwish.enums.wish.PlayerWishState;
 import me.twomillions.plugin.advancedwish.managers.RegisterManager;
 import me.twomillions.plugin.advancedwish.utils.Scripts.ScriptUtils;
@@ -394,14 +391,13 @@ public class QuickUtils {
      * call AsyncEffectSendEvent
      *
      * @param fileName fileName
-     * @param targetPlayer targetPlayer
-     * @param replacePlayer replacePlayer
+     * @param player player
      * @param path path
      * @param pathPrefix pathPrefix
      * @return AsyncEffectSendEvent
      */
-    public static AsyncEffectSendEvent callAsyncEffectSendEvent(String fileName, Player targetPlayer, Player replacePlayer, String path, String pathPrefix) {
-        AsyncEffectSendEvent asyncEffectSendEvent = new AsyncEffectSendEvent(fileName, targetPlayer, replacePlayer, path, pathPrefix);
+    public static AsyncEffectSendEvent callAsyncEffectSendEvent(String fileName, Player player, String path, String pathPrefix) {
+        AsyncEffectSendEvent asyncEffectSendEvent = new AsyncEffectSendEvent(fileName, player, path, pathPrefix);
         Bukkit.getPluginManager().callEvent(asyncEffectSendEvent);
 
         return asyncEffectSendEvent;
@@ -443,6 +439,22 @@ public class QuickUtils {
         Bukkit.getPluginManager().callEvent(asyncPlayerCheckCacheEvent);
 
         return asyncPlayerCheckCacheEvent;
+    }
+
+    /**
+     * call AsyncRecordEffectSendEvent
+     *
+     * @param player player
+     * @param fileName fileName
+     * @param path path
+     * @param pathPrefix pathPrefix
+     * @return AsyncRecordEffectSendEvent
+     */
+    public static AsyncRecordEffectSendEvent callAsyncRecordEffectSendEvent(Player player, String fileName, String path, String pathPrefix) {
+        AsyncRecordEffectSendEvent asyncRecordEffectSendEvent = new AsyncRecordEffectSendEvent(player, fileName, path, pathPrefix);
+        Bukkit.getPluginManager().callEvent(asyncRecordEffectSendEvent);
+
+        return asyncRecordEffectSendEvent;
     }
 
     /**

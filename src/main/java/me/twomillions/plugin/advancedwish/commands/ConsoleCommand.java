@@ -39,7 +39,7 @@ public class ConsoleCommand implements CommandExecutor {
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             Yaml messageYaml = ConfigManager.getMessageYaml();
-            
+
             if (args.length == 0) {
                 messageYaml.getStringList("COMSOLE-SHOW-COMMAND").forEach(message -> sender.sendMessage(QuickUtils.handleString(message)));
                 return;

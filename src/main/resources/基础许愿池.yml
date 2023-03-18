@@ -206,9 +206,6 @@ GUARANTEED:
     #  此语句是可以进行套娃的，可以在随机的基础上再进行随机。
     #  例: "method.randomSentence("method.randomSentence(\"DO-LIST.A\", 5, \"DO-LIST.B\", 5)", 5, \"DO-LIST.B\", 5)"
     #
-    #  您也可以用蒙特卡洛方法进行随机，自定义蒙特卡洛方法的试验次数。
-    #  例: "method.randomSentence(1000, \"DO-LIST.A\", 5, \"DO-LIST.B\", 5)" - 1000 次蒙特卡洛方法试验次数。
-    #
     #  此处需要的是字符串类型，使用了特殊语句，需要使用双引号进行包裹。
     EFFECT:
       - "method.randomSentence(\"DO-LIST.A\", 5, \"DO-LIST.B\", 5)"
@@ -233,7 +230,7 @@ GUARANTEED:
 # 注意事项:
 #  如果玩家在许愿后，服务器被关闭，玩家掉线或者您没有使用此插件自带的重载指令，而是使用了其他第三方插件重载了此插件 (Yum Plugman 等)，
 #  那么此时，Advanced Wish 会将玩家未执行完毕的抽奖执行项保存到缓存中，以便玩家在下次进入服务器或重载过后即使恢复进度。
-#  当然还需要注意的是，这一切都是您没有更改 执行项 (DO-LIST) 名称的前提下。
+#  当然还需要注意的是，这一切都是您没有更改 执行项 名称的前提下。
 #
 # 解析:
 #  这里使用了特殊语句 method.addPlayerScheduledTask 来添加玩家的执行项目，
@@ -245,8 +242,8 @@ GUARANTEED:
 #  使用原始路径示例: "method.addPlayerScheduledTask(\"基础许愿池\", \"D:/MinecraftTestServers/测试群组/1.12.2 - Sevrer3/plugins/AdvancedWish/Wish\", \"DO-LIST.CANT-WISH-AGAIN-EFFECT\")"
 #
 #  关于连抽，您可以使用特殊语句 method.getFinalWishPrize 进行再随机。
-#  method.getFinalWishPrize 需要传入三个参数，第一个为许愿池名，第二个为是否处理抽奖次数，保底率等，第三个为返回类型 (若为 true 则只返回执行节点，否则返回全语句)
-#  若没有可用的随机奖品，getFinalWishPrize 将会返回一个空值 ("")。
+#  method.getFinalWishPrize 需要传入三个参数，第一个为许愿池名，第二个为是否处理抽奖次数，保底率等，第三个为返回类型 (若为 true 则只返回执行节点，否则返回全语句)。
+#  若没有可用的奖品，则会抛出异常。
 #
 # 三连抽示例:
 #   - "method.addPlayerScheduledTask(\"基础许愿池\", \"/Wish\", \"DO-LIST.START\")"
@@ -270,7 +267,7 @@ WAIT-SET:
 
 # 当玩家许愿一次后没有等待最终奖品发放便尝试二次许愿时
 CANT-WISH-AGAIN:
-  - "method.addPlayerScheduledTask(\"基础许愿池\", _pluginPath_ + \"/AdvancedWish/Wish\", \"DO-LIST.CANT-WISH-AGAIN-EFFECT\")"
+  - "method.addPlayerScheduledTask(\"基础许愿池\", \"/Wish\", \"DO-LIST.CANT-WISH-AGAIN-EFFECT\")"
 
 # 当玩家没有满足许愿条件但是尝试许愿时
 CANT-WISH:
@@ -286,7 +283,7 @@ CANT-WISH-WAITING-LOADING-CACHE:
 
 # 缓存设置
 CACHE-SETTINGS:
-  WAIT-RECOVERY: 2 # 发送完毕 WISH-CACHE 后我们应该多久后恢复原本未执行的 DO-LIST 内容 - 单位秒 - 不可小数 - 支持算数
+  WAIT-RECOVERY: 2 # 发送完毕 WISH-CACHE 后我们应该多久后恢复原本未执行的内容 - 单位秒 - 不可小数 - 支持算数
 
   # 当玩家有未执行完毕的执行项玩家进服显示的提示内容
   WISH-CACHE:
