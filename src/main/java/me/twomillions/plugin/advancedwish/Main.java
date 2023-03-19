@@ -59,17 +59,6 @@ public final class Main extends JavaPlugin {
             return;
         }
 
-        // 获取配置文件规定的路径
-        String pluginPath = Main.getInstance().getDataFolder().toString();
-
-        String logsConfig = advancedWishYaml.getString("LOGS-PATH");
-        String guaranteedConfig = advancedWishYaml.getString("GUARANTEED-PATH");
-        String doListCacheConfig = advancedWishYaml.getString("DO-LIST-CACHE-PATH");
-
-        setLogsPath("".equals(logsConfig) ? pluginPath + Constants.PLAYER_LOGS : logsConfig);
-        setGuaranteedPath("".equals(guaranteedConfig) ? pluginPath + Constants.PLAYER_GUARANTEED : guaranteedConfig);
-        setDoListCachePath("".equals(doListCacheConfig) ? pluginPath + Constants.PLAYER_CACHE : doListCacheConfig);
-
         // 迁移检查
         if (MongoManager.playerGuaranteedJsonToMongo(advancedWishYaml) != JsonTransformationMongoState.TurnOff) {
             Bukkit.shutdown();

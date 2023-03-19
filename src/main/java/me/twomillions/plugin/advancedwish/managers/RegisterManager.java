@@ -76,6 +76,19 @@ public class RegisterManager {
         setupVault();
         setupPlayerPoints();
 
+        // 获取配置文件规定的路径
+        String pluginPath = Main.getInstance().getDataFolder().toString();
+
+        Yaml advancedWishYaml = ConfigManager.getAdvancedWishYaml();
+
+        String logsConfig = advancedWishYaml.getString("LOGS-PATH");
+        String guaranteedConfig = advancedWishYaml.getString("GUARANTEED-PATH");
+        String doListCacheConfig = advancedWishYaml.getString("DO-LIST-CACHE-PATH");
+
+        Main.setLogsPath("".equals(logsConfig) ? pluginPath + Constants.PLAYER_LOGS : logsConfig);
+        Main.setGuaranteedPath("".equals(guaranteedConfig) ? pluginPath + Constants.PLAYER_GUARANTEED : guaranteedConfig);
+        Main.setDoListCachePath("".equals(doListCacheConfig) ? pluginPath + Constants.PLAYER_CACHE : doListCacheConfig);
+
         // PlaceholderAPI
         if (manager.isPluginEnabled("PlaceholderAPI")) {
             setUsingPapi(true);
@@ -168,15 +181,16 @@ public class RegisterManager {
         // 取消任务
         WishLimitResetTask.cancelAllWishLimitResetTasks();
 
-        // 设置玩家数据地址
-        String guaranteedConfig = ConfigManager.getAdvancedWishYaml().getString("GUARANTEED-PATH");
-        Main.setGuaranteedPath("".equals(guaranteedConfig) ? Main.getInstance().getDataFolder() + Constants.PLAYER_GUARANTEED : guaranteedConfig);
-
         // 低版本 Papi 没有 unregister 方法，捕获异常以取消 Papi 重载
-        if (isUsingPapi()) Bukkit.getScheduler().runTask(plugin, () -> {
-            try { new PapiManager().unregister(); new PapiManager().register(); }
-            catch (Throwable throwable) { QuickUtils.sendConsoleMessage("&ePlaceholder&c 重载异常，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/placeholderapi.6245/&c，已取消 &ePlaceholder&c 重载。"); }
-        });
+        if (isUsingPapi()) {
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                try {
+                    new PapiManager().unregister();
+                } catch (Throwable throwable) {
+                    QuickUtils.sendConsoleMessage("&ePlaceholder&c 重载异常，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/placeholderapi.6245/&c，已取消 &ePlaceholder&c 重载。");
+                }
+            });
+        }
 
         setupPlugins(false);
         registerWish();
