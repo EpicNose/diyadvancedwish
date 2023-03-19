@@ -80,7 +80,7 @@ public class RegisterManager {
         if (manager.isPluginEnabled("PlaceholderAPI")) {
             setUsingPapi(true);
 
-            new PapiManager().register();
+            Bukkit.getScheduler().runTask(plugin, () -> new PapiManager().register());
 
             QuickUtils.sendConsoleMessage("&a检查到服务器存在 &ePlaceholderAPI&a，已注册 &ePlaceholderAPI&a 变量。");
         }
