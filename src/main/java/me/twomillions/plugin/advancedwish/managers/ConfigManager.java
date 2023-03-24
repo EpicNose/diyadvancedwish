@@ -45,7 +45,7 @@ public class ConfigManager {
      */
     public static Yaml getYaml(String fileName) {
         String dataFolder = plugin.getDataFolder().toString();
-        File file = new File(dataFolder, fileName + Constants.YAML);
+        File file = new File(dataFolder, fileName + Constants.YAML_SUFFIX);
 
         if (!file.exists()) {
             QuickUtils.sendConsoleMessage("&c运行有误，请检查配置文件是否被误删！开始重新创建配置文件！");
@@ -88,7 +88,7 @@ public class ConfigManager {
      * @return 最新的配置文件版本号
      */
     public static int getLastConfigVersion() {
-        return 61;
+        return 62;
     }
 
     /**
@@ -109,7 +109,7 @@ public class ConfigManager {
      */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean checkLastVersion(Yaml yaml) {
-        String yamlFileName = yaml.getFile().getName().replace(Constants.YAML, "");
+        String yamlFileName = yaml.getFile().getName().replace(Constants.YAML_SUFFIX, "");
 
         if (isLastConfigVersion(yaml)) {
             QuickUtils.sendConsoleMessage("&a检查到 &e" + yamlFileName + " &aYaml 配置文件为最新版本。已通过版本检查。");
@@ -132,14 +132,14 @@ public class ConfigManager {
      */
     public static Yaml createYaml(String fileName, String path, boolean originalPath, boolean inputStreamFromResource) {
         // 去除文件后缀
-        if (fileName.contains(Constants.YAML)) fileName = fileName.split(Constants.YAML)[0];
+        if (fileName.contains(Constants.YAML_SUFFIX)) fileName = fileName.split(Constants.YAML_SUFFIX)[0];
 
         // 设置文件路径
         if (path == null) path = plugin.getDataFolder().toString();
         else if (!originalPath) path = plugin.getDataFolder() + path;
 
         // 创建 Yaml 文件对象
-        File file = new File(path, fileName + Constants.YAML);
+        File file = new File(path, fileName + Constants.YAML_SUFFIX);
 
         // 如果文件已存在，且 inputStreamFromResource 为 true，则设置为 false
         if (file.exists() && inputStreamFromResource) {
@@ -154,7 +154,7 @@ public class ConfigManager {
                 .setConfigSettings(ConfigSettings.PRESERVE_COMMENTS)
                 .setReloadSettings(ReloadSettings.AUTOMATICALLY);
 
-        if (inputStreamFromResource) simplixBuilder.addInputStreamFromResource(fileName + Constants.YAML);
+        if (inputStreamFromResource) simplixBuilder.addInputStreamFromResource(fileName + Constants.YAML_SUFFIX);
 
         return simplixBuilder.createYaml();
     }
@@ -170,14 +170,14 @@ public class ConfigManager {
      */
     public static Json createJson(String fileName, String path, boolean originalPath, boolean inputStreamFromResource) {
         // 去除文件后缀
-        if (fileName.contains(Constants.JSON)) fileName = fileName.split(Constants.JSON)[0];
+        if (fileName.contains(Constants.JSON_SUFFIX)) fileName = fileName.split(Constants.JSON_SUFFIX)[0];
 
         // 设置文件路径
         if (path == null) path = plugin.getDataFolder().toString();
         else if (!originalPath) path = plugin.getDataFolder() + path;
 
         // 创建 Json 文件对象
-        File file = new File(path, fileName + Constants.JSON);
+        File file = new File(path, fileName + Constants.JSON_SUFFIX);
 
         // 如果文件已存在，且 inputStreamFromResource 为 true，则设置为 false
         if (file.exists() && inputStreamFromResource) {
@@ -192,7 +192,7 @@ public class ConfigManager {
                 .setConfigSettings(ConfigSettings.PRESERVE_COMMENTS)
                 .setReloadSettings(ReloadSettings.AUTOMATICALLY);
 
-        if (inputStreamFromResource) simplixBuilder.addInputStreamFromResource(fileName + Constants.JSON);
+        if (inputStreamFromResource) simplixBuilder.addInputStreamFromResource(fileName + Constants.JSON_SUFFIX);
 
         return simplixBuilder.createJson();
     }

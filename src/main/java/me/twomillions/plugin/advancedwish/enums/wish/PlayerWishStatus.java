@@ -4,7 +4,7 @@ package me.twomillions.plugin.advancedwish.enums.wish;
  * @author 2000000
  * @date 2023/02/02
  */
-public enum PlayerWishState {
+public enum PlayerWishStatus {
 
     /**
      * Allow - 允许许愿

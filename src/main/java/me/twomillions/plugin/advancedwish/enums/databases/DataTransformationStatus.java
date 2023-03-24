@@ -1,10 +1,10 @@
-package me.twomillions.plugin.advancedwish.enums.mongo;
+package me.twomillions.plugin.advancedwish.enums.databases;
 
 /**
  * @author 2000000
  * @date 2023/02/02
  */
-public enum JsonTransformationMongoState {
+public enum DataTransformationStatus {
 
     /**
      * TurnOff - 关闭

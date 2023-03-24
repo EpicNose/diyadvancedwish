@@ -26,9 +26,14 @@ public class UpdateCheckerTask {
      * 如果开启了更新检查并且获取最新版本信息失败，会向控制台输出信息。
      */
     public static void startTask() {
-        if (Main.isDisabled()) return;
+        if (Main.isDisabled()) {
+            return;
+        }
 
-        if (!ConfigManager.getAdvancedWishYaml().getBoolean("UPDATE-CHECKER")) return;
+        if (!ConfigManager.getAdvancedWishYaml().getBoolean("UPDATE-CHECKER")) {
+            return;
+        }
+
         int cycle = ConfigManager.getAdvancedWishYaml().getInt("CHECK-CYCLE");
 
         Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {

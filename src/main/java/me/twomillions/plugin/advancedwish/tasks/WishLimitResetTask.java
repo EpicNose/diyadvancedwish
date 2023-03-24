@@ -5,11 +5,10 @@ import lombok.Getter;
 import me.twomillions.plugin.advancedwish.Constants;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.api.AsyncWishLimitResetEvent;
-import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
 import me.twomillions.plugin.advancedwish.managers.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.ScheduledTaskManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
-import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
+import me.twomillions.plugin.advancedwish.managers.databases.DatabasesManager;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
@@ -44,14 +43,16 @@ public class WishLimitResetTask {
             boolean isResetCompleteSendEnabled = QuickUtils.handleBoolean(WishManager.isResetCompleteSendEnabled(wishName));
             boolean isResetCompleteSendConsoleEnabled = QuickUtils.handleBoolean(WishManager.isResetCompleteSendConsoleEnabled(wishName));
 
-            String storeMode = MongoManager.getMongoConnectState() == MongoConnectState.Connected ? "Mongo" : "Json";
+            String storeMode = DatabasesManager.getDataStorageType().toString();
 
             // 调用异步重置事件
             AsyncWishLimitResetEvent event = QuickUtils.callAsyncWishLimitResetEvent(wishName, storeMode, wishResetLimitStart,
                     wishResetLimitCycle, isResetCompleteSendEnabled, isResetCompleteSendConsoleEnabled);
 
             // 如果事件被取消了，则退出方法
-            if (event.isCancelled()) return;
+            if (event.isCancelled()) {
+                return;
+            }
 
             // 重置许愿池的限制许愿次数
             WishManager.resetWishLimitAmount(wishName);
@@ -79,6 +80,8 @@ public class WishLimitResetTask {
      * 在 reload 的时候结束所有的任务。
      */
     public static void cancelAllWishLimitResetTasks() {
-        for (BukkitTask bukkitTask : wishLimitResetTaskList) bukkitTask.cancel();
+        for (BukkitTask bukkitTask : wishLimitResetTaskList) {
+            bukkitTask.cancel();
+        }
     }
 }

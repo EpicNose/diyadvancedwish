@@ -10,15 +10,16 @@ import org.jetbrains.annotations.NotNull;
  * @author 2000000
  * @date 2023/1/31 19:00
  */
+@Getter
 public class AsyncWishLimitResetEvent extends Event {
-    @Getter private final String wishName;
-    @Getter private final String storeMode;
-    @Getter private final int wishResetLimitStart;
-    @Getter private final int wishResetLimitCycle;
-    @Getter private final boolean isEnabledResetCompleteSend;
-    @Getter private final boolean isEnabledResetCompleteSendConsole;
+    private final String wishName;
+    private final String storeMode;
+    private final int wishResetLimitStart;
+    private final int wishResetLimitCycle;
+    private final boolean isEnabledResetCompleteSend;
+    private final boolean isEnabledResetCompleteSendConsole;
 
-    @Getter @Setter private boolean isCancelled;
+    @Setter private boolean isCancelled;
 
     private static final HandlerList HANDLERS = new HandlerList();
 
@@ -44,10 +45,6 @@ public class AsyncWishLimitResetEvent extends Event {
         this.isEnabledResetCompleteSend = isEnabledResetCompleteSend;
         this.isEnabledResetCompleteSendConsole = isEnabledResetCompleteSendConsole;
         this.isCancelled = false;
-    }
-
-    public static HandlerList getHandlerList() {
-        return HANDLERS;
     }
 
     public @NotNull HandlerList getHandlers() {

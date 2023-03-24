@@ -28,8 +28,14 @@ public final class ExpUtils {
      * @see <a href=http://minecraft.gamepedia.com/Experience#Leveling_up>经验值#升级</a>
      */
     public static int levelToExp(int level) {
-        if (level <= 16) return level * level + 6 * level;
-        if (level <= 31) return (int) (2.5 * level * level - 40.5 * level + 360);
+        if (level <= 16) {
+            return level * level + 6 * level;
+        }
+
+        if (level <= 31) {
+            return (int) (2.5 * level * level - 40.5 * level + 360);
+        }
+
         return (int) (4.5 * level * level - 162.5 * level + 2220);
     }
 
@@ -58,8 +64,14 @@ public final class ExpUtils {
      * @see <a href=http://minecraft.gamepedia.com/Experience#Leveling_up>经验值#升级</a>
      */
     public static int expToLevel(long exp) {
-        if (exp > 1508) return (int) ((Math.sqrt(72 * exp - 54215) + 325) / 18);
-        if (exp > 353) return (int) (Math.sqrt(40 * exp - 7839) / 10 + 8.1);
+        if (exp > 1508) {
+            return (int) ((Math.sqrt(72 * exp - 54215) + 325) / 18);
+        }
+
+        if (exp > 353) {
+            return (int) (Math.sqrt(40 * exp - 7839) / 10 + 8.1);
+        }
+
         return (int) (Math.sqrt(exp + 9) - 3);
     }
 
@@ -71,8 +83,14 @@ public final class ExpUtils {
      * @see <a href=http://minecraft.gamepedia.com/Experience#Leveling_up>Experience#Leveling_up</a>
      */
     private static int getNextLevelExp(int level) {
-        if (level >= 31) return 9 * level - 158;
-        if (level >= 16) return 5 * level - 38;
+        if (level >= 31) {
+            return 9 * level - 158;
+        }
+
+        if (level >= 16) {
+            return 5 * level - 38;
+        }
+
         return level * 2 + 7;
     }
 
@@ -89,7 +107,9 @@ public final class ExpUtils {
     public static void addExp(Player player, int exp) {
         exp += getExp(player);
 
-        if (exp < 0) exp = 0;
+        if (exp < 0) {
+            exp = 0;
+        }
 
         double levelAndExp = getLevelFromExp(exp);
         int level = (int) levelAndExp;

@@ -12,13 +12,14 @@ import org.jetbrains.annotations.NotNull;
  * @author 2000000
  * @date 2023/1/28 19:30
  */
+@Getter
 public class AsyncEffectSendEvent extends Event implements Cancellable {
-    @Getter private final Player player;
-    @Getter private final String fileName;
-    @Getter private final String path;
-    @Getter private final String pathPrefix;
+    private final Player player;
+    private final String fileName;
+    private final String path;
+    private final String pathPrefix;
 
-    @Getter @Setter private boolean isCancelled;
+    @Setter private boolean isCancelled;
 
     private static final HandlerList HANDLERS = new HandlerList();
 
@@ -38,10 +39,6 @@ public class AsyncEffectSendEvent extends Event implements Cancellable {
         this.path = path;
         this.pathPrefix = pathPrefix;
         this.isCancelled = false;
-    }
-
-    public static HandlerList getHandlerList() {
-        return HANDLERS;
     }
 
     public @NotNull HandlerList getHandlers() {

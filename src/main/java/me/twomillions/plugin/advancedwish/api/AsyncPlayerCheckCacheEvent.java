@@ -11,12 +11,13 @@ import org.jetbrains.annotations.NotNull;
  * @author 2000000
  * @date 2023/1/31 19:00
  */
+@Getter
 public class AsyncPlayerCheckCacheEvent extends Event {
-    @Getter private final Player player;
-    @Getter private final String normalPath;
-    @Getter private final String doListCachePath;
+    private final Player player;
+    private final String normalPath;
+    private final String doListCachePath;
 
-    @Getter @Setter private boolean isCancelled;
+    @Setter private boolean isCancelled;
 
     private static final HandlerList HANDLERS = new HandlerList();
 
@@ -36,10 +37,6 @@ public class AsyncPlayerCheckCacheEvent extends Event {
         this.normalPath = normalPath;
         this.doListCachePath = doListCachePath;
         this.isCancelled = false;
-    }
-
-    public static HandlerList getHandlerList() {
-        return HANDLERS;
     }
 
     public @NotNull HandlerList getHandlers() {

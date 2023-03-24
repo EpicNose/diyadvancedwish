@@ -3,7 +3,7 @@ package me.twomillions.plugin.advancedwish.utils;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.api.*;
-import me.twomillions.plugin.advancedwish.enums.wish.PlayerWishState;
+import me.twomillions.plugin.advancedwish.enums.wish.PlayerWishStatus;
 import me.twomillions.plugin.advancedwish.managers.RegisterManager;
 import me.twomillions.plugin.advancedwish.utils.Scripts.ScriptUtils;
 import org.apache.commons.jexl3.JexlBuilder;
@@ -25,7 +25,6 @@ import java.util.function.Function;
  */
 @SuppressWarnings("unused")
 public class QuickUtils {
-
     private static final Plugin plugin = Main.getInstance();
     private static final JexlEngine jexlEngine = new JexlBuilder().create();
     private static final String CHAT_BAR = ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "------------------------------------------------";
@@ -131,7 +130,10 @@ public class QuickUtils {
      */
     public static String count(String countString) {
         try {
-            if (countString == null || "".equals(countString)) return "";
+            if (countString == null || "".equals(countString)) {
+                return "";
+            }
+
             return jexlEngine.createExpression(countString).evaluate(null).toString();
         } catch (Exception exception) {
             return countString;
@@ -199,7 +201,10 @@ public class QuickUtils {
      */
     public static int handleInt(String string, Object... params) {
         String result = ScriptUtils.eval(string, null, params);
-        if (result.contains(".")) result = result.split("\\.")[0];
+
+        if (result.contains(".")) {
+            result = result.split("\\.")[0];
+        }
 
         return Integer.parseInt(result);
     }
@@ -214,7 +219,10 @@ public class QuickUtils {
      */
     public static int handleInt(String string, Player player, Object... params) {
         String result = ScriptUtils.eval(string, player, params);
-        if (result.contains(".")) result = result.split("\\.")[0];
+
+        if (result.contains(".")) {
+            result = result.split("\\.")[0];
+        }
 
         return Integer.parseInt(result);
     }
@@ -228,7 +236,10 @@ public class QuickUtils {
      */
     public static long handleLong(String string, Object... params) {
         String result = ScriptUtils.eval(string, null, params);
-        if (result.contains(".")) result = result.split("\\.")[0];
+
+        if (result.contains(".")) {
+            result = result.split("\\.")[0];
+        }
 
         return Long.parseLong(result);
     }
@@ -243,7 +254,10 @@ public class QuickUtils {
      */
     public static long handleLong(String string, Player player, Object... params) {
         String result = ScriptUtils.eval(string, player, params);
-        if (result.contains(".")) result = result.split("\\.")[0];
+
+        if (result.contains(".")) {
+            result = result.split("\\.")[0];
+        }
 
         return Long.parseLong(result);
     }
@@ -394,13 +408,13 @@ public class QuickUtils {
      * call AsyncPlayerWishEvent
      *
      * @param player player
-     * @param playerWishState playerWishState
+     * @param playerWishStatus playerWishStatus
      * @param wishName wishName
      * @param isForce isForce
      * @return AsyncPlayerWishEvent
      */
-    public static AsyncPlayerWishEvent callAsyncPlayerWishEvent(Player player, PlayerWishState playerWishState, String wishName, boolean isForce) {
-        AsyncPlayerWishEvent asyncPlayerWishEvent = new AsyncPlayerWishEvent(player, playerWishState, wishName, isForce);
+    public static AsyncPlayerWishEvent callAsyncPlayerWishEvent(Player player, PlayerWishStatus playerWishStatus, String wishName, boolean isForce) {
+        AsyncPlayerWishEvent asyncPlayerWishEvent = new AsyncPlayerWishEvent(player, playerWishStatus, wishName, isForce);
         Bukkit.getPluginManager().callEvent(asyncPlayerWishEvent);
 
         return asyncPlayerWishEvent;
@@ -490,15 +504,20 @@ public class QuickUtils {
         int startIndex = string.indexOf(start);
         int endIndex = string.indexOf(end, startIndex + 1);
 
-        if (startIndex == -1 || endIndex == -1) return string;
+        if (startIndex == -1 || endIndex == -1) {
+            return string;
+        }
 
         String beforeStart = string.substring(0, startIndex + start.length());
         String afterEnd = string.substring(endIndex);
 
         String replacedString = beforeStart + replace + afterEnd;
 
-        if (removeStartEndString) return replacedString.replace(start, "").replace(end, "");
-        else return beforeStart + replace + afterEnd;
+        if (removeStartEndString) {
+            return replacedString.replace(start, "").replace(end, "");
+        } else {
+            return beforeStart + replace + afterEnd;
+        }
     }
 
 }

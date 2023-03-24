@@ -1,10 +1,10 @@
 package me.twomillions.plugin.advancedwish.utils.Scripts;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import me.twomillions.plugin.advancedwish.Constants;
 import me.twomillions.plugin.advancedwish.managers.ScheduledTaskManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
-import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import me.twomillions.plugin.advancedwish.utils.RandomUtils;
 import org.bukkit.entity.Player;
 
@@ -14,16 +14,10 @@ import org.bukkit.entity.Player;
  * @author 2000000
  * @date 2023/3/2
  */
+@AllArgsConstructor
 @SuppressWarnings("UnusedDeclaration")
 public class MethodFunctions {
     @Getter final Player player;
-
-    /**
-     * 构造函数，用于创建 MethodFunctions 对象。
-     */
-    public MethodFunctions(Player player) {
-        this.player = player;
-    }
 
     /**
      * 添加玩家的定时任务。
@@ -66,28 +60,69 @@ public class MethodFunctions {
      * 随机返回一个对象。
      *
      * @param values 由对象和概率值组成的数组，不能为空，长度必须为偶数
-     * @return 随机返回的对象
-     * @throws IllegalArgumentException 如果概率值不是整数或缺少概率值，则抛出该异常
+     * @return {@link RandomUtils#getResult()} 随机返回的对象
      */
     public Object randomSentence(Object... values) {
-        RandomUtils<Object> randomUtils = new RandomUtils<>();
+        return new RandomUtils<>(values).getResult();
+    }
 
-        for (int i = 0; i < values.length; i += 2) {
-            if (i + 1 >= values.length) {
-                throw new IllegalArgumentException("Missing probability value for object: " + values[i]);
-            }
+    /**
+     * 随机返回一个对象。
+     *
+     * @param values 由对象和概率值组成的数组，不能为空，长度必须为偶数
+     * @return {@link RandomUtils#getResultWithSecureRandom()} 随机返回的对象
+     */
+    public Object randomSentenceWithSecureRandom(Object... values) {
+        return new RandomUtils<>(values).getResultWithSecureRandom();
+    }
 
-            Object object = values[i];
-            Object probabilityValue = values[i + 1];
+    /**
+     * 随机返回一个对象。
+     *
+     * @param values 由对象和概率值组成的数组，不能为空，长度必须为偶数
+     * @return {@link RandomUtils#getResultWithMonteCarlo()} 随机返回的对象
+     */
+    public Object randomSentenceWithMonteCarlo(Object... values) {
+        return new RandomUtils<>(values).getResultWithMonteCarlo();
+    }
 
-            if (!QuickUtils.isInt(probabilityValue.toString())) {
-                throw new IllegalArgumentException("Probability value for object " + values[i] + " is not an integer.");
-            }
+    /**
+     * 随机返回一个对象。
+     *
+     * @param values 由对象和概率值组成的数组，不能为空，长度必须为偶数
+     * @return {@link RandomUtils#getResultWithShuffle()} 随机返回的对象
+     */
+    public Object randomSentenceWithShuffle(Object... values) {
+        return new RandomUtils<>(values).getResultWithShuffle();
+    }
 
-            int probability = (int) probabilityValue;
-            randomUtils.addRandomObject(object, probability);
-        }
+    /**
+     * 随机返回一个对象。
+     *
+     * @param values 由对象和概率值组成的数组，不能为空，长度必须为偶数
+     * @return {@link RandomUtils#getResultWithGaussian()} 随机返回的对象
+     */
+    public Object randomSentenceWithGaussian(Object... values) {
+        return new RandomUtils<>(values).getResultWithGaussian();
+    }
 
-        return randomUtils.getResult();
+    /**
+     * 随机返回一个对象。
+     *
+     * @param values 由对象和概率值组成的数组，不能为空，长度必须为偶数
+     * @return {@link RandomUtils#getResultWithMersenneTwister()} 随机返回的对象
+     */
+    public Object randomSentenceWithMersenneTwister(Object... values) {
+        return new RandomUtils<>(values).getResultWithMersenneTwister();
+    }
+
+    /**
+     * 随机返回一个对象。
+     *
+     * @param values 由对象和概率值组成的数组，不能为空，长度必须为偶数
+     * @return {@link RandomUtils#getResultWithXORShift()} 随机返回的对象
+     */
+    public Object randomSentenceWithXORShift(Object... values) {
+        return new RandomUtils<>(values).getResultWithXORShift();
     }
 }

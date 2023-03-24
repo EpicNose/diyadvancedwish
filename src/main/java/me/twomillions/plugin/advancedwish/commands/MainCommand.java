@@ -3,10 +3,10 @@ package me.twomillions.plugin.advancedwish.commands;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import me.twomillions.plugin.advancedwish.Main;
-import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
 import me.twomillions.plugin.advancedwish.managers.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.RegisterManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
+import me.twomillions.plugin.advancedwish.managers.databases.DatabasesManager;
 import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import me.twomillions.plugin.advancedwish.utils.UnicodeUtils;
@@ -484,13 +484,25 @@ public class MainCommand implements TabExecutor {
                         return;
                     }
 
-                    // 查询
-                    ConcurrentLinkedQueue<String> logs = MongoManager.getMongoConnectState() == MongoConnectState.Connected ?
-                            MongoManager.getPlayerWishLog(queryPlayerUUID, startNumber, endNumber) :
-                            ConfigManager.getPlayerWishLog(queryPlayerUUID, startNumber, endNumber);
+                    int allLogsSize;
+                    ConcurrentLinkedQueue<String> logs;
 
-                    int allLogsSize = MongoManager.getMongoConnectState() == MongoConnectState.Connected ?
-                            MongoManager.getWishLogsSize(queryPlayerUUID) : ConfigManager.getPlayerWishLogCount(queryPlayerUUID);
+                    switch (DatabasesManager.getDataStorageType()) {
+                        case Json:
+                            logs = ConfigManager.getPlayerWishLog(queryPlayerUUID, startNumber, endNumber);
+                            allLogsSize = MongoManager.getWishLogsSize(queryPlayerUUID);
+                            break;
+
+                        case MongoDB:
+                            logs = MongoManager.getPlayerWishLog(queryPlayerUUID, startNumber, endNumber);
+                            allLogsSize = ConfigManager.getPlayerWishLogCount(queryPlayerUUID);
+                            break;
+
+                        default:
+                            QuickUtils.sendConsoleMessage("&c您填入了未知的数据存储类型，请检查配置文件! 即将关闭服务器!");
+                            Bukkit.shutdown();
+                            throw new IllegalArgumentException("Unknown data store type!");
+                    }
 
                     if (logs.size() == 0 || allLogsSize <= 0) {
                         for (String queryPrefix : messageYaml.getStringList("QUERY-WISH.LOGS-NULL")) {

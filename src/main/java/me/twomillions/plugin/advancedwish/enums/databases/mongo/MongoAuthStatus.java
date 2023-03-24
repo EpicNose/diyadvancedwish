@@ -1,10 +1,10 @@
-package me.twomillions.plugin.advancedwish.enums.mongo;
+package me.twomillions.plugin.advancedwish.enums.databases.mongo;
 
 /**
  * @author 2000000
  * @date 2023/02/02
  */
-public enum MongoAuthState {
+public enum MongoAuthStatus {
 
     /**
      * TurnOff - 不使用密码

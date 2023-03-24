@@ -12,7 +12,8 @@ import lombok.Getter;
 import lombok.Setter;
 import me.twomillions.plugin.advancedwish.Constants;
 import me.twomillions.plugin.advancedwish.Main;
-import me.twomillions.plugin.advancedwish.enums.mongo.*;
+import me.twomillions.plugin.advancedwish.enums.databases.DataTransformationStatus;
+import me.twomillions.plugin.advancedwish.enums.databases.mongo.*;
 import me.twomillions.plugin.advancedwish.managers.ConfigManager;
 import me.twomillions.plugin.advancedwish.utils.QuickUtils;
 import org.bson.Document;
@@ -30,15 +31,17 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @date 2023/1/8 21:23
  */
 public class MongoManager {
-    @Getter @Setter private volatile static MongoClient mongoClient;
+    @Getter @Setter
+    private volatile static MongoClient mongoClient;
     @Getter @Setter private volatile static DBCollection dbCollection;
     @Getter @Setter private volatile static MongoDatabase mongoDatabase;
     @Getter @Setter private volatile static String mongoClientUrlString;
     @Getter @Setter private volatile static MongoClientURI mongoClientUrl;
 
-    @Getter @Setter private volatile static MongoAuthState mongoAuthState;
-    @Getter @Setter private volatile static MongoConnectState mongoConnectState;
-    @Getter @Setter private volatile static MongoCustomUrlState mongoCustomUrlState;
+    @Getter @Setter private volatile static MongoAuthStatus mongoAuthStatus;
+    @Getter @Setter private volatile static MongoCustomUrlStatus mongoCustomUrlStatus;
+
+    @Getter @Setter private volatile static MongoConnectStatus mongoConnectStatus = MongoConnectStatus.TurnOff;
 
     /**
      * 设置 MongoDB 数据库连接。
@@ -46,13 +49,7 @@ public class MongoManager {
      * @param yaml 配置文件
      * @return MongoDB 连接状态
      */
-    public static MongoConnectState setupMongo(Yaml yaml) {
-        // 检查是否启用MongoDB
-        if (!yaml.getBoolean("MONGO.ENABLE")) {
-            setMongoConnectState(MongoConnectState.TurnOff);
-            return getMongoConnectState();
-        }
-
+    public static MongoConnectStatus setupMongo(Yaml yaml) {
         // 设置MongoDB登录信息
         String mongoIP = yaml.getString("MONGO.IP");
         String mongoPort = yaml.getString("MONGO.PORT");
@@ -60,17 +57,17 @@ public class MongoManager {
         String mongoPassword = yaml.getString("MONGO.AUTH.PASSWORD");
 
         // 检查是否使用自定义的MongoDB连接URL
-        setMongoCustomUrlState("".equals(yaml.getString("MONGO.CUSTOM-URL")) ? MongoCustomUrlState.TurnOff : MongoCustomUrlState.TurnOn);
+        setMongoCustomUrlStatus("".equals(yaml.getString("MONGO.CUSTOM-URL")) ? MongoCustomUrlStatus.TurnOff : MongoCustomUrlStatus.TurnOn);
 
         // 根据是否使用自定义URL设置连接URL
-        if (getMongoCustomUrlState() == MongoCustomUrlState.TurnOn) {
+        if (getMongoCustomUrlStatus() == MongoCustomUrlStatus.TurnOn) {
             setMongoClientUrlString(yaml.getString("MONGO.CUSTOM-URL"));
         } else {
             if ("".equals(mongoUser) || "".equals(mongoPassword)) {
-                setMongoAuthState(MongoAuthState.TurnOff);
+                setMongoAuthStatus(MongoAuthStatus.TurnOff);
                 setMongoClientUrlString("mongodb://" + mongoIP + ":" + mongoPort + "/AdvancedWish");
             } else {
-                setMongoAuthState(MongoAuthState.UsingAuth);
+                setMongoAuthStatus(MongoAuthStatus.UsingAuth);
                 setMongoClientUrlString("mongodb://" + mongoUser + ":" + mongoPassword + "@" + mongoIP + ":" + mongoPort + "/AdvancedWish");
 
                 QuickUtils.sendConsoleMessage("&aAdvanced Wish 检查到Mongo开启身份验证，已设置身份验证信息!");
@@ -85,16 +82,16 @@ public class MongoManager {
 
             QuickUtils.sendConsoleMessage("&aAdvanced Wish 已成功建立与MongoDB的连接!");
 
-            setMongoConnectState(MongoConnectState.Connected);
+            setMongoConnectStatus(MongoConnectStatus.Connected);
         } catch (Exception exception) {
             QuickUtils.sendConsoleMessage("&c您打开了MongoDB数据库选项，但Advanced Wish未能正确连接到MongoDB，请检查MongoDB服务状态，即将关闭服务器!");
 
-            setMongoConnectState(MongoConnectState.CannotConnect);
+            setMongoConnectStatus(MongoConnectStatus.CannotConnect);
 
             Bukkit.shutdown();
         }
 
-        return getMongoConnectState();
+        return getMongoConnectStatus();
     }
 
     /**
@@ -103,13 +100,13 @@ public class MongoManager {
      * @param player 玩家实例
      * @param foundKey 要查询的键
      * @param value 找不到键值时使用的默认值
-     * @param mongoCollections 数据库集合枚举
+     * @param mongoCollectionStatus 数据库集合枚举
      * @return 找到的键值，或默认值
      */
-    public static Object getOrDefault(Player player, String foundKey, Object value, MongoCollections mongoCollections) {
+    public static Object getOrDefault(Player player, String foundKey, Object value, MongoCollectionStatus mongoCollectionStatus) {
         String playerUUID = player.getUniqueId().toString();
 
-        MongoCollection<Document> playerCollection = getMongoDatabase().getCollection(mongoCollections.toString());
+        MongoCollection<Document> playerCollection = getMongoDatabase().getCollection(mongoCollectionStatus.toString());
 
         Document playerDocument = playerCollection.find(new Document("uuid", playerUUID)).first();
 
@@ -136,11 +133,11 @@ public class MongoManager {
      * @param uuid 查询的 uuid
      * @param key 查询的 key
      * @param defaultValue 查询的默认值
-     * @param mongoCollections 查询的 MongoDB 集合
+     * @param mongoCollectionStatus 查询的 MongoDB 集合
      * @return 对应的值
      */
-    public static Object getOrDefault(String uuid, String key, Object defaultValue, MongoCollections mongoCollections) {
-        MongoCollection<Document> collection = getMongoDatabase().getCollection(mongoCollections.toString());
+    public static Object getOrDefault(String uuid, String key, Object defaultValue, MongoCollectionStatus mongoCollectionStatus) {
+        MongoCollection<Document> collection = getMongoDatabase().getCollection(mongoCollectionStatus.toString());
 
         Document filter = new Document("uuid", uuid);
         Document document = collection.find(filter).first();
@@ -169,12 +166,12 @@ public class MongoManager {
      * @param player 查询的 Player
      * @param key 查询的 key
      * @param defaultValue 查询的默认值
-     * @param mongoCollections 查询的 MongoDB 集合
+     * @param mongoCollectionStatus 查询的 MongoDB 集合
      * @return 对应的 List 值
      */
-    public static ConcurrentLinkedQueue<String> getOrDefaultList(Player player, String key, ConcurrentLinkedQueue<String> defaultValue, MongoCollections mongoCollections) {
+    public static ConcurrentLinkedQueue<String> getOrDefaultList(Player player, String key, ConcurrentLinkedQueue<String> defaultValue, MongoCollectionStatus mongoCollectionStatus) {
         String uuid = player.getUniqueId().toString();
-        MongoCollection<Document> collection = getMongoDatabase().getCollection(mongoCollections.toString());
+        MongoCollection<Document> collection = getMongoDatabase().getCollection(mongoCollectionStatus.toString());
 
         Document filter = new Document("uuid", uuid);
         Document document = collection.find(filter).first();
@@ -203,11 +200,11 @@ public class MongoManager {
      * @param uuid 查询的 UUID
      * @param key 查询的 key
      * @param defaultValue 查询的默认值
-     * @param mongoCollections 查询的 MongoDB 集合
+     * @param mongoCollectionStatus 查询的 MongoDB 集合
      * @return 对应的 List 值
      */
-    public static ConcurrentLinkedQueue<String> getOrDefaultList(String uuid, String key, ConcurrentLinkedQueue<String> defaultValue, MongoCollections mongoCollections) {
-        MongoCollection<Document> collection = getMongoDatabase().getCollection(mongoCollections.toString());
+    public static ConcurrentLinkedQueue<String> getOrDefaultList(String uuid, String key, ConcurrentLinkedQueue<String> defaultValue, MongoCollectionStatus mongoCollectionStatus) {
+        MongoCollection<Document> collection = getMongoDatabase().getCollection(mongoCollectionStatus.toString());
 
         Document filter = new Document("uuid", uuid);
         Document document = collection.find(filter).first();
@@ -238,7 +235,7 @@ public class MongoManager {
      * @param value 数据的值
      * @param collection 数据存储的集合
      */
-    public static void update(Player player, String key, Object value, MongoCollections collection) {
+    public static void update(Player player, String key, Object value, MongoCollectionStatus collection) {
         MongoCollection<Document> mongoCollection = getMongoDatabase().getCollection(collection.toString());
         Document filter = new Document("uuid", player.getUniqueId().toString());
         Document update = new Document("$set", new Document(key, value));
@@ -254,7 +251,7 @@ public class MongoManager {
      * @param value 数据的值
      * @param collection 数据存储的集合
      */
-    public static void update(String uuid, String key, Object value, MongoCollections collection) {
+    public static void update(String uuid, String key, Object value, MongoCollectionStatus collection) {
         MongoCollection<Document> mongoCollection = getMongoDatabase().getCollection(collection.toString());
         Document filter = new Document("uuid", uuid);
         Document update = new Document("$set", new Document(key, value));
@@ -270,9 +267,9 @@ public class MongoManager {
      */
     @SuppressWarnings("unused")
     public static void addPlayerWishLog(Player player, String logString) {
-        ConcurrentLinkedQueue<String> logs = getOrDefaultList(player, "logs", new ConcurrentLinkedQueue<>(), MongoCollections.PlayerLogs);
+        ConcurrentLinkedQueue<String> logs = getOrDefaultList(player, "logs", new ConcurrentLinkedQueue<>(), MongoCollectionStatus.PlayerLogs);
         logs.add(logString);
-        update(player, "logs", logs, MongoCollections.PlayerLogs);
+        update(player, "logs", logs, MongoCollectionStatus.PlayerLogs);
     }
 
     /**
@@ -282,9 +279,9 @@ public class MongoManager {
      * @param logString 许愿日志
      */
     public static void addPlayerWishLog(String uuid, String logString) {
-        ConcurrentLinkedQueue<String> logs = getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), MongoCollections.PlayerLogs);
+        ConcurrentLinkedQueue<String> logs = getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), MongoCollectionStatus.PlayerLogs);
         logs.add(logString);
-        update(uuid, "logs", logs, MongoCollections.PlayerLogs);
+        update(uuid, "logs", logs, MongoCollectionStatus.PlayerLogs);
     }
 
     /**
@@ -297,7 +294,7 @@ public class MongoManager {
      */
     @SuppressWarnings("unused")
     public static ConcurrentLinkedQueue<String> getPlayerWishLog(Player player, int findMin, int findMax) {
-        ConcurrentLinkedQueue<String> logs = getOrDefaultList(player, "logs", new ConcurrentLinkedQueue<>(), MongoCollections.PlayerLogs);
+        ConcurrentLinkedQueue<String> logs = getOrDefaultList(player, "logs", new ConcurrentLinkedQueue<>(), MongoCollectionStatus.PlayerLogs);
 
         return getLogsInRange(logs, findMin, findMax);
     }
@@ -311,7 +308,7 @@ public class MongoManager {
      * @return 返回查询出来的日志列表
      */
     public static ConcurrentLinkedQueue<String> getPlayerWishLog(String uuid, int findMin, int findMax) {
-        ConcurrentLinkedQueue<String> logs = getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), MongoCollections.PlayerLogs);
+        ConcurrentLinkedQueue<String> logs = getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), MongoCollectionStatus.PlayerLogs);
 
         return getLogsInRange(logs, findMin, findMax);
     }
@@ -324,7 +321,7 @@ public class MongoManager {
      */
     @SuppressWarnings("unused")
     public static int getWishLogsSize(Player player) {
-        return getOrDefaultList(player, "logs", new ConcurrentLinkedQueue<>(), MongoCollections.PlayerLogs).size();
+        return getOrDefaultList(player, "logs", new ConcurrentLinkedQueue<>(), MongoCollectionStatus.PlayerLogs).size();
     }
 
     /**
@@ -334,7 +331,7 @@ public class MongoManager {
      * @return 返回日志条目数
      */
     public static int getWishLogsSize(String uuid) {
-        return getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), MongoCollections.PlayerLogs).size();
+        return getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), MongoCollectionStatus.PlayerLogs).size();
     }
 
     /**
@@ -363,23 +360,22 @@ public class MongoManager {
         return result;
     }
 
-
     /**
      * 将 JSON 转换为 MongoDB 数据。
      *
      * @param yaml 包含转换信息的 YAML 对象
      * @return 返回数据迁移状态
      */
-    public static JsonTransformationMongoState playerGuaranteedJsonToMongo(Yaml yaml) {
+    public static DataTransformationStatus playerGuaranteedJsonToMongo(Yaml yaml) {
         // 检查是否开启转换
         if (!yaml.getBoolean("TRANSFORMATION-JSON-TO-MONGO")) {
-            return JsonTransformationMongoState.TurnOff;
+            return DataTransformationStatus.TurnOff;
         }
 
         // 检查 MongoDB 是否已连接
-        if (MongoManager.getMongoConnectState() != MongoConnectState.Connected) {
+        if (MongoManager.getMongoConnectStatus() != MongoConnectStatus.Connected) {
             QuickUtils.sendConsoleMessage("&c您开启了数据迁移选项，但 Mongo 数据库并没有成功连接，请检查配置文件，服务器即将关闭。");
-            return JsonTransformationMongoState.Failed;
+            return DataTransformationStatus.Failed;
         }
 
         // 获取文件路径和文件名列表
@@ -392,7 +388,7 @@ public class MongoManager {
         // 检查是否有需要转换的文件
         if (logsFileNames.isEmpty() && guaranteedFileNames.isEmpty()) {
             QuickUtils.sendConsoleMessage("&c未发现需要进行迁移的 JSON 数据，结束此次迁移，服务器即将关闭。");
-            return JsonTransformationMongoState.Failed;
+            return DataTransformationStatus.Failed;
         }
 
         // 迁移 JSON 文件
@@ -404,7 +400,7 @@ public class MongoManager {
                 Set<String> jsonKeySet = json.keySet();
                 jsonKeySetAmount += jsonKeySet.size();
                 for (String key : jsonKeySet) {
-                    update(guaranteedFileName.split(Constants.JSON)[0], key, json.get(key), MongoCollections.PlayerGuaranteed);
+                    update(guaranteedFileName.split(Constants.JSON_SUFFIX)[0], key, json.get(key), MongoCollectionStatus.PlayerGuaranteed);
                 }
             }
         } else {
@@ -417,7 +413,7 @@ public class MongoManager {
                 Set<String> jsonKeySet = json.keySet();
                 jsonKeySetAmount += jsonKeySet.size();
                 for (String key : jsonKeySet) {
-                    update(logsFileName.split(Constants.JSON)[0], key, json.get(key), MongoCollections.PlayerLogs);
+                    update(logsFileName.split(Constants.JSON_SUFFIX)[0], key, json.get(key), MongoCollectionStatus.PlayerLogs);
                 }
             }
         } else {
@@ -426,6 +422,6 @@ public class MongoManager {
 
         QuickUtils.sendConsoleMessage("&a已成功迁移 JSON 数据至 MongoDB 数据库，此次迁移总文件数: &e" + (guaranteedFileNames.size() + logsFileNames.size()) + "&a，迁移数据数: &e" + jsonKeySetAmount + "&a，即将关闭服务器，已迁移的 JSON 不会被删除，请手动关闭迁移选项!");
 
-        return JsonTransformationMongoState.Completed;
+        return DataTransformationStatus.Completed;
     }
 }

@@ -16,7 +16,9 @@ public class UnicodeUtils {
      * @return Unicode 表示的字符串
      */
     public static String stringToUnicode(String string) {
-        if (string == null || string.isEmpty()) return "";
+        if (string == null || string.isEmpty()) {
+            return "";
+        }
 
         StringBuilder unicode = new StringBuilder();
 
@@ -36,10 +38,12 @@ public class UnicodeUtils {
      * @return 转换后的正常字符串
      */
     public static String unicodeToString(String unicode) {
-        if (unicode == null || unicode.isEmpty()) return "";
+        if (unicode == null || unicode.isEmpty()) {
+            return "";
+        }
 
-        StringBuilder string = new StringBuilder();
         int i = 0;
+        StringBuilder string = new StringBuilder();
         while (i < unicode.length()) {
             if (unicode.charAt(i) == '\\' && i + 1 < unicode.length() && unicode.charAt(i + 1) == 'u') {
                 // 如果遇到 \\u，就将后面的四个十六进制数字解析为一个 Unicode 字符，并添加到字符串中

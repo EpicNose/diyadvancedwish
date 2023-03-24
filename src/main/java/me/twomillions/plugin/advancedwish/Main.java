@@ -3,11 +3,13 @@ package me.twomillions.plugin.advancedwish;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import lombok.Setter;
-import me.twomillions.plugin.advancedwish.enums.mongo.JsonTransformationMongoState;
-import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
+import me.twomillions.plugin.advancedwish.enums.databases.DataStorageType;
+import me.twomillions.plugin.advancedwish.enums.databases.DataTransformationStatus;
+import me.twomillions.plugin.advancedwish.enums.databases.mongo.MongoConnectStatus;
 import me.twomillions.plugin.advancedwish.managers.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.RegisterManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
+import me.twomillions.plugin.advancedwish.managers.databases.DatabasesManager;
 import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
 import me.twomillions.plugin.advancedwish.tasks.PlayerCheckCacheTask;
 import me.twomillions.plugin.advancedwish.tasks.PlayerTimestampTask;
@@ -46,6 +48,7 @@ public final class Main extends JavaPlugin {
                 .replace("_", "0").replace("[", "").replace("]", "")));
 
         ConfigManager.createDefaultConfig();
+
         Yaml messageYaml = ConfigManager.getMessageYaml();
         Yaml advancedWishYaml = ConfigManager.getAdvancedWishYaml();
 
@@ -54,13 +57,29 @@ public final class Main extends JavaPlugin {
             return;
         }
 
-        // 设置 Mongo
-        if (MongoManager.setupMongo(advancedWishYaml) == MongoConnectState.CannotConnect) {
-            return;
+        // 设置数据存储
+        switch (advancedWishYaml.getString("DATA-STORAGE-TYPE").toLowerCase()) {
+            case Constants.JSON:
+                DatabasesManager.setDataStorageType(DataStorageType.Json);
+                break;
+
+            case Constants.MONGODB:
+                DatabasesManager.setDataStorageType(DataStorageType.MongoDB);
+
+                if (MongoManager.setupMongo(advancedWishYaml) == MongoConnectStatus.CannotConnect) {
+                    return;
+                }
+
+                break;
+
+            default:
+                QuickUtils.sendConsoleMessage("&c您填入了未知的数据存储类型，请检查配置文件! 即将关闭服务器!");
+                Bukkit.shutdown();
+                return;
         }
 
         // 迁移检查
-        if (MongoManager.playerGuaranteedJsonToMongo(advancedWishYaml) != JsonTransformationMongoState.TurnOff) {
+        if (MongoManager.playerGuaranteedJsonToMongo(advancedWishYaml) != DataTransformationStatus.TurnOff) {
             Bukkit.shutdown();
             return;
         }

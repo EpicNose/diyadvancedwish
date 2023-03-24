@@ -30,7 +30,10 @@ public class PlayerTimestampTask {
             @Override
             public void run() {
                 // 若玩家已下线则取消任务
-                if (!player.isOnline()) { cancel(); return; }
+                if (!player.isOnline()) {
+                    cancel();
+                    return;
+                }
 
                 // 获取玩家的任务列表
                 ConcurrentLinkedQueue<String> playerScheduledTasks = ScheduledTaskManager.getPlayerScheduledTasks(player);
@@ -51,8 +54,13 @@ public class PlayerTimestampTask {
      * @param player 玩家
      */
     private static void checkRepairAndRemove(ConcurrentLinkedQueue<String> playerScheduledTasks, Player player) {
-        if (playerScheduledTasks.size() > 0 && !WishManager.isPlayerInWishList(player)) WishManager.addPlayerToWishList(player);
-        if (playerScheduledTasks.size() == 0 && WishManager.isPlayerInWishList(player)) WishManager.removePlayerWithWishList(player);
+        if (playerScheduledTasks.size() > 0 && !WishManager.isPlayerInWishList(player)) {
+            WishManager.addPlayerToWishList(player);
+        }
+
+        if (playerScheduledTasks.size() == 0 && WishManager.isPlayerInWishList(player)) {
+            WishManager.removePlayerWithWishList(player);
+        }
     }
 
     /**
@@ -69,7 +77,9 @@ public class PlayerTimestampTask {
             long time = QuickUtils.handleLong(scheduledTaskSplit[0], player);
 
             // 若任务时间戳大于当前时间则跳过
-            if (time > currentTimeMillis) continue;
+            if (time > currentTimeMillis) {
+                continue;
+            }
 
             ScheduledTaskManager.removePlayerScheduledTask(player, scheduledTask);
 

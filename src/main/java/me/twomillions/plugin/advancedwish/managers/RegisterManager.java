@@ -41,12 +41,12 @@ public class RegisterManager {
     @Getter @Setter private volatile static Economy economy;
 
     /**
-     * 是否使用了 PlaceholderAPI.
+     * 是否使用 PlaceholderAPI.
      */
     @Getter @Setter private volatile static boolean usingPapi;
 
     /**
-     * 是否使用了 Vulpecula.
+     * 是否使用 Vulpecula.
      */
     @Getter @Setter private volatile static boolean usingVulpecula;
 
@@ -56,7 +56,7 @@ public class RegisterManager {
     @Getter @Setter private volatile static PlayerPointsAPI playerPointsAPI;
 
     /**
-     * 注册指令
+     * 注册指令。
      */
     @SuppressWarnings("all")
     public static void registerCommands() {
@@ -73,21 +73,9 @@ public class RegisterManager {
     public static void setupPlugins(boolean registerEvents) {
         PluginManager manager = Bukkit.getPluginManager();
 
+        setupPath();
         setupVault();
         setupPlayerPoints();
-
-        // 获取配置文件规定的路径
-        String pluginPath = Main.getInstance().getDataFolder().toString();
-
-        Yaml advancedWishYaml = ConfigManager.getAdvancedWishYaml();
-
-        String logsConfig = advancedWishYaml.getString("LOGS-PATH");
-        String guaranteedConfig = advancedWishYaml.getString("GUARANTEED-PATH");
-        String doListCacheConfig = advancedWishYaml.getString("DO-LIST-CACHE-PATH");
-
-        Main.setLogsPath("".equals(logsConfig) ? pluginPath + Constants.PLAYER_LOGS : logsConfig);
-        Main.setGuaranteedPath("".equals(guaranteedConfig) ? pluginPath + Constants.PLAYER_GUARANTEED : guaranteedConfig);
-        Main.setDoListCachePath("".equals(doListCacheConfig) ? pluginPath + Constants.PLAYER_CACHE : doListCacheConfig);
 
         // PlaceholderAPI
         if (manager.isPluginEnabled("PlaceholderAPI")) {
@@ -106,6 +94,23 @@ public class RegisterManager {
         }
 
         if (registerEvents) manager.registerEvents(new PlayerListener(), plugin);
+    }
+
+    /**
+     * 设置路径。
+     */
+    private static void setupPath() {
+        String pluginPath = Main.getInstance().getDataFolder().toString();
+
+        Yaml advancedWishYaml = ConfigManager.getAdvancedWishYaml();
+
+        String logsConfig = advancedWishYaml.getString("LOGS-PATH");
+        String guaranteedConfig = advancedWishYaml.getString("GUARANTEED-PATH");
+        String doListCacheConfig = advancedWishYaml.getString("DO-LIST-CACHE-PATH");
+
+        Main.setLogsPath("".equals(logsConfig) ? pluginPath + Constants.PLAYER_LOGS : logsConfig);
+        Main.setGuaranteedPath("".equals(guaranteedConfig) ? pluginPath + Constants.PLAYER_GUARANTEED : guaranteedConfig);
+        Main.setDoListCachePath("".equals(doListCacheConfig) ? pluginPath + Constants.PLAYER_CACHE : doListCacheConfig);
     }
 
     /**

@@ -6,7 +6,7 @@
 
     <groupId>me.twomillions.plugin</groupId>
     <artifactId>AdvancedWish</artifactId>
-    <version>0.0.6.1-SNAPSHOT</version>
+    <version>0.0.6.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>AdvancedWish</name>
@@ -199,6 +199,13 @@
             <version>2.6.4</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/libs/Skript-2.6.4.jar</systemPath>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math3 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.6.1</version>
         </dependency>
 
     </dependencies>

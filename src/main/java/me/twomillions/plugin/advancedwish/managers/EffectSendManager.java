@@ -4,7 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import me.twomillions.plugin.advancedwish.Main;
-import me.twomillions.plugin.advancedwish.enums.mongo.MongoConnectState;
+import me.twomillions.plugin.advancedwish.managers.databases.DatabasesManager;
 import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
 import me.twomillions.plugin.advancedwish.utils.*;
 import net.md_5.bungee.api.ChatMessageType;
@@ -91,9 +91,21 @@ public class EffectSendManager {
             if (QuickUtils.callAsyncRecordEffectSendEvent(player, fileName, path, pathPrefix).isCancelled()) {
                 return;
             }
-            
-            if (MongoManager.getMongoConnectState() == MongoConnectState.Connected) MongoManager.addPlayerWishLog(playerUUIDString, finalLogString);
-            else ConfigManager.addPlayerWishLog(playerUUIDString, finalLogString);
+
+            switch (DatabasesManager.getDataStorageType()) {
+                case Json:
+                    ConfigManager.addPlayerWishLog(playerUUIDString, finalLogString);
+                    break;
+
+                case MongoDB:
+                    MongoManager.addPlayerWishLog(playerUUIDString, finalLogString);
+                    break;
+
+                default:
+                    QuickUtils.sendConsoleMessage("&c您填入了未知的数据存储类型，请检查配置文件! 即将关闭服务器!");
+                    Bukkit.shutdown();
+                    throw new IllegalArgumentException("Unknown data store type!");
+            }
         }
     }
 
