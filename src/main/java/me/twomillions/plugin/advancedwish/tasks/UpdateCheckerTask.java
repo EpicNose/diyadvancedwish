@@ -53,13 +53,16 @@ public class UpdateCheckerTask {
 
     /**
      * 获取指定网址的页面内容。
-     * 如果获取失败，会将isLatestVersion置为false，并向控制台输出信息。
+     * 如果获取失败，会将 isLatestVersion 置为 false，并向控制台输出信息。
      *
      * @return 获取的网页内容，如果获取失败返回空字符串。
      */
     private static String getURLString() {
         StringBuilder stringBuilder = new StringBuilder();
 
+        /*
+         * 2023.3.25 换为美国服务器
+         */
         try (Scanner sc = new Scanner(new URL("http://update.twomillions.top/advancedwishupdate.html").openStream())) {
             while (sc.hasNextLine()) stringBuilder.append(sc.nextLine()).append(' ');
         } catch (IOException exception) {
