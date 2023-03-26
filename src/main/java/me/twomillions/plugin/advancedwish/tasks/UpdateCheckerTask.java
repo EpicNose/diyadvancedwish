@@ -2,8 +2,8 @@ package me.twomillions.plugin.advancedwish.tasks;
 
 import lombok.Getter;
 import me.twomillions.plugin.advancedwish.Main;
-import me.twomillions.plugin.advancedwish.managers.ConfigManager;
-import me.twomillions.plugin.advancedwish.utils.QuickUtils;
+import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
+import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 

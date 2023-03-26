@@ -3,22 +3,25 @@ package me.twomillions.plugin.advancedwish;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import lombok.Setter;
-import me.twomillions.plugin.advancedwish.enums.databases.DataStorageType;
-import me.twomillions.plugin.advancedwish.enums.databases.DataTransformationStatus;
-import me.twomillions.plugin.advancedwish.enums.databases.mongo.MongoConnectStatus;
-import me.twomillions.plugin.advancedwish.managers.ConfigManager;
-import me.twomillions.plugin.advancedwish.managers.RegisterManager;
+import me.twomillions.plugin.advancedwish.enums.databases.status.ConnectStatus;
+import me.twomillions.plugin.advancedwish.enums.databases.status.DataTransformationStatus;
+import me.twomillions.plugin.advancedwish.enums.databases.types.DataStorageType;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
+import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.databases.DatabasesManager;
-import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
+import me.twomillions.plugin.advancedwish.managers.register.RegisterManager;
 import me.twomillions.plugin.advancedwish.tasks.PlayerCheckCacheTask;
 import me.twomillions.plugin.advancedwish.tasks.PlayerTimestampTask;
 import me.twomillions.plugin.advancedwish.tasks.UpdateCheckerTask;
-import me.twomillions.plugin.advancedwish.utils.QuickUtils;
+import me.twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;
+import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
+import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.sql.SQLException;
 import java.util.Arrays;
 
 /**
@@ -59,27 +62,34 @@ public final class Main extends JavaPlugin {
 
         // 设置数据存储
         switch (advancedWishYaml.getString("DATA-STORAGE-TYPE").toLowerCase()) {
-            case Constants.JSON:
+            case ConstantsUtils.JSON:
                 DatabasesManager.setDataStorageType(DataStorageType.Json);
                 break;
 
-            case Constants.MONGODB:
+            case ConstantsUtils.MONGODB:
                 DatabasesManager.setDataStorageType(DataStorageType.MongoDB);
 
-                if (MongoManager.setupMongo(advancedWishYaml) == MongoConnectStatus.CannotConnect) {
+                if (DatabasesManager.getMongoManager().setup(advancedWishYaml) == ConnectStatus.CannotConnect) {
                     return;
                 }
+                break;
 
+            case ConstantsUtils.MYSQL:
+                DatabasesManager.setDataStorageType(DataStorageType.MySQL);
+
+                if (DatabasesManager.getMySQLManager().setup(advancedWishYaml) == ConnectStatus.CannotConnect) {
+                    System.out.println("c");
+                    return;
+                }
                 break;
 
             default:
-                QuickUtils.sendConsoleMessage("&c您填入了未知的数据存储类型，请检查配置文件! 即将关闭服务器!");
-                Bukkit.shutdown();
+                ExceptionUtils.throwUnknownDataStoreType();
                 return;
         }
 
         // 迁移检查
-        if (MongoManager.playerGuaranteedJsonToMongo(advancedWishYaml) != DataTransformationStatus.TurnOff) {
+        if (DatabasesManager.getMongoManager() != null && DatabasesManager.getMongoManager().playerGuaranteedJsonToMongo(advancedWishYaml) != DataTransformationStatus.TurnOff) {
             Bukkit.shutdown();
             return;
         }
@@ -91,7 +101,7 @@ public final class Main extends JavaPlugin {
 
         // bStats
         if (!advancedWishYaml.getOrDefault("BSTATS", true)) {
-            new bStats(this, 16990);
+            new Metrics(this, 16990);
         }
 
         // 网页更新
@@ -116,6 +126,16 @@ public final class Main extends JavaPlugin {
     public void onDisable() {
         setDisabled(true);
 
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) WishManager.savePlayerCacheData(onlinePlayer);
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            WishManager.savePlayerCacheData(onlinePlayer);
+        }
+
+        if (DatabasesManager.getDataStorageType() == DataStorageType.MySQL) {
+            try {
+                DatabasesManager.getMySQLManager().getDataSource().close();
+            } catch (SQLException exception) {
+                exception.printStackTrace();
+            }
+        }
     }
 }

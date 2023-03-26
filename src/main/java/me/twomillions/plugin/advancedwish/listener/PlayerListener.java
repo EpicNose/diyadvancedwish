@@ -2,13 +2,13 @@ package me.twomillions.plugin.advancedwish.listener;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import me.twomillions.plugin.advancedwish.Main;
-import me.twomillions.plugin.advancedwish.managers.ConfigManager;
-import me.twomillions.plugin.advancedwish.managers.EffectSendManager;
+import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
+import me.twomillions.plugin.advancedwish.managers.effect.EffectSendManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.tasks.PlayerCheckCacheTask;
 import me.twomillions.plugin.advancedwish.tasks.PlayerTimestampTask;
 import me.twomillions.plugin.advancedwish.tasks.UpdateCheckerTask;
-import me.twomillions.plugin.advancedwish.utils.QuickUtils;
+import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -69,7 +69,9 @@ public class PlayerListener implements Listener {
         Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), () -> {
             PlayerCheckCacheTask.setWaitingLoadingCache(uuid, true);
 
-            try { Thread.sleep(waitingTime * 1000L); } catch (InterruptedException ignored) { }
+            try {
+                Thread.sleep(waitingTime * 1000L);
+            } catch (Exception ignored) { }
 
             // 玩家已经离线，取消等待
             if (!player.isOnline()) {

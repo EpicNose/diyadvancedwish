@@ -2,14 +2,15 @@ package me.twomillions.plugin.advancedwish.tasks;
 
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
-import me.twomillions.plugin.advancedwish.Constants;
+import me.twomillions.plugin.advancedwish.utils.events.EventUtils;
+import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.api.AsyncWishLimitResetEvent;
-import me.twomillions.plugin.advancedwish.managers.ConfigManager;
-import me.twomillions.plugin.advancedwish.managers.ScheduledTaskManager;
+import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
+import me.twomillions.plugin.advancedwish.managers.task.ScheduledTaskManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.managers.databases.DatabasesManager;
-import me.twomillions.plugin.advancedwish.utils.QuickUtils;
+import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -46,7 +47,7 @@ public class WishLimitResetTask {
             String storeMode = DatabasesManager.getDataStorageType().toString();
 
             // 调用异步重置事件
-            AsyncWishLimitResetEvent event = QuickUtils.callAsyncWishLimitResetEvent(wishName, storeMode, wishResetLimitStart,
+            AsyncWishLimitResetEvent event = EventUtils.callAsyncWishLimitResetEvent(wishName, storeMode, wishResetLimitStart,
                     wishResetLimitCycle, isResetCompleteSendEnabled, isResetCompleteSendConsoleEnabled);
 
             // 如果事件被取消了，则退出方法
@@ -59,7 +60,7 @@ public class WishLimitResetTask {
 
             // 发送效果
             if (isResetCompleteSendEnabled) {
-                Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
+                Yaml yaml = ConfigManager.createYaml(wishName, ConstantsUtils.WISH, false, false);
 
                 Bukkit.getOnlinePlayers().forEach(player ->
                         ScheduledTaskManager.createPlayerScheduledTasks(player,

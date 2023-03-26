@@ -15,7 +15,7 @@
 ####################################################
 
 # 配置版本 请不要擅自更改，插件将在启动时检查配置文件版本，并告诉您您是否应该重新生成来防止错误
-CONFIG-VERSION: 62
+CONFIG-VERSION: 63
 
 ####################################################
 ##################### 许愿池注册 #####################
@@ -49,6 +49,22 @@ MONGO:
   # 自定义 Mongo 连接 URL
   #  如果启用则需要自己写连接 URL，上面的指定内容全部作废，AdvancedWish 数据库名: AdvancedWish
   #  实例: mongodb://USER:PWD@IP:PORT/AdvancedWish - 使用用户密码登陆指定服务器的 AdvancedWish 数据库
+  CUSTOM-URL: ""
+
+# MySQL 数据库设置
+MYSQL:
+  # MySQL5 使用: com.mysql.jdbc.Driver
+  DRIVER: "com.mysql.cj.jdbc.Driver" # MySQL 8
+
+  IP: 127.0.0.1
+  PORT: 3306
+
+  # 使用用户名或密码 (若没有设置用户密码则两个都不填写)
+  AUTH:
+    USER: ""
+    PASSWORD: ""
+
+  # 自定义 MySQL 连接 URL
   CUSTOM-URL: ""
 
 # 数据转换:

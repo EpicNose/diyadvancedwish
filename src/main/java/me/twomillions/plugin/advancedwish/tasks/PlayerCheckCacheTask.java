@@ -3,13 +3,14 @@ package me.twomillions.plugin.advancedwish.tasks;
 import com.github.benmanes.caffeine.cache.Cache;
 import de.leonhard.storage.Json;
 import de.leonhard.storage.Yaml;
-import me.twomillions.plugin.advancedwish.Constants;
 import me.twomillions.plugin.advancedwish.Main;
-import me.twomillions.plugin.advancedwish.managers.ConfigManager;
-import me.twomillions.plugin.advancedwish.managers.ScheduledTaskManager;
-import me.twomillions.plugin.advancedwish.utils.CaffeineUtils;
-import me.twomillions.plugin.advancedwish.utils.QuickUtils;
-import me.twomillions.plugin.advancedwish.utils.UnicodeUtils;
+import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
+import me.twomillions.plugin.advancedwish.managers.task.ScheduledTaskManager;
+import me.twomillions.plugin.advancedwish.utils.events.EventUtils;
+import me.twomillions.plugin.advancedwish.utils.others.CaffeineUtils;
+import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
+import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
+import me.twomillions.plugin.advancedwish.utils.texts.StringEncrypter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -32,7 +33,7 @@ public class PlayerCheckCacheTask {
     /**
      * 设置指定玩家的缓存加载状态。
      *
-     * @param uuid 玩家UUID
+     * @param uuid 玩家 UUID
      * @param isLoadingCache 缓存加载状态
      */
     public static void setLoadingCache(UUID uuid, boolean isLoadingCache) {
@@ -52,7 +53,7 @@ public class PlayerCheckCacheTask {
     /**
      * 设置指定玩家的等待缓存加载状态。
      *
-     * @param uuid 玩家UUID
+     * @param uuid 玩家 UUID
      * @param isWaitingLoadingCache 等待缓存加载状态
      */
     public static void setWaitingLoadingCache(UUID uuid, boolean isWaitingLoadingCache) {
@@ -109,29 +110,37 @@ public class PlayerCheckCacheTask {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             UUID uuid = player.getUniqueId();
 
-            String normalPath = plugin.getDataFolder() + Constants.PLAYER_CACHE;
+            String normalPath = plugin.getDataFolder() + ConstantsUtils.PLAYER_CACHE;
             String doListCachePath = Main.getDoListCachePath();
 
             // 遍历缓存文件，判断是否有正常缓存或操作缓存
-            boolean hasNormalCache = ConfigManager.getAllFileNames(normalPath).contains(uuid + Constants.JSON_SUFFIX);
-            boolean hasDoListCachePath = ConfigManager.getAllFileNames(doListCachePath).contains(uuid + Constants.JSON_SUFFIX);
+            boolean hasNormalCache = ConfigManager.getAllFileNames(normalPath).contains(uuid + ConstantsUtils.JSON_SUFFIX);
+            boolean hasDoListCachePath = ConfigManager.getAllFileNames(doListCachePath).contains(uuid + ConstantsUtils.JSON_SUFFIX);
 
             // 如果没有相应的缓存，将其赋值为 null
-            if (!hasNormalCache) normalPath = null;
-            if (!hasDoListCachePath) doListCachePath = null;
+            if (!hasNormalCache) {
+                normalPath = null;
+            }
+
+            if (!hasDoListCachePath) {
+                doListCachePath = null;
+            }
 
             // isCancelled
             // 触发异步检查缓存事件，并判断是否取消事件
-            if (QuickUtils.callAsyncPlayerCheckCacheEvent(player, normalPath, doListCachePath).isCancelled()) return;
+            if (EventUtils.callAsyncPlayerCheckCacheEvent(player, normalPath, doListCachePath).isCancelled()) {
+                return;
+            }
 
             // 如果没有缓存文件，直接返回
-            if (!hasNormalCache && !hasDoListCachePath) return;
+            if (!hasNormalCache && !hasDoListCachePath) {
+                return;
+            }
 
             // 检查缓存
             checkCache(player, normalPath, doListCachePath);
         });
     }
-
 
     /**
      * 检查玩家缓存数据，并执行相关操作。
@@ -165,21 +174,24 @@ public class PlayerCheckCacheTask {
             ConcurrentLinkedQueue<String> playerDoListCacheClone = new ConcurrentLinkedQueue<>(playerDoListCache);
 
             // 如果没有缓存项则退出
-            if (playerDoListCache.size() == 0) { setLoadingCache(uuid, false); return; }
+            if (playerDoListCache.size() == 0) {
+                setLoadingCache(uuid, false);
+                return;
+            }
 
             boolean firstSentEffect = true;
 
             // 遍历缓存执行项
             for (String playerWishDoListString : playerDoListCache) {
                 // 解析缓存执行项
-                playerWishDoListString = UnicodeUtils.unicodeToString(playerWishDoListString);
+                playerWishDoListString = StringEncrypter.decrypt(playerWishDoListString);
                 String[] playerWishDoListStringSplit = playerWishDoListString.split(";");
 
                 String doList = playerWishDoListStringSplit[4];
                 String wishName = playerWishDoListStringSplit[1];
 
                 // 获取任务配置文件
-                Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
+                Yaml yaml = ConfigManager.createYaml(wishName, ConstantsUtils.WISH, false, false);
 
                 // 发送任务执行效果
                 if (firstSentEffect) {
@@ -187,11 +199,14 @@ public class PlayerCheckCacheTask {
                     ScheduledTaskManager.createPlayerScheduledTasks(player, yaml.getStringList("CACHE-SETTINGS.WISH-CACHE"));
 
                     // 如果玩家离线则跳出循环
-                    if (!player.isOnline()) break;
+                    if (!player.isOnline()) {
+                        break;
+                    }
 
                     // 等待一定时间再执行下一个任务
-                    try { Thread.sleep(QuickUtils.handleLong(yaml.getString("CACHE-SETTINGS.WAIT-RECOVERY"), player) * 1000L); }
-                    catch (Exception ignore) { }
+                    try {
+                        Thread.sleep(QuickUtils.handleLong(yaml.getString("CACHE-SETTINGS.WAIT-RECOVERY"), player) * 1000L);
+                    } catch (Exception ignore) { }
 
                     firstSentEffect = false;
                 }
@@ -202,15 +217,20 @@ public class PlayerCheckCacheTask {
                     long quitTime = getPlayerQuitTime(player);
                     long oldTime = Long.parseLong(playerWishDoListStringSplit[0]);
 
-                    ScheduledTaskManager.addPlayerScheduledTask(player, oldTime - quitTime + nowTime, wishName, Constants.WISH, false, doList);
-                    playerDoListCacheClone.remove(UnicodeUtils.stringToUnicode(playerWishDoListString));
+                    ScheduledTaskManager.addPlayerScheduledTask(player, oldTime - quitTime + nowTime, wishName, ConstantsUtils.WISH, false, doList);
+                    playerDoListCacheClone.remove(StringEncrypter.encrypt(playerWishDoListString));
                 }
 
                 // 更新任务缓存数据
-                if (playerDoListCacheClone.size() == 0) doListCacheJson.set("CACHE", null);
-                else doListCacheJson.set("CACHE", playerDoListCacheClone);
+                if (playerDoListCacheClone.size() == 0) {
+                    doListCacheJson.set("CACHE", null);
+                } else {
+                    doListCacheJson.set("CACHE", playerDoListCacheClone);
+                }
 
-                if (!player.isOnline()) break;
+                if (!player.isOnline()) {
+                    break;
+                }
             }
         }
 

@@ -3,13 +3,12 @@ package me.twomillions.plugin.advancedwish.commands;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import me.twomillions.plugin.advancedwish.Main;
-import me.twomillions.plugin.advancedwish.managers.ConfigManager;
-import me.twomillions.plugin.advancedwish.managers.RegisterManager;
+import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
+import me.twomillions.plugin.advancedwish.managers.effect.LogManager;
+import me.twomillions.plugin.advancedwish.managers.register.RegisterManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
-import me.twomillions.plugin.advancedwish.managers.databases.DatabasesManager;
-import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
-import me.twomillions.plugin.advancedwish.utils.QuickUtils;
-import me.twomillions.plugin.advancedwish.utils.UnicodeUtils;
+import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
+import me.twomillions.plugin.advancedwish.utils.texts.StringEncrypter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -484,25 +483,8 @@ public class MainCommand implements TabExecutor {
                         return;
                     }
 
-                    int allLogsSize;
-                    ConcurrentLinkedQueue<String> logs;
-
-                    switch (DatabasesManager.getDataStorageType()) {
-                        case Json:
-                            logs = ConfigManager.getPlayerWishLog(queryPlayerUUID, startNumber, endNumber);
-                            allLogsSize = MongoManager.getWishLogsSize(queryPlayerUUID);
-                            break;
-
-                        case MongoDB:
-                            logs = MongoManager.getPlayerWishLog(queryPlayerUUID, startNumber, endNumber);
-                            allLogsSize = ConfigManager.getPlayerWishLogCount(queryPlayerUUID);
-                            break;
-
-                        default:
-                            QuickUtils.sendConsoleMessage("&c您填入了未知的数据存储类型，请检查配置文件! 即将关闭服务器!");
-                            Bukkit.shutdown();
-                            throw new IllegalArgumentException("Unknown data store type!");
-                    }
+                    int allLogsSize = LogManager.getPlayerWishLogSize(queryPlayerUUID);
+                    ConcurrentLinkedQueue<String> logs = LogManager.getPlayerWishLog(queryPlayerUUID, startNumber, endNumber);
 
                     if (logs.size() == 0 || allLogsSize <= 0) {
                         for (String queryPrefix : messageYaml.getStringList("QUERY-WISH.LOGS-NULL")) {
@@ -525,7 +507,7 @@ public class MainCommand implements TabExecutor {
 
                         String queryLogTime = queryLogSplit[0].replace("-", " ");
                         String queryLogPlayerName = queryLogSplit[1];
-                        String queryLogWishName = UnicodeUtils.unicodeToString(queryLogSplit[3]);
+                        String queryLogWishName = StringEncrypter.decrypt(queryLogSplit[3]);
                         String queryLogDoList = queryLogSplit[4];
 
                         for (String queryQuery : messageYaml.getStringList("QUERY-WISH.QUERY")) {

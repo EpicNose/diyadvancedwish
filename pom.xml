@@ -6,7 +6,7 @@
 
     <groupId>me.twomillions.plugin</groupId>
     <artifactId>AdvancedWish</artifactId>
-    <version>0.0.6.2-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>AdvancedWish</name>
@@ -43,12 +43,17 @@
                             <relocations>
                                 <relocation>
                                     <pattern>de.leonhard.storage</pattern>
-                                    <shadedPattern>me.twomillions.plugin.advancedwish.storage</shadedPattern>
+                                    <shadedPattern>me.twomillions.plugin.advancedwish.relocation.storage</shadedPattern>
                                 </relocation>
 
                                 <relocation>
                                     <pattern>com.mongodb</pattern>
-                                    <shadedPattern>me.twomillions.plugin.advancedwish.mongo</shadedPattern>
+                                    <shadedPattern>me.twomillions.plugin.advancedwish.relocation.mongo</shadedPattern>
+                                </relocation>
+
+                                <relocation>
+                                    <pattern>org.bstats</pattern>
+                                    <shadedPattern>me.twomillions.plugin.advancedwish.relocation.bstats</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
@@ -206,6 +211,28 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
             <version>3.6.1</version>
+        </dependency>
+
+        <!-- MySQL -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.32</version>
+        </dependency>
+
+        <!-- bStats -->
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>3.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-dbcp2 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-dbcp2</artifactId>
+            <version>2.9.0</version>
         </dependency>
 
     </dependencies>

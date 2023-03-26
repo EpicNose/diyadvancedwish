@@ -5,14 +5,22 @@ import com.mongodb.client.model.Filters;
 import de.leonhard.storage.Json;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
-import me.twomillions.plugin.advancedwish.Constants;
 import me.twomillions.plugin.advancedwish.Main;
-import me.twomillions.plugin.advancedwish.enums.databases.mongo.MongoCollectionStatus;
+import me.twomillions.plugin.advancedwish.enums.databases.types.DatabaseCollectionType;
 import me.twomillions.plugin.advancedwish.enums.wish.PlayerWishStatus;
+import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.databases.DatabasesManager;
-import me.twomillions.plugin.advancedwish.managers.databases.MongoManager;
+import me.twomillions.plugin.advancedwish.managers.register.RegisterManager;
+import me.twomillions.plugin.advancedwish.managers.task.ScheduledTaskManager;
 import me.twomillions.plugin.advancedwish.tasks.PlayerCheckCacheTask;
-import me.twomillions.plugin.advancedwish.utils.*;
+import me.twomillions.plugin.advancedwish.utils.events.EventUtils;
+import me.twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;
+import me.twomillions.plugin.advancedwish.utils.others.CaffeineUtils;
+import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
+import me.twomillions.plugin.advancedwish.utils.others.ItemUtils;
+import me.twomillions.plugin.advancedwish.utils.random.RandomUtils;
+import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
+import me.twomillions.plugin.advancedwish.utils.texts.StringEncrypter;
 import net.milkbowl.vault.economy.Economy;
 import org.apache.commons.lang3.StringUtils;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
@@ -94,7 +102,7 @@ public class WishManager {
      * @return 返回指定许愿池 WAIT-SET 计划任务的列表
      */
     public static List<String> getWishWaitSetScheduledTasks(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, ConstantsUtils.WISH, false, false);
         return yaml.getStringList("WAIT-SET");
     }
 
@@ -107,7 +115,7 @@ public class WishManager {
      * @return 许愿所需数量的增量
      */
     public static String getWishNeedIncreasedAmount(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, ConstantsUtils.WISH, false, false);
         return yaml.getString("ADVANCED-SETTINGS.INCREASED-WISH-AMOUNT");
     }
 
@@ -122,7 +130,7 @@ public class WishManager {
      */
     @SuppressWarnings("unused")
     public static List<String> getWishGuaranteedList(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, ConstantsUtils.WISH, false, false);
         return yaml.getStringList("GUARANTEED");
     }
 
@@ -133,7 +141,7 @@ public class WishManager {
      * @return 数据同步状态或许愿池名称
      */
     public static String getWishDataSync(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, ConstantsUtils.WISH, false, false);
         return yaml.getOrDefault("ADVANCED-SETTINGS.DATA-SYNC", wishName);
     }
 
@@ -144,7 +152,7 @@ public class WishManager {
      * @return 如果开启了许愿数限制，则返回 true;否则返回 false。
      */
     public static boolean isEnabledWishLimit(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, ConstantsUtils.WISH, false, false);
         return !yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.LIMIT-AMOUNT").equals("0");
     }
 
@@ -155,7 +163,7 @@ public class WishManager {
      * @return 许愿池限制的许愿数，如果未设置限制，则返回 0。
      */
     public static String getWishLimitAmount(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, ConstantsUtils.WISH, false, false);
         return yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.LIMIT-AMOUNT");
     }
 
@@ -166,7 +174,7 @@ public class WishManager {
      * @return 许愿池重置限制的开始秒数，如果未设置限制，则返回 0。
      */
     public static String getWishResetLimitStart(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, ConstantsUtils.WISH, false, false);
         return yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-LIMIT-START");
     }
 
@@ -177,7 +185,7 @@ public class WishManager {
      * @return 许愿池重置完成后循环秒数间隔，如果未设置，则返回 0。
      */
     public static String getWishResetLimitCycle(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, ConstantsUtils.WISH, false, false);
         return yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-LIMIT-CYCLE");
     }
 
@@ -190,7 +198,7 @@ public class WishManager {
      * @return 如果许愿卷增加限制数，则返回 true;否则返回 false。
      */
     public static String isEnabledCouponLimit(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, ConstantsUtils.WISH, false, false);
         return yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.COUPON-LIMIT");
     }
 
@@ -203,7 +211,7 @@ public class WishManager {
      * @return 增加的许愿限制次数，如果未设置，则返回 0。
      */
     public static String getWishIncreasedAmount(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, ConstantsUtils.WISH, false, false);
         return yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.INCREASED-AMOUNT");
     }
 
@@ -216,7 +224,7 @@ public class WishManager {
      * @return 启用状态
      */
     public static String isResetCompleteSendEnabled(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, ConstantsUtils.WISH, false, false);
         return yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-COMPLETE-SEND");
     }
 
@@ -229,7 +237,7 @@ public class WishManager {
      * @return 启用状态
      */
     public static String isResetCompleteSendConsoleEnabled(String wishName) {
-        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, ConstantsUtils.WISH, false, false);
         return yaml.getString("ADVANCED-SETTINGS.WISH-LIMIT.RESET-COMPLETE-SEND-CONSOLE");
     }
 
@@ -244,7 +252,7 @@ public class WishManager {
      * @throws IllegalArgumentException 如果没有可随机的奖品
      */
     public static String getFinalWishPrize(Player player, String wishName, boolean actualProcessing, boolean returnNode) {
-        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, ConstantsUtils.WISH, false, false);
 
         // 获取玩家此奖池的许愿数
         int wishAmount = getPlayerWishAmount(player, wishName);
@@ -400,12 +408,12 @@ public class WishManager {
     public static void makeWish(Player player, String wishName, boolean force) {
         // 许愿状态
         PlayerWishStatus playerWishStatus = canPlayerWish(player, wishName);
-        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, ConstantsUtils.WISH, false, false);
 
         // 当玩家许愿一次后没有等待最终奖品发放便尝试二次许愿时
         if (playerWishStatus == PlayerWishStatus.InProgress) {
             // isCancelled
-            if (!QuickUtils.callAsyncPlayerWishEvent(player, PlayerWishStatus.InProgress, wishName, force).isCancelled()) {
+            if (!EventUtils.callAsyncPlayerWishEvent(player, PlayerWishStatus.InProgress, wishName, force).isCancelled()) {
                 ScheduledTaskManager.createPlayerScheduledTasks(player, yaml.getStringList("CANT-WISH-AGAIN"));
             }
 
@@ -415,7 +423,7 @@ public class WishManager {
         // 当玩家正在处理缓存时尝试许愿
         if (playerWishStatus == PlayerWishStatus.LoadingCache) {
             // isCancelled
-            if (!QuickUtils.callAsyncPlayerWishEvent(player, PlayerWishStatus.LoadingCache, wishName, force).isCancelled()) {
+            if (!EventUtils.callAsyncPlayerWishEvent(player, PlayerWishStatus.LoadingCache, wishName, force).isCancelled()) {
                 ScheduledTaskManager.createPlayerScheduledTasks(player, yaml.getStringList("CANT-WISH-LOADING-CACHE"));
             }
 
@@ -425,7 +433,7 @@ public class WishManager {
         // 当玩家正在等待处理缓存时尝试许愿
         if (playerWishStatus == PlayerWishStatus.WaitingLoadingCache) {
             // isCancelled
-            if (!QuickUtils.callAsyncPlayerWishEvent(player, PlayerWishStatus.WaitingLoadingCache, wishName, force).isCancelled()) {
+            if (!EventUtils.callAsyncPlayerWishEvent(player, PlayerWishStatus.WaitingLoadingCache, wishName, force).isCancelled()) {
                 ScheduledTaskManager.createPlayerScheduledTasks(player, yaml.getStringList("CANT-WISH-WAITING-LOADING-CACHE"));
             }
 
@@ -435,7 +443,7 @@ public class WishManager {
         // 当玩家没有满足许愿条件但是尝试许愿时
         if (playerWishStatus == PlayerWishStatus.RequirementsNotMet && !force) {
             // isCancelled
-            if (!QuickUtils.callAsyncPlayerWishEvent(player, PlayerWishStatus.RequirementsNotMet, wishName, false).isCancelled()) {
+            if (!EventUtils.callAsyncPlayerWishEvent(player, PlayerWishStatus.RequirementsNotMet, wishName, false).isCancelled()) {
                 ScheduledTaskManager.createPlayerScheduledTasks(player, yaml.getStringList("CANT-WISH"));
             }
 
@@ -445,7 +453,7 @@ public class WishManager {
         // 开启许愿次数限制并且玩家已经达到了许愿次数极限但是尝试许愿时
         if (playerWishStatus == PlayerWishStatus.ReachLimit && !force) {
             // isCancelled
-            if (!QuickUtils.callAsyncPlayerWishEvent(player, PlayerWishStatus.ReachLimit, wishName, false).isCancelled()) {
+            if (!EventUtils.callAsyncPlayerWishEvent(player, PlayerWishStatus.ReachLimit, wishName, false).isCancelled()) {
                 ScheduledTaskManager.createPlayerScheduledTasks(player, yaml.getStringList("ADVANCED-SETTINGS.WISH-LIMIT.REACH-LIMIT"));
             }
 
@@ -453,7 +461,7 @@ public class WishManager {
         }
 
         // isCancelled
-        if (QuickUtils.callAsyncPlayerWishEvent(player, PlayerWishStatus.Allow, wishName, force).isCancelled()) return;
+        if (EventUtils.callAsyncPlayerWishEvent(player, PlayerWishStatus.Allow, wishName, force).isCancelled()) return;
 
         // 设置与为玩家开启计划任务
         String finalWishPrize = getFinalWishPrize(player, wishName, true, true);
@@ -471,22 +479,26 @@ public class WishManager {
      * @param guaranteed 保底率
      */
     public static void setPlayerWishGuaranteed(Player player, String wishName, double guaranteed) {
-        String dataSync = UnicodeUtils.stringToUnicode(getWishDataSync(wishName) + "_guaranteed");
+        String uuid = player.getUniqueId().toString();
+        String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_guaranteed");
 
         switch (DatabasesManager.getDataStorageType()) {
+            case MongoDB:
+                DatabasesManager.getMongoManager().update(uuid, dataSync, String.valueOf(guaranteed), DatabaseCollectionType.PlayerGuaranteed);
+                break;
+
+            case MySQL:
+                DatabasesManager.getMySQLManager().update(uuid, dataSync, String.valueOf(guaranteed), DatabaseCollectionType.PlayerGuaranteed);
+                break;
+
             case Json:
-                Json json = ConfigManager.createJson(player.getUniqueId().toString(), Main.getGuaranteedPath(), true, false);
+                Json json = ConfigManager.createJson(uuid, Main.getGuaranteedPath(), true, false);
                 json.set(dataSync, guaranteed);
                 break;
 
-            case MongoDB:
-                MongoManager.update(player, dataSync, String.valueOf(guaranteed), MongoCollectionStatus.PlayerGuaranteed);
-                break;
-
             default:
-                QuickUtils.sendConsoleMessage("&c您填入了未知的数据存储类型，请检查配置文件! 即将关闭服务器!");
-                Bukkit.shutdown();
-                throw new IllegalArgumentException("Unknown data store type!");
+                ExceptionUtils.throwUnknownDataStoreType();
+                break;
         }
     }
 
@@ -500,25 +512,28 @@ public class WishManager {
      */
     @SuppressWarnings({"deprecation", "unused"})
     public static void setPlayerWishGuaranteed(String playerName, String wishName, double guaranteed) {
-        String dataSync = UnicodeUtils.stringToUnicode(getWishDataSync(wishName) + "_guaranteed");
+        String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_guaranteed");
 
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
         String offlinePlayerUUID = offlinePlayer.getUniqueId().toString();
 
         switch (DatabasesManager.getDataStorageType()) {
+            case MongoDB:
+                DatabasesManager.getMongoManager().update(offlinePlayerUUID, dataSync, String.valueOf(guaranteed), DatabaseCollectionType.PlayerGuaranteed);
+                break;
+
+            case MySQL:
+                DatabasesManager.getMySQLManager().update(offlinePlayerUUID, dataSync, String.valueOf(guaranteed), DatabaseCollectionType.PlayerGuaranteed);
+                break;
+
             case Json:
                 Json json = ConfigManager.createJson(offlinePlayerUUID, Main.getGuaranteedPath(), true, false);
                 json.set(dataSync, guaranteed);
                 break;
 
-            case MongoDB:
-                MongoManager.update(offlinePlayerUUID, dataSync, String.valueOf(guaranteed), MongoCollectionStatus.PlayerGuaranteed);
-                break;
-
             default:
-                QuickUtils.sendConsoleMessage("&c您填入了未知的数据存储类型，请检查配置文件! 即将关闭服务器!");
-                Bukkit.shutdown();
-                throw new IllegalArgumentException("Unknown data store type!");
+                ExceptionUtils.throwUnknownDataStoreType();
+                break;
         }
     }
 
@@ -530,20 +545,22 @@ public class WishManager {
      * @return 返回玩家在指定许愿池的保底率
      */
     public static double getPlayerWishGuaranteed(Player player, String wishName) {
-        String dataSync = UnicodeUtils.stringToUnicode(getWishDataSync(wishName) + "_guaranteed");
+        String uuid = player.getUniqueId().toString();
+        String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_guaranteed");
 
         switch (DatabasesManager.getDataStorageType()) {
+            case MongoDB:
+                return Double.parseDouble(DatabasesManager.getMongoManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+
+            case MySQL:
+                return Double.parseDouble(DatabasesManager.getMySQLManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+
             case Json:
-                Json json = ConfigManager.createJson(player.getUniqueId().toString(), Main.getGuaranteedPath(), true, false);
+                Json json = ConfigManager.createJson(uuid, Main.getGuaranteedPath(), true, false);
                 return json.getDouble(dataSync);
 
-            case MongoDB:
-                return Double.parseDouble(MongoManager.getOrDefault(player, dataSync, "0", MongoCollectionStatus.PlayerGuaranteed).toString());
-
             default:
-                QuickUtils.sendConsoleMessage("&c您填入了未知的数据存储类型，请检查配置文件! 即将关闭服务器!");
-                Bukkit.shutdown();
-                throw new IllegalArgumentException("Unknown data store type!");
+                return ExceptionUtils.throwUnknownDataStoreType();
         }
     }
 
@@ -556,23 +573,24 @@ public class WishManager {
      */
     @SuppressWarnings({"deprecation", "unused"})
     public static double getPlayerWishGuaranteed(String playerName, String wishName) {
-        String dataSync = UnicodeUtils.stringToUnicode(getWishDataSync(wishName) + "_guaranteed");
+        String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_guaranteed");
 
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
         String offlinePlayerUUID = offlinePlayer.getUniqueId().toString();
 
         switch (DatabasesManager.getDataStorageType()) {
+            case MongoDB:
+                return Double.parseDouble(DatabasesManager.getMongoManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+
+            case MySQL:
+                return Double.parseDouble(DatabasesManager.getMySQLManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+
             case Json:
                 Json json = ConfigManager.createJson(offlinePlayerUUID, Main.getGuaranteedPath(), true, false);
                 return json.getDouble(dataSync);
 
-            case MongoDB:
-                return Double.parseDouble(MongoManager.getOrDefault(offlinePlayerUUID, dataSync, "0", MongoCollectionStatus.PlayerGuaranteed).toString());
-
             default:
-                QuickUtils.sendConsoleMessage("&c您填入了未知的数据存储类型，请检查配置文件! 即将关闭服务器!");
-                Bukkit.shutdown();
-                throw new IllegalArgumentException("Unknown data store type!");
+                return ExceptionUtils.throwUnknownDataStoreType();
         }
     }
 
@@ -584,22 +602,26 @@ public class WishManager {
      * @param amount 许愿次数
      */
     public static void setPlayerWishAmount(Player player, String wishName, int amount) {
-        String dataSync = UnicodeUtils.stringToUnicode(getWishDataSync(wishName) + "_amount");
+        String uuid = player.getUniqueId().toString();
+        String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_amount");
 
         switch (DatabasesManager.getDataStorageType()) {
+            case MongoDB:
+                DatabasesManager.getMongoManager().update(uuid, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
+                break;
+
+            case MySQL:
+                DatabasesManager.getMySQLManager().update(uuid, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
+                break;
+
             case Json:
-                Json json = ConfigManager.createJson(player.getUniqueId().toString(), Main.getGuaranteedPath(), true, false);
+                Json json = ConfigManager.createJson(uuid, Main.getGuaranteedPath(), true, false);
                 json.set(dataSync, amount);
                 break;
 
-            case MongoDB:
-                MongoManager.update(player, dataSync, String.valueOf(amount), MongoCollectionStatus.PlayerGuaranteed);
-                break;
-
             default:
-                QuickUtils.sendConsoleMessage("&c您填入了未知的数据存储类型，请检查配置文件! 即将关闭服务器!");
-                Bukkit.shutdown();
-                throw new IllegalArgumentException("Unknown data store type!");
+                ExceptionUtils.throwUnknownDataStoreType();
+                break;
         }
     }
 
@@ -612,25 +634,28 @@ public class WishManager {
      */
     @SuppressWarnings({"deprecation", "unused"})
     public static void setPlayerWishAmount(String playerName, String wishName, int amount) {
-        String dataSync = UnicodeUtils.stringToUnicode(getWishDataSync(wishName) + "_amount");
+        String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_amount");
 
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
         String offlinePlayerUUID = offlinePlayer.getUniqueId().toString();
 
         switch (DatabasesManager.getDataStorageType()) {
+            case MongoDB:
+                DatabasesManager.getMongoManager().update(offlinePlayerUUID, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
+                break;
+
+            case MySQL:
+                DatabasesManager.getMySQLManager().update(offlinePlayerUUID, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
+                break;
+
             case Json:
                 Json json = ConfigManager.createJson(offlinePlayerUUID, Main.getGuaranteedPath(), true, false);
                 json.set(dataSync, amount);
                 break;
 
-            case MongoDB:
-                MongoManager.update(offlinePlayerUUID, dataSync, String.valueOf(amount), MongoCollectionStatus.PlayerGuaranteed);
-                break;
-
             default:
-                QuickUtils.sendConsoleMessage("&c您填入了未知的数据存储类型，请检查配置文件! 即将关闭服务器!");
-                Bukkit.shutdown();
-                throw new IllegalArgumentException("Unknown data store type!");
+                ExceptionUtils.throwUnknownDataStoreType();
+                break;
         }
     }
 
@@ -642,20 +667,22 @@ public class WishManager {
      * @return 玩家在许愿池中的许愿次数
      */
     public static int getPlayerWishAmount(Player player, String wishName) {
-        String dataSync = UnicodeUtils.stringToUnicode(getWishDataSync(wishName) + "_amount");
+        String uuid = player.getUniqueId().toString();
+        String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_amount");
 
         switch (DatabasesManager.getDataStorageType()) {
+            case MongoDB:
+                return Integer.parseInt(DatabasesManager.getMongoManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+
+            case MySQL:
+                return Integer.parseInt(DatabasesManager.getMySQLManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+
             case Json:
-                Json json = ConfigManager.createJson(player.getUniqueId().toString(), Main.getGuaranteedPath(), true, false);
+                Json json = ConfigManager.createJson(uuid, Main.getGuaranteedPath(), true, false);
                 return json.getInt(dataSync);
 
-            case MongoDB:
-                return Integer.parseInt(MongoManager.getOrDefault(player, dataSync, "0", MongoCollectionStatus.PlayerGuaranteed).toString());
-
             default:
-                QuickUtils.sendConsoleMessage("&c您填入了未知的数据存储类型，请检查配置文件! 即将关闭服务器!");
-                Bukkit.shutdown();
-                throw new IllegalArgumentException("Unknown data store type!");
+                return ExceptionUtils.throwUnknownDataStoreType();
         }
     }
 
@@ -668,23 +695,24 @@ public class WishManager {
      */
     @SuppressWarnings({"deprecation", "unused"})
     public static int getPlayerWishAmount(String playerName, String wishName) {
-        String dataSync = UnicodeUtils.stringToUnicode(getWishDataSync(wishName) + "_amount");
+        String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_amount");
 
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
         String offlinePlayerUUID = offlinePlayer.getUniqueId().toString();
 
         switch (DatabasesManager.getDataStorageType()) {
+            case MongoDB:
+                return Integer.parseInt(DatabasesManager.getMongoManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+
+            case MySQL:
+                return Integer.parseInt(DatabasesManager.getMySQLManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+
             case Json:
                 Json json = ConfigManager.createJson(offlinePlayerUUID, Main.getGuaranteedPath(), true, false);
                 return json.getInt(dataSync);
 
-            case MongoDB:
-                return Integer.parseInt(MongoManager.getOrDefault(offlinePlayerUUID, dataSync, "0", MongoCollectionStatus.PlayerGuaranteed).toString());
-
             default:
-                QuickUtils.sendConsoleMessage("&c您填入了未知的数据存储类型，请检查配置文件! 即将关闭服务器!");
-                Bukkit.shutdown();
-                throw new IllegalArgumentException("Unknown data store type!");
+                return ExceptionUtils.throwUnknownDataStoreType();
         }
     }
 
@@ -698,22 +726,26 @@ public class WishManager {
     public static void setPlayerWishLimitAmount(Player player, String wishName, int amount) {
         if (!isEnabledWishLimit(wishName)) return;
 
-        String dataSync = UnicodeUtils.stringToUnicode(getWishDataSync(wishName) + "_limit_amount");
+        String uuid = player.getUniqueId().toString();
+        String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_limit_amount");
 
         switch (DatabasesManager.getDataStorageType()) {
+            case MongoDB:
+                DatabasesManager.getMongoManager().update(uuid, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
+                break;
+
+            case MySQL:
+                DatabasesManager.getMySQLManager().update(uuid, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
+                break;
+
             case Json:
-                Json json = ConfigManager.createJson(player.getUniqueId().toString(), Main.getGuaranteedPath(), true, false);
+                Json json = ConfigManager.createJson(uuid, Main.getGuaranteedPath(), true, false);
                 json.set(dataSync, amount);
                 break;
 
-            case MongoDB:
-                MongoManager.update(player, dataSync, String.valueOf(amount), MongoCollectionStatus.PlayerGuaranteed);
-                break;
-
             default:
-                QuickUtils.sendConsoleMessage("&c您填入了未知的数据存储类型，请检查配置文件! 即将关闭服务器!");
-                Bukkit.shutdown();
-                throw new IllegalArgumentException("Unknown data store type!");
+                ExceptionUtils.throwUnknownDataStoreType();
+                break;
         }
     }
 
@@ -728,25 +760,28 @@ public class WishManager {
     public static void setPlayerWishLimitAmount(String playerName, String wishName, int amount) {
         if (!isEnabledWishLimit(wishName)) return;
 
-        String dataSync = UnicodeUtils.stringToUnicode(getWishDataSync(wishName) + "_limit_amount");
+        String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_limit_amount");
 
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
         String offlinePlayerUUID = offlinePlayer.getUniqueId().toString();
 
         switch (DatabasesManager.getDataStorageType()) {
+            case MongoDB:
+                DatabasesManager.getMongoManager().update(offlinePlayerUUID, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
+                break;
+
+            case MySQL:
+                DatabasesManager.getMySQLManager().update(offlinePlayerUUID, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
+                break;
+
             case Json:
                 Json json = ConfigManager.createJson(offlinePlayerUUID, Main.getGuaranteedPath(), true, false);
                 json.set(dataSync, amount);
                 break;
 
-            case MongoDB:
-                MongoManager.update(offlinePlayerUUID, dataSync, String.valueOf(amount), MongoCollectionStatus.PlayerGuaranteed);
-                break;
-
             default:
-                QuickUtils.sendConsoleMessage("&c您填入了未知的数据存储类型，请检查配置文件! 即将关闭服务器!");
-                Bukkit.shutdown();
-                throw new IllegalArgumentException("Unknown data store type!");
+                ExceptionUtils.throwUnknownDataStoreType();
+                break;
         }
     }
 
@@ -760,20 +795,22 @@ public class WishManager {
     public static int getPlayerWishLimitAmount(Player player, String wishName) {
         if (!isEnabledWishLimit(wishName)) return 0;
 
-        String dataSync = UnicodeUtils.stringToUnicode(getWishDataSync(wishName) + "_limit_amount");
+        String uuid = player.getUniqueId().toString();
+        String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_limit_amount");
 
         switch (DatabasesManager.getDataStorageType()) {
+            case MongoDB:
+                return Integer.parseInt(DatabasesManager.getMongoManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+
+            case MySQL:
+                return Integer.parseInt(DatabasesManager.getMySQLManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+
             case Json:
-                Json json = ConfigManager.createJson(player.getUniqueId().toString(), Main.getGuaranteedPath(), true, false);
+                Json json = ConfigManager.createJson(uuid, Main.getGuaranteedPath(), true, false);
                 return json.getInt(dataSync);
 
-            case MongoDB:
-                return Integer.parseInt(MongoManager.getOrDefault(player, dataSync, "0", MongoCollectionStatus.PlayerGuaranteed).toString());
-
             default:
-                QuickUtils.sendConsoleMessage("&c您填入了未知的数据存储类型，请检查配置文件! 即将关闭服务器!");
-                Bukkit.shutdown();
-                throw new IllegalArgumentException("Unknown data store type!");
+                return ExceptionUtils.throwUnknownDataStoreType();
         }
     }
 
@@ -788,23 +825,24 @@ public class WishManager {
     public static int getPlayerWishLimitAmount(String playerName, String wishName) {
         if (!isEnabledWishLimit(wishName)) return 0;
 
-        String dataSync = UnicodeUtils.stringToUnicode(getWishDataSync(wishName) + "_limit_amount");
+        String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_limit_amount");
 
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
         String offlinePlayerUUID = offlinePlayer.getUniqueId().toString();
 
         switch (DatabasesManager.getDataStorageType()) {
+            case MongoDB:
+                return Integer.parseInt(DatabasesManager.getMongoManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+
+            case MySQL:
+                return Integer.parseInt(DatabasesManager.getMySQLManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+
             case Json:
                 Json json = ConfigManager.createJson(offlinePlayerUUID, Main.getGuaranteedPath(), true, false);
                 return json.getInt(dataSync);
 
-            case MongoDB:
-                return Integer.parseInt(MongoManager.getOrDefault(offlinePlayerUUID, dataSync, "0", MongoCollectionStatus.PlayerGuaranteed).toString());
-
             default:
-                QuickUtils.sendConsoleMessage("&c您填入了未知的数据存储类型，请检查配置文件! 即将关闭服务器!");
-                Bukkit.shutdown();
-                throw new IllegalArgumentException("Unknown data store type!");
+                return ExceptionUtils.throwUnknownDataStoreType();
         }
     }
 
@@ -814,14 +852,18 @@ public class WishManager {
      * @param wishName 许愿池名称
      */
     public static void resetWishLimitAmount(String wishName) {
-        String dataSync = UnicodeUtils.stringToUnicode(getWishDataSync(wishName) + "_limit_amount");
+        String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_limit_amount");
 
         switch (DatabasesManager.getDataStorageType()) {
-            case Json:
-                MongoManager.getMongoDatabase().getCollection("PlayerGuaranteed").deleteMany(Filters.gte(dataSync, "0"));
+            case MongoDB:
+                DatabasesManager.getMongoManager().getMongoDatabase().getCollection("PlayerGuaranteed").deleteMany(Filters.gte(dataSync, "0"));
                 break;
 
-            case MongoDB:
+            case MySQL:
+                DatabasesManager.getMySQLManager().executeStatement("DELETE FROM PlayerGuaranteed WHERE dataSync >= '0'");
+                break;
+
+            case Json:
                 String path = Main.getGuaranteedPath();
                 for (String fileName : ConfigManager.getAllFileNames(path)) {
                     Json json = ConfigManager.createJson(fileName, path, true, false);
@@ -830,9 +872,8 @@ public class WishManager {
                 break;
 
             default:
-                QuickUtils.sendConsoleMessage("&c您填入了未知的数据存储类型，请检查配置文件! 即将关闭服务器!");
-                Bukkit.shutdown();
-                throw new IllegalArgumentException("Unknown data store type!");
+                ExceptionUtils.throwUnknownDataStoreType();
+                break;
         }
     }
 
@@ -856,7 +897,7 @@ public class WishManager {
         // 检查玩家是否正在等待处理缓存
         if (PlayerCheckCacheTask.isWaitingLoadingCache(uuid)) return PlayerWishStatus.WaitingLoadingCache;
 
-        Yaml yaml = ConfigManager.createYaml(wishName, Constants.WISH, false, false);
+        Yaml yaml = ConfigManager.createYaml(wishName, ConstantsUtils.WISH, false, false);
         yaml.setPathPrefix("CONDITION");
 
         String permission = QuickUtils.handleString(yaml.getString("PERM"), player);
@@ -1067,7 +1108,7 @@ public class WishManager {
             int effectAmplifier = Integer.parseInt(effectInfo[1]);
 
             if (potionEffectType == null) {
-                QuickUtils.sendUnknownWarn("药水效果", wishName, effectType);
+                ExceptionUtils.sendUnknownWarn("药水效果", wishName, effectType);
                 return PlayerWishStatus.RequirementsNotMet;
             }
 
@@ -1148,7 +1189,7 @@ public class WishManager {
         }
 
         List<String> newPlayerDoList = playerDoList.stream()
-                .map(UnicodeUtils::stringToUnicode)
+                .map(StringEncrypter::encrypt)
                 .collect(Collectors.toList());
 
         ConfigManager.createJson(uuid.toString(), Main.getDoListCachePath(), true, false).set("CACHE", newPlayerDoList);
@@ -1165,7 +1206,7 @@ public class WishManager {
      * @param doOpCommand 是否允许使用 OP 指令
      */
     public static void setPlayerCacheOpData(Player player, boolean doOpCommand) {
-        ConfigManager.createJson(player.getUniqueId().toString(), Constants.PLAYER_CACHE, false, false)
+        ConfigManager.createJson(player.getUniqueId().toString(), ConstantsUtils.PLAYER_CACHE, false, false)
                 .set("DO-OP-COMMAND", doOpCommand);
     }
 }
