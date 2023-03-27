@@ -38,7 +38,7 @@ public class RandomUtils<T> {
     private final ThreadLocalRandom threadLocalRandom = ThreadLocalRandom.current();
 
     /**
-     * 随机数生成器 ThreadLocalRandom。
+     * 随机数生成器 SecureRandom。
      */
     private final SecureRandom secureRandom = new SecureRandom();
 
