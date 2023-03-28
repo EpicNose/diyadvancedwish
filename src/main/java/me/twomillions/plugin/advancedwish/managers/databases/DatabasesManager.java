@@ -47,8 +47,10 @@ public class DatabasesManager implements DatabasesInterface {
     public Object setup(Yaml yaml) {
         switch (getDataStorageType()) {
             case MongoDB:
+                return getMongoManager().setup(yaml);
+
             case MySQL:
-                return getDatabasesManager().setup(yaml);
+                return getMySQLManager().setup(yaml);
 
             default:
                 return ExceptionUtils.throwUnknownDataStoreType();
@@ -68,8 +70,10 @@ public class DatabasesManager implements DatabasesInterface {
     public Object getOrDefault(String uuid, String key, Object defaultValue, DatabaseCollectionType databaseCollectionType) {
         switch (getDataStorageType()) {
             case MongoDB:
+                return getMongoManager().getOrDefault(uuid, key, defaultValue, databaseCollectionType);
+
             case MySQL:
-                return getDatabasesManager().getOrDefault(uuid, key, defaultValue, databaseCollectionType);
+                return getMySQLManager().getOrDefault(uuid, key, defaultValue, databaseCollectionType);
 
             default:
                 return ExceptionUtils.throwUnknownDataStoreType();
@@ -89,8 +93,10 @@ public class DatabasesManager implements DatabasesInterface {
     public ConcurrentLinkedQueue<String> getOrDefaultList(String uuid, String key, ConcurrentLinkedQueue<String> defaultValue, DatabaseCollectionType databaseCollectionType) {
         switch (getDataStorageType()) {
             case MongoDB:
+                return getMongoManager().getOrDefaultList(uuid, key, defaultValue, databaseCollectionType);
+
             case MySQL:
-                return getDatabasesManager().getOrDefaultList(uuid, key, defaultValue, databaseCollectionType);
+                return getMySQLManager().getOrDefaultList(uuid, key, defaultValue, databaseCollectionType);
 
             default:
                 return ExceptionUtils.throwUnknownDataStoreType();
@@ -109,8 +115,10 @@ public class DatabasesManager implements DatabasesInterface {
     public boolean update(String uuid, String key, Object value, DatabaseCollectionType databaseCollectionType) {
         switch (getDataStorageType()) {
             case MongoDB:
+                return getMongoManager().update(uuid, key, value, databaseCollectionType);
+
             case MySQL:
-                return getDatabasesManager().update(uuid, key, value, databaseCollectionType);
+                return getMySQLManager().update(uuid, key, value, databaseCollectionType);
 
             default:
                 return ExceptionUtils.throwUnknownDataStoreType();
