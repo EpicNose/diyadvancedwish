@@ -3,7 +3,6 @@ package me.twomillions.plugin.advancedwish;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import lombok.Setter;
-import me.twomillions.plugin.advancedwish.enums.databases.status.ConnectStatus;
 import me.twomillions.plugin.advancedwish.enums.databases.status.DataTransformationStatus;
 import me.twomillions.plugin.advancedwish.enums.databases.types.DataStorageType;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
@@ -61,26 +60,17 @@ public final class Main extends JavaPlugin {
         }
 
         // 设置数据存储
-        switch (advancedWishYaml.getString("DATA-STORAGE-TYPE").toLowerCase()) {
+        String dataStorageType = advancedWishYaml.getString("DATA-STORAGE-TYPE").toLowerCase();
+
+        switch (dataStorageType) {
+            case ConstantsUtils.MYSQL:
+            case ConstantsUtils.MONGODB:
+                DatabasesManager.setDataStorageType(DataStorageType.valueOf(dataStorageType));
+                DatabasesManager.getDatabasesManager().setup(advancedWishYaml);
+                break;
+
             case ConstantsUtils.JSON:
                 DatabasesManager.setDataStorageType(DataStorageType.Json);
-                break;
-
-            case ConstantsUtils.MONGODB:
-                DatabasesManager.setDataStorageType(DataStorageType.MongoDB);
-
-                if (DatabasesManager.getMongoManager().setup(advancedWishYaml) == ConnectStatus.CannotConnect) {
-                    return;
-                }
-                break;
-
-            case ConstantsUtils.MYSQL:
-                DatabasesManager.setDataStorageType(DataStorageType.MySQL);
-
-                if (DatabasesManager.getMySQLManager().setup(advancedWishYaml) == ConnectStatus.CannotConnect) {
-                    System.out.println("c");
-                    return;
-                }
                 break;
 
             default:

@@ -50,5 +50,5 @@ public interface DatabasesInterface {
      * @param value 数据的值
      * @param databaseCollectionType 数据存储的集合
      */
-    void update(String uuid, String key, Object value, DatabaseCollectionType databaseCollectionType);
+    boolean update(String uuid, String key, Object value, DatabaseCollectionType databaseCollectionType);
 }

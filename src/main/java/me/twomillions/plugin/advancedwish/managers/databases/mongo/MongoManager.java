@@ -179,12 +179,14 @@ public class MongoManager implements DatabasesInterface {
      * @param databaseCollectionType 数据存储的集合
      */
     @Override
-    public void update(String uuid, String key, Object value, DatabaseCollectionType databaseCollectionType) {
+    public boolean update(String uuid, String key, Object value, DatabaseCollectionType databaseCollectionType) {
         MongoCollection<Document> mongoCollection = getMongoDatabase().getCollection(databaseCollectionType.toString());
         Document filter = new Document("uuid", uuid);
         Document update = new Document("$set", new Document(key, value));
         UpdateOptions options = new UpdateOptions().upsert(true);
         mongoCollection.updateOne(filter, update, options);
+
+        return true;
     }
 
     /**

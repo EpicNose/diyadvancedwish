@@ -484,11 +484,8 @@ public class WishManager {
 
         switch (DatabasesManager.getDataStorageType()) {
             case MongoDB:
-                DatabasesManager.getMongoManager().update(uuid, dataSync, String.valueOf(guaranteed), DatabaseCollectionType.PlayerGuaranteed);
-                break;
-
             case MySQL:
-                DatabasesManager.getMySQLManager().update(uuid, dataSync, String.valueOf(guaranteed), DatabaseCollectionType.PlayerGuaranteed);
+                DatabasesManager.getDatabasesManager().update(uuid, dataSync, String.valueOf(guaranteed), DatabaseCollectionType.PlayerGuaranteed);
                 break;
 
             case Json:
@@ -519,11 +516,8 @@ public class WishManager {
 
         switch (DatabasesManager.getDataStorageType()) {
             case MongoDB:
-                DatabasesManager.getMongoManager().update(offlinePlayerUUID, dataSync, String.valueOf(guaranteed), DatabaseCollectionType.PlayerGuaranteed);
-                break;
-
             case MySQL:
-                DatabasesManager.getMySQLManager().update(offlinePlayerUUID, dataSync, String.valueOf(guaranteed), DatabaseCollectionType.PlayerGuaranteed);
+                DatabasesManager.getDatabasesManager().update(offlinePlayerUUID, dataSync, String.valueOf(guaranteed), DatabaseCollectionType.PlayerGuaranteed);
                 break;
 
             case Json:
@@ -550,10 +544,8 @@ public class WishManager {
 
         switch (DatabasesManager.getDataStorageType()) {
             case MongoDB:
-                return Double.parseDouble(DatabasesManager.getMongoManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
-
             case MySQL:
-                return Double.parseDouble(DatabasesManager.getMySQLManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+                return Double.parseDouble(DatabasesManager.getDatabasesManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
 
             case Json:
                 Json json = ConfigManager.createJson(uuid, Main.getGuaranteedPath(), true, false);
@@ -580,10 +572,8 @@ public class WishManager {
 
         switch (DatabasesManager.getDataStorageType()) {
             case MongoDB:
-                return Double.parseDouble(DatabasesManager.getMongoManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
-
             case MySQL:
-                return Double.parseDouble(DatabasesManager.getMySQLManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+                return Double.parseDouble(DatabasesManager.getDatabasesManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
 
             case Json:
                 Json json = ConfigManager.createJson(offlinePlayerUUID, Main.getGuaranteedPath(), true, false);
@@ -607,11 +597,8 @@ public class WishManager {
 
         switch (DatabasesManager.getDataStorageType()) {
             case MongoDB:
-                DatabasesManager.getMongoManager().update(uuid, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
-                break;
-
             case MySQL:
-                DatabasesManager.getMySQLManager().update(uuid, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
+                DatabasesManager.getDatabasesManager().update(uuid, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
                 break;
 
             case Json:
@@ -641,11 +628,8 @@ public class WishManager {
 
         switch (DatabasesManager.getDataStorageType()) {
             case MongoDB:
-                DatabasesManager.getMongoManager().update(offlinePlayerUUID, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
-                break;
-
             case MySQL:
-                DatabasesManager.getMySQLManager().update(offlinePlayerUUID, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
+                DatabasesManager.getDatabasesManager().update(offlinePlayerUUID, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
                 break;
 
             case Json:
@@ -672,10 +656,8 @@ public class WishManager {
 
         switch (DatabasesManager.getDataStorageType()) {
             case MongoDB:
-                return Integer.parseInt(DatabasesManager.getMongoManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
-
             case MySQL:
-                return Integer.parseInt(DatabasesManager.getMySQLManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+                return Integer.parseInt(DatabasesManager.getDatabasesManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
 
             case Json:
                 Json json = ConfigManager.createJson(uuid, Main.getGuaranteedPath(), true, false);
@@ -702,10 +684,8 @@ public class WishManager {
 
         switch (DatabasesManager.getDataStorageType()) {
             case MongoDB:
-                return Integer.parseInt(DatabasesManager.getMongoManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
-
             case MySQL:
-                return Integer.parseInt(DatabasesManager.getMySQLManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+                return Integer.parseInt(DatabasesManager.getDatabasesManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
 
             case Json:
                 Json json = ConfigManager.createJson(offlinePlayerUUID, Main.getGuaranteedPath(), true, false);
@@ -731,11 +711,8 @@ public class WishManager {
 
         switch (DatabasesManager.getDataStorageType()) {
             case MongoDB:
-                DatabasesManager.getMongoManager().update(uuid, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
-                break;
-
             case MySQL:
-                DatabasesManager.getMySQLManager().update(uuid, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
+                DatabasesManager.getDatabasesManager().update(uuid, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
                 break;
 
             case Json:
@@ -767,11 +744,8 @@ public class WishManager {
 
         switch (DatabasesManager.getDataStorageType()) {
             case MongoDB:
-                DatabasesManager.getMongoManager().update(offlinePlayerUUID, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
-                break;
-
             case MySQL:
-                DatabasesManager.getMySQLManager().update(offlinePlayerUUID, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
+                DatabasesManager.getDatabasesManager().update(offlinePlayerUUID, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
                 break;
 
             case Json:
@@ -800,10 +774,8 @@ public class WishManager {
 
         switch (DatabasesManager.getDataStorageType()) {
             case MongoDB:
-                return Integer.parseInt(DatabasesManager.getMongoManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
-
             case MySQL:
-                return Integer.parseInt(DatabasesManager.getMySQLManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+                return Integer.parseInt(DatabasesManager.getDatabasesManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
 
             case Json:
                 Json json = ConfigManager.createJson(uuid, Main.getGuaranteedPath(), true, false);
@@ -832,10 +804,8 @@ public class WishManager {
 
         switch (DatabasesManager.getDataStorageType()) {
             case MongoDB:
-                return Integer.parseInt(DatabasesManager.getMongoManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
-
             case MySQL:
-                return Integer.parseInt(DatabasesManager.getMySQLManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+                return Integer.parseInt(DatabasesManager.getDatabasesManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
 
             case Json:
                 Json json = ConfigManager.createJson(offlinePlayerUUID, Main.getGuaranteedPath(), true, false);

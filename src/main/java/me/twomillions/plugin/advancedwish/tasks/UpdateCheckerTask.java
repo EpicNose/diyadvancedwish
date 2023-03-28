@@ -63,11 +63,12 @@ public class UpdateCheckerTask {
         /*
          * 2023.3.25 换为美国服务器
          */
-        try (Scanner sc = new Scanner(new URL("http://update.twomillions.top/advancedwishupdate.html").openStream())) {
-            while (sc.hasNextLine()) stringBuilder.append(sc.nextLine()).append(' ');
+        try (Scanner sc = new Scanner(new URL("http://pluginUpdate.twomillions.top/advancedwishupdate.html").openStream())) {
+            while (sc.hasNextLine()) {
+                stringBuilder.append(sc.nextLine()).append(' ');
+            }
         } catch (IOException exception) {
             isLatestVersion = false;
-
             QuickUtils.sendConsoleMessage("&cAdvanced Wish 更新检查错误... 请务必手动检查插件是否为最新版。 下载链接: https://gitee.com/A2000000/advanced-wish/releases/");
         }
 

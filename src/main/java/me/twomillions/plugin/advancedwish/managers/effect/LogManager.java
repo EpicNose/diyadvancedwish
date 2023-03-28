@@ -25,15 +25,10 @@ public class LogManager {
     public static void addPlayerWishLog(String uuid, String logString) {
         switch (DatabasesManager.getDataStorageType()) {
             case MongoDB:
-                ConcurrentLinkedQueue<String> mongoLogs = DatabasesManager.getMongoManager().getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), DatabaseCollectionType.PlayerLogs);
-                mongoLogs.add(logString);
-                DatabasesManager.getMongoManager().update(uuid, "logs", mongoLogs, DatabaseCollectionType.PlayerLogs);
-                break;
-
             case MySQL:
-                ConcurrentLinkedQueue<String> mySQLLogs = DatabasesManager.getMySQLManager().getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), DatabaseCollectionType.PlayerLogs);
-                mySQLLogs.add(logString);
-                DatabasesManager.getMySQLManager().update(uuid, "logs", mySQLLogs, DatabaseCollectionType.PlayerLogs);
+                ConcurrentLinkedQueue<String> dbLogs = DatabasesManager.getDatabasesManager().getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), DatabaseCollectionType.PlayerLogs);
+                dbLogs.add(logString);
+                DatabasesManager.getDatabasesManager().update(uuid, "logs", dbLogs, DatabaseCollectionType.PlayerLogs);
                 break;
 
             case Json:
@@ -60,10 +55,8 @@ public class LogManager {
     public static ConcurrentLinkedQueue<String> getPlayerWishLog(String uuid, int findMin, int findMax) {
         switch (DatabasesManager.getDataStorageType()) {
             case MongoDB:
-                return getLogsInRange(DatabasesManager.getMongoManager().getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), DatabaseCollectionType.PlayerLogs), findMin, findMax);
-
             case MySQL:
-                return getLogsInRange(DatabasesManager.getMySQLManager().getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), DatabaseCollectionType.PlayerLogs), findMin, findMax);
+                return getLogsInRange(DatabasesManager.getDatabasesManager().getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), DatabaseCollectionType.PlayerLogs), findMin, findMax);
 
             case Json:
                 Json json = ConfigManager.createJson(uuid, Main.getLogsPath(), true, false);
@@ -96,10 +89,8 @@ public class LogManager {
     public static int getPlayerWishLogSize(String uuid) {
         switch (DatabasesManager.getDataStorageType()) {
             case MongoDB:
-                return DatabasesManager.getMongoManager().getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), DatabaseCollectionType.PlayerLogs).size();
-
             case MySQL:
-                return DatabasesManager.getMySQLManager().getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), DatabaseCollectionType.PlayerLogs).size();
+                return DatabasesManager.getDatabasesManager().getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), DatabaseCollectionType.PlayerLogs).size();
 
             case Json:
                 return ConfigManager.createJson(uuid, Main.getLogsPath(), true, false).getStringList("logs").size();

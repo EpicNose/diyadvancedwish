@@ -9,6 +9,3 @@ commands:
   advancedwish:
     aliases: [ aw ]
     description: 提示指令.
-  advancedwishconsole:
-    aliases: [ awc ]
-    description: 控制台指令.

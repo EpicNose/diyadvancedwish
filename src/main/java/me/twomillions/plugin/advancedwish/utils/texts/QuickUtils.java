@@ -2,12 +2,14 @@ package me.twomillions.plugin.advancedwish.utils.texts;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.twomillions.plugin.advancedwish.Main;
+import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.register.RegisterManager;
 import me.twomillions.plugin.advancedwish.utils.scripts.ScriptUtils;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -118,6 +120,48 @@ public class QuickUtils {
      */
     public static String replaceTranslate(String string, Player player) {
         return translate(replace(string, player));
+    }
+
+    /**
+     * 从 message.yml 内读取对应信息并发送。
+     *
+     * @param player 玩家对象
+     * @param string message.yml 内对应信息
+     * @param params 替换的可选参数
+     */
+    public static void sendMessage(Player player, String string, Object... params) {
+        ConfigManager.getMessageYaml().getStringList(string).stream()
+                .map(message -> {
+                    if (params != null) {
+                        for (int i = 0; i < params.length; i += 2) {
+                            message = message.replaceAll(params[i].toString(), params[i + 1].toString());
+                        }
+                    }
+
+                    return QuickUtils.handleString(message, player);
+                })
+                .forEach(player::sendMessage);
+    }
+
+    /**
+     * 从 message.yml 内读取对应信息并发送。
+     *
+     * @param sender 指令发送对象
+     * @param string message.yml 内对应信息
+     * @param params 替换的可选参数
+     */
+    public static void sendMessage(CommandSender sender, String string, Object... params) {
+        ConfigManager.getMessageYaml().getStringList(string).stream()
+                .map(message -> {
+                    if (params != null) {
+                        for (int i = 0; i < params.length; i += 2) {
+                            message = message.replaceAll(params[i].toString(), params[i + 1].toString());
+                        }
+                    }
+
+                    return QuickUtils.handleString(message);
+                })
+                .forEach(sender::sendMessage);
     }
 
     /**
@@ -420,5 +464,4 @@ public class QuickUtils {
             return beforeStart + replace + afterEnd;
         }
     }
-
 }

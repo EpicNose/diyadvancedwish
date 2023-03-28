@@ -168,7 +168,7 @@ public class MySQLManager implements DatabasesInterface {
      * @param databaseCollectionType 查询的集合
      */
     @Override
-    public void update(String uuid, String key, Object value, DatabaseCollectionType databaseCollectionType) {
+    public boolean update(String uuid, String key, Object value, DatabaseCollectionType databaseCollectionType) {
         try (Connection connection = getDataSource().getConnection()) {
             checkCollectionType(key, databaseCollectionType);
             checkColumn(key, databaseCollectionType);
@@ -180,8 +180,11 @@ public class MySQLManager implements DatabasesInterface {
             preparedStatement.setObject(2, value);
             preparedStatement.setObject(3, value);
             preparedStatement.executeUpdate();
+
+            return true;
         } catch (SQLException exception) {
             exception.printStackTrace();
+            return false;
         }
     }
 
@@ -190,12 +193,15 @@ public class MySQLManager implements DatabasesInterface {
      *
      * @param sql 要执行的 SQL 语句。
      */
-    public void executeStatement(String sql) {
+    public boolean executeStatement(String sql) {
         try (Connection connection = getDataSource().getConnection()) {
             Statement statement = connection.createStatement();
             statement.executeUpdate(sql);
+
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
     }
 
