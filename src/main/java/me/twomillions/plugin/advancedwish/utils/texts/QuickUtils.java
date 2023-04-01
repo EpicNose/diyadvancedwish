@@ -15,7 +15,11 @@ import org.bukkit.plugin.Plugin;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * 实用工具类。
@@ -23,7 +27,7 @@ import java.util.function.Function;
  * @author 2000000
  * @date 2022/11/21 12:39
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"deprecation", "unused"})
 public class QuickUtils {
     private static final Plugin plugin = Main.getInstance();
     private static final JexlEngine jexlEngine = new JexlBuilder().create();
@@ -162,6 +166,19 @@ public class QuickUtils {
                     return QuickUtils.handleString(message);
                 })
                 .forEach(sender::sendMessage);
+    }
+
+    /**
+     * 获取玩家名对应的 UUID.
+     *
+     * @param playerName 玩家名
+     */
+    public static String getPlayerUUID(String playerName) {
+        if (Main.isOfflineMode()) {
+            return UUID.nameUUIDFromBytes(("OfflinePlayer:" + playerName).getBytes()).toString();
+        }
+
+        return Bukkit.getOfflinePlayer(playerName).getUniqueId().toString();
     }
 
     /**
@@ -463,5 +480,30 @@ public class QuickUtils {
         } else {
             return beforeStart + replace + afterEnd;
         }
+    }
+
+    /**
+     * 将集合转为 String.
+     *
+     * @param collection 集合
+     * @return 字符串
+     */
+    public static String listToString(Collection<?> collection) {
+        return collection.stream()
+                .map(Object::toString)
+                .collect(Collectors.joining(","));
+    }
+
+    /**
+     * 将 String 转为集合.
+     *
+     * @param string 字符串
+     * @return 集合
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> ConcurrentLinkedQueue<T> stringToList(String string) {
+        return Arrays.stream(string.split(","))
+                .map(s -> (T) s)
+                .collect(Collectors.toCollection(ConcurrentLinkedQueue::new));
     }
 }

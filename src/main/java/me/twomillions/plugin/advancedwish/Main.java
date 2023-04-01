@@ -3,7 +3,6 @@ package me.twomillions.plugin.advancedwish;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import lombok.Setter;
-import me.twomillions.plugin.advancedwish.enums.databases.status.DataTransformationStatus;
 import me.twomillions.plugin.advancedwish.enums.databases.types.DataStorageType;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
@@ -37,6 +36,8 @@ public final class Main extends JavaPlugin {
 
     @Getter @Setter private volatile static boolean disabled;
 
+    @Getter private static final boolean isOfflineMode = Bukkit.getServer().getOnlineMode();
+
     @Override
     public void onEnable() {
         setInstance(this);
@@ -49,8 +50,6 @@ public final class Main extends JavaPlugin {
         setServerVersion(Double.parseDouble(Arrays.toString(org.apache.commons.lang.StringUtils.substringsBetween(getServer().getClass().getPackage().getName(), ".v", "_R"))
                 .replace("_", "0").replace("[", "").replace("]", "")));
 
-        ConfigManager.createDefaultConfig();
-
         Yaml messageYaml = ConfigManager.getMessageYaml();
         Yaml advancedWishYaml = ConfigManager.getAdvancedWishYaml();
 
@@ -59,13 +58,49 @@ public final class Main extends JavaPlugin {
             return;
         }
 
+        // 注册
+        RegisterManager.setupPlugins(true);
+        RegisterManager.registerWish();
+        RegisterManager.registerCommands();
+
         // 设置数据存储
         String dataStorageType = advancedWishYaml.getString("DATA-STORAGE-TYPE").toLowerCase();
 
+        if (dataStorageType.contains(":")) {
+            String[] dataStorageTypeSplit = dataStorageType.split(":");
+
+            if (dataStorageTypeSplit.length > 2) {
+                ExceptionUtils.throwUnknownDatabaseCollectionType();
+                return;
+            }
+
+            DataStorageType type = DataStorageType.valueOfIgnoreCase(dataStorageTypeSplit[0]);
+            DataStorageType type1 = DataStorageType.valueOfIgnoreCase(dataStorageTypeSplit[1]);
+
+            if (type == type1) {
+                QuickUtils.sendConsoleMessage("&a原存储类型与新存储类型相同，请检查配置文件是否正确! 即将关闭服务器!");
+                Bukkit.shutdown();
+                return;
+            }
+
+            if (DatabasesManager.dataMigration(advancedWishYaml, type, type1)) {
+                QuickUtils.sendConsoleMessage("&a数据迁移完成! 即将关闭服务器!");
+            } else {
+                QuickUtils.sendConsoleMessage("&c数据迁移出错，没有可迁移数据? 迁移或初始化错误? 即将关闭服务器!");
+            }
+
+            Bukkit.shutdown();
+            return;
+        }
+
         switch (dataStorageType) {
             case ConstantsUtils.MYSQL:
+                DatabasesManager.setDataStorageType(DataStorageType.MySQL);
+                DatabasesManager.getDatabasesManager().setup(advancedWishYaml);
+                break;
+
             case ConstantsUtils.MONGODB:
-                DatabasesManager.setDataStorageType(DataStorageType.valueOf(dataStorageType));
+                DatabasesManager.setDataStorageType(DataStorageType.MongoDB);
                 DatabasesManager.getDatabasesManager().setup(advancedWishYaml);
                 break;
 
@@ -77,17 +112,6 @@ public final class Main extends JavaPlugin {
                 ExceptionUtils.throwUnknownDataStoreType();
                 return;
         }
-
-        // 迁移检查
-        if (DatabasesManager.getMongoManager() != null && DatabasesManager.getMongoManager().playerGuaranteedJsonToMongo(advancedWishYaml) != DataTransformationStatus.TurnOff) {
-            Bukkit.shutdown();
-            return;
-        }
-
-        // 注册
-        RegisterManager.setupPlugins(true);
-        RegisterManager.registerWish();
-        RegisterManager.registerCommands();
 
         // bStats
         if (!advancedWishYaml.getOrDefault("BSTATS", true)) {

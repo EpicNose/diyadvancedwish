@@ -13,7 +13,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.bukkit.Bukkit;
 
 import java.sql.*;
-import java.util.Arrays;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -69,13 +69,13 @@ public class MySQLManager implements DatabasesInterface {
             getDataSource().setPassword(getPassword());
             getDataSource().setInitialSize(5);
 
-            QuickUtils.sendConsoleMessage("&aAdvanced Wish 已成功建立与 MySQL 的连接!");
+            QuickUtils.sendConsoleMessage("&a已成功建立与 &eMySQL&a 的连接!");
 
             setConnectStatus(ConnectStatus.Connected);
         } catch (Exception exception) {
             exception.printStackTrace();
 
-            QuickUtils.sendConsoleMessage("&c您打开了 MySQL 数据库选项，但 Advanced Wish 未能正确连接到 MySQL，请检查 MySQL 服务状态，即将关闭服务器!");
+            QuickUtils.sendConsoleMessage("&c您打开了 &eMySQL&c 数据库选项，但未能正确连接到 &eMySQL&c，请检查 &eMySQL&c 服务状态，即将关闭服务器!");
 
             setConnectStatus(ConnectStatus.CannotConnect);
 
@@ -152,7 +152,7 @@ public class MySQLManager implements DatabasesInterface {
                 return defaultValue;
             }
 
-            return new ConcurrentLinkedQueue<>(Arrays.asList(value.split(",")));
+            return QuickUtils.stringToList(value);
         } catch (SQLException exception) {
             exception.printStackTrace();
             return defaultValue;
@@ -173,6 +173,10 @@ public class MySQLManager implements DatabasesInterface {
             checkCollectionType(key, databaseCollectionType);
             checkColumn(key, databaseCollectionType);
 
+            if (value instanceof Collections) {
+                value = QuickUtils.listToString((Collection<?>) value);
+            }
+
             String query = "INSERT INTO `" + databaseCollectionType + "` (uuid, `" + key + "`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `" + key + "`=?";
 
             PreparedStatement preparedStatement = connection.prepareStatement(query);
@@ -185,6 +189,75 @@ public class MySQLManager implements DatabasesInterface {
         } catch (SQLException exception) {
             exception.printStackTrace();
             return false;
+        }
+    }
+
+    /**
+     * 获取指定集合类型的所有数据。
+     *
+     * @param databaseCollectionType 查询的集合
+     * @return 以 Map 的形式返回所有数据，其中 Map 的 Key 是 UUID，value 是一个包含键值对的 Map
+     */
+    @Override
+    public Map<String, Map<String, Object>> getAllData(DatabaseCollectionType databaseCollectionType) {
+        try (Connection connection = getDataSource().getConnection()) {
+            DatabaseMetaData databaseMetaData = connection.getMetaData();
+            ResultSet columns = databaseMetaData.getColumns(null, null, databaseCollectionType.toString(), null);
+
+            List<String> columnNames = new ArrayList<>();
+            while (columns.next()) {
+                String columnName = columns.getString("COLUMN_NAME");
+                columnNames.add(columnName);
+            }
+
+            if (columnNames.isEmpty()) {
+                return new HashMap<>();
+            }
+
+            String query = "SELECT uuid, `" + String.join("`, `", columnNames) + "` FROM `" + databaseCollectionType + "`";
+
+            PreparedStatement statement = connection.prepareStatement(query);
+            ResultSet resultSet = statement.executeQuery();
+
+            ResultSetMetaData metadata = resultSet.getMetaData();
+            int columnCount = metadata.getColumnCount();
+            List<String> dataColumnNames = new ArrayList<>();
+
+            for (int i = 2; i <= columnCount; i++) {
+                dataColumnNames.add(metadata.getColumnName(i));
+            }
+
+            Map<String, Map<String, Object>> data = new HashMap<>();
+
+            while (resultSet.next()) {
+                String uuid = resultSet.getString("uuid");
+                Map<String, Object> rowData = new HashMap<>();
+
+                for (String columnName : dataColumnNames) {
+                    Object value = resultSet.getObject(columnName);
+                    rowData.put(columnName, value);
+                }
+
+                data.put(uuid, rowData);
+            }
+
+            Map<String, Map<String, Object>> correctedData = new HashMap<>();
+            for (String columnName : dataColumnNames) {
+                if (!columnName.equals("uuid")) {
+                    Map<String, Object> columnData = new HashMap<>();
+
+                    for (String uuid : data.keySet()) {
+                        columnData.put(uuid, data.get(uuid).get(columnName));
+                    }
+
+                    correctedData.put(columnName, columnData);
+                }
+            }
+
+            return correctedData;
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+            return new HashMap<>();
         }
     }
 
@@ -206,7 +279,8 @@ public class MySQLManager implements DatabasesInterface {
     }
 
     /**
-     * 检查指定集合类型的表是否存在，如果不存在，则创建该表。
+     * 检查是否存在指定集合。
+     * 如果不存在，则创建新集合，其中包含一个主键 uuid 和一个指定的列。
      *
      * @param key 查询的 Key
      * @param databaseCollectionType 查询的集合
@@ -227,7 +301,7 @@ public class MySQLManager implements DatabasesInterface {
     }
 
     /**
-     * 检查指定集合类型的表是否包含指定的列，如果不包含，则为该表添加该列。
+     * 检查是否存在指定的列。如果不存在，则在表格中添加新列。
      *
      * @param key 查询的 Key
      * @param databaseCollectionType 查询的集合
@@ -235,7 +309,7 @@ public class MySQLManager implements DatabasesInterface {
     private void checkColumn(String key, DatabaseCollectionType databaseCollectionType) {
         try (Connection connection = getDataSource().getConnection()) {
             DatabaseMetaData databaseMetaData = connection.getMetaData();
-            ResultSet columns = databaseMetaData.getColumns(null, null, String.valueOf(databaseCollectionType), key);
+            ResultSet columns = databaseMetaData.getColumns(null, null, databaseCollectionType.toString(), key);
 
             if (!columns.next()) {
                 String alterTableQuery = "ALTER TABLE `" + databaseCollectionType + "` ADD `" + key + "` TEXT DEFAULT NULL";

@@ -6,25 +6,24 @@ import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
-import de.leonhard.storage.Json;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import lombok.Setter;
-import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
-import me.twomillions.plugin.advancedwish.Main;
-import me.twomillions.plugin.advancedwish.enums.databases.status.DataTransformationStatus;
 import me.twomillions.plugin.advancedwish.enums.databases.status.AuthStatus;
-import me.twomillions.plugin.advancedwish.enums.databases.types.DatabaseCollectionType;
 import me.twomillions.plugin.advancedwish.enums.databases.status.ConnectStatus;
 import me.twomillions.plugin.advancedwish.enums.databases.status.CustomUrlStatus;
+import me.twomillions.plugin.advancedwish.enums.databases.types.DatabaseCollectionType;
 import me.twomillions.plugin.advancedwish.interfaces.DatabasesInterface;
-import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.bson.Document;
 import org.bukkit.Bukkit;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 
 /**
  * MongoDB 操作类。
@@ -78,7 +77,7 @@ public class MongoManager implements DatabasesInterface {
                 setAuthStatus(AuthStatus.UsingAuth);
                 setMongoClientUrlString("mongodb://" + getUsername() + ":" + getPassword() + "@" + getIp() + ":" + getPort() + "/AdvancedWish");
 
-                QuickUtils.sendConsoleMessage("&aAdvanced Wish 检查到Mongo开启身份验证，已设置身份验证信息!");
+                QuickUtils.sendConsoleMessage("&a检查到 &eMongo&a 开启身份验证，已设置身份验证信息!");
             }
         }
 
@@ -88,11 +87,11 @@ public class MongoManager implements DatabasesInterface {
             setMongoClient(new MongoClient(getMongoClientUrl()));
             setMongoDatabase(getMongoClient().getDatabase("AdvancedWish"));
 
-            QuickUtils.sendConsoleMessage("&aAdvanced Wish 已成功建立与MongoDB的连接!");
+            QuickUtils.sendConsoleMessage("&a已成功建立与 &eMongoDB&a 的连接!");
 
             setConnectStatus(ConnectStatus.Connected);
         } catch (Exception exception) {
-            QuickUtils.sendConsoleMessage("&c您打开了MongoDB数据库选项，但Advanced Wish未能正确连接到MongoDB，请检查MongoDB服务状态，即将关闭服务器!");
+            QuickUtils.sendConsoleMessage("&c您打开了 &eMongoDB&c 数据库选项，但未能正确连接到 &eMongoDB&c，请检查 &eMongoDB&c 服务状态，即将关闭服务器!");
 
             setConnectStatus(ConnectStatus.CannotConnect);
 
@@ -115,12 +114,12 @@ public class MongoManager implements DatabasesInterface {
     public Object getOrDefault(String uuid, String key, Object defaultValue, DatabaseCollectionType databaseCollectionType) {
         MongoCollection<Document> collection = getMongoDatabase().getCollection(databaseCollectionType.toString());
 
-        Document filter = new Document("uuid", uuid);
+        Document filter = new Document("_id", uuid);
         Document document = collection.find(filter).first();
 
         // 如果没有找到，则插入默认值
         if (document == null) {
-            document = new Document("uuid", uuid).append(key, defaultValue);
+            document = new Document("_id", uuid).append(key, defaultValue);
             collection.insertOne(document);
             return defaultValue;
         }
@@ -149,12 +148,12 @@ public class MongoManager implements DatabasesInterface {
     public ConcurrentLinkedQueue<String> getOrDefaultList(String uuid, String key, ConcurrentLinkedQueue<String> defaultValue, DatabaseCollectionType databaseCollectionType) {
         MongoCollection<Document> collection = getMongoDatabase().getCollection(databaseCollectionType.toString());
 
-        Document filter = new Document("uuid", uuid);
+        Document filter = new Document("_id", uuid);
         Document document = collection.find(filter).first();
 
         // 如果没有找到，则插入默认值
         if (document == null) {
-            document = new Document("uuid", uuid).append(key, defaultValue);
+            document = new Document("_id", uuid).append(key, defaultValue);
             collection.insertOne(document);
             return defaultValue;
         }
@@ -180,77 +179,32 @@ public class MongoManager implements DatabasesInterface {
      */
     @Override
     public boolean update(String uuid, String key, Object value, DatabaseCollectionType databaseCollectionType) {
-        MongoCollection<Document> mongoCollection = getMongoDatabase().getCollection(databaseCollectionType.toString());
-        Document filter = new Document("uuid", uuid);
-        Document update = new Document("$set", new Document(key, value));
-        UpdateOptions options = new UpdateOptions().upsert(true);
-        mongoCollection.updateOne(filter, update, options);
-
+        MongoCollection<Document> collection = getMongoDatabase().getCollection(databaseCollectionType.toString());
+        collection.updateOne(new Document("_id", uuid), new Document("$set", new Document(key, value)), new UpdateOptions().upsert(true));
         return true;
     }
 
     /**
-     * 将 JSON 转换为 MongoDB 数据。
+     * 获取指定集合类型的所有数据。
      *
-     * @param yaml 包含转换信息的 YAML 对象
-     * @return 返回数据迁移状态
+     * @param databaseCollectionType 查询的集合
+     * @return 以 Map 的形式返回所有数据，其中 Map 的 Key 是 UUID，value 是一个包含键值对的 Map
      */
-    public DataTransformationStatus playerGuaranteedJsonToMongo(Yaml yaml) {
-        // 检查是否开启转换
-        if (!yaml.getBoolean("TRANSFORMATION-JSON-TO-MONGO")) {
-            return DataTransformationStatus.TurnOff;
+    @Override
+    public Map<String, Map<String, Object>> getAllData(DatabaseCollectionType databaseCollectionType) {
+        MongoCollection<Document> collection = getMongoDatabase().getCollection(databaseCollectionType.toString());
+        List<Document> documents = collection.find().into(new ArrayList<>());
+
+        Map<String, Map<String, Object>> result = new HashMap<>();
+
+        for (Document document : documents) {
+            String id = document.getString("_id");
+            Map<String, Object> data = document.entrySet().stream()
+                    .filter(entry -> !entry.getKey().equals("_id"))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            result.put(id, data);
         }
 
-        // 检查 MongoDB 是否已连接
-        if (getConnectStatus() != ConnectStatus.Connected) {
-            QuickUtils.sendConsoleMessage("&c您开启了数据迁移选项，但 Mongo 数据库并没有成功连接，请检查配置文件，服务器即将关闭。");
-            return DataTransformationStatus.Failed;
-        }
-
-        // 获取文件路径和文件名列表
-        String logsPath = Main.getLogsPath();
-        String guaranteedPath = Main.getGuaranteedPath();
-
-        ConcurrentLinkedQueue<String> logsFileNames = ConfigManager.getAllFileNames(logsPath);
-        ConcurrentLinkedQueue<String> guaranteedFileNames = ConfigManager.getAllFileNames(guaranteedPath);
-
-        // 检查是否有需要转换的文件
-        if (logsFileNames.isEmpty() && guaranteedFileNames.isEmpty()) {
-            QuickUtils.sendConsoleMessage("&c未发现需要进行迁移的 JSON 数据，结束此次迁移，服务器即将关闭。");
-            return DataTransformationStatus.Failed;
-        }
-
-        // 迁移 JSON 文件
-        int jsonKeySetAmount = 0;
-
-        if (!guaranteedFileNames.isEmpty()) {
-            for (String guaranteedFileName : guaranteedFileNames) {
-                Json json = ConfigManager.createJson(guaranteedFileName, guaranteedPath, true, false);
-                Set<String> jsonKeySet = json.keySet();
-                jsonKeySetAmount += jsonKeySet.size();
-                for (String key : jsonKeySet) {
-                    update(guaranteedFileName.split(ConstantsUtils.JSON_SUFFIX)[0], key, json.get(key), DatabaseCollectionType.PlayerGuaranteed);
-                }
-            }
-        } else {
-            QuickUtils.sendConsoleMessage("&c未发现需要进行迁移的玩家许愿 JSON 数据，跳过玩家许愿数据迁移。");
-        }
-
-        if (!logsFileNames.isEmpty()) {
-            for (String logsFileName : logsFileNames) {
-                Json json = ConfigManager.createJson(logsFileName, logsPath, true, false);
-                Set<String> jsonKeySet = json.keySet();
-                jsonKeySetAmount += jsonKeySet.size();
-                for (String key : jsonKeySet) {
-                    update(logsFileName.split(ConstantsUtils.JSON_SUFFIX)[0], key, json.get(key), DatabaseCollectionType.PlayerLogs);
-                }
-            }
-        } else {
-            QuickUtils.sendConsoleMessage("&c未发现需要进行迁移的玩家许愿日志 JSON 数据，跳过玩家许愿日志数据迁移。");
-        }
-
-        QuickUtils.sendConsoleMessage("&a已成功迁移 JSON 数据至 MongoDB 数据库，此次迁移总文件数: &e" + (guaranteedFileNames.size() + logsFileNames.size()) + "&a，迁移数据数: &e" + jsonKeySetAmount + "&a，即将关闭服务器，已迁移的 JSON 不会被删除，请手动关闭迁移选项!");
-
-        return DataTransformationStatus.Completed;
+        return result;
     }
 }

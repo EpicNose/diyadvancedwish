@@ -224,6 +224,10 @@ GUARANTEED:
     #  此语句是可以进行套娃的，可以在随机的基础上再进行随机。
     #  例: "method.randomSentence("method.randomSentence(\"DO-LIST.A\", 5, \"DO-LIST.B\", 5)", 5, \"DO-LIST.B\", 5)"
     #
+    #  我们也提供了各种算法的 randomSentence 语句，分别为:
+    #  randomSentenceWithSecureRandom / randomSentenceWithMonteCarlo / randomSentenceWithShuffle / randomSentenceWithShuffle
+    #  randomSentenceWithMersenneTwister / randomSentenceWithXORShift
+    #
     #  此处需要的是字符串类型，使用特殊语句，需要使用双引号进行包裹。
     EFFECT:
       - "method.randomSentence(\"DO-LIST.A\", 5, \"DO-LIST.B\", 5)"

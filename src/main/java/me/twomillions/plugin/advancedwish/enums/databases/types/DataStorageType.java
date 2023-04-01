@@ -19,5 +19,20 @@ public enum DataStorageType {
     /**
      * Json - Json 存储
      */
-    Json
+    Json;
+
+    /**
+     * valueOf 忽略大小写。
+     *
+     * @param name name
+     * @return DataStorageType
+     */
+    public static DataStorageType valueOfIgnoreCase(String name) {
+        for (DataStorageType type : DataStorageType.values()) {
+            if (type.name().equalsIgnoreCase(name)) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("No enum constant " + DataStorageType.class.getCanonicalName() + "." + name);
+    }
 }

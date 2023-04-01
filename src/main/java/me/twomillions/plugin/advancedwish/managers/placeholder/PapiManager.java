@@ -2,17 +2,13 @@ package me.twomillions.plugin.advancedwish.managers.placeholder;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.twomillions.plugin.advancedwish.Main;
-import me.twomillions.plugin.advancedwish.managers.register.RegisterManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
-import org.bukkit.Bukkit;
+import me.twomillions.plugin.advancedwish.managers.register.RegisterManager;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Locale;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.Optional;
 
 /**
  * 该类继承 PlaceholderExpansion 类，用于处理 Advanced Wish 额外变量。
@@ -62,24 +58,14 @@ public class PapiManager extends PlaceholderExpansion {
      */
     @Override
     public String onRequest(OfflinePlayer player, @NotNull String params) {
-        final String finalParams = params.toLowerCase(Locale.ROOT);
+        String playerName = player.getName();
 
-        if (player.getPlayer() == null) {
-            return "&7Unknown";
-        }
-
-        Player player1 = player.getPlayer();
-
-        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> RegisterManager.getRegisterWish().stream()
+        Optional<String> result = RegisterManager.getRegisterWish().stream()
                 .filter(wishName -> {
-                    String[] wishParams = finalParams.split("_");
+                    String[] wishParams = params.split("_");
 
-                    if (wishParams.length > 3) {
-                        return false;
-                    }
-
-                    String wishType = wishParams[0];
-                    String wishName2 = wishParams[1];
+                    String wishType = wishParams[0].toLowerCase();
+                    String wishName2 = wishParams[1].toLowerCase();
 
                     if (!wishType.equals("amount") && !wishType.equals("guaranteed") && !wishType.equals("limit")) {
                         return false;
@@ -89,35 +75,25 @@ public class PapiManager extends PlaceholderExpansion {
                 })
                 .findFirst()
                 .map(wishName -> {
-                    String[] wishParams = finalParams.split("_");
-                    Player player2 = null;
+                    String[] wishParams = params.split("_");
+                    String player2Name = null;
 
-                    if (wishParams.length == 3) {
-                        player2 = Bukkit.getPlayerExact(wishParams[2]);
-                        if (player2 == null) {
-                            return "&7Unknown";
-                        }
+                    if (wishParams.length >= 3) {
+                        player2Name = params.substring(params.indexOf('_', params.indexOf('_') + 1) + 1);
                     }
 
-                    switch (wishParams[0]) {
+                    switch (wishParams[0].toLowerCase()) {
                         case "amount":
-                            return Integer.toString(WishManager.getPlayerWishAmount(player2 == null ? player1 : player2, wishName));
+                            return Integer.toString(WishManager.getPlayerWishAmount(player2Name == null ? playerName : player2Name, wishName));
                         case "guaranteed":
-                            return Double.toString(WishManager.getPlayerWishGuaranteed(player2 == null ? player1 : player2, wishName));
+                            return Double.toString(WishManager.getPlayerWishGuaranteed(player2Name == null ? playerName : player2Name, wishName));
                         case "limit":
-                            return Integer.toString(WishManager.getPlayerWishLimitAmount(player2 == null ? player1 : player2, wishName));
+                            return Integer.toString(WishManager.getPlayerWishLimitAmount(player2Name == null ? playerName : player2Name, wishName));
                         default:
                             return "&7Unknown";
                     }
-                })
-                .orElse("&7Unknown"));
+                });
 
-        try {
-            return future.get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-            Thread.currentThread().interrupt();
-            return "&cError";
-        }
+        return result.orElse("&7Unknown");
     }
 }

@@ -30,7 +30,13 @@ WISH:
 ####################################################
 
 # 数据存储类型
-#  默认使用 Json，可选有 MongoDB
+#  默认使用 Json，可选有 Json、MongoDB、MySQL (大小写不敏感)
+#
+# 数据转移写法
+#   Advanced Wish 支持您将一个方式存储的数据转换为另一个方式，进行数据迁移。
+#   需要注意的是，迁移完成后会进行提示并且关闭服务器，不会删除原有的数据，您需要切换数据迁移写法为普通的数据存储类型。
+#   如果是两个数据库的迁移，请确保两个数据库都正常开启且可以进行连接。
+#   写法: "原存储类型:新存储类型" - 将原存储类型的所有数据迁移至新存储类型。
 DATA-STORAGE-TYPE: "JSON"
 
 # Mongo 数据库设置
@@ -54,7 +60,8 @@ MONGO:
 # MySQL 数据库设置
 MYSQL:
   # MySQL5 使用: com.mysql.jdbc.Driver
-  DRIVER: "com.mysql.cj.jdbc.Driver" # MySQL 8
+  # MySQL8 使用: com.mysql.cj.jdbc.Driver
+  DRIVER: "com.mysql.cj.jdbc.Driver"
 
   IP: 127.0.0.1
   PORT: 3306

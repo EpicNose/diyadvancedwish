@@ -28,6 +28,19 @@ public class ExceptionUtils {
      * @return 永远不会返回任何值，因为该方法抛出异常后会立即关闭服务器。
      * @throws IllegalArgumentException 未知的数据存储类型
      */
+    public static <T> T throwUnknownDatabaseCollectionType() {
+        QuickUtils.sendConsoleMessage("&c未知的数据集合类型，这是不应该出现的，是否进行开发? 即将关闭服务器!");
+        Bukkit.shutdown();
+        throw new IllegalArgumentException("Unknown database collection type!");
+    }
+
+    /**
+     * 抛出异常，表示未知的数据存储类型。
+     *
+     * @param <T> 任意类型
+     * @return 永远不会返回任何值，因为该方法抛出异常后会立即关闭服务器。
+     * @throws IllegalArgumentException 未知的数据存储类型
+     */
     public static <T> T throwEncrypt() {
         QuickUtils.sendConsoleMessage("&c加 / 解密错误，此问题不应该出现，请反馈此问题给开发者! 即将关闭服务器!");
         Bukkit.shutdown();

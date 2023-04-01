@@ -96,7 +96,9 @@ public class RegisterManager {
             QuickUtils.sendConsoleMessage("&a检查到服务器存在 &eVulpecula&a，已支持使用 &eKether&a 脚本。");
         }
 
-        if (registerEvents) manager.registerEvents(new PlayerListener(), plugin);
+        if (registerEvents) {
+            manager.registerEvents(new PlayerListener(), plugin);
+        }
     }
 
     /**

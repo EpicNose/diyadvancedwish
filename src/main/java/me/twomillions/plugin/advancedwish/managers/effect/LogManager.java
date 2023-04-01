@@ -1,14 +1,9 @@
 package me.twomillions.plugin.advancedwish.managers.effect;
 
-import de.leonhard.storage.Json;
-import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.enums.databases.types.DatabaseCollectionType;
-import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.databases.DatabasesManager;
-import me.twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -23,25 +18,9 @@ public class LogManager {
      * @param logString 许愿日志
      */
     public static void addPlayerWishLog(String uuid, String logString) {
-        switch (DatabasesManager.getDataStorageType()) {
-            case MongoDB:
-            case MySQL:
-                ConcurrentLinkedQueue<String> dbLogs = DatabasesManager.getDatabasesManager().getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), DatabaseCollectionType.PlayerLogs);
-                dbLogs.add(logString);
-                DatabasesManager.getDatabasesManager().update(uuid, "logs", dbLogs, DatabaseCollectionType.PlayerLogs);
-                break;
-
-            case Json:
-                Json json = ConfigManager.createJson(uuid, Main.getLogsPath(), true, false);
-                List<String> jsonLogs = json.getStringList("logs");
-                jsonLogs.add(logString);
-                json.set("logs", jsonLogs);
-                break;
-
-            default:
-                ExceptionUtils.throwUnknownDataStoreType();
-                break;
-        }
+        ConcurrentLinkedQueue<String> dbLogs = DatabasesManager.getDatabasesManager().getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), DatabaseCollectionType.PlayerLogs);
+        dbLogs.add(logString);
+        DatabasesManager.getDatabasesManager().update(uuid, "logs", dbLogs, DatabaseCollectionType.PlayerLogs);
     }
 
     /**
@@ -53,31 +32,7 @@ public class LogManager {
      * @return 返回查询出来的日志列表
      */
     public static ConcurrentLinkedQueue<String> getPlayerWishLog(String uuid, int findMin, int findMax) {
-        switch (DatabasesManager.getDataStorageType()) {
-            case MongoDB:
-            case MySQL:
-                return getLogsInRange(DatabasesManager.getDatabasesManager().getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), DatabaseCollectionType.PlayerLogs), findMin, findMax);
-
-            case Json:
-                Json json = ConfigManager.createJson(uuid, Main.getLogsPath(), true, false);
-
-                List<String> jsonLogs = json.getStringList("logs");
-                ConcurrentLinkedQueue<String> returnLogs = new ConcurrentLinkedQueue<>();
-
-                // 计算查询范围
-                int start = Math.max(0, findMin - 1);  // 从 0 开始，所以需要减去 1
-                int end = Math.min(jsonLogs.size(), findMax);  // 取 logs 的实际长度与 findMax 之间的最小值
-
-                // 将符合查询范围的日志加入到结果列表
-                for (int i = start; i < end; i++) {
-                    returnLogs.add(jsonLogs.get(i));
-                }
-
-                return returnLogs;
-
-            default:
-                return ExceptionUtils.throwUnknownDataStoreType();
-        }
+        return getLogsInRange(DatabasesManager.getDatabasesManager().getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), DatabaseCollectionType.PlayerLogs), findMin, findMax);
     }
 
     /**
@@ -87,17 +42,7 @@ public class LogManager {
      * @return 返回日志条目数
      */
     public static int getPlayerWishLogSize(String uuid) {
-        switch (DatabasesManager.getDataStorageType()) {
-            case MongoDB:
-            case MySQL:
-                return DatabasesManager.getDatabasesManager().getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), DatabaseCollectionType.PlayerLogs).size();
-
-            case Json:
-                return ConfigManager.createJson(uuid, Main.getLogsPath(), true, false).getStringList("logs").size();
-
-            default:
-                return ExceptionUtils.throwUnknownDataStoreType();
-        }
+        return DatabasesManager.getDatabasesManager().getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), DatabaseCollectionType.PlayerLogs).size();
     }
 
     /**

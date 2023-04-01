@@ -24,9 +24,7 @@ import me.twomillions.plugin.advancedwish.utils.texts.StringEncrypter;
 import net.milkbowl.vault.economy.Economy;
 import org.apache.commons.lang3.StringUtils;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -45,8 +43,8 @@ import java.util.stream.Collectors;
  * @author 2000000
  * @date 2022/11/24 16:53
  */
+@SuppressWarnings({"unused", "BooleanMethodIsAlwaysInverted"})
 public class WishManager {
-    @SuppressWarnings("unused")
     private static final Plugin plugin = Main.getInstance();
 
     /**
@@ -62,7 +60,6 @@ public class WishManager {
      * @param wishName 许愿池名称
      * @return 若存在则返回 true，否则返回 false
      */
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean hasWish(String wishName) {
         return RegisterManager.getRegisterWish().contains(wishName);
     }
@@ -482,21 +479,7 @@ public class WishManager {
         String uuid = player.getUniqueId().toString();
         String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_guaranteed");
 
-        switch (DatabasesManager.getDataStorageType()) {
-            case MongoDB:
-            case MySQL:
-                DatabasesManager.getDatabasesManager().update(uuid, dataSync, String.valueOf(guaranteed), DatabaseCollectionType.PlayerGuaranteed);
-                break;
-
-            case Json:
-                Json json = ConfigManager.createJson(uuid, Main.getGuaranteedPath(), true, false);
-                json.set(dataSync, guaranteed);
-                break;
-
-            default:
-                ExceptionUtils.throwUnknownDataStoreType();
-                break;
-        }
+        DatabasesManager.getDatabasesManager().update(uuid, dataSync, String.valueOf(guaranteed), DatabaseCollectionType.PlayerGuaranteed);
     }
 
     /**
@@ -507,28 +490,12 @@ public class WishManager {
      * @param wishName 许愿池名称
      * @param guaranteed 保底率
      */
-    @SuppressWarnings({"deprecation", "unused"})
     public static void setPlayerWishGuaranteed(String playerName, String wishName, double guaranteed) {
         String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_guaranteed");
 
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
-        String offlinePlayerUUID = offlinePlayer.getUniqueId().toString();
+        String offlinePlayerUUID = QuickUtils.getPlayerUUID(playerName);
 
-        switch (DatabasesManager.getDataStorageType()) {
-            case MongoDB:
-            case MySQL:
-                DatabasesManager.getDatabasesManager().update(offlinePlayerUUID, dataSync, String.valueOf(guaranteed), DatabaseCollectionType.PlayerGuaranteed);
-                break;
-
-            case Json:
-                Json json = ConfigManager.createJson(offlinePlayerUUID, Main.getGuaranteedPath(), true, false);
-                json.set(dataSync, guaranteed);
-                break;
-
-            default:
-                ExceptionUtils.throwUnknownDataStoreType();
-                break;
-        }
+        DatabasesManager.getDatabasesManager().update(offlinePlayerUUID, dataSync, String.valueOf(guaranteed), DatabaseCollectionType.PlayerGuaranteed);
     }
 
     /**
@@ -542,18 +509,7 @@ public class WishManager {
         String uuid = player.getUniqueId().toString();
         String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_guaranteed");
 
-        switch (DatabasesManager.getDataStorageType()) {
-            case MongoDB:
-            case MySQL:
-                return Double.parseDouble(DatabasesManager.getDatabasesManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
-
-            case Json:
-                Json json = ConfigManager.createJson(uuid, Main.getGuaranteedPath(), true, false);
-                return json.getDouble(dataSync);
-
-            default:
-                return ExceptionUtils.throwUnknownDataStoreType();
-        }
+        return Double.parseDouble(DatabasesManager.getDatabasesManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
     }
 
     /**
@@ -563,25 +519,12 @@ public class WishManager {
      * @param wishName 许愿池名称
      * @return 返回玩家在指定许愿池的保底率
      */
-    @SuppressWarnings({"deprecation", "unused"})
     public static double getPlayerWishGuaranteed(String playerName, String wishName) {
         String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_guaranteed");
 
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
-        String offlinePlayerUUID = offlinePlayer.getUniqueId().toString();
+        String offlinePlayerUUID = QuickUtils.getPlayerUUID(playerName);
 
-        switch (DatabasesManager.getDataStorageType()) {
-            case MongoDB:
-            case MySQL:
-                return Double.parseDouble(DatabasesManager.getDatabasesManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
-
-            case Json:
-                Json json = ConfigManager.createJson(offlinePlayerUUID, Main.getGuaranteedPath(), true, false);
-                return json.getDouble(dataSync);
-
-            default:
-                return ExceptionUtils.throwUnknownDataStoreType();
-        }
+        return Double.parseDouble(DatabasesManager.getDatabasesManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
     }
 
     /**
@@ -595,21 +538,7 @@ public class WishManager {
         String uuid = player.getUniqueId().toString();
         String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_amount");
 
-        switch (DatabasesManager.getDataStorageType()) {
-            case MongoDB:
-            case MySQL:
-                DatabasesManager.getDatabasesManager().update(uuid, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
-                break;
-
-            case Json:
-                Json json = ConfigManager.createJson(uuid, Main.getGuaranteedPath(), true, false);
-                json.set(dataSync, amount);
-                break;
-
-            default:
-                ExceptionUtils.throwUnknownDataStoreType();
-                break;
-        }
+        DatabasesManager.getDatabasesManager().update(uuid, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
     }
 
     /**
@@ -619,28 +548,12 @@ public class WishManager {
      * @param wishName 许愿池名称
      * @param amount 许愿次数
      */
-    @SuppressWarnings({"deprecation", "unused"})
     public static void setPlayerWishAmount(String playerName, String wishName, int amount) {
         String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_amount");
 
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
-        String offlinePlayerUUID = offlinePlayer.getUniqueId().toString();
+        String offlinePlayerUUID = QuickUtils.getPlayerUUID(playerName);
 
-        switch (DatabasesManager.getDataStorageType()) {
-            case MongoDB:
-            case MySQL:
-                DatabasesManager.getDatabasesManager().update(offlinePlayerUUID, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
-                break;
-
-            case Json:
-                Json json = ConfigManager.createJson(offlinePlayerUUID, Main.getGuaranteedPath(), true, false);
-                json.set(dataSync, amount);
-                break;
-
-            default:
-                ExceptionUtils.throwUnknownDataStoreType();
-                break;
-        }
+        DatabasesManager.getDatabasesManager().update(offlinePlayerUUID, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
     }
 
     /**
@@ -654,18 +567,7 @@ public class WishManager {
         String uuid = player.getUniqueId().toString();
         String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_amount");
 
-        switch (DatabasesManager.getDataStorageType()) {
-            case MongoDB:
-            case MySQL:
-                return Integer.parseInt(DatabasesManager.getDatabasesManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
-
-            case Json:
-                Json json = ConfigManager.createJson(uuid, Main.getGuaranteedPath(), true, false);
-                return json.getInt(dataSync);
-
-            default:
-                return ExceptionUtils.throwUnknownDataStoreType();
-        }
+        return Integer.parseInt(DatabasesManager.getDatabasesManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
     }
 
     /**
@@ -675,25 +577,12 @@ public class WishManager {
      * @param wishName 许愿池名称
      * @return 玩家在许愿池中的许愿次数
      */
-    @SuppressWarnings({"deprecation", "unused"})
     public static int getPlayerWishAmount(String playerName, String wishName) {
         String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_amount");
 
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
-        String offlinePlayerUUID = offlinePlayer.getUniqueId().toString();
+        String offlinePlayerUUID = QuickUtils.getPlayerUUID(playerName);
 
-        switch (DatabasesManager.getDataStorageType()) {
-            case MongoDB:
-            case MySQL:
-                return Integer.parseInt(DatabasesManager.getDatabasesManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
-
-            case Json:
-                Json json = ConfigManager.createJson(offlinePlayerUUID, Main.getGuaranteedPath(), true, false);
-                return json.getInt(dataSync);
-
-            default:
-                return ExceptionUtils.throwUnknownDataStoreType();
-        }
+        return Integer.parseInt(DatabasesManager.getDatabasesManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
     }
 
     /**
@@ -709,21 +598,7 @@ public class WishManager {
         String uuid = player.getUniqueId().toString();
         String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_limit_amount");
 
-        switch (DatabasesManager.getDataStorageType()) {
-            case MongoDB:
-            case MySQL:
-                DatabasesManager.getDatabasesManager().update(uuid, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
-                break;
-
-            case Json:
-                Json json = ConfigManager.createJson(uuid, Main.getGuaranteedPath(), true, false);
-                json.set(dataSync, amount);
-                break;
-
-            default:
-                ExceptionUtils.throwUnknownDataStoreType();
-                break;
-        }
+        DatabasesManager.getDatabasesManager().update(uuid, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
     }
 
     /**
@@ -733,30 +608,14 @@ public class WishManager {
      * @param wishName 许愿池名称
      * @param amount 许愿次数上限
      */
-    @SuppressWarnings({"deprecation", "unused"})
     public static void setPlayerWishLimitAmount(String playerName, String wishName, int amount) {
         if (!isEnabledWishLimit(wishName)) return;
 
         String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_limit_amount");
 
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
-        String offlinePlayerUUID = offlinePlayer.getUniqueId().toString();
+        String offlinePlayerUUID = QuickUtils.getPlayerUUID(playerName);
 
-        switch (DatabasesManager.getDataStorageType()) {
-            case MongoDB:
-            case MySQL:
-                DatabasesManager.getDatabasesManager().update(offlinePlayerUUID, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
-                break;
-
-            case Json:
-                Json json = ConfigManager.createJson(offlinePlayerUUID, Main.getGuaranteedPath(), true, false);
-                json.set(dataSync, amount);
-                break;
-
-            default:
-                ExceptionUtils.throwUnknownDataStoreType();
-                break;
-        }
+        DatabasesManager.getDatabasesManager().update(offlinePlayerUUID, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
     }
 
     /**
@@ -772,18 +631,7 @@ public class WishManager {
         String uuid = player.getUniqueId().toString();
         String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_limit_amount");
 
-        switch (DatabasesManager.getDataStorageType()) {
-            case MongoDB:
-            case MySQL:
-                return Integer.parseInt(DatabasesManager.getDatabasesManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
-
-            case Json:
-                Json json = ConfigManager.createJson(uuid, Main.getGuaranteedPath(), true, false);
-                return json.getInt(dataSync);
-
-            default:
-                return ExceptionUtils.throwUnknownDataStoreType();
-        }
+        return Integer.parseInt(DatabasesManager.getDatabasesManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
     }
 
     /**
@@ -793,27 +641,14 @@ public class WishManager {
      * @param wishName 许愿池名称
      * @return 玩家在许愿池中的许愿次数上限
      */
-    @SuppressWarnings({"deprecation", "unused"})
     public static int getPlayerWishLimitAmount(String playerName, String wishName) {
         if (!isEnabledWishLimit(wishName)) return 0;
 
         String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_limit_amount");
 
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
-        String offlinePlayerUUID = offlinePlayer.getUniqueId().toString();
+        String offlinePlayerUUID = QuickUtils.getPlayerUUID(playerName);
 
-        switch (DatabasesManager.getDataStorageType()) {
-            case MongoDB:
-            case MySQL:
-                return Integer.parseInt(DatabasesManager.getDatabasesManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
-
-            case Json:
-                Json json = ConfigManager.createJson(offlinePlayerUUID, Main.getGuaranteedPath(), true, false);
-                return json.getInt(dataSync);
-
-            default:
-                return ExceptionUtils.throwUnknownDataStoreType();
-        }
+        return Integer.parseInt(DatabasesManager.getDatabasesManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
     }
 
     /**
@@ -1114,7 +949,6 @@ public class WishManager {
      * @param player 玩家
      * @return 若处理成功则返回 true，若达到极限则为 false
      */
-    @SuppressWarnings({"unused", "BooleanMethodIsAlwaysInverted"})
     private static boolean handleWishIncreasedAmount(String wishName, Player player) {
         int wishLimitAmount = QuickUtils.handleInt(getWishLimitAmount(wishName), player);
         int wishIncreasedAmount = QuickUtils.handleInt(getWishIncreasedAmount(wishName), player);

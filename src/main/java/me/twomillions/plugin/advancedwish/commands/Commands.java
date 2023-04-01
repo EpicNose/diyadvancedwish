@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
  * @author 2000000
  * @date 2023/3/26
  */
-@SuppressWarnings({"unused", "SameParameterValue", "deprecation"})
+@SuppressWarnings({"unused", "SameParameterValue"})
 public class Commands implements TabExecutor {
     private static final Plugin plugin = Main.getInstance();
     private final Cache<String, Method> subCommandMap = CaffeineUtils.buildBukkitCache();
@@ -539,9 +539,7 @@ public class Commands implements TabExecutor {
         }
 
         String name = args[1];
-        Player queryPlayer = Bukkit.getPlayer(name);
-        String queryPlayerUUID = queryPlayer == null ? Bukkit.getOfflinePlayer(name).getUniqueId().toString():
-                queryPlayer.isOnline() ? queryPlayer.getUniqueId().toString() : Bukkit.getOfflinePlayer(name).getUniqueId().toString();
+        String queryPlayerUUID = QuickUtils.getPlayerUUID(name);
 
         int startNumber;
         int endNumber;

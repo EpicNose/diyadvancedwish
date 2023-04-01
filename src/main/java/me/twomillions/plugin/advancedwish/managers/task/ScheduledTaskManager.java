@@ -23,7 +23,7 @@ public class ScheduledTaskManager {
     private static final Plugin plugin = Main.getInstance();
 
     /**
-     * 用 Map 存储每个玩家的计划任务，key 为玩家的 UUID，value 为 List，存储每个计划任务的字符串表示。
+     * 用 Map 存储每个玩家的计划任务，Key 为玩家的 UUID，value 为 List，存储每个计划任务的字符串表示。
      */
     private static final Cache<UUID, ConcurrentLinkedQueue<String>> playerScheduledTasks = CaffeineUtils.buildBukkitCache();
 

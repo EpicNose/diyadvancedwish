@@ -2,7 +2,9 @@ package me.twomillions.plugin.advancedwish.interfaces;
 
 import de.leonhard.storage.Yaml;
 import me.twomillions.plugin.advancedwish.enums.databases.types.DatabaseCollectionType;
+import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -51,4 +53,41 @@ public interface DatabasesInterface {
      * @param databaseCollectionType 数据存储的集合
      */
     boolean update(String uuid, String key, Object value, DatabaseCollectionType databaseCollectionType);
+
+    /**
+     * 获取指定集合类型的所有数据。
+     *
+     * @param databaseCollectionType 查询的集合
+     * @return 以 Map 的形式返回所有数据，其中 Map 的 Key 是 UUID，value 是一个包含键值对的 Map
+     */
+    Map<String, Map<String, Object>> getAllData(DatabaseCollectionType databaseCollectionType);
+
+    /**
+     * 将指定集合类型的所有数据插入到数据库中。
+     *
+     * @param databaseCollectionType 数据存储的集合
+     * @param data 要插入的数据，以 Map 的形式传递，其中 Map 的 Key 是 UUID，value 是一个包含键值对的 Map
+     */
+    default void insertAllData(DatabaseCollectionType databaseCollectionType, Map<String, Map<String, Object>> data) {
+        int count = 0;
+
+        for (Map.Entry<String, Map<String, Object>> entry : data.entrySet()) {
+            String uuid = entry.getKey();
+
+            for (Map.Entry<String, Object> keyData : entry.getValue().entrySet()) {
+                String key = keyData.getKey();
+                Object value = keyData.getValue();
+
+                update(uuid, key, value, databaseCollectionType);
+
+                count++;
+
+                QuickUtils.sendConsoleMessage("&a插入数据: UUID: " + uuid + ", key: " + key + ", value: " + value);
+            }
+        }
+
+        if (count != 0) {
+            QuickUtils.sendConsoleMessage("&a迁移完毕，总迁移数据: " + count + " 个。");
+        }
+    }
 }

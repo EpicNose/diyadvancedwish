@@ -6,10 +6,13 @@ import lombok.Setter;
 import me.twomillions.plugin.advancedwish.enums.databases.types.DataStorageType;
 import me.twomillions.plugin.advancedwish.enums.databases.types.DatabaseCollectionType;
 import me.twomillions.plugin.advancedwish.interfaces.DatabasesInterface;
+import me.twomillions.plugin.advancedwish.managers.databases.json.JsonManager;
 import me.twomillions.plugin.advancedwish.managers.databases.mongo.MongoManager;
 import me.twomillions.plugin.advancedwish.managers.databases.mysql.MySQLManager;
 import me.twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -30,12 +33,17 @@ public class DatabasesManager implements DatabasesInterface {
     /**
      * DatabasesManager.getMongoManager().
      */
-    @Setter @Getter private static MongoManager mongoManager = new MongoManager();
+    @Getter @Setter private static MongoManager mongoManager = new MongoManager();
 
     /**
      * DatabasesManager.getMySQLManager().
      */
-    @Setter @Getter private static MySQLManager mySQLManager = new MySQLManager();
+    @Getter @Setter private static MySQLManager mySQLManager = new MySQLManager();
+
+    /**
+     * DatabasesManager.getJsonManager().
+     */
+    @Getter @Setter private static JsonManager jsonManager = new JsonManager();
 
     /**
      * 根据指定的 YAML 配置，初始化数据库连接。
@@ -51,6 +59,9 @@ public class DatabasesManager implements DatabasesInterface {
 
             case MySQL:
                 return getMySQLManager().setup(yaml);
+
+            case Json:
+                return getJsonManager().setup(yaml);
 
             default:
                 return ExceptionUtils.throwUnknownDataStoreType();
@@ -75,6 +86,9 @@ public class DatabasesManager implements DatabasesInterface {
             case MySQL:
                 return getMySQLManager().getOrDefault(uuid, key, defaultValue, databaseCollectionType);
 
+            case Json:
+                return getJsonManager().getOrDefault(uuid, key, defaultValue, databaseCollectionType);
+
             default:
                 return ExceptionUtils.throwUnknownDataStoreType();
         }
@@ -98,6 +112,9 @@ public class DatabasesManager implements DatabasesInterface {
             case MySQL:
                 return getMySQLManager().getOrDefaultList(uuid, key, defaultValue, databaseCollectionType);
 
+            case Json:
+                return getJsonManager().getOrDefaultList(uuid, key, defaultValue, databaseCollectionType);
+
             default:
                 return ExceptionUtils.throwUnknownDataStoreType();
         }
@@ -120,8 +137,107 @@ public class DatabasesManager implements DatabasesInterface {
             case MySQL:
                 return getMySQLManager().update(uuid, key, value, databaseCollectionType);
 
+            case Json:
+                return getJsonManager().update(uuid, key, value, databaseCollectionType);
+
             default:
                 return ExceptionUtils.throwUnknownDataStoreType();
+        }
+    }
+
+    /**
+     * 获取指定集合类型的所有数据。
+     *
+     * @param databaseCollectionType 查询的集合
+     * @return 以 Map 的形式返回所有数据，其中 Map 的 Key 是 UUID，value 是一个包含键值对的 Map
+     */
+    @Override
+    public Map<String, Map<String, Object>> getAllData(DatabaseCollectionType databaseCollectionType) {
+        switch (getDataStorageType()) {
+            case MongoDB:
+                return getMongoManager().getAllData(databaseCollectionType);
+
+            case MySQL:
+                return getMySQLManager().getAllData(databaseCollectionType);
+
+            case Json:
+                return getJsonManager().getAllData(databaseCollectionType);
+
+            default:
+                return ExceptionUtils.throwUnknownDataStoreType();
+        }
+    }
+
+    /**
+     * 数据迁移。
+     *
+     * @param yaml 包含数据库连接信息的 YAML 配置
+     * @param type 原存储类型
+     * @param type1 新存储类型
+     * @return 是否成功迁移
+     */
+    public static boolean dataMigration(Yaml yaml, DataStorageType type, DataStorageType type1) {
+        try {
+            Map<String, Map<String, Object>> playerLogs = Collections.emptyMap();
+            Map<String, Map<String, Object>> playerGuaranteed= Collections.emptyMap();
+
+            switch (type) {
+                case MongoDB:
+                    getMongoManager().setup(yaml);
+                    playerLogs = getMongoManager().getAllData(DatabaseCollectionType.PlayerLogs);
+                    playerGuaranteed = getMongoManager().getAllData(DatabaseCollectionType.PlayerGuaranteed);
+                    break;
+
+                case MySQL:
+                    getMySQLManager().setup(yaml);
+                    playerLogs = getMySQLManager().getAllData(DatabaseCollectionType.PlayerLogs);
+                    playerGuaranteed = getMySQLManager().getAllData(DatabaseCollectionType.PlayerGuaranteed);
+                    System.out.println(playerGuaranteed);
+                    break;
+
+                case Json:
+                    getJsonManager().setup(yaml);
+                    playerLogs = getJsonManager().getAllData(DatabaseCollectionType.PlayerLogs);
+                    playerGuaranteed = getJsonManager().getAllData(DatabaseCollectionType.PlayerGuaranteed);
+                    break;
+
+                default:
+                    ExceptionUtils.throwUnknownDataStoreType();
+                    break;
+            }
+
+            if (playerLogs.isEmpty() && playerGuaranteed.isEmpty()) {
+                return false;
+            }
+
+            switch (type1) {
+                case MongoDB:
+                    getMongoManager().setup(yaml);
+                    getMongoManager().insertAllData(DatabaseCollectionType.PlayerLogs, playerLogs);
+                    getMongoManager().insertAllData(DatabaseCollectionType.PlayerGuaranteed, playerGuaranteed);
+                    break;
+
+                case MySQL:
+                    getMySQLManager().setup(yaml);
+                    getMySQLManager().insertAllData(DatabaseCollectionType.PlayerLogs, playerLogs);
+                    getMySQLManager().insertAllData(DatabaseCollectionType.PlayerGuaranteed, playerGuaranteed);
+                    break;
+
+                case Json:
+                    getJsonManager().setup(yaml);
+                    getJsonManager().insertAllData(DatabaseCollectionType.PlayerLogs, playerLogs);
+                    getJsonManager().insertAllData(DatabaseCollectionType.PlayerGuaranteed, playerGuaranteed);
+                    break;
+
+                default:
+                    ExceptionUtils.throwUnknownDataStoreType();
+                    break;
+            }
+
+            return true;
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return false;
         }
     }
 }

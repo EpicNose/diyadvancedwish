@@ -6,8 +6,9 @@ import de.leonhard.storage.Yaml;
 import de.leonhard.storage.internal.settings.ConfigSettings;
 import de.leonhard.storage.internal.settings.DataType;
 import de.leonhard.storage.internal.settings.ReloadSettings;
-import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
+import lombok.Getter;
 import me.twomillions.plugin.advancedwish.Main;
+import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
@@ -27,48 +28,8 @@ import java.util.stream.Collectors;
 public class ConfigManager {
     private static final Plugin plugin = Main.getInstance();
 
-    /**
-     * 创建默认配置文件，包括 message.yml 和 advancedWish.yml.
-     */
-    public static void createDefaultConfig() {
-        createYaml("message", null, false, true);
-        createYaml("advancedWish", null, false, true);
-    }
-
-    /**
-     * 获取指定名称的 Yaml 配置文件对象，如果文件不存在，则会重新创建该文件。
-     *
-     * @param fileName 配置文件名称
-     * @return 指定名称的 Yaml 配置文件对象
-     */
-    public static Yaml getYaml(String fileName) {
-        String dataFolder = plugin.getDataFolder().toString();
-        File file = new File(dataFolder, fileName + ConstantsUtils.YAML_SUFFIX);
-
-        if (!file.exists()) {
-            QuickUtils.sendConsoleMessage("&c运行有误，请检查配置文件是否被误删！开始重新创建配置文件！");
-        }
-
-        return createYaml(fileName, null, false, true);
-    }
-
-    /**
-     * 获取 message.yml 配置文件对象。
-     *
-     * @return message.yml 配置文件对象
-     */
-    public static Yaml getMessageYaml() {
-        return getYaml("message");
-    }
-
-    /**
-     * 获取 advancedWish.yml 配置文件对象。
-     *
-     * @return advancedWish.yml 配置文件对象
-     */
-    public static Yaml getAdvancedWishYaml() {
-        return getYaml("advancedWish");
-    }
+    @Getter private static final Yaml messageYaml = createYaml("message", null, false, true);
+    @Getter private static final Yaml advancedWishYaml = createYaml("advancedWish", null, false, true);
 
     /**
      * 获取指定 Yaml 配置文件对象的版本号.

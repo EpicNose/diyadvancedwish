@@ -1,13 +1,15 @@
 package me.twomillions.plugin.advancedwish.utils.scripts;
 
-import me.twomillions.plugin.advancedwish.Main;
+import com.github.benmanes.caffeine.cache.Cache;
+import me.twomillions.plugin.advancedwish.utils.others.CaffeineUtils;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
-import me.twomillions.plugin.advancedwish.utils.random.RandomUtils;
 import org.bukkit.entity.Player;
 
+import javax.script.Bindings;
+import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import java.io.File;
+import java.io.StringReader;
 
 /**
  * JavaScript 工具类。
@@ -16,6 +18,9 @@ import java.io.File;
  * @date 2023/3/2
  */
 public class ScriptUtils {
+    private static final ScriptEngine ENGINE = new ScriptEngineManager().getEngineByExtension("js");
+    private static final Cache<Object[], Bindings> BINDINGS_CACHE = CaffeineUtils.buildBukkitCache();
+
     /**
      * 分析 JavaScript 表达式，返回结果字符串。
      *
@@ -27,27 +32,24 @@ public class ScriptUtils {
     public static String eval(String string, Player player, Object... params) {
         string = QuickUtils.toPapi(QuickUtils.replaceTranslate(string, player), player);
 
-        ScriptEngineManager manager = new ScriptEngineManager();
-        javax.script.ScriptEngine engine = manager.getEngineByName("JavaScript");
+        Bindings bindings = BINDINGS_CACHE.get(params, k -> {
+            Bindings newBindings = ENGINE.createBindings();
 
-        engine.put("RandomUtils", new RandomUtils<>());
-        engine.put("method", new MethodFunctions(player));
+            newBindings.put("_player_", player);
+            newBindings.put("method", new MethodFunctions(player));
 
-        File pluginFolder = Main.getInstance().getDataFolder().getParentFile();
-        String pluginFolderPath = pluginFolder.getAbsolutePath();
+            for (int i = 0; i < params.length; i += 2) {
+                newBindings.put(params[i].toString(), params[i + 1]);
+            }
 
-        engine.put("_player_", player);
-        engine.put("_pluginPath_", pluginFolderPath);
-
-        for (int i = 0; i < params.length; i += 2) {
-            engine.put(params[i].toString(), params[i + 1]);
-        }
+            return newBindings;
+        });
 
         Object result;
 
         try {
-            result = engine.eval(string);
-        } catch (ScriptException scriptException) {
+            result = ENGINE.eval(new StringReader(string), bindings);
+        } catch (ScriptException e) {
             return string;
         }
 
