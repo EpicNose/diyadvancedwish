@@ -173,7 +173,7 @@ public class MySQLManager implements DatabasesInterface {
             checkCollectionType(key, databaseCollectionType);
             checkColumn(key, databaseCollectionType);
 
-            if (value instanceof Collections) {
+            if (value instanceof Collection<?>) {
                 value = QuickUtils.listToString((Collection<?>) value);
             }
 
@@ -247,7 +247,10 @@ public class MySQLManager implements DatabasesInterface {
                     Map<String, Object> columnData = new HashMap<>();
 
                     for (String uuid : data.keySet()) {
-                        columnData.put(uuid, data.get(uuid).get(columnName));
+                        Object value = data.get(uuid).get(columnName);
+                        if (value != null) {
+                            columnData.put(uuid, value);
+                        }
                     }
 
                     correctedData.put(columnName, columnData);

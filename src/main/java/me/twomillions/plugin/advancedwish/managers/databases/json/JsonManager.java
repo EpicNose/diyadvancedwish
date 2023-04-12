@@ -57,7 +57,7 @@ public class JsonManager implements DatabasesInterface {
     @Override
     public ConcurrentLinkedQueue<String> getOrDefaultList(String uuid, String key, ConcurrentLinkedQueue<String> defaultValue, DatabaseCollectionType databaseCollectionType) {
         String path = getPath(databaseCollectionType);
-        return ConfigManager.createJson(uuid, path, true, false).getOrDefault(key, defaultValue);
+        return new ConcurrentLinkedQueue<>(ConfigManager.createJson(uuid, path, true, false).getOrDefault(key, defaultValue));
     }
 
     /**
