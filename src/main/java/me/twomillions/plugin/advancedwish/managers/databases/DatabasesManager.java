@@ -192,7 +192,6 @@ public class DatabasesManager implements DatabasesInterface {
                     getMySQLManager().setup(yaml);
                     playerLogs = getMySQLManager().getAllData(DatabaseCollectionType.PlayerLogs);
                     playerGuaranteed = getMySQLManager().getAllData(DatabaseCollectionType.PlayerGuaranteed);
-                    System.out.println(playerGuaranteed);
                     break;
 
                 case Json:
