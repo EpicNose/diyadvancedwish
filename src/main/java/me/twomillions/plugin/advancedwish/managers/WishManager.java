@@ -12,7 +12,7 @@ import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.databases.DatabasesManager;
 import me.twomillions.plugin.advancedwish.managers.register.RegisterManager;
 import me.twomillions.plugin.advancedwish.managers.task.ScheduledTaskManager;
-import me.twomillions.plugin.advancedwish.tasks.PlayerCheckCacheTask;
+import me.twomillions.plugin.advancedwish.tasks.PlayerCacheHandler;
 import me.twomillions.plugin.advancedwish.utils.events.EventUtils;
 import me.twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;
 import me.twomillions.plugin.advancedwish.utils.others.CaffeineUtils;
@@ -697,10 +697,10 @@ public class WishManager {
         if (isPlayerInWishList(player)) return PlayerWishStatus.InProgress;
 
         // 检查玩家是否正在处理缓存
-        if (PlayerCheckCacheTask.isLoadingCache(uuid)) return PlayerWishStatus.LoadingCache;
+        if (PlayerCacheHandler.isLoadingCache(uuid)) return PlayerWishStatus.LoadingCache;
 
         // 检查玩家是否正在等待处理缓存
-        if (PlayerCheckCacheTask.isWaitingLoadingCache(uuid)) return PlayerWishStatus.WaitingLoadingCache;
+        if (PlayerCacheHandler.isWaitingLoadingCache(uuid)) return PlayerWishStatus.WaitingLoadingCache;
 
         Yaml yaml = ConfigManager.createYaml(wishName, ConstantsUtils.WISH, false, false);
         yaml.setPathPrefix("CONDITION");
@@ -983,7 +983,7 @@ public class WishManager {
 
         savingCache.put(uuid, true);
 
-        PlayerCheckCacheTask.setPlayerQuitTime(player);
+        PlayerCacheHandler.setPlayerQuitTime(player);
 
         ConcurrentLinkedQueue<String> playerDoList = ScheduledTaskManager.getPlayerScheduledTasks(player);
 

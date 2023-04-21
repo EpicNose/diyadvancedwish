@@ -3,12 +3,14 @@ package me.twomillions.plugin.advancedwish.managers.task;
 import com.github.benmanes.caffeine.cache.Cache;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
+import me.twomillions.plugin.advancedwish.tasks.ScheduledTaskHandler;
 import me.twomillions.plugin.advancedwish.utils.others.CaffeineUtils;
-import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import me.twomillions.plugin.advancedwish.utils.scripts.ScriptUtils;
+import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -19,6 +21,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @author 2000000
  * @date 2023/2/18
  */
+@SuppressWarnings("unused")
 public class ScheduledTaskManager {
     private static final Plugin plugin = Main.getInstance();
 
@@ -101,6 +104,9 @@ public class ScheduledTaskManager {
 
     /**
      * 删除指定计划任务。
+     *
+     * <p>在 {@link ScheduledTaskHandler#startTask()}
+     * 等并发环境下直接在循环中修改集合的元素操作请不要使用此方法，而是使用 {@link Iterator#remove()}，否则会引发并发修改异常
      *
      * @param player 玩家
      * @param wishScheduledTaskString 待删除的计划任务的字符串表示，格式为 "时间;文件名;文件路径;true/false;node"

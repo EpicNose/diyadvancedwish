@@ -1,7 +1,9 @@
 package me.twomillions.plugin.advancedwish.tasks;
 
 import lombok.Getter;
+import lombok.Setter;
 import me.twomillions.plugin.advancedwish.Main;
+import me.twomillions.plugin.advancedwish.abstracts.TasksAbstract;
 import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.bukkit.Bukkit;
@@ -17,26 +19,27 @@ import java.util.Scanner;
  * @author 2000000
  * @date 2022/11/24 16:49
  */
-public class UpdateCheckerTask {
+@Getter @Setter
+public class UpdateHandler extends TasksAbstract {
+    private final Runnable runnable;
     private static final Plugin plugin = Main.getInstance();
+
     @Getter private static boolean isLatestVersion = true;
 
     /**
-     * 检查插件更新，并向控制台输出版本信息。
-     * 如果开启了更新检查并且获取最新版本信息失败，会向控制台输出信息。
+     * 获取实例。
      */
-    public static void startTask() {
-        if (Main.isDisabled()) {
-            return;
-        }
+    @Getter private static final UpdateHandler updateHandler = new UpdateHandler();
 
-        if (!ConfigManager.getAdvancedWishYaml().getBoolean("UPDATE-CHECKER")) {
-            return;
-        }
+    /**
+     * 构造器。
+     */
+    private UpdateHandler() {
+        runnable = () -> {
+            if (!ConfigManager.getAdvancedWishYaml().getBoolean("UPDATE-CHECKER")) {
+                return;
+            }
 
-        int cycle = ConfigManager.getAdvancedWishYaml().getInt("CHECK-CYCLE");
-
-        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
             String urlString = getURLString();
 
             if (urlString.contains(plugin.getDescription().getVersion())) {
@@ -48,7 +51,17 @@ public class UpdateCheckerTask {
 
                 QuickUtils.sendConsoleMessage("&c您目前正在使用过时的 Advanced Wish! 请更新以避免服务器出现问题! 下载链接: https://gitee.com/A2000000/advanced-wish/releases/");
             }
-        }, 0, (long) cycle * 1200); // 一分钟等于 1200 ticks
+        };
+    }
+
+    /**
+     * 检查插件更新，并向控制台输出版本信息。
+     * 如果开启了更新检查并且获取最新版本信息失败，会向控制台输出信息。
+     */
+    @Override
+    public void startTask() {
+        int cycle = ConfigManager.getAdvancedWishYaml().getInt("CHECK-CYCLE");
+        setBukkitTask(Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, runnable, 0, (long) cycle * 1200));
     }
 
     /**
@@ -57,7 +70,7 @@ public class UpdateCheckerTask {
      *
      * @return 获取的网页内容，如果获取失败返回空字符串。
      */
-    private static String getURLString() {
+    private String getURLString() {
         StringBuilder stringBuilder = new StringBuilder();
 
         /*

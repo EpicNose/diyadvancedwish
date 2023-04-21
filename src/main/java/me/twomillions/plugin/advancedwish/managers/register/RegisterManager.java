@@ -9,7 +9,7 @@ import me.twomillions.plugin.advancedwish.listener.PlayerListener;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.placeholder.PapiManager;
-import me.twomillions.plugin.advancedwish.tasks.WishLimitResetTask;
+import me.twomillions.plugin.advancedwish.tasks.WishLimitResetHandler;
 import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import net.milkbowl.vault.economy.Economy;
@@ -178,7 +178,7 @@ public class RegisterManager {
 
             // 许愿限制
             if (WishManager.isEnabledWishLimit(wishName)) {
-                WishLimitResetTask.startTask(wishName);
+                new WishLimitResetHandler(wishName).startTask();
                 QuickUtils.sendConsoleMessage("&a检查到许愿池启用了许愿限制，已成功创建对应异步计划任务! 许愿池文件名称: &e" + wishName);
             }
         }
@@ -189,7 +189,7 @@ public class RegisterManager {
      */
     public static void reload() {
         // 取消任务
-        WishLimitResetTask.cancelAllWishLimitResetTasks();
+        WishLimitResetHandler.cancelAllWishLimitResetTasks();
 
         // 低版本 Papi 没有 unregister 方法，捕获异常以取消 Papi 重载
         if (isUsingPapi()) {

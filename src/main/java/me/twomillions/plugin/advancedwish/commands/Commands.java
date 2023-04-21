@@ -774,7 +774,7 @@ public class Commands implements TabExecutor {
     /**
      * 是否拥有管理员权限。
      *
-     * @param player 玩家对象
+     * @param player 玩家
      * @param sendMessage 是否发送消息
      * @return 是否拥有管理员权限
      */
@@ -794,7 +794,7 @@ public class Commands implements TabExecutor {
      * 玩家是否在线。
      *
      * @param sender 指令发送对象
-     * @param targetPlayer 检查的玩家对象
+     * @param targetPlayer 检查的玩家
      * @param sendMessage 是否发送消息
      * @return 玩家是否在线
      */
@@ -816,7 +816,7 @@ public class Commands implements TabExecutor {
      * 玩家是否在线。
      *
      * @param sender 指令发送对象
-     * @param targetPlayer 检查的玩家对象
+     * @param targetPlayer 检查的玩家
      * @param sendMessage 是否发送消息
      * @return 玩家是否在线
      */

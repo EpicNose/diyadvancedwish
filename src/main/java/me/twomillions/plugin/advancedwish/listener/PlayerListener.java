@@ -5,9 +5,8 @@ import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.effect.EffectSendManager;
-import me.twomillions.plugin.advancedwish.tasks.PlayerCheckCacheTask;
-import me.twomillions.plugin.advancedwish.tasks.PlayerTimestampTask;
-import me.twomillions.plugin.advancedwish.tasks.UpdateCheckerTask;
+import me.twomillions.plugin.advancedwish.tasks.PlayerCacheHandler;
+import me.twomillions.plugin.advancedwish.tasks.UpdateHandler;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -43,12 +42,12 @@ public class PlayerListener implements Listener {
             return;
         }
 
-        if (PlayerCheckCacheTask.isLoadingCache(uuid)) {
+        if (PlayerCacheHandler.isLoadingCache(uuid)) {
             event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, QuickUtils.handleString(ConfigManager.getAdvancedWishYaml().getString("CANCEL-LOGIN-REASONS.LOADING-CACHE")));
             return;
         }
 
-        if (PlayerCheckCacheTask.isWaitingLoadingCache(uuid)) {
+        if (PlayerCacheHandler.isWaitingLoadingCache(uuid)) {
             event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, QuickUtils.handleString(ConfigManager.getAdvancedWishYaml().getString("CANCEL-LOGIN-REASONS.WAITING-LOADING-CACHE")));
         }
     }
@@ -67,7 +66,7 @@ public class PlayerListener implements Listener {
 
         // 延时等待玩家缓存写入
         Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), () -> {
-            PlayerCheckCacheTask.setWaitingLoadingCache(uuid, true);
+            PlayerCacheHandler.setWaitingLoadingCache(uuid, true);
 
             try {
                 Thread.sleep(waitingTime * 1000L);
@@ -75,17 +74,17 @@ public class PlayerListener implements Listener {
 
             // 玩家已经离线，取消等待
             if (!player.isOnline()) {
-                PlayerCheckCacheTask.setWaitingLoadingCache(uuid, false);
+                PlayerCacheHandler.setWaitingLoadingCache(uuid, false);
                 return;
             }
 
-            PlayerCheckCacheTask.setWaitingLoadingCache(uuid, false);
-            PlayerCheckCacheTask.startTask(player);
-            PlayerTimestampTask.startTask(player);
+            PlayerCacheHandler.setWaitingLoadingCache(uuid, false);
+
+            new PlayerCacheHandler(player).startTask();
         });
 
         // 发送版本更新提示
-        if (!UpdateCheckerTask.isLatestVersion() && player.isOp()) {
+        if (!UpdateHandler.isLatestVersion() && player.isOp()) {
             player.sendMessage(QuickUtils.translate(
                     "&7[&6&lAdvanced Wish&7] &c您正在使用过时版本的 Advanced Wish！请下载最新版本以避免出现未知问题！下载链接：https://gitee.com/A2000000/advanced-wish/releases"
             ));

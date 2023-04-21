@@ -1,14 +1,19 @@
 package me.twomillions.plugin.advancedwish.tasks;
 
+import lombok.Getter;
+import lombok.Setter;
 import me.twomillions.plugin.advancedwish.Main;
+import me.twomillions.plugin.advancedwish.abstracts.TasksAbstract;
+import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.managers.effect.EffectSendManager;
 import me.twomillions.plugin.advancedwish.managers.task.ScheduledTaskManager;
-import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.Iterator;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -17,34 +22,39 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @author 2000000
  * @date 2022/11/24 16:49
  */
-public class PlayerTimestampTask {
+@Getter @Setter
+@SuppressWarnings("unused")
+public class ScheduledTaskHandler extends TasksAbstract {
+    private final Runnable runnable;
     private static final Plugin plugin = Main.getInstance();
 
     /**
-     * 开始执行任务。
-     *
-     * @param player 玩家
+     * 获取实例。
      */
-    public static void startTask(Player player) {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                // 若玩家已下线则取消任务
-                if (!player.isOnline()) {
-                    cancel();
-                    return;
-                }
+    @Getter private static final ScheduledTaskHandler scheduledTaskHandler = new ScheduledTaskHandler();
 
-                // 获取玩家的任务列表
-                ConcurrentLinkedQueue<String> playerScheduledTasks = ScheduledTaskManager.getPlayerScheduledTasks(player);
+    /**
+     * 构造器。
+     */
+    private ScheduledTaskHandler() {
+        runnable = () -> Bukkit.getOnlinePlayers().forEach(player -> {
+            // 获取玩家的任务列表
+            ConcurrentLinkedQueue<String> playerScheduledTasks = ScheduledTaskManager.getPlayerScheduledTasks(player);
 
-                // 检查修复和移除任务
-                checkRepairAndRemove(playerScheduledTasks, player);
+            // 检查修复和移除许愿列表
+            checkRepairAndRemove(playerScheduledTasks, player);
 
-                // 遍历执行任务
-                executeScheduledTasks(playerScheduledTasks, player);
-            }
-        }.runTaskTimerAsynchronously(plugin, 0, 0);
+            // 遍历执行任务
+            executeScheduledTasks(playerScheduledTasks, player);
+        });
+    }
+
+    /**
+     * 开始任务。
+     */
+    @Override
+    public void startTask() {
+        setBukkitTask(Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, runnable, 0, 0));
     }
 
     /**
@@ -53,7 +63,7 @@ public class PlayerTimestampTask {
      * @param playerScheduledTasks 玩家任务列表
      * @param player 玩家
      */
-    private static void checkRepairAndRemove(ConcurrentLinkedQueue<String> playerScheduledTasks, Player player) {
+    private void checkRepairAndRemove(ConcurrentLinkedQueue<String> playerScheduledTasks, Player player) {
         if (playerScheduledTasks.size() > 0 && !WishManager.isPlayerInWishList(player)) {
             WishManager.addPlayerToWishList(player);
         }
@@ -69,8 +79,16 @@ public class PlayerTimestampTask {
      * @param playerScheduledTasks 玩家任务列表
      * @param player 玩家
      */
-    private static void executeScheduledTasks(ConcurrentLinkedQueue<String> playerScheduledTasks, Player player) {
-        for (String scheduledTask : new ConcurrentLinkedQueue<>(playerScheduledTasks)) {
+    private void executeScheduledTasks(ConcurrentLinkedQueue<String> playerScheduledTasks, Player player) {
+        UUID uuid = player.getUniqueId();
+
+        if (PlayerCacheHandler.isLoadingCache(uuid) || PlayerCacheHandler.isWaitingLoadingCache(uuid)) {
+            return;
+        }
+
+        Iterator<String> iterator = playerScheduledTasks.iterator();
+        while (iterator.hasNext()) {
+            String scheduledTask = iterator.next();
             String[] scheduledTaskSplit = scheduledTask.split(";");
 
             long currentTimeMillis = System.currentTimeMillis();
@@ -81,7 +99,7 @@ public class PlayerTimestampTask {
                 continue;
             }
 
-            ScheduledTaskManager.removePlayerScheduledTask(player, scheduledTask);
+            iterator.remove();
 
             String fileName = scheduledTaskSplit[1];
             String path = scheduledTaskSplit[2];

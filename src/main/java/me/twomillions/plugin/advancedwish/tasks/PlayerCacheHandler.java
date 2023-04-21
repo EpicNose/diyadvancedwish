@@ -3,7 +3,10 @@ package me.twomillions.plugin.advancedwish.tasks;
 import com.github.benmanes.caffeine.cache.Cache;
 import de.leonhard.storage.Json;
 import de.leonhard.storage.Yaml;
+import lombok.Getter;
+import lombok.Setter;
 import me.twomillions.plugin.advancedwish.Main;
+import me.twomillions.plugin.advancedwish.abstracts.TasksAbstract;
 import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.task.ScheduledTaskManager;
 import me.twomillions.plugin.advancedwish.utils.events.EventUtils;
@@ -25,89 +28,22 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @author 2000000
  * @date 2022/11/24 20:09
  */
-public class PlayerCheckCacheTask {
+@Getter @Setter
+@SuppressWarnings("unused")
+public class PlayerCacheHandler extends TasksAbstract {
+    private final Runnable runnable;
+
     private static final Plugin plugin = Main.getInstance();
     private static final Cache<UUID, Boolean> loadingCache = CaffeineUtils.buildBukkitCache();
     private static final Cache<UUID, Boolean> waitingLoadingCache = CaffeineUtils.buildBukkitCache();
 
     /**
-     * 设置指定玩家的缓存加载状态。
-     *
-     * @param uuid 玩家 UUID
-     * @param isLoadingCache 缓存加载状态
-     */
-    public static void setLoadingCache(UUID uuid, boolean isLoadingCache) {
-        loadingCache.put(uuid, isLoadingCache);
-    }
-
-    /**
-     * 检查指定玩家的缓存加载状态。
-     *
-     * @param uuid 玩家UUID
-     * @return 缓存加载状态，如果玩家未在缓存中，则返回false
-     */
-    public static boolean isLoadingCache(UUID uuid) {
-        return Boolean.TRUE.equals(loadingCache.get(uuid, k -> false));
-    }
-
-    /**
-     * 设置指定玩家的等待缓存加载状态。
-     *
-     * @param uuid 玩家 UUID
-     * @param isWaitingLoadingCache 等待缓存加载状态
-     */
-    public static void setWaitingLoadingCache(UUID uuid, boolean isWaitingLoadingCache) {
-        waitingLoadingCache.put(uuid, isWaitingLoadingCache);
-    }
-
-    /**
-     * 检查指定玩家的等待缓存加载状态。
-     *
-     * @param uuid 玩家UUID
-     * @return 等待缓存加载状态，如果玩家未在缓存中，则返回false
-     */
-    public static boolean isWaitingLoadingCache(UUID uuid) {
-        return Boolean.TRUE.equals(waitingLoadingCache.get(uuid, k -> false));
-    }
-
-    /**
-     * 设置指定玩家的退出时间戳。
-     *
-     * @param player 玩家
-     * @param time 退出时间戳
-     */
-    public static void setPlayerQuitTime(Player player, long time) {
-        ConfigManager.createJson(player.getUniqueId().toString(), Main.getDoListCachePath(), true, false).set("QUIT-CACHE", time);
-    }
-
-    /**
-     * 设置指定玩家的退出时间戳为当前系统时间戳。
+     * 构造器。
      *
      * @param player 玩家
      */
-    public static void setPlayerQuitTime(Player player) {
-        setPlayerQuitTime(player, System.currentTimeMillis());
-    }
-
-    /**
-     * 获取指定玩家的退出时间戳。
-     *
-     * @param player 玩家
-     * @return 退出时间戳
-     */
-    public static long getPlayerQuitTime(Player player) {
-        return ConfigManager.createJson(player.getUniqueId().toString(), Main.getDoListCachePath(), true, false).getLong("QUIT-CACHE");
-    }
-
-    /**
-     * 异步检查玩家缓存数据并触发对应事件。
-     *
-     * <p>自 0.0.3.4-SNAPSHOT 后，此方法将记录每次玩家的状态，以防止安全问题。
-     *
-     * @param player 玩家
-     */
-    public static void startTask(Player player) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+    public PlayerCacheHandler(Player player) {
+        runnable = () -> {
             UUID uuid = player.getUniqueId();
 
             String normalPath = plugin.getDataFolder() + ConstantsUtils.PLAYER_CACHE;
@@ -139,7 +75,17 @@ public class PlayerCheckCacheTask {
 
             // 检查缓存
             checkCache(player, normalPath, doListCachePath);
-        });
+        };
+    }
+
+    /**
+     * 异步检查玩家缓存数据并触发对应事件。
+     *
+     * <p>自 0.0.3.4-SNAPSHOT 后，此方法将记录每次玩家的状态，以防止安全问题。
+     */
+    @Override
+    public void startTask() {
+        setBukkitTask(Bukkit.getScheduler().runTaskAsynchronously(plugin, runnable));
     }
 
     /**
@@ -149,7 +95,7 @@ public class PlayerCheckCacheTask {
      * @param normalPath 正常缓存数据的文件路径
      * @param doListCachePath 任务缓存数据的文件路径
      */
-    private static void checkCache(Player player, String normalPath, String doListCachePath) {
+    private void checkCache(Player player, String normalPath, String doListCachePath) {
         UUID uuid = player.getUniqueId();
 
         setLoadingCache(uuid, true);
@@ -235,5 +181,74 @@ public class PlayerCheckCacheTask {
         }
 
         setLoadingCache(uuid, false);
+    }
+
+    /**
+     * 设置指定玩家的缓存加载状态。
+     *
+     * @param uuid 玩家 UUID
+     * @param isLoadingCache 缓存加载状态
+     */
+    public static void setLoadingCache(UUID uuid, boolean isLoadingCache) {
+        loadingCache.put(uuid, isLoadingCache);
+    }
+
+    /**
+     * 检查指定玩家的缓存加载状态。
+     *
+     * @param uuid 玩家UUID
+     * @return 缓存加载状态，如果玩家未在缓存中，则返回false
+     */
+    public static boolean isLoadingCache(UUID uuid) {
+        return Boolean.TRUE.equals(loadingCache.get(uuid, k -> false));
+    }
+
+    /**
+     * 设置指定玩家的等待缓存加载状态。
+     *
+     * @param uuid 玩家 UUID
+     * @param isWaitingLoadingCache 等待缓存加载状态
+     */
+    public static void setWaitingLoadingCache(UUID uuid, boolean isWaitingLoadingCache) {
+        waitingLoadingCache.put(uuid, isWaitingLoadingCache);
+    }
+
+    /**
+     * 检查指定玩家的等待缓存加载状态。
+     *
+     * @param uuid 玩家UUID
+     * @return 等待缓存加载状态，如果玩家未在缓存中，则返回false
+     */
+    public static boolean isWaitingLoadingCache(UUID uuid) {
+        return Boolean.TRUE.equals(waitingLoadingCache.get(uuid, k -> false));
+    }
+
+    /**
+     * 设置指定玩家的退出时间戳。
+     *
+     * @param player 玩家
+     * @param time 退出时间戳
+     */
+    public static void setPlayerQuitTime(Player player, long time) {
+        ConfigManager.createJson(player.getUniqueId().toString(), Main.getDoListCachePath(), true, false).set("QUIT-CACHE", time);
+    }
+
+    /**
+     * 设置指定玩家的退出时间戳为当前系统时间戳。
+     *
+     * @param player 玩家
+     */
+    public static void setPlayerQuitTime(Player player) {
+        setPlayerQuitTime(player, System.currentTimeMillis());
+    }
+
+    /**
+     * 获取指定玩家的退出时间戳。
+     *
+     * @param player 玩家
+     * @return 退出时间戳
+     */
+    public static long getPlayerQuitTime(Player player) {
+        return ConfigManager.createJson(player.getUniqueId().toString(), Main.getDoListCachePath(), true, false).getLong("QUIT-CACHE");
     }
 }

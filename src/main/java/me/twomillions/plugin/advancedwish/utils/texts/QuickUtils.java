@@ -129,7 +129,7 @@ public class QuickUtils {
     /**
      * 从 message.yml 内读取对应信息并发送。
      *
-     * @param player 玩家对象
+     * @param player 玩家
      * @param string message.yml 内对应信息
      * @param params 替换的可选参数
      */

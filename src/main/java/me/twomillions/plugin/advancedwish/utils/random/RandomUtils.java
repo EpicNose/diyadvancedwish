@@ -63,7 +63,7 @@ public class RandomUtils<T> {
             }
 
             int probability = (int) probabilityValue;
-            this.addRandomObject(object, probability);
+            addRandomObject(object, probability);
         }
     }
 

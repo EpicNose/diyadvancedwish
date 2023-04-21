@@ -20,7 +20,7 @@ public class EventUtils {
      * @return AsyncPlayerWishEvent
      */
     public static AsyncPlayerWishEvent callAsyncPlayerWishEvent(Player player, PlayerWishStatus playerWishStatus, String wishName, boolean isForce) {
-        AsyncPlayerWishEvent asyncPlayerWishEvent = new AsyncPlayerWishEvent(player, playerWishStatus, wishName, isForce);
+        AsyncPlayerWishEvent asyncPlayerWishEvent = new AsyncPlayerWishEvent(player, wishName, isForce, playerWishStatus);
         Bukkit.getPluginManager().callEvent(asyncPlayerWishEvent);
 
         return asyncPlayerWishEvent;
@@ -36,7 +36,7 @@ public class EventUtils {
      * @return AsyncEffectSendEvent
      */
     public static AsyncEffectSendEvent callAsyncEffectSendEvent(String fileName, Player player, String path, String pathPrefix) {
-        AsyncEffectSendEvent asyncEffectSendEvent = new AsyncEffectSendEvent(fileName, player, path, pathPrefix);
+        AsyncEffectSendEvent asyncEffectSendEvent = new AsyncEffectSendEvent(player, fileName, path, pathPrefix);
         Bukkit.getPluginManager().callEvent(asyncEffectSendEvent);
 
         return asyncEffectSendEvent;
@@ -47,17 +47,14 @@ public class EventUtils {
      *
      * @param wishName wishName
      * @param storeMode storeMode
-     * @param wishResetLimitStart wishResetLimitStart
-     * @param wishResetLimitCycle wishResetLimitCycle
      * @param isEnabledResetCompleteSend isEnabledResetCompleteSend
      * @param isEnabledResetCompleteSendConsole isEnabledResetCompleteSendConsole
      * @return AsyncWishLimitResetEvent
      */
-    public static AsyncWishLimitResetEvent callAsyncWishLimitResetEvent(String wishName, String storeMode, int wishResetLimitStart, int wishResetLimitCycle
+    public static AsyncWishLimitResetEvent callAsyncWishLimitResetEvent(String wishName, String storeMode
             , boolean isEnabledResetCompleteSend, boolean isEnabledResetCompleteSendConsole) {
 
         AsyncWishLimitResetEvent asyncWishLimitResetEvent = new AsyncWishLimitResetEvent(wishName, storeMode
-                , wishResetLimitStart, wishResetLimitCycle
                 , isEnabledResetCompleteSend, isEnabledResetCompleteSendConsole);
 
         Bukkit.getPluginManager().callEvent(asyncWishLimitResetEvent);

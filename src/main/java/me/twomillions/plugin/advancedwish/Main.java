@@ -8,9 +8,10 @@ import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.databases.DatabasesManager;
 import me.twomillions.plugin.advancedwish.managers.register.RegisterManager;
-import me.twomillions.plugin.advancedwish.tasks.PlayerCheckCacheTask;
-import me.twomillions.plugin.advancedwish.tasks.PlayerTimestampTask;
-import me.twomillions.plugin.advancedwish.tasks.UpdateCheckerTask;
+import me.twomillions.plugin.advancedwish.tasks.PlayerCacheHandler;
+import me.twomillions.plugin.advancedwish.tasks.ScheduledTaskHandler;
+import me.twomillions.plugin.advancedwish.tasks.UpdateHandler;
+import me.twomillions.plugin.advancedwish.tasks.WishLimitResetHandler;
 import me.twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;
 import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
@@ -118,8 +119,11 @@ public final class Main extends JavaPlugin {
             new Metrics(this, 16990);
         }
 
+        // 任务处理
+        ScheduledTaskHandler.getScheduledTaskHandler().startTask();
+
         // 网页更新
-        UpdateCheckerTask.startTask();
+        UpdateHandler.getUpdateHandler().startTask();
 
         /*
          * 如果玩家没有使用插件的指令进行热重载，那么会导致 PlayerTimestampRunnable 停止
@@ -127,10 +131,7 @@ public final class Main extends JavaPlugin {
          * 并且如果此玩家在线那么直接检查缓存数据，而不是需要玩家重新进入服务器
          */
         if (!Bukkit.getOnlinePlayers().isEmpty()) {
-            Bukkit.getOnlinePlayers().forEach(onlinePlayer -> {
-                PlayerTimestampTask.startTask(onlinePlayer);
-                PlayerCheckCacheTask.startTask(onlinePlayer);
-            });
+            Bukkit.getOnlinePlayers().forEach(player -> new PlayerCacheHandler(player).startTask());
         }
 
         QuickUtils.sendConsoleMessage("&aAdvanced Wish 插件已成功加载! 感谢您使用此插件! 版本: &e" + getDescription().getVersion() + "&a, 作者: &e2000000&a。");
@@ -139,6 +140,11 @@ public final class Main extends JavaPlugin {
     @Override
     public void onDisable() {
         setDisabled(true);
+
+        // 取消任务
+        ScheduledTaskHandler.getScheduledTaskHandler().cancelTask();
+        UpdateHandler.getUpdateHandler().cancelTask();
+        WishLimitResetHandler.cancelAllWishLimitResetTasks();
 
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             WishManager.savePlayerCacheData(onlinePlayer);
@@ -151,5 +157,7 @@ public final class Main extends JavaPlugin {
                 exception.printStackTrace();
             }
         }
+
+        QuickUtils.sendConsoleMessage("&aAdvanced Wish 插件已成功卸载! 感谢您使用此插件! 版本: &e" + getDescription().getVersion() + "&a, 作者: &e2000000&a。");
     }
 }

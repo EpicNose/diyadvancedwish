@@ -69,22 +69,15 @@ public interface DatabasesInterface {
      * @param data 要插入的数据，以 Map 的形式传递，其中 Map 的 Key 是 UUID，value 是一个包含键值对的 Map
      */
     default void insertAllData(DatabaseCollectionType databaseCollectionType, Map<String, Map<String, Object>> data) {
-        int count = 0;
-
-        for (Map.Entry<String, Map<String, Object>> entry : data.entrySet()) {
-            String uuid = entry.getKey();
-
-            for (Map.Entry<String, Object> keyData : entry.getValue().entrySet()) {
-                String key = keyData.getKey();
-                Object value = keyData.getValue();
-
-                update(uuid, key, value, databaseCollectionType);
-
-                count++;
-
-                QuickUtils.sendConsoleMessage("&a插入数据: UUID: " + uuid + ", key: " + key + ", value: " + value);
-            }
-        }
+        long count = data.entrySet().stream()
+                .flatMap(entry -> entry.getValue().entrySet().stream()
+                        .map(keyData -> new Object[] { entry.getKey(), keyData.getKey(), keyData.getValue() })
+                )
+                .peek(values -> {
+                    update((String) values[0], (String) values[1], values[2], databaseCollectionType);
+                    QuickUtils.sendConsoleMessage("&a插入数据: UUID: " + values[0] + ", key: " + values[1] + ", value: " + values[2]);
+                })
+                .count();
 
         if (count != 0) {
             QuickUtils.sendConsoleMessage("&a迁移完毕，总迁移数据: " + count + " 个。");
