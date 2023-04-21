@@ -10,7 +10,7 @@ import me.twomillions.plugin.advancedwish.managers.task.ScheduledTaskManager;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Iterator;
 import java.util.UUID;
@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 @SuppressWarnings("unused")
 public class ScheduledTaskHandler extends TasksAbstract {
     private final Runnable runnable;
-    private static final Plugin plugin = Main.getInstance();
+    private static final JavaPlugin plugin = Main.getInstance();
 
     /**
      * 获取实例。

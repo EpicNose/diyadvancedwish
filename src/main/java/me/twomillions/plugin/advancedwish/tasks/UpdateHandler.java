@@ -7,7 +7,7 @@ import me.twomillions.plugin.advancedwish.abstracts.TasksAbstract;
 import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
 import java.net.URL;
@@ -22,7 +22,7 @@ import java.util.Scanner;
 @Getter @Setter
 public class UpdateHandler extends TasksAbstract {
     private final Runnable runnable;
-    private static final Plugin plugin = Main.getInstance();
+    private static final JavaPlugin plugin = Main.getInstance();
 
     @Getter private static boolean isLatestVersion = true;
 

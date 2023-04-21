@@ -15,10 +15,12 @@ import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import net.milkbowl.vault.economy.Economy;
 import org.black_ixx.playerpoints.PlayerPoints;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -30,7 +32,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @date 2022/11/24 19:01
  */
 public class RegisterManager {
-    private static final Plugin plugin = Main.getInstance();
+    private static final JavaPlugin plugin = Main.getInstance();
 
     /**
      * 注册的许愿池列表。
@@ -76,6 +78,11 @@ public class RegisterManager {
     public static void setupPlugins(boolean registerEvents) {
         PluginManager manager = Bukkit.getPluginManager();
 
+        // bStats
+        if (!ConfigManager.getAdvancedWishYaml().getOrDefault("BSTATS", true)) {
+            new Metrics(plugin, 16990);
+        }
+        
         setupPath();
         setupVault();
         setupPlayerPoints();

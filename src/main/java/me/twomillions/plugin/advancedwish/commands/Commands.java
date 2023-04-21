@@ -15,7 +15,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings({"unused", "SameParameterValue"})
 public class Commands implements TabExecutor {
-    private static final Plugin plugin = Main.getInstance();
+    private static final JavaPlugin plugin = Main.getInstance();
     private final Cache<String, Method> subCommandMap = CaffeineUtils.buildBukkitCache();
 
     private static final Yaml messageYaml = ConfigManager.getMessageYaml();

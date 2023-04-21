@@ -5,7 +5,7 @@ import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.managers.register.RegisterManager;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -17,7 +17,7 @@ import java.util.Optional;
  * @date 2022/12/2 13:16
  */
 public class PapiManager extends PlaceholderExpansion {
-    private static final Plugin plugin = Main.getInstance();
+    private static final JavaPlugin plugin = Main.getInstance();
 
     /**
      * 获取标识符。

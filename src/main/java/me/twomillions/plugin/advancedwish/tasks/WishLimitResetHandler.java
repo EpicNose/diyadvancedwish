@@ -3,18 +3,18 @@ package me.twomillions.plugin.advancedwish.tasks;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import lombok.Setter;
+import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.abstracts.TasksAbstract;
+import me.twomillions.plugin.advancedwish.api.AsyncWishLimitResetEvent;
+import me.twomillions.plugin.advancedwish.managers.WishManager;
+import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
+import me.twomillions.plugin.advancedwish.managers.databases.DatabasesManager;
+import me.twomillions.plugin.advancedwish.managers.task.ScheduledTaskManager;
 import me.twomillions.plugin.advancedwish.utils.events.EventUtils;
 import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
-import me.twomillions.plugin.advancedwish.Main;
-import me.twomillions.plugin.advancedwish.api.AsyncWishLimitResetEvent;
-import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
-import me.twomillions.plugin.advancedwish.managers.task.ScheduledTaskManager;
-import me.twomillions.plugin.advancedwish.managers.WishManager;
-import me.twomillions.plugin.advancedwish.managers.databases.DatabasesManager;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class WishLimitResetHandler extends TasksAbstract {
     private final String wishName;
     private final Runnable runnable;
-    private static final Plugin plugin = Main.getInstance();
+    private static final JavaPlugin plugin = Main.getInstance();
 
     @Getter private static ConcurrentLinkedQueue<BukkitTask> wishLimitResetTaskList = new ConcurrentLinkedQueue<>();
 

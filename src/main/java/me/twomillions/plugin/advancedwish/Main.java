@@ -15,7 +15,6 @@ import me.twomillions.plugin.advancedwish.tasks.WishLimitResetHandler;
 import me.twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;
 import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
-import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -114,21 +113,12 @@ public final class Main extends JavaPlugin {
                 return;
         }
 
-        // bStats
-        if (!advancedWishYaml.getOrDefault("BSTATS", true)) {
-            new Metrics(this, 16990);
-        }
-
         // 任务处理
         ScheduledTaskHandler.getScheduledTaskHandler().startTask();
-
-        // 网页更新
         UpdateHandler.getUpdateHandler().startTask();
 
         /*
-         * 如果玩家没有使用插件的指令进行热重载，那么会导致 PlayerTimestampRunnable 停止
-         * 这里检查服内是否有此玩家，如果有的话那么就为所有玩家启动 PlayerTimestampRunnable
-         * 并且如果此玩家在线那么直接检查缓存数据，而不是需要玩家重新进入服务器
+         * 如果插件开启时有玩家既是热重载等，检查玩家缓存重新开始任务
          */
         if (!Bukkit.getOnlinePlayers().isEmpty()) {
             Bukkit.getOnlinePlayers().forEach(player -> new PlayerCacheHandler(player).startTask());

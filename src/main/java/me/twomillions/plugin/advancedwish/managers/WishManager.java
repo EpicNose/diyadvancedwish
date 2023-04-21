@@ -28,7 +28,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.List;
@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings({"unused", "BooleanMethodIsAlwaysInverted"})
 public class WishManager {
-    private static final Plugin plugin = Main.getInstance();
+    private static final JavaPlugin plugin = Main.getInstance();
 
     /**
      * 玩家许愿记录。

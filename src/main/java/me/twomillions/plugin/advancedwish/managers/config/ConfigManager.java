@@ -11,7 +11,7 @@ import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.util.Arrays;
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  * @date 2022/11/21 12:41
  */
 public class ConfigManager {
-    private static final Plugin plugin = Main.getInstance();
+    private static final JavaPlugin plugin = Main.getInstance();
 
     @Getter private static final Yaml messageYaml = createYaml("message", null, false, true);
     @Getter private static final Yaml advancedWishYaml = createYaml("advancedWish", null, false, true);

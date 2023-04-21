@@ -16,7 +16,7 @@ import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import me.twomillions.plugin.advancedwish.utils.texts.StringEncrypter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
 import java.util.UUID;
@@ -33,7 +33,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class PlayerCacheHandler extends TasksAbstract {
     private final Runnable runnable;
 
-    private static final Plugin plugin = Main.getInstance();
+    private static final JavaPlugin plugin = Main.getInstance();
     private static final Cache<UUID, Boolean> loadingCache = CaffeineUtils.buildBukkitCache();
     private static final Cache<UUID, Boolean> waitingLoadingCache = CaffeineUtils.buildBukkitCache();
 

@@ -11,7 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings({"deprecation", "unused"})
 public class QuickUtils {
-    private static final Plugin plugin = Main.getInstance();
+    private static final JavaPlugin plugin = Main.getInstance();
     private static final JexlEngine jexlEngine = new JexlBuilder().create();
     private static final String CHAT_BAR = ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "------------------------------------------------";
 

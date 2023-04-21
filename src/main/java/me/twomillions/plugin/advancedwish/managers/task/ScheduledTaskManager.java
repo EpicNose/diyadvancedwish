@@ -8,7 +8,7 @@ import me.twomillions.plugin.advancedwish.utils.others.CaffeineUtils;
 import me.twomillions.plugin.advancedwish.utils.scripts.ScriptUtils;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Iterator;
 import java.util.List;
@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 @SuppressWarnings("unused")
 public class ScheduledTaskManager {
-    private static final Plugin plugin = Main.getInstance();
+    private static final JavaPlugin plugin = Main.getInstance();
 
     /**
      * 用 Map 存储每个玩家的计划任务，Key 为玩家的 UUID，value 为 List，存储每个计划任务的字符串表示。
