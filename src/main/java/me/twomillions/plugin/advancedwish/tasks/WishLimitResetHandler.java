@@ -20,7 +20,7 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * 许愿池限制次数重置的管理器。
+ * 该类继承 {@link TasksAbstract}，用于处理许愿池限制次数重置。
  *
  * @author 2000000
  * @date 2023/1/9 15:08

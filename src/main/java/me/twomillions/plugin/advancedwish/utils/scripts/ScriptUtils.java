@@ -1,6 +1,7 @@
 package me.twomillions.plugin.advancedwish.utils.scripts;
 
 import com.github.benmanes.caffeine.cache.Cache;
+import lombok.experimental.UtilityClass;
 import me.twomillions.plugin.advancedwish.utils.others.CaffeineUtils;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.bukkit.entity.Player;
@@ -17,6 +18,7 @@ import java.io.StringReader;
  * @author 2000000
  * @date 2023/3/2
  */
+@UtilityClass
 public class ScriptUtils {
     private static final ScriptEngine ENGINE = new ScriptEngineManager().getEngineByExtension("js");
     private static final Cache<Object[], Bindings> BINDINGS_CACHE = CaffeineUtils.buildBukkitCache();

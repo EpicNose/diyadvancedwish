@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 
 /**
- * 该类继承 PlaceholderExpansion 类，用于处理 Advanced Wish 额外变量。
+ * 该类继承 {@link PlaceholderExpansion}，用于处理 Advanced Wish 额外变量。
  *
  * @author 2000000
  * @date 2022/12/2 13:16

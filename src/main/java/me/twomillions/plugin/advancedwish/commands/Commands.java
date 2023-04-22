@@ -35,6 +35,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 /**
+ * 该类实现 {@link TabExecutor}，通过反射与注解处理指令及 Tab 补全。
+ *
  * @author 2000000
  * @date 2023/3/26
  */
@@ -717,11 +719,11 @@ public class Commands implements TabExecutor {
     }
 
     /**
-     * SubCommand 注解
+     * SubCommand 注解。
      */
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
-    public @interface SubCommand {
+    private @interface SubCommand {
         String value();
     }
 

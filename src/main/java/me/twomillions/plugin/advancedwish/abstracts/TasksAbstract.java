@@ -5,7 +5,7 @@ import lombok.Setter;
 import org.bukkit.scheduler.BukkitTask;
 
 /**
- * 普通任务抽象类。
+ * 任务抽象类。
  *
  * @author 2000000
  * @date 2023/4/21

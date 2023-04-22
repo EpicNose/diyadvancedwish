@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.apache.commons.math3.random.MersenneTwister;
-import org.apache.commons.math3.random.RandomGenerator;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -21,7 +20,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * @param <T> 随机对象类型
  */
 @NoArgsConstructor
-public class RandomUtils<T> {
+public class RandomGenerator<T> {
     /**
      * 存储所有随机对象及其对应的概率。
      */
@@ -43,13 +42,13 @@ public class RandomUtils<T> {
     private final SecureRandom secureRandom = new SecureRandom();
 
     /**
-     * 通过可选参数创建一个 RandomUtils 实例。
+     * 通过可选参数创建一个 RandomGenerator 实例。
      *
      * @param values 由对象和概率值组成的数组，不能为空，长度必须为偶数
      * @throws IllegalArgumentException 如果概率值不是整数或缺少概率值，则抛出该异常
      */
     @SafeVarargs
-    public RandomUtils(T... values) {
+    public RandomGenerator(T... values) {
         for (int i = 0; i < values.length; i += 2) {
             if (i + 1 >= values.length) {
                 throw new IllegalArgumentException("Missing probability value for object: " + values[i]);
@@ -247,7 +246,7 @@ public class RandomUtils<T> {
     public T getResultWithMersenneTwister() {
         doSecurityCheck();
 
-        RandomGenerator randomGenerator = new MersenneTwister();
+        org.apache.commons.math3.random.RandomGenerator randomGenerator = new MersenneTwister();
 
         int randomNumber = randomGenerator.nextInt(totalProbability);
 

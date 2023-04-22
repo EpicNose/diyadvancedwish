@@ -1,14 +1,18 @@
 package me.twomillions.plugin.advancedwish.utils.events;
 
+import lombok.experimental.UtilityClass;
 import me.twomillions.plugin.advancedwish.api.*;
 import me.twomillions.plugin.advancedwish.enums.wish.PlayerWishStatus;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 /**
+ * 事件工具类。
+ *
  * @author 2000000
  * @date 2023/3/26
  */
+@UtilityClass
 public class EventUtils {
     /**
      * call AsyncPlayerWishEvent

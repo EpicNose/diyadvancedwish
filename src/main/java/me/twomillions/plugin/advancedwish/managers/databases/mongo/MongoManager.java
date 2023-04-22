@@ -12,7 +12,6 @@ import lombok.Setter;
 import me.twomillions.plugin.advancedwish.enums.databases.status.AuthStatus;
 import me.twomillions.plugin.advancedwish.enums.databases.status.ConnectStatus;
 import me.twomillions.plugin.advancedwish.enums.databases.status.CustomUrlStatus;
-import me.twomillions.plugin.advancedwish.enums.databases.types.DatabaseCollectionType;
 import me.twomillions.plugin.advancedwish.interfaces.DatabasesInterface;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.bson.Document;
@@ -26,7 +25,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
 /**
- * MongoDB 操作类。
+ * 该类实现 {@link DatabasesInterface}，处理 Mongo 操作。
  *
  * @author 2000000
  * @date 2023/1/8 21:23
@@ -104,15 +103,15 @@ public class MongoManager implements DatabasesInterface {
     /**
      * 根据给定的 UUID、Key 和默认值获取对应的值，若未找到则插入默认值并返回。若找到的值为 null，则更新为默认值并返回。
      *
-     * @param uuid 查询的 UUID
+     * @param uuid 标识符
      * @param key 查询的 Key
      * @param defaultValue 查询的默认值
-     * @param databaseCollectionType 查询的集合
+     * @param databaseCollection 查询的集合
      * @return 对应的值
      */
     @Override
-    public Object getOrDefault(String uuid, String key, Object defaultValue, DatabaseCollectionType databaseCollectionType) {
-        MongoCollection<Document> collection = getMongoDatabase().getCollection(databaseCollectionType.toString());
+    public Object getOrDefault(String uuid, String key, Object defaultValue, String databaseCollection) {
+        MongoCollection<Document> collection = getMongoDatabase().getCollection(databaseCollection);
 
         Document filter = new Document("_id", uuid);
         Document document = collection.find(filter).first();
@@ -138,15 +137,15 @@ public class MongoManager implements DatabasesInterface {
     /**
      * 根据给定的 UUID、Key 和默认值获取对应的 List 值，若未找到则插入默认值并返回。若找到的值为 null，则更新为默认值并返回。
      *
-     * @param uuid 查询的 UUID
+     * @param uuid 标识符
      * @param key 查询的 Key
      * @param defaultValue 查询的默认值
-     * @param databaseCollectionType 查询的集合
+     * @param databaseCollection 查询的集合
      * @return 对应的 List 值
      */
     @Override
-    public ConcurrentLinkedQueue<String> getOrDefaultList(String uuid, String key, ConcurrentLinkedQueue<String> defaultValue, DatabaseCollectionType databaseCollectionType) {
-        MongoCollection<Document> collection = getMongoDatabase().getCollection(databaseCollectionType.toString());
+    public ConcurrentLinkedQueue<String> getOrDefaultList(String uuid, String key, ConcurrentLinkedQueue<String> defaultValue, String databaseCollection) {
+        MongoCollection<Document> collection = getMongoDatabase().getCollection(databaseCollection);
 
         Document filter = new Document("_id", uuid);
         Document document = collection.find(filter).first();
@@ -170,16 +169,17 @@ public class MongoManager implements DatabasesInterface {
     }
 
     /**
-     * 更新玩家数据。
+     * 根据给定的 UUID、Key 更新数据值，若未找到则插入数据值并返回。
      *
-     * @param uuid 玩家的 UUID
+     * @param uuid 标识符
      * @param key 查询的 Key
-     * @param value 数据的值
-     * @param databaseCollectionType 数据存储的集合
+     * @param value 数据值
+     * @param databaseCollection 数据存储的集合
+     * @return 是否成功更新
      */
     @Override
-    public boolean update(String uuid, String key, Object value, DatabaseCollectionType databaseCollectionType) {
-        MongoCollection<Document> collection = getMongoDatabase().getCollection(databaseCollectionType.toString());
+    public boolean update(String uuid, String key, Object value, String databaseCollection) {
+        MongoCollection<Document> collection = getMongoDatabase().getCollection(databaseCollection);
         collection.updateOne(new Document("_id", uuid), new Document("$set", new Document(key, value)), new UpdateOptions().upsert(true));
         return true;
     }
@@ -187,12 +187,12 @@ public class MongoManager implements DatabasesInterface {
     /**
      * 获取指定集合类型的所有数据。
      *
-     * @param databaseCollectionType 查询的集合
+     * @param databaseCollection 查询的集合
      * @return 以 Map 的形式返回所有数据，其中 Map 的 Key 是 UUID，value 是一个包含键值对的 Map
      */
     @Override
-    public Map<String, Map<String, Object>> getAllData(DatabaseCollectionType databaseCollectionType) {
-        MongoCollection<Document> collection = getMongoDatabase().getCollection(databaseCollectionType.toString());
+    public Map<String, Map<String, Object>> getAllData(String databaseCollection) {
+        MongoCollection<Document> collection = getMongoDatabase().getCollection(databaseCollection);
         List<Document> documents = collection.find().into(new ArrayList<>());
 
         Map<String, Map<String, Object>> result = new HashMap<>();

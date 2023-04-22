@@ -6,7 +6,6 @@ import lombok.Setter;
 import me.twomillions.plugin.advancedwish.enums.databases.status.AuthStatus;
 import me.twomillions.plugin.advancedwish.enums.databases.status.ConnectStatus;
 import me.twomillions.plugin.advancedwish.enums.databases.status.CustomUrlStatus;
-import me.twomillions.plugin.advancedwish.enums.databases.types.DatabaseCollectionType;
 import me.twomillions.plugin.advancedwish.interfaces.DatabasesInterface;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -17,6 +16,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
+ * 该类实现 {@link DatabasesInterface}，处理 MySQL 操作。
+ *
  * @author 2000000
  * @date 2023/3/26
  */
@@ -88,19 +89,19 @@ public class MySQLManager implements DatabasesInterface {
     /**
      * 根据给定的 UUID、Key 和默认值获取对应的值，若未找到则插入默认值并返回。若找到的值为 null，则更新为默认值并返回。
      *
-     * @param uuid 查询的 UUID
+     * @param uuid 标识符
      * @param key 查询的 Key
      * @param defaultValue 查询的默认值
-     * @param databaseCollectionType 查询的集合
+     * @param databaseCollection 查询的集合
      * @return 对应的值
      */
     @Override
-    public Object getOrDefault(String uuid, String key, Object defaultValue, DatabaseCollectionType databaseCollectionType) {
+    public Object getOrDefault(String uuid, String key, Object defaultValue, String databaseCollection) {
         try (Connection connection = getDataSource().getConnection()) {
-            checkCollectionType(key, databaseCollectionType);
-            checkColumn(key, databaseCollectionType);
+            checkCollectionType(key, databaseCollection);
+            checkColumn(key, databaseCollection);
 
-            String query = "SELECT COALESCE((SELECT `" + key + "` FROM `" + databaseCollectionType + "` WHERE uuid = ?), ?)";
+            String query = "SELECT COALESCE((SELECT `" + key + "` FROM `" + databaseCollection + "` WHERE uuid = ?), ?)";
 
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, uuid);
@@ -112,7 +113,7 @@ public class MySQLManager implements DatabasesInterface {
 
             if (value == null) {
                 value = defaultValue;
-                update(uuid, key, defaultValue, databaseCollectionType);
+                update(uuid, key, defaultValue, databaseCollection);
             }
 
             return value;
@@ -125,19 +126,19 @@ public class MySQLManager implements DatabasesInterface {
     /**
      * 根据给定的 UUID、Key 和默认值获取对应的 List 值，若未找到则插入默认值并返回。若找到的值为 null，则更新为默认值并返回。
      *
-     * @param uuid 查询的 UUID
+     * @param uuid 标识符
      * @param key 查询的 Key
      * @param defaultValue 查询的默认值
-     * @param databaseCollectionType 查询的集合
+     * @param databaseCollection 查询的集合
      * @return 对应的 List 值
      */
     @Override
-    public ConcurrentLinkedQueue<String> getOrDefaultList(String uuid, String key, ConcurrentLinkedQueue<String> defaultValue, DatabaseCollectionType databaseCollectionType) {
+    public ConcurrentLinkedQueue<String> getOrDefaultList(String uuid, String key, ConcurrentLinkedQueue<String> defaultValue, String databaseCollection) {
         try (Connection connection = getDataSource().getConnection()) {
-            checkCollectionType(key, databaseCollectionType);
-            checkColumn(key, databaseCollectionType);
+            checkCollectionType(key, databaseCollection);
+            checkColumn(key, databaseCollection);
 
-            String query = "SELECT COALESCE((SELECT `" + key + "` FROM `" + databaseCollectionType + "` WHERE uuid = ?), ?)";
+            String query = "SELECT COALESCE((SELECT `" + key + "` FROM `" + databaseCollection + "` WHERE uuid = ?), ?)";
 
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, uuid);
@@ -148,7 +149,7 @@ public class MySQLManager implements DatabasesInterface {
             String value = resultSet.getString(1);
 
             if (value == null || value.isEmpty()) {
-                update(uuid, key, defaultValue, databaseCollectionType);
+                update(uuid, key, defaultValue, databaseCollection);
                 return defaultValue;
             }
 
@@ -160,24 +161,25 @@ public class MySQLManager implements DatabasesInterface {
     }
 
     /**
-     * 更新玩家数据。
+     * 根据给定的 UUID、Key 更新数据值，若未找到则插入数据值并返回。
      *
-     * @param uuid 玩家的 UUID
+     * @param uuid 标识符
      * @param key 查询的 Key
-     * @param value 数据的值
-     * @param databaseCollectionType 查询的集合
+     * @param value 数据值
+     * @param databaseCollection 数据存储的集合
+     * @return 是否成功更新
      */
     @Override
-    public boolean update(String uuid, String key, Object value, DatabaseCollectionType databaseCollectionType) {
+    public boolean update(String uuid, String key, Object value, String databaseCollection) {
         try (Connection connection = getDataSource().getConnection()) {
-            checkCollectionType(key, databaseCollectionType);
-            checkColumn(key, databaseCollectionType);
+            checkCollectionType(key, databaseCollection);
+            checkColumn(key, databaseCollection);
 
             if (value instanceof Collection<?>) {
                 value = QuickUtils.listToString((Collection<?>) value);
             }
 
-            String query = "INSERT INTO `" + databaseCollectionType + "` (uuid, `" + key + "`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `" + key + "`=?";
+            String query = "INSERT INTO `" + databaseCollection + "` (uuid, `" + key + "`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `" + key + "`=?";
 
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, uuid);
@@ -195,14 +197,14 @@ public class MySQLManager implements DatabasesInterface {
     /**
      * 获取指定集合类型的所有数据。
      *
-     * @param databaseCollectionType 查询的集合
+     * @param databaseCollection 查询的集合
      * @return 以 Map 的形式返回所有数据，其中 Map 的 Key 是 UUID，value 是一个包含键值对的 Map
      */
     @Override
-    public Map<String, Map<String, Object>> getAllData(DatabaseCollectionType databaseCollectionType) {
+    public Map<String, Map<String, Object>> getAllData(String databaseCollection) {
         try (Connection connection = getDataSource().getConnection()) {
             DatabaseMetaData databaseMetaData = connection.getMetaData();
-            ResultSet columns = databaseMetaData.getColumns(null, null, databaseCollectionType.toString(), null);
+            ResultSet columns = databaseMetaData.getColumns(null, null, databaseCollection, null);
 
             List<String> columnNames = new ArrayList<>();
             while (columns.next()) {
@@ -214,7 +216,7 @@ public class MySQLManager implements DatabasesInterface {
                 return new HashMap<>();
             }
 
-            String query = "SELECT uuid, `" + String.join("`, `", columnNames) + "` FROM `" + databaseCollectionType + "`";
+            String query = "SELECT uuid, `" + String.join("`, `", columnNames) + "` FROM `" + databaseCollection + "`";
 
             PreparedStatement statement = connection.prepareStatement(query);
             ResultSet resultSet = statement.executeQuery();
@@ -286,15 +288,15 @@ public class MySQLManager implements DatabasesInterface {
      * 如果不存在，则创建新集合，其中包含一个主键 uuid 和一个指定的列。
      *
      * @param key 查询的 Key
-     * @param databaseCollectionType 查询的集合
+     * @param databaseCollection 查询的集合
      */
-    private void checkCollectionType(String key, DatabaseCollectionType databaseCollectionType) {
+    private void checkCollectionType(String key, String databaseCollection) {
         try (Connection connection = getDataSource().getConnection()) {
             DatabaseMetaData databaseMetaData = connection.getMetaData();
-            ResultSet tables = databaseMetaData.getTables(null, null, databaseCollectionType.toString(), null);
+            ResultSet tables = databaseMetaData.getTables(null, null, databaseCollection, null);
 
             if (!tables.next()) {
-                String createTableQuery = "CREATE TABLE `" + databaseCollectionType + "` (`uuid` VARCHAR(36) NOT NULL, `" + key + "` TEXT DEFAULT NULL, PRIMARY KEY (`uuid`))";
+                String createTableQuery = "CREATE TABLE `" + databaseCollection + "` (`uuid` VARCHAR(36) NOT NULL, `" + key + "` TEXT DEFAULT NULL, PRIMARY KEY (`uuid`))";
                 PreparedStatement createTableStatement = connection.prepareStatement(createTableQuery);
                 createTableStatement.executeUpdate();
             }
@@ -307,15 +309,15 @@ public class MySQLManager implements DatabasesInterface {
      * 检查是否存在指定的列。如果不存在，则在表格中添加新列。
      *
      * @param key 查询的 Key
-     * @param databaseCollectionType 查询的集合
+     * @param databaseCollection 查询的集合
      */
-    private void checkColumn(String key, DatabaseCollectionType databaseCollectionType) {
+    private void checkColumn(String key, String databaseCollection) {
         try (Connection connection = getDataSource().getConnection()) {
             DatabaseMetaData databaseMetaData = connection.getMetaData();
-            ResultSet columns = databaseMetaData.getColumns(null, null, databaseCollectionType.toString(), key);
+            ResultSet columns = databaseMetaData.getColumns(null, null, databaseCollection, key);
 
             if (!columns.next()) {
-                String alterTableQuery = "ALTER TABLE `" + databaseCollectionType + "` ADD `" + key + "` TEXT DEFAULT NULL";
+                String alterTableQuery = "ALTER TABLE `" + databaseCollection + "` ADD `" + key + "` TEXT DEFAULT NULL";
                 PreparedStatement alterTableStatement = connection.prepareStatement(alterTableQuery);
                 alterTableStatement.executeUpdate();
             }

@@ -1,5 +1,6 @@
 package me.twomillions.plugin.advancedwish.utils.random;
 
+import lombok.experimental.UtilityClass;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 
@@ -9,6 +10,7 @@ import org.bukkit.boss.BarStyle;
  * @author 2000000
  * @date 2023/2/8
  */
+@UtilityClass
 public class BossBarRandomUtils {
     /**
      * 随机获取一个 {@link BarColor} 颜色
@@ -16,7 +18,7 @@ public class BossBarRandomUtils {
      * @return 随机颜色
      */
     public static BarColor randomColor() {
-        RandomUtils<BarColor> randomUtils = new RandomUtils<>();
+        RandomGenerator<BarColor> randomUtils = new RandomGenerator<>();
 
         for (BarColor value : BarColor.values()) {
             randomUtils.addRandomObject(value, 1);
@@ -31,7 +33,7 @@ public class BossBarRandomUtils {
      * @return 随机样式
      */
     public static BarStyle randomStyle() {
-        RandomUtils<BarStyle> randomUtils = new RandomUtils<>();
+        RandomGenerator<BarStyle> randomUtils = new RandomGenerator<>();
 
         for (BarStyle value : BarStyle.values()) {
             randomUtils.addRandomObject(value, 1);

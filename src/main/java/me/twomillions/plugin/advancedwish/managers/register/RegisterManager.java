@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- *
+ * 插件注册处理类。
  *
  * @author 2000000
  * @date 2022/11/24 19:01

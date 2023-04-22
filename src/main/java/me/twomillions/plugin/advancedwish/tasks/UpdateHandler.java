@@ -14,7 +14,7 @@ import java.net.URL;
 import java.util.Scanner;
 
 /**
- * 插件更新检查。
+ * 该类继承 {@link TasksAbstract}，用于处理插件更新检查。
  *
  * @author 2000000
  * @date 2022/11/24 16:49

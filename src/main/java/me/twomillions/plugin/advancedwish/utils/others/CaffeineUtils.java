@@ -2,6 +2,7 @@ package me.twomillions.plugin.advancedwish.utils.others;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import lombok.experimental.UtilityClass;
 import me.twomillions.plugin.advancedwish.Main;
 import org.bukkit.Bukkit;
 
@@ -13,6 +14,7 @@ import org.bukkit.Bukkit;
  * @author 2000000
  * @date 2023/2/20
  */
+@UtilityClass
 public class CaffeineUtils {
     /**
      * 构建一个 Caffeine 缓存，使用 Bukkit 的异步任务线程池来执行缓存操作。

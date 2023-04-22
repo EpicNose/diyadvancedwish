@@ -1,12 +1,14 @@
 package me.twomillions.plugin.advancedwish.managers.effect;
 
-import me.twomillions.plugin.advancedwish.enums.databases.types.DatabaseCollectionType;
 import me.twomillions.plugin.advancedwish.managers.databases.DatabasesManager;
+import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
 
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
+ * 玩家日志处理类。
+ *
  * @author 2000000
  * @date 2023/3/26
  */
@@ -18,9 +20,9 @@ public class LogManager {
      * @param logString 许愿日志
      */
     public static void addPlayerWishLog(String uuid, String logString) {
-        ConcurrentLinkedQueue<String> dbLogs = DatabasesManager.getDatabasesManager().getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), DatabaseCollectionType.PlayerLogs);
+        ConcurrentLinkedQueue<String> dbLogs = DatabasesManager.getDatabasesManager().getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), ConstantsUtils.PLAYER_LOGS_COLLECTION_NAME);
         dbLogs.add(logString);
-        DatabasesManager.getDatabasesManager().update(uuid, "logs", dbLogs, DatabaseCollectionType.PlayerLogs);
+        DatabasesManager.getDatabasesManager().update(uuid, "logs", dbLogs, ConstantsUtils.PLAYER_LOGS_COLLECTION_NAME);
     }
 
     /**
@@ -32,7 +34,7 @@ public class LogManager {
      * @return 返回查询出来的日志列表
      */
     public static ConcurrentLinkedQueue<String> getPlayerWishLog(String uuid, int findMin, int findMax) {
-        return getLogsInRange(DatabasesManager.getDatabasesManager().getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), DatabaseCollectionType.PlayerLogs), findMin, findMax);
+        return getLogsInRange(DatabasesManager.getDatabasesManager().getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), ConstantsUtils.PLAYER_LOGS_COLLECTION_NAME), findMin, findMax);
     }
 
     /**
@@ -42,7 +44,7 @@ public class LogManager {
      * @return 返回日志条目数
      */
     public static int getPlayerWishLogSize(String uuid) {
-        return DatabasesManager.getDatabasesManager().getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), DatabaseCollectionType.PlayerLogs).size();
+        return DatabasesManager.getDatabasesManager().getOrDefaultList(uuid, "logs", new ConcurrentLinkedQueue<>(), ConstantsUtils.PLAYER_LOGS_COLLECTION_NAME).size();
     }
 
     /**

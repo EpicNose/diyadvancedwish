@@ -17,7 +17,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * 玩家任务执行类。
+ * 该类继承 {@link TasksAbstract}，用于处理玩家正常任务。
  *
  * @author 2000000
  * @date 2022/11/24 16:49

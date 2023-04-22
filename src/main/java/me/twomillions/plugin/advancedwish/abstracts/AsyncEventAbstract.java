@@ -7,6 +7,8 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 /**
+ * 该类继承 {@link Event} 实现 {@link Cancellable}，更加快捷的实现异步事件。
+ *
  * @author 2000000
  * @date 2023/4/21
  */

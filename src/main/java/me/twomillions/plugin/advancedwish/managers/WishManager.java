@@ -6,7 +6,6 @@ import de.leonhard.storage.Json;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import me.twomillions.plugin.advancedwish.Main;
-import me.twomillions.plugin.advancedwish.enums.databases.types.DatabaseCollectionType;
 import me.twomillions.plugin.advancedwish.enums.wish.PlayerWishStatus;
 import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.databases.DatabasesManager;
@@ -18,7 +17,7 @@ import me.twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;
 import me.twomillions.plugin.advancedwish.utils.others.CaffeineUtils;
 import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
 import me.twomillions.plugin.advancedwish.utils.others.ItemUtils;
-import me.twomillions.plugin.advancedwish.utils.random.RandomUtils;
+import me.twomillions.plugin.advancedwish.utils.random.RandomGenerator;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import me.twomillions.plugin.advancedwish.utils.texts.StringEncrypter;
 import net.milkbowl.vault.economy.Economy;
@@ -299,7 +298,7 @@ public class WishManager {
         }
 
         // 如果没有触发保底，则进行随机
-        RandomUtils<String> randomUtils = new RandomUtils<>();
+        RandomGenerator<String> randomUtils = new RandomGenerator<>();
         for (String wishPrizeSetString : yaml.singleLayerKeySet("PRIZE-SET")) {
             String key = "PRIZE-SET." + wishPrizeSetString;
 
@@ -479,7 +478,7 @@ public class WishManager {
         String uuid = player.getUniqueId().toString();
         String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_guaranteed");
 
-        DatabasesManager.getDatabasesManager().update(uuid, dataSync, String.valueOf(guaranteed), DatabaseCollectionType.PlayerGuaranteed);
+        DatabasesManager.getDatabasesManager().update(uuid, dataSync, String.valueOf(guaranteed), ConstantsUtils.PLAYER_GUARANTEED_COLLECTION_NAME);
     }
 
     /**
@@ -495,7 +494,7 @@ public class WishManager {
 
         String offlinePlayerUUID = QuickUtils.getPlayerUUID(playerName);
 
-        DatabasesManager.getDatabasesManager().update(offlinePlayerUUID, dataSync, String.valueOf(guaranteed), DatabaseCollectionType.PlayerGuaranteed);
+        DatabasesManager.getDatabasesManager().update(offlinePlayerUUID, dataSync, String.valueOf(guaranteed), ConstantsUtils.PLAYER_GUARANTEED_COLLECTION_NAME);
     }
 
     /**
@@ -509,7 +508,7 @@ public class WishManager {
         String uuid = player.getUniqueId().toString();
         String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_guaranteed");
 
-        return Double.parseDouble(DatabasesManager.getDatabasesManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+        return Double.parseDouble(DatabasesManager.getDatabasesManager().getOrDefault(uuid, dataSync, "0", ConstantsUtils.PLAYER_GUARANTEED_COLLECTION_NAME).toString());
     }
 
     /**
@@ -524,7 +523,7 @@ public class WishManager {
 
         String offlinePlayerUUID = QuickUtils.getPlayerUUID(playerName);
 
-        return Double.parseDouble(DatabasesManager.getDatabasesManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+        return Double.parseDouble(DatabasesManager.getDatabasesManager().getOrDefault(offlinePlayerUUID, dataSync, "0", ConstantsUtils.PLAYER_GUARANTEED_COLLECTION_NAME).toString());
     }
 
     /**
@@ -538,7 +537,7 @@ public class WishManager {
         String uuid = player.getUniqueId().toString();
         String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_amount");
 
-        DatabasesManager.getDatabasesManager().update(uuid, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
+        DatabasesManager.getDatabasesManager().update(uuid, dataSync, String.valueOf(amount), ConstantsUtils.PLAYER_GUARANTEED_COLLECTION_NAME);
     }
 
     /**
@@ -553,7 +552,7 @@ public class WishManager {
 
         String offlinePlayerUUID = QuickUtils.getPlayerUUID(playerName);
 
-        DatabasesManager.getDatabasesManager().update(offlinePlayerUUID, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
+        DatabasesManager.getDatabasesManager().update(offlinePlayerUUID, dataSync, String.valueOf(amount), ConstantsUtils.PLAYER_GUARANTEED_COLLECTION_NAME);
     }
 
     /**
@@ -567,7 +566,7 @@ public class WishManager {
         String uuid = player.getUniqueId().toString();
         String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_amount");
 
-        return Integer.parseInt(DatabasesManager.getDatabasesManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+        return Integer.parseInt(DatabasesManager.getDatabasesManager().getOrDefault(uuid, dataSync, "0", ConstantsUtils.PLAYER_GUARANTEED_COLLECTION_NAME).toString());
     }
 
     /**
@@ -582,7 +581,7 @@ public class WishManager {
 
         String offlinePlayerUUID = QuickUtils.getPlayerUUID(playerName);
 
-        return Integer.parseInt(DatabasesManager.getDatabasesManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+        return Integer.parseInt(DatabasesManager.getDatabasesManager().getOrDefault(offlinePlayerUUID, dataSync, "0", ConstantsUtils.PLAYER_GUARANTEED_COLLECTION_NAME).toString());
     }
 
     /**
@@ -598,7 +597,7 @@ public class WishManager {
         String uuid = player.getUniqueId().toString();
         String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_limit_amount");
 
-        DatabasesManager.getDatabasesManager().update(uuid, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
+        DatabasesManager.getDatabasesManager().update(uuid, dataSync, String.valueOf(amount), ConstantsUtils.PLAYER_GUARANTEED_COLLECTION_NAME);
     }
 
     /**
@@ -615,7 +614,7 @@ public class WishManager {
 
         String offlinePlayerUUID = QuickUtils.getPlayerUUID(playerName);
 
-        DatabasesManager.getDatabasesManager().update(offlinePlayerUUID, dataSync, String.valueOf(amount), DatabaseCollectionType.PlayerGuaranteed);
+        DatabasesManager.getDatabasesManager().update(offlinePlayerUUID, dataSync, String.valueOf(amount), ConstantsUtils.PLAYER_GUARANTEED_COLLECTION_NAME);
     }
 
     /**
@@ -631,7 +630,7 @@ public class WishManager {
         String uuid = player.getUniqueId().toString();
         String dataSync = StringEncrypter.encrypt(getWishDataSync(wishName) + "_limit_amount");
 
-        return Integer.parseInt(DatabasesManager.getDatabasesManager().getOrDefault(uuid, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+        return Integer.parseInt(DatabasesManager.getDatabasesManager().getOrDefault(uuid, dataSync, "0", ConstantsUtils.PLAYER_GUARANTEED_COLLECTION_NAME).toString());
     }
 
     /**
@@ -648,7 +647,7 @@ public class WishManager {
 
         String offlinePlayerUUID = QuickUtils.getPlayerUUID(playerName);
 
-        return Integer.parseInt(DatabasesManager.getDatabasesManager().getOrDefault(offlinePlayerUUID, dataSync, "0", DatabaseCollectionType.PlayerGuaranteed).toString());
+        return Integer.parseInt(DatabasesManager.getDatabasesManager().getOrDefault(offlinePlayerUUID, dataSync, "0", ConstantsUtils.PLAYER_GUARANTEED_COLLECTION_NAME).toString());
     }
 
     /**

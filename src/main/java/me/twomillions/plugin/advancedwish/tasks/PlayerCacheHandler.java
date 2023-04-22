@@ -23,7 +23,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * 玩家缓存的管理器。
+ * 该类继承 {@link TasksAbstract}，用于处理玩家缓存任务。
  *
  * @author 2000000
  * @date 2022/11/24 20:09
@@ -50,8 +50,8 @@ public class PlayerCacheHandler extends TasksAbstract {
             String doListCachePath = Main.getDoListCachePath();
 
             // 遍历缓存文件，判断是否有正常缓存或操作缓存
-            boolean hasNormalCache = ConfigManager.getAllFileNames(normalPath).contains(uuid + ConstantsUtils.JSON_SUFFIX);
-            boolean hasDoListCachePath = ConfigManager.getAllFileNames(doListCachePath).contains(uuid + ConstantsUtils.JSON_SUFFIX);
+            boolean hasNormalCache = ConfigManager.getAllFileNames(normalPath).contains(uuid + ConstantsUtils.JSON_FILE_EXTENSION);
+            boolean hasDoListCachePath = ConfigManager.getAllFileNames(doListCachePath).contains(uuid + ConstantsUtils.JSON_FILE_EXTENSION);
 
             // 如果没有相应的缓存，将其赋值为 null
             if (!hasNormalCache) {

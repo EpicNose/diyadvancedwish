@@ -20,7 +20,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import java.util.UUID;
 
 /**
- * 玩家监听处理。
+ * 该类实现 {@link Listener}，处理玩家监听。
  *
  * @author 2000000
  * @date 2022/11/24 16:58

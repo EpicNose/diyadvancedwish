@@ -2,21 +2,23 @@ package me.twomillions.plugin.advancedwish.utils.scripts;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
-import me.twomillions.plugin.advancedwish.managers.task.ScheduledTaskManager;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
-import me.twomillions.plugin.advancedwish.utils.random.RandomUtils;
+import me.twomillions.plugin.advancedwish.managers.databases.DatabasesManager;
+import me.twomillions.plugin.advancedwish.managers.task.ScheduledTaskManager;
+import me.twomillions.plugin.advancedwish.utils.random.RandomGenerator;
+import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
 import org.bukkit.entity.Player;
 
 /**
- * 提供了一些针对玩家的方法函数，用于 JavaScript。
+ * 提供了一些用于 JavaScript 的方法函数。
+ * 该类继承 {@link DatabasesManager} 可使用其父类方法操作数据。
  *
  * @author 2000000
  * @date 2023/3/2
  */
 @AllArgsConstructor
 @SuppressWarnings("UnusedDeclaration")
-public class MethodFunctions {
+public class MethodFunctions extends DatabasesManager {
     @Getter final Player player;
 
     /**
@@ -60,69 +62,69 @@ public class MethodFunctions {
      * 随机返回一个对象。
      *
      * @param values 由对象和概率值组成的数组，不能为空，长度必须为偶数
-     * @return {@link RandomUtils#getResult()} 随机返回的对象
+     * @return {@link RandomGenerator#getResult()} 随机返回的对象
      */
     public Object randomSentence(Object... values) {
-        return new RandomUtils<>(values).getResult();
+        return new RandomGenerator<>(values).getResult();
     }
 
     /**
      * 随机返回一个对象。
      *
      * @param values 由对象和概率值组成的数组，不能为空，长度必须为偶数
-     * @return {@link RandomUtils#getResultWithSecureRandom()} 随机返回的对象
+     * @return {@link RandomGenerator#getResultWithSecureRandom()} 随机返回的对象
      */
     public Object randomSentenceWithSecureRandom(Object... values) {
-        return new RandomUtils<>(values).getResultWithSecureRandom();
+        return new RandomGenerator<>(values).getResultWithSecureRandom();
     }
 
     /**
      * 随机返回一个对象。
      *
      * @param values 由对象和概率值组成的数组，不能为空，长度必须为偶数
-     * @return {@link RandomUtils#getResultWithMonteCarlo()} 随机返回的对象
+     * @return {@link RandomGenerator#getResultWithMonteCarlo()} 随机返回的对象
      */
     public Object randomSentenceWithMonteCarlo(Object... values) {
-        return new RandomUtils<>(values).getResultWithMonteCarlo();
+        return new RandomGenerator<>(values).getResultWithMonteCarlo();
     }
 
     /**
      * 随机返回一个对象。
      *
      * @param values 由对象和概率值组成的数组，不能为空，长度必须为偶数
-     * @return {@link RandomUtils#getResultWithShuffle()} 随机返回的对象
+     * @return {@link RandomGenerator#getResultWithShuffle()} 随机返回的对象
      */
     public Object randomSentenceWithShuffle(Object... values) {
-        return new RandomUtils<>(values).getResultWithShuffle();
+        return new RandomGenerator<>(values).getResultWithShuffle();
     }
 
     /**
      * 随机返回一个对象。
      *
      * @param values 由对象和概率值组成的数组，不能为空，长度必须为偶数
-     * @return {@link RandomUtils#getResultWithGaussian()} 随机返回的对象
+     * @return {@link RandomGenerator#getResultWithGaussian()} 随机返回的对象
      */
     public Object randomSentenceWithGaussian(Object... values) {
-        return new RandomUtils<>(values).getResultWithGaussian();
+        return new RandomGenerator<>(values).getResultWithGaussian();
     }
 
     /**
      * 随机返回一个对象。
      *
      * @param values 由对象和概率值组成的数组，不能为空，长度必须为偶数
-     * @return {@link RandomUtils#getResultWithMersenneTwister()} 随机返回的对象
+     * @return {@link RandomGenerator#getResultWithMersenneTwister()} 随机返回的对象
      */
     public Object randomSentenceWithMersenneTwister(Object... values) {
-        return new RandomUtils<>(values).getResultWithMersenneTwister();
+        return new RandomGenerator<>(values).getResultWithMersenneTwister();
     }
 
     /**
      * 随机返回一个对象。
      *
      * @param values 由对象和概率值组成的数组，不能为空，长度必须为偶数
-     * @return {@link RandomUtils#getResultWithXORShift()} 随机返回的对象
+     * @return {@link RandomGenerator#getResultWithXORShift()} 随机返回的对象
      */
     public Object randomSentenceWithXORShift(Object... values) {
-        return new RandomUtils<>(values).getResultWithXORShift();
+        return new RandomGenerator<>(values).getResultWithXORShift();
     }
 }

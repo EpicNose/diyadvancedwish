@@ -23,6 +23,8 @@ import java.sql.SQLException;
 import java.util.Arrays;
 
 /**
+ * 该类继承 {@link JavaPlugin}，插件主类。
+ *
  * @author 2000000
  * @date 2022/11/21 12:00
  */
@@ -70,7 +72,7 @@ public final class Main extends JavaPlugin {
             String[] dataStorageTypeSplit = dataStorageType.split(":");
 
             if (dataStorageTypeSplit.length > 2) {
-                ExceptionUtils.throwUnknownDatabaseCollectionType();
+                ExceptionUtils.throwUnknowndatabaseCollection();
                 return;
             }
 
@@ -94,17 +96,17 @@ public final class Main extends JavaPlugin {
         }
 
         switch (dataStorageType) {
-            case ConstantsUtils.MYSQL:
+            case ConstantsUtils.MYSQL_DB_TYPE:
                 DatabasesManager.setDataStorageType(DataStorageType.MySQL);
                 DatabasesManager.getDatabasesManager().setup(advancedWishYaml);
                 break;
 
-            case ConstantsUtils.MONGODB:
+            case ConstantsUtils.MONGODB_DB_TYPE:
                 DatabasesManager.setDataStorageType(DataStorageType.MongoDB);
                 DatabasesManager.getDatabasesManager().setup(advancedWishYaml);
                 break;
 
-            case ConstantsUtils.JSON:
+            case ConstantsUtils.JSON_DB_TYPE:
                 DatabasesManager.setDataStorageType(DataStorageType.Json);
                 break;
 

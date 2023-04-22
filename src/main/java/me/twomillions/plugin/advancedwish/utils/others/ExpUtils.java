@@ -1,11 +1,13 @@
 package me.twomillions.plugin.advancedwish.utils.others;
 
+import lombok.experimental.UtilityClass;
 import org.bukkit.entity.Player;
 
 /**
  * 玩家经验管理工具，由 2000000 进行修改。
  * 参考实现: <a href="https://gist.github.com/Jikoo/30ec040443a4701b8980">Jikoo</a>
  */
+@UtilityClass
 public final class ExpUtils {
     /**
      * 计算玩家总经验。
