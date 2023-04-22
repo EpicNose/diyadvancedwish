@@ -32,7 +32,7 @@ public class ExceptionUtils {
      * @return 永远不会返回任何值，因为该方法抛出异常后会立即关闭服务器。
      * @throws IllegalArgumentException 未知的数据存储类型
      */
-    public static <T> T throwUnknowndatabaseCollection() {
+    public static <T> T throwUnknownDatabaseCollection() {
         QuickUtils.sendConsoleMessage("&c未知的数据集合类型，这是不应该出现的，是否进行开发? 即将关闭服务器!");
         Bukkit.shutdown();
         throw new IllegalArgumentException("Unknown database collection type!");

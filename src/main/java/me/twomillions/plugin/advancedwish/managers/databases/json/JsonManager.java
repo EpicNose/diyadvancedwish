@@ -121,7 +121,7 @@ public class JsonManager implements DatabasesInterface {
                 return Main.getGuaranteedPath();
 
             default:
-                return ExceptionUtils.throwUnknowndatabaseCollection();
+                return ExceptionUtils.throwUnknownDatabaseCollection();
         }
     }
 }

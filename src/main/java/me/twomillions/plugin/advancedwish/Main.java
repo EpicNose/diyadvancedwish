@@ -72,7 +72,7 @@ public final class Main extends JavaPlugin {
             String[] dataStorageTypeSplit = dataStorageType.split(":");
 
             if (dataStorageTypeSplit.length > 2) {
-                ExceptionUtils.throwUnknowndatabaseCollection();
+                ExceptionUtils.throwUnknownDatabaseCollection();
                 return;
             }
 
