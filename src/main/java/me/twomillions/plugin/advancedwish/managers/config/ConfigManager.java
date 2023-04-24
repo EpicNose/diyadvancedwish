@@ -47,7 +47,7 @@ public class ConfigManager {
      * @return 最新的配置文件版本号
      */
     public static int getLastConfigVersion() {
-        return 64;
+        return 65;
     }
 
     /**
@@ -165,6 +165,21 @@ public class ConfigManager {
     public static ConcurrentLinkedQueue<String> getAllFileNames(String path) {
         return Optional.ofNullable(new File(path).listFiles())
                 .map(files -> Arrays.stream(files)
+                        .parallel()
+                        .map(File::getName)
+                        .collect(Collectors.toCollection(ConcurrentLinkedQueue::new)))
+                .orElse(new ConcurrentLinkedQueue<>());
+    }
+
+    /**
+     * 获取指定路径下的所有文件夹名。
+     *
+     * @param path 指定路径
+     * @return 文件夹名列表
+     */
+    public static ConcurrentLinkedQueue<String> getAllFolderNames(String path) {
+        return Optional.ofNullable(new File(path).listFiles(File::isDirectory))
+                .map(folders -> Arrays.stream(folders)
                         .parallel()
                         .map(File::getName)
                         .collect(Collectors.toCollection(ConcurrentLinkedQueue::new)))

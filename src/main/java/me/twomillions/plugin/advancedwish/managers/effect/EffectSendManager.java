@@ -111,7 +111,7 @@ public class EffectSendManager {
      */
     public static boolean isRecordEffectSend(String fileName, String path, String pathPrefix) {
         Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
-        return QuickUtils.handleBoolean(yaml.getOrDefault(pathPrefix + ".RECORD", "false"));
+        return QuickUtils.handleBoolean(String.valueOf(yaml.getBoolean(pathPrefix + ".RECORD")));
     }
 
     /**

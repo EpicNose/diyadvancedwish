@@ -39,14 +39,14 @@ public class ExceptionUtils {
     }
 
     /**
-     * 抛出异常，表示未知的数据存储类型。
+     * 抛出异常，表示字符串加密解密错误。
      *
      * @param <T> 任意类型
      * @return 永远不会返回任何值，因为该方法抛出异常后会立即关闭服务器。
      * @throws IllegalArgumentException 未知的数据存储类型
      */
     public static <T> T throwEncrypt() {
-        QuickUtils.sendConsoleMessage("&c加 / 解密错误，此问题不应该出现，请反馈此问题给开发者! 即将关闭服务器!");
+        QuickUtils.sendConsoleMessage("&c字符串加 / 解密错误，此问题不应该出现，请反馈此问题给开发者! 即将关闭服务器!");
         Bukkit.shutdown();
         throw new IllegalArgumentException("Encrypt / Decrypt error!");
     }

@@ -21,8 +21,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @author 2000000
  * @date 2023/3/26
  */
-@Getter
-@Setter
+@Getter @Setter
 public class MySQLManager implements DatabasesInterface {
     private volatile String jdbcUrlString;
     private volatile BasicDataSource dataSource = new BasicDataSource();
@@ -92,7 +91,7 @@ public class MySQLManager implements DatabasesInterface {
      * @param uuid 标识符
      * @param key 查询的 Key
      * @param defaultValue 查询的默认值
-     * @param databaseCollection 查询的集合
+     * @param databaseCollection 查询的数据集合
      * @return 对应的值
      */
     @Override
@@ -129,7 +128,7 @@ public class MySQLManager implements DatabasesInterface {
      * @param uuid 标识符
      * @param key 查询的 Key
      * @param defaultValue 查询的默认值
-     * @param databaseCollection 查询的集合
+     * @param databaseCollection 查询的数据集合
      * @return 对应的 List 值
      */
     @Override
@@ -166,7 +165,7 @@ public class MySQLManager implements DatabasesInterface {
      * @param uuid 标识符
      * @param key 查询的 Key
      * @param value 数据值
-     * @param databaseCollection 数据存储的集合
+     * @param databaseCollection 更新的数据集合
      * @return 是否成功更新
      */
     @Override
@@ -195,10 +194,34 @@ public class MySQLManager implements DatabasesInterface {
     }
 
     /**
-     * 获取指定集合类型的所有数据。
+     * 获取数据库中的所有集合名称。
      *
-     * @param databaseCollection 查询的集合
-     * @return 以 Map 的形式返回所有数据，其中 Map 的 Key 是 UUID，value 是一个包含键值对的 Map
+     * @return 包含所有集合名称的字符串列表
+     */
+    public List<String> getAllDatabaseCollectionNames() {
+        try (Connection connection = getDataSource().getConnection()) {
+            DatabaseMetaData metaData = connection.getMetaData();
+            ResultSet tables = metaData.getTables(null, null, null, new String[] { "TABLE" });
+
+            List<String> tableNames = new ArrayList<>();
+            while (tables.next()) {
+                String tableName = tables.getString("TABLE_NAME");
+                tableNames.add(tableName);
+            }
+
+            return tableNames;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+    }
+
+
+    /**
+     * 获取所有数据集合的所有数据。
+     *
+     * @param databaseCollection 查询的数据集合
+     * @return 以 Map 的形式传递，Map Key 为数据集合名，value Map Key 为 UUID，value 是一个包含键值对的 Map
      */
     @Override
     public Map<String, Map<String, Object>> getAllData(String databaseCollection) {
@@ -288,7 +311,7 @@ public class MySQLManager implements DatabasesInterface {
      * 如果不存在，则创建新集合，其中包含一个主键 uuid 和一个指定的列。
      *
      * @param key 查询的 Key
-     * @param databaseCollection 查询的集合
+     * @param databaseCollection 查询的数据集合
      */
     private void checkCollectionType(String key, String databaseCollection) {
         try (Connection connection = getDataSource().getConnection()) {
@@ -309,7 +332,7 @@ public class MySQLManager implements DatabasesInterface {
      * 检查是否存在指定的列。如果不存在，则在表格中添加新列。
      *
      * @param key 查询的 Key
-     * @param databaseCollection 查询的集合
+     * @param databaseCollection 查询的数据集合
      */
     private void checkColumn(String key, String databaseCollection) {
         try (Connection connection = getDataSource().getConnection()) {

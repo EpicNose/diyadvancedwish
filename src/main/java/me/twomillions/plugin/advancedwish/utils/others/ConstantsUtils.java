@@ -18,6 +18,7 @@ public class ConstantsUtils {
     public static final String PLAYER_CACHE = "/PlayerCache";
     public static final String PLAYER_GUARANTEED = "/PlayerGuaranteed";
     public static final String PLAYER_LOGS = "/PlayerLogs";
+    public static final String OTHER_DATA = "/OtherData";
 
     /**
      * 常用文件扩展名。

@@ -35,6 +35,7 @@ public final class Main extends JavaPlugin {
     @Getter @Setter private volatile static String logsPath;
     @Getter @Setter private volatile static String guaranteedPath;
     @Getter @Setter private volatile static String doListCachePath;
+    @Getter @Setter private volatile static String otherDataPath;
 
     @Getter @Setter private volatile static boolean disabled;
 
@@ -72,7 +73,7 @@ public final class Main extends JavaPlugin {
             String[] dataStorageTypeSplit = dataStorageType.split(":");
 
             if (dataStorageTypeSplit.length > 2) {
-                ExceptionUtils.throwUnknownDatabaseCollection();
+                ExceptionUtils.throwUnknownDataStoreType();
                 return;
             }
 

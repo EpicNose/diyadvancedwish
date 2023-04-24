@@ -6,7 +6,7 @@
 
     <groupId>me.twomillions.plugin</groupId>
     <artifactId>AdvancedWish</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <packaging>jar</packaging>
 
     <name>AdvancedWish</name>
@@ -156,7 +156,7 @@
             <artifactId>Vulpecula</artifactId>
             <version>2.0.10</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/libs/Vulpecula-2.0.10.jar</systemPath>
+            <systemPath>${project.basedir}/libs/Vulpecula-2.2.0.jar</systemPath>
         </dependency>
 
         <!-- Player Points - 本地 -->
@@ -176,13 +176,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Apache commons-jexl -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-jexl3</artifactId>
-            <version>3.2.1</version>
-        </dependency>
-
         <!-- https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver -->
         <dependency>
             <groupId>org.mongodb</groupId>
@@ -195,15 +188,6 @@
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
             <version>2.9.3</version>
-        </dependency>
-
-        <!-- Skript -->
-        <dependency>
-            <groupId>ch.njol.skript</groupId>
-            <artifactId>Skript</artifactId>
-            <version>2.6.4</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/libs/Skript-2.6.4.jar</systemPath>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math3 -->

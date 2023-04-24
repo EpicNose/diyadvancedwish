@@ -5,12 +5,10 @@ import de.leonhard.storage.Yaml;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.interfaces.DatabasesInterface;
 import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
-import me.twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;
 import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
+import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -37,7 +35,7 @@ public class JsonManager implements DatabasesInterface {
      * @param uuid 标识符
      * @param key 查询的 Key
      * @param defaultValue 查询的默认值
-     * @param databaseCollection 查询的集合
+     * @param databaseCollection 查询的数据集合
      * @return 对应的值
      */
     @Override
@@ -52,7 +50,7 @@ public class JsonManager implements DatabasesInterface {
      * @param uuid 标识符
      * @param key 查询的 Key
      * @param defaultValue 查询的默认值
-     * @param databaseCollection 查询的集合
+     * @param databaseCollection 查询的数据集合
      * @return 对应的 List 值
      */
     @Override
@@ -67,7 +65,7 @@ public class JsonManager implements DatabasesInterface {
      * @param uuid 标识符
      * @param key 查询的 Key
      * @param value 数据值
-     * @param databaseCollection 数据存储的集合
+     * @param databaseCollection 更新的数据集合
      * @return 是否成功更新
      */
     @Override
@@ -78,10 +76,19 @@ public class JsonManager implements DatabasesInterface {
     }
 
     /**
-     * 获取指定集合类型的所有数据。
+     * 获取数据库中的所有集合名称。
      *
-     * @param databaseCollection 查询的集合
-     * @return 以 Map 的形式返回所有数据，其中 Map 的 Key 是 UUID，value 是一个包含键值对的 Map
+     * @return 包含所有集合名称的字符串列表
+     */
+    public List<String> getAllDatabaseCollectionNames() {
+        return new ArrayList<>(ConfigManager.getAllFolderNames(Main.getOtherDataPath()));
+    }
+
+    /**
+     * 获取所有数据集合的所有数据。
+     *
+     * @param databaseCollection 查询的数据集合
+     * @return 以 Map 的形式传递，Map Key 为数据集合名，value Map Key 为 UUID，value 是一个包含键值对的 Map
      */
     public Map<String, Map<String, Object>> getAllData(String databaseCollection) {
         String path = getPath(databaseCollection);
@@ -121,7 +128,7 @@ public class JsonManager implements DatabasesInterface {
                 return Main.getGuaranteedPath();
 
             default:
-                return ExceptionUtils.throwUnknownDatabaseCollection();
+                return QuickUtils.handleString(Main.getOtherDataPath() + "/" + databaseCollection);
         }
     }
 }

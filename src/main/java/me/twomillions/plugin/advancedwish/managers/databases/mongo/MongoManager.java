@@ -30,8 +30,7 @@ import java.util.stream.Collectors;
  * @author 2000000
  * @date 2023/1/8 21:23
  */
-@Getter
-@Setter
+@Getter @Setter
 public class MongoManager implements DatabasesInterface {
      private volatile MongoClient mongoClient;
      private volatile DBCollection dbCollection;
@@ -106,7 +105,7 @@ public class MongoManager implements DatabasesInterface {
      * @param uuid 标识符
      * @param key 查询的 Key
      * @param defaultValue 查询的默认值
-     * @param databaseCollection 查询的集合
+     * @param databaseCollection 查询的数据集合
      * @return 对应的值
      */
     @Override
@@ -140,7 +139,7 @@ public class MongoManager implements DatabasesInterface {
      * @param uuid 标识符
      * @param key 查询的 Key
      * @param defaultValue 查询的默认值
-     * @param databaseCollection 查询的集合
+     * @param databaseCollection 查询的数据集合
      * @return 对应的 List 值
      */
     @Override
@@ -174,7 +173,7 @@ public class MongoManager implements DatabasesInterface {
      * @param uuid 标识符
      * @param key 查询的 Key
      * @param value 数据值
-     * @param databaseCollection 数据存储的集合
+     * @param databaseCollection 更新的数据集合
      * @return 是否成功更新
      */
     @Override
@@ -185,10 +184,19 @@ public class MongoManager implements DatabasesInterface {
     }
 
     /**
-     * 获取指定集合类型的所有数据。
+     * 获取数据库中的所有集合名称。
      *
-     * @param databaseCollection 查询的集合
-     * @return 以 Map 的形式返回所有数据，其中 Map 的 Key 是 UUID，value 是一个包含键值对的 Map
+     * @return 包含所有集合名称的字符串列表
+     */
+    public List<String> getAllDatabaseCollectionNames() {
+        return getMongoDatabase().listCollectionNames().into(new ArrayList<>());
+    }
+
+    /**
+     * 获取所有数据集合的所有数据。
+     *
+     * @param databaseCollection 查询的数据集合
+     * @return 以 Map 的形式传递，Map Key 为数据集合名，value Map Key 为 UUID，value 是一个包含键值对的 Map
      */
     @Override
     public Map<String, Map<String, Object>> getAllData(String databaseCollection) {

@@ -138,7 +138,12 @@ public class WishManager {
      */
     public static String getWishDataSync(String wishName) {
         Yaml yaml = ConfigManager.createYaml(wishName, ConstantsUtils.WISH, false, false);
-        return yaml.getOrDefault("ADVANCED-SETTINGS.DATA-SYNC", wishName);
+        /*
+         * 原本使用 getOrDefault 如果值不存在返回为 "" 而不是 null
+         * 所以不会正常返回 手动判断是否为 ""
+         */
+        String dataSync = yaml.getString("ADVANCED-SETTINGS.DATA-SYNC");
+        return dataSync.equals("") ? wishName : dataSync;
     }
 
     /**

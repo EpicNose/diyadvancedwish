@@ -5,8 +5,6 @@ import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.register.RegisterManager;
 import me.twomillions.plugin.advancedwish.utils.scripts.ScriptUtils;
-import org.apache.commons.jexl3.JexlBuilder;
-import org.apache.commons.jexl3.JexlEngine;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -30,7 +28,6 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"deprecation", "unused"})
 public class QuickUtils {
     private static final JavaPlugin plugin = Main.getInstance();
-    private static final JexlEngine jexlEngine = new JexlBuilder().create();
     private static final String CHAT_BAR = ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "------------------------------------------------";
 
     /**
@@ -179,24 +176,6 @@ public class QuickUtils {
         }
 
         return Bukkit.getOfflinePlayer(playerName).getUniqueId().toString();
-    }
-
-    /**
-     * 将传入的字符串进行算术运算，并返回结果。
-     *
-     * @param countString 待运算的字符串表达式
-     * @return 返回运算结果
-     */
-    public static String count(String countString) {
-        try {
-            if (countString == null || "".equals(countString)) {
-                return "";
-            }
-
-            return jexlEngine.createExpression(countString).evaluate(null).toString();
-        } catch (Exception exception) {
-            return countString;
-        }
     }
 
     /**

@@ -119,10 +119,12 @@ public class RegisterManager {
         String logsConfig = advancedWishYaml.getString("LOGS-PATH");
         String guaranteedConfig = advancedWishYaml.getString("GUARANTEED-PATH");
         String doListCacheConfig = advancedWishYaml.getString("DO-LIST-CACHE-PATH");
+        String otherDataConfig = advancedWishYaml.getString("OTHER-DATA-PATH");
 
         Main.setLogsPath("".equals(logsConfig) ? pluginPath + ConstantsUtils.PLAYER_LOGS : logsConfig);
         Main.setGuaranteedPath("".equals(guaranteedConfig) ? pluginPath + ConstantsUtils.PLAYER_GUARANTEED : guaranteedConfig);
         Main.setDoListCachePath("".equals(doListCacheConfig) ? pluginPath + ConstantsUtils.PLAYER_CACHE : doListCacheConfig);
+        Main.setOtherDataPath("".equals(otherDataConfig) ? pluginPath + ConstantsUtils.OTHER_DATA : otherDataConfig);
     }
 
     /**
