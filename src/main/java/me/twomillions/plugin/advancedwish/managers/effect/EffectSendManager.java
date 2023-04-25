@@ -135,7 +135,7 @@ public class EffectSendManager {
         String subTitle = QuickUtils.handleString(yaml.getString("SUB-TITLE"), player);
 
         // 如果标题文本为空，直接返回
-        if ("".equals(mainTitle) && "".equals(subTitle)) return;
+        if (mainTitle.isEmpty() && subTitle.isEmpty()) return;
 
         // 替换并获取标题淡入、停留和淡出时间
         int fadeIn = QuickUtils.handleInt(yaml.getString("FADE-IN"), player);
@@ -170,7 +170,7 @@ public class EffectSendManager {
 
         // 遍历 PARTICLE 列表并发送
         yaml.getStringList("PARTICLE").forEach(particleConfig -> {
-            if (particleConfig == null || particleConfig.length() <= 1) return;
+            if (pathPrefix.isEmpty()) return;
 
             // 解析粒子效果配置
             String[] particleConfigSplit = QuickUtils.handleStrings(particleConfig.toUpperCase(Locale.ROOT).split(";"), player);
@@ -278,7 +278,7 @@ public class EffectSendManager {
 
         // 遍历音效列表并发送每个音效
         soundConfigs.forEach(soundConfig -> {
-            if (soundConfig == null || soundConfig.length() <= 1) return;
+            if (soundConfig.isEmpty()) return;
 
             // 解析音效配置
             String[] soundConfigSplit = QuickUtils.handleStrings(soundConfig.toUpperCase(Locale.ROOT).split(";"), player);
@@ -318,7 +318,7 @@ public class EffectSendManager {
 
         // 执行玩家指令
         yaml.getStringList("PLAYER").forEach(commandConfig -> {
-            if (commandConfig == null || commandConfig.length() <= 1) return;
+            if (commandConfig.isEmpty()) return;
 
             commandConfig = QuickUtils.handleString(commandConfig, player);
 
@@ -354,7 +354,7 @@ public class EffectSendManager {
 
         // 执行控制台指令
         yaml.getStringList("CONSOLE").forEach(commandConfig -> {
-            if (commandConfig == null || commandConfig.length() <= 1) return;
+            if (commandConfig.isEmpty()) return;
 
             ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
 
@@ -435,7 +435,7 @@ public class EffectSendManager {
 
         // 遍历公告配置列表
         yaml.getStringList("ANNOUNCEMENT").forEach(announcementConfig -> {
-            if (announcementConfig == null || announcementConfig.length() <= 1) return;
+            if (announcementConfig.isEmpty()) return;
 
             // 广播公告
             Bukkit.getScheduler().runTask(plugin, () -> Bukkit.broadcastMessage(QuickUtils.handleString(announcementConfig, player)));
@@ -458,7 +458,7 @@ public class EffectSendManager {
 
         // 遍历配置中的所有药水效果
         yaml.getStringList("EFFECTS").forEach(effectConfig -> {
-            if (effectConfig == null || effectConfig.length() <= 1) return;
+            if (effectConfig.isEmpty()) return;
 
             // 解析药水效果配置
             String[] effectConfigSplit = QuickUtils.handleStrings(effectConfig.split(";"), player);
@@ -586,7 +586,7 @@ public class EffectSendManager {
         String barStyleString = QuickUtils.handleString(yaml.getString("STYLE"), player);
 
         // 判断 Boss Bar 的信息是否为空
-        if ("".equals(bossBarMessage) || bossBarTime == 0) return;
+        if (bossBarMessage.isEmpty() || bossBarTime == 0) return;
 
         // 设置 Boss Bar 的颜色和样式
         BarColor bossBarColor = barColorString.equals("RANDOM") ? BossBarRandomUtils.randomColor() : BarColor.valueOf(barColorString);

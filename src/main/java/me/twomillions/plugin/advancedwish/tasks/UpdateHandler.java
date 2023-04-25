@@ -46,7 +46,7 @@ public class UpdateHandler extends TasksAbstract {
                 isLatestVersion = true;
 
                 QuickUtils.sendConsoleMessage("&a自动更新检查完成，您目前正在使用最新版的 Advanced Wish! 版本: " + plugin.getDescription().getVersion());
-            } else if (!"".equals(urlString)) {
+            } else if (!urlString.isEmpty()) {
                 isLatestVersion = false;
 
                 QuickUtils.sendConsoleMessage("&c您目前正在使用过时的 Advanced Wish! 请更新以避免服务器出现问题! 下载链接: https://gitee.com/A2000000/advanced-wish/releases/");

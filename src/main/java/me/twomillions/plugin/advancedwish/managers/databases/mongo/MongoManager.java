@@ -62,13 +62,13 @@ public class MongoManager implements DatabasesInterface {
         setPassword(yaml.getString("MONGO.AUTH.PASSWORD"));
 
         // 检查是否使用自定义的MongoDB连接URL
-        setCustomUrlStatus("".equals(yaml.getString("MONGO.CUSTOM-URL")) ? CustomUrlStatus.TurnOff : CustomUrlStatus.TurnOn);
+        setCustomUrlStatus(yaml.getString("MONGO.CUSTOM-URL").isEmpty() ? CustomUrlStatus.TurnOff : CustomUrlStatus.TurnOn);
 
         // 根据是否使用自定义URL设置连接URL
         if (getCustomUrlStatus() == CustomUrlStatus.TurnOn) {
             setMongoClientUrlString(yaml.getString("MONGO.CUSTOM-URL"));
         } else {
-            if ("".equals(getUsername()) || "".equals(getPassword())) {
+            if (getUsername().isEmpty() || getPassword().isEmpty()) {
                 setAuthStatus(AuthStatus.TurnOff);
                 setMongoClientUrlString("mongodb://" + getIp() + ":" + getPort() + "/AdvancedWish");
             } else {

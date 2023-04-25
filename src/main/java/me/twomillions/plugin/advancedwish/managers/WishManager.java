@@ -21,7 +21,6 @@ import me.twomillions.plugin.advancedwish.utils.random.RandomGenerator;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import me.twomillions.plugin.advancedwish.utils.texts.StringEncrypter;
 import net.milkbowl.vault.economy.Economy;
-import org.apache.commons.lang3.StringUtils;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -143,7 +142,7 @@ public class WishManager {
          * 所以不会正常返回 手动判断是否为 ""
          */
         String dataSync = yaml.getString("ADVANCED-SETTINGS.DATA-SYNC");
-        return dataSync.equals("") ? wishName : dataSync;
+        return dataSync.isEmpty() ? wishName : dataSync;
     }
 
     /**
@@ -794,7 +793,7 @@ public class WishManager {
 
         // 背包物品检查
         for (String configInventoryHave : yaml.getStringList("INVENTORY-HAVE")) {
-            if (configInventoryHave == null || configInventoryHave.length() <= 1) continue;
+            if (configInventoryHave.isEmpty()) continue;
 
             String[] configInventoryHaveSplit = QuickUtils.stripColor(QuickUtils.handleStrings(configInventoryHave.split(";"), player));
 
@@ -837,7 +836,7 @@ public class WishManager {
 
         // 背包物品检查 - 自定义物品
         for (String configInventoryHaveCustom : yaml.getStringList("INVENTORY-HAVE-CUSTOM")) {
-            if (configInventoryHaveCustom == null || configInventoryHaveCustom.length() <= 1) continue;
+            if (configInventoryHaveCustom.isEmpty()) continue;
 
             String[] configInventoryHaveCustomSplit = QuickUtils.stripColor(QuickUtils.handleStrings(configInventoryHaveCustom.split(";"), player));
 
@@ -909,7 +908,7 @@ public class WishManager {
 
         // 检查玩家是否拥有指定的药水效果
         for (String effect : yaml.getStringList("PLAYER-HAVE-EFFECTS")) {
-            if (effect == null || effect.length() <= 1) continue;
+            if (effect.isEmpty()) continue;
 
             String[] effectInfo = QuickUtils.handleStrings(effect.split(";"), player);
             String effectType = effectInfo[0].toUpperCase(Locale.ROOT);
@@ -926,7 +925,7 @@ public class WishManager {
 
         // 检查自定义条件
         for (String custom : yaml.getStringList("CUSTOM")) {
-            if ("".equals(custom) || custom.length() <= 1 || StringUtils.isBlank(custom)) continue;
+            if (custom.isEmpty()) continue;
 
             if (!QuickUtils.handleBoolean(custom)) return PlayerWishStatus.RequirementsNotMet;
         }

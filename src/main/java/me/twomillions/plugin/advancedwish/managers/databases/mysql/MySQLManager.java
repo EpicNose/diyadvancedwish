@@ -52,7 +52,7 @@ public class MySQLManager implements DatabasesInterface {
         setDriver(yaml.getString("MYSQL.DRIVER"));
 
         // 检查是否使用自定义的MySQL连接URL
-        setCustomUrlStatus("".equals(yaml.getString("MYSQL.CUSTOM-URL")) ? CustomUrlStatus.TurnOff : CustomUrlStatus.TurnOn);
+        setCustomUrlStatus(yaml.getString("MYSQL.CUSTOM-URL").isEmpty() ? CustomUrlStatus.TurnOff : CustomUrlStatus.TurnOn);
 
         // 根据是否使用自定义URL设置连接URL
         if (getCustomUrlStatus() == CustomUrlStatus.TurnOn) {
