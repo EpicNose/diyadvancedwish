@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import me.twomillions.plugin.advancedwish.Main;
+import me.twomillions.plugin.advancedwish.annotations.JsInteropJavaType;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.register.RegisterManager;
@@ -43,6 +44,7 @@ import java.util.Locale;
  * @author 2000000
  * @date 2022/11/24 20:27
  */
+@JsInteropJavaType
 @SuppressWarnings("deprecation")
 public class EffectSendManager {
     private static final JavaPlugin plugin = Main.getInstance();
@@ -50,7 +52,7 @@ public class EffectSendManager {
     /**
      * 用于储存需要玩家以 OP 身份执行的命令。
      */
-    @Getter private volatile static Cache<Player, String> opSentCommand = CaffeineUtils.buildBukkitCache();
+    @Getter private static final Cache<Player, String> opSentCommand = CaffeineUtils.buildBukkitCache();
 
     /**
      * 发送效果。

@@ -41,7 +41,7 @@ public class ScheduledTaskManager {
      * @return 计划任务字符串
      */
     public static String toScheduledTask(long time, String fileName, String path, boolean originalPath, String node) {
-        if (!originalPath) path = plugin.getDataFolder() + path;
+        if (!originalPath) path = Main.getPluginPath() + path;
         return String.format("%d;%s;%s;%b;%s", time, fileName, path, originalPath, node);
     }
 

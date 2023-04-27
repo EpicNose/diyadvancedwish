@@ -14,6 +14,7 @@ import me.twomillions.plugin.advancedwish.tasks.UpdateHandler;
 import me.twomillions.plugin.advancedwish.tasks.WishLimitResetHandler;
 import me.twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;
 import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
+import me.twomillions.plugin.advancedwish.utils.scripts.ScriptUtils;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -32,6 +33,8 @@ public final class Main extends JavaPlugin {
     @Getter @Setter private volatile static Main instance;
     @Getter @Setter private volatile static Double serverVersion;
 
+    @Getter @Setter private volatile static String pluginPath;
+
     @Getter @Setter private volatile static String logsPath;
     @Getter @Setter private volatile static String guaranteedPath;
     @Getter @Setter private volatile static String doListCachePath;
@@ -41,10 +44,17 @@ public final class Main extends JavaPlugin {
 
     @Getter private static final boolean isOfflineMode = Bukkit.getServer().getOnlineMode();
 
+    @Getter private static final String packageName = Main.class.getPackage().getName();
+    @Getter private static final String codeSourceLocation = Main.class.getProtectionDomain().getCodeSource().getLocation().toString();
+
     @Override
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public void onEnable() {
+        long startTime = System.currentTimeMillis();
+
         setInstance(this);
         setDisabled(false);
+        setPluginPath(getInstance().getDataFolder().toString());
 
         /*
          * 获取 -> org.bukkit.craftbukkit.v1_7_R4，分割后为 -> 1_7, 最终为 -> 107
@@ -65,6 +75,9 @@ public final class Main extends JavaPlugin {
         RegisterManager.setupPlugins(true);
         RegisterManager.registerWish();
         RegisterManager.registerCommands();
+
+        // 初始化 Script
+        ScriptUtils.getRhino();
 
         // 设置数据存储
         String dataStorageType = advancedWishYaml.getString("DATA-STORAGE-TYPE").toLowerCase();
@@ -127,7 +140,10 @@ public final class Main extends JavaPlugin {
             Bukkit.getOnlinePlayers().forEach(player -> new PlayerCacheHandler(player).startTask());
         }
 
-        QuickUtils.sendConsoleMessage("&aAdvanced Wish 插件已成功加载! 感谢您使用此插件! 版本: &e" + getDescription().getVersion() + "&a, 作者: &e2000000&a。");
+        long endTime = System.currentTimeMillis();
+        long durationMillis = endTime - startTime;
+
+        QuickUtils.sendConsoleMessage("&aAdvanced Wish 插件已成功加载! 版本: &e" + getDescription().getVersion() + "&a, 作者: &e2000000&a。加载用时: &e" + durationMillis + " &ams!");
     }
 
     @Override
@@ -150,6 +166,8 @@ public final class Main extends JavaPlugin {
                 exception.printStackTrace();
             }
         }
+
+        ScriptUtils.getRhino().close();
 
         QuickUtils.sendConsoleMessage("&aAdvanced Wish 插件已成功卸载! 感谢您使用此插件! 版本: &e" + getDescription().getVersion() + "&a, 作者: &e2000000&a。");
     }

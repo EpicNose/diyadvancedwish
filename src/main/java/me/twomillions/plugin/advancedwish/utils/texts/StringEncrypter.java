@@ -1,5 +1,7 @@
 package me.twomillions.plugin.advancedwish.utils.texts;
 
+import lombok.experimental.UtilityClass;
+import me.twomillions.plugin.advancedwish.annotations.JsInteropJavaType;
 import me.twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;
 
 import javax.crypto.Cipher;
@@ -13,6 +15,8 @@ import java.util.Base64;
  * @author 2000000
  * @date 2023/2/19
  */
+@UtilityClass
+@JsInteropJavaType
 public class StringEncrypter {
     private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
     private static final String SECRET_KEY = "Abfudi2!@#dfHsdg";
@@ -35,9 +39,8 @@ public class StringEncrypter {
             // 加密字符串并使用 Base64 编码
             byte[] encryptedBytes = cipher.doFinal(str.getBytes());
             return Base64.getEncoder().encodeToString(encryptedBytes);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ExceptionUtils.throwEncrypt();
+        } catch (Exception exception) {
+            return ExceptionUtils.throwEncrypt(exception);
         }
     }
 
@@ -59,9 +62,8 @@ public class StringEncrypter {
             byte[] encryptedBytes = Base64.getDecoder().decode(encryptedStr);
             byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
             return new String(decryptedBytes);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ExceptionUtils.throwEncrypt();
+        } catch (Exception exception) {
+            return ExceptionUtils.throwEncrypt(exception);
         }
     }
 }

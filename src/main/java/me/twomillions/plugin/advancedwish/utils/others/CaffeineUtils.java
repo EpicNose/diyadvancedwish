@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.experimental.UtilityClass;
 import me.twomillions.plugin.advancedwish.Main;
+import me.twomillions.plugin.advancedwish.annotations.JsInteropJavaType;
 import org.bukkit.Bukkit;
 
 /**
@@ -15,6 +16,7 @@ import org.bukkit.Bukkit;
  * @date 2023/2/20
  */
 @UtilityClass
+@JsInteropJavaType
 public class CaffeineUtils {
     /**
      * 构建一个 Caffeine 缓存，使用 Bukkit 的异步任务线程池来执行缓存操作。

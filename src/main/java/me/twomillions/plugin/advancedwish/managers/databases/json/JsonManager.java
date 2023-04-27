@@ -2,6 +2,9 @@ package me.twomillions.plugin.advancedwish.managers.databases.json;
 
 import de.leonhard.storage.Json;
 import de.leonhard.storage.Yaml;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.interfaces.DatabasesInterface;
 import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
@@ -17,7 +20,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @author 2000000
  * @date 2023/4/1
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JsonManager implements DatabasesInterface {
+    @Getter private static final JsonManager jsonManager = new JsonManager();
+
     /**
      * 根据指定的 YAML 配置，初始化。
      *

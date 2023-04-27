@@ -8,10 +8,10 @@ import de.leonhard.storage.internal.settings.DataType;
 import de.leonhard.storage.internal.settings.ReloadSettings;
 import lombok.Getter;
 import me.twomillions.plugin.advancedwish.Main;
+import me.twomillions.plugin.advancedwish.annotations.JsInteropJavaType;
 import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.util.Arrays;
@@ -25,9 +25,8 @@ import java.util.stream.Collectors;
  * @author 2000000
  * @date 2022/11/21 12:41
  */
+@JsInteropJavaType
 public class ConfigManager {
-    private static final JavaPlugin plugin = Main.getInstance();
-
     @Getter private static final Yaml messageYaml = createYaml("message", null, false, true);
     @Getter private static final Yaml advancedWishYaml = createYaml("advancedWish", null, false, true);
 
@@ -94,8 +93,8 @@ public class ConfigManager {
         if (fileName.contains(ConstantsUtils.YAML_FILE_EXTENSION)) fileName = fileName.split(ConstantsUtils.YAML_FILE_EXTENSION)[0];
 
         // 设置文件路径
-        if (path == null) path = plugin.getDataFolder().toString();
-        else if (!originalPath) path = plugin.getDataFolder() + path;
+        if (path == null) path = Main.getPluginPath();
+        else if (!originalPath) path = Main.getPluginPath() + path;
 
         // 创建 Yaml 文件对象
         File file = new File(path, fileName + ConstantsUtils.YAML_FILE_EXTENSION);
@@ -132,8 +131,8 @@ public class ConfigManager {
         if (fileName.contains(ConstantsUtils.JSON_FILE_EXTENSION)) fileName = fileName.split(ConstantsUtils.JSON_FILE_EXTENSION)[0];
 
         // 设置文件路径
-        if (path == null) path = plugin.getDataFolder().toString();
-        else if (!originalPath) path = plugin.getDataFolder() + path;
+        if (path == null) path = Main.getPluginPath();
+        else if (!originalPath) path = Main.getPluginPath() + path;
 
         // 创建 Json 文件对象
         File file = new File(path, fileName + ConstantsUtils.JSON_FILE_EXTENSION);

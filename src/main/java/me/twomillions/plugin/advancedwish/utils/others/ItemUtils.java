@@ -1,6 +1,7 @@
 package me.twomillions.plugin.advancedwish.utils.others;
 
 import lombok.experimental.UtilityClass;
+import me.twomillions.plugin.advancedwish.annotations.JsInteropJavaType;
 import me.twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;
 import org.bukkit.Material;
 
@@ -13,6 +14,7 @@ import java.util.Locale;
  * @date 2022/12/15 13:47
  */
 @UtilityClass
+@JsInteropJavaType
 @SuppressWarnings("unused")
 public class ItemUtils {
     /**

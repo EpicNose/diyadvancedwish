@@ -1,7 +1,9 @@
 package me.twomillions.plugin.advancedwish.managers.databases.mysql;
 
 import de.leonhard.storage.Yaml;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import me.twomillions.plugin.advancedwish.enums.databases.status.AuthStatus;
 import me.twomillions.plugin.advancedwish.enums.databases.status.ConnectStatus;
@@ -22,6 +24,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @date 2023/3/26
  */
 @Getter @Setter
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MySQLManager implements DatabasesInterface {
     private volatile String jdbcUrlString;
     private volatile BasicDataSource dataSource = new BasicDataSource();
@@ -35,6 +38,8 @@ public class MySQLManager implements DatabasesInterface {
     private volatile AuthStatus authStatus;
     private volatile CustomUrlStatus customUrlStatus;
     private volatile ConnectStatus connectStatus = ConnectStatus.TurnOff;
+
+    @Getter private static final MySQLManager mySQLManager = new MySQLManager();
 
     /**
      * 根据指定的 YAML 配置，初始化数据库连接。

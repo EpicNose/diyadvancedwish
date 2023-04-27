@@ -3,22 +3,20 @@ package me.twomillions.plugin.advancedwish.utils.scripts;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
-import me.twomillions.plugin.advancedwish.managers.databases.DatabasesManager;
 import me.twomillions.plugin.advancedwish.managers.task.ScheduledTaskManager;
-import me.twomillions.plugin.advancedwish.utils.random.RandomGenerator;
 import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
+import me.twomillions.plugin.advancedwish.utils.random.RandomGenerator;
 import org.bukkit.entity.Player;
 
 /**
  * 提供了一些用于 JavaScript 的方法函数。
- * 该类继承 {@link DatabasesManager} 可使用其父类方法操作数据。
  *
  * @author 2000000
  * @date 2023/3/2
  */
 @AllArgsConstructor
 @SuppressWarnings("UnusedDeclaration")
-public class MethodFunctions extends DatabasesManager {
+public class MethodFunctions {
     @Getter final Player player;
 
     /**

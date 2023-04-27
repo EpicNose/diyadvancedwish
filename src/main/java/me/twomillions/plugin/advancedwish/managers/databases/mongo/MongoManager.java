@@ -7,7 +7,9 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
 import de.leonhard.storage.Yaml;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import me.twomillions.plugin.advancedwish.enums.databases.status.AuthStatus;
 import me.twomillions.plugin.advancedwish.enums.databases.status.ConnectStatus;
@@ -31,21 +33,24 @@ import java.util.stream.Collectors;
  * @date 2023/1/8 21:23
  */
 @Getter @Setter
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MongoManager implements DatabasesInterface {
-     private volatile MongoClient mongoClient;
-     private volatile DBCollection dbCollection;
-     private volatile MongoDatabase mongoDatabase;
-     private volatile String mongoClientUrlString;
-     private volatile MongoClientURI mongoClientUrl;
+    private volatile MongoClient mongoClient;
+    private volatile DBCollection dbCollection;
+    private volatile MongoDatabase mongoDatabase;
+    private volatile String mongoClientUrlString;
+    private volatile MongoClientURI mongoClientUrl;
 
     private volatile String ip;
     private volatile String port;
     private volatile String username;
     private volatile String password;
 
-     private volatile AuthStatus authStatus;
-     private volatile CustomUrlStatus customUrlStatus;
-     private volatile ConnectStatus connectStatus = ConnectStatus.TurnOff;
+    private volatile AuthStatus authStatus;
+    private volatile CustomUrlStatus customUrlStatus;
+    private volatile ConnectStatus connectStatus = ConnectStatus.TurnOff;
+
+    @Getter private static final MongoManager mongoManager = new MongoManager();
 
     /**
      * 根据指定的 YAML 配置，初始化数据库连接。

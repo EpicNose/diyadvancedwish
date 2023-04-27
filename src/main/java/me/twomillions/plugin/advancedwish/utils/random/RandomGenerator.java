@@ -2,6 +2,7 @@ package me.twomillions.plugin.advancedwish.utils.random;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import me.twomillions.plugin.advancedwish.annotations.JsInteropJavaType;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.apache.commons.math3.random.MersenneTwister;
 
@@ -20,6 +21,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * @param <T> 随机对象类型
  */
 @NoArgsConstructor
+@JsInteropJavaType
 public class RandomGenerator<T> {
     /**
      * 存储所有随机对象及其对应的概率。

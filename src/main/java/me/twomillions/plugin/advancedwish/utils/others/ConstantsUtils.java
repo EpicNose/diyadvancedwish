@@ -1,6 +1,7 @@
 package me.twomillions.plugin.advancedwish.utils.others;
 
 import lombok.experimental.UtilityClass;
+import me.twomillions.plugin.advancedwish.annotations.JsInteropJavaType;
 
 /**
  * 常量类。
@@ -9,6 +10,7 @@ import lombok.experimental.UtilityClass;
  * @date 2023/3/4
  */
 @UtilityClass
+@JsInteropJavaType
 @SuppressWarnings("unused")
 public class ConstantsUtils {
     /**

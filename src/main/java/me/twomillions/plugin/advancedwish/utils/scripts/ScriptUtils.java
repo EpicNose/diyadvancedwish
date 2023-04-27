@@ -1,16 +1,13 @@
 package me.twomillions.plugin.advancedwish.utils.scripts;
 
-import com.github.benmanes.caffeine.cache.Cache;
+import lombok.Getter;
 import lombok.experimental.UtilityClass;
-import me.twomillions.plugin.advancedwish.utils.others.CaffeineUtils;
+import me.twomillions.plugin.advancedwish.annotations.JsInteropJavaType;
+import me.twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.bukkit.entity.Player;
-
-import javax.script.Bindings;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-import java.io.StringReader;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Scriptable;
 
 /**
  * JavaScript 工具类。
@@ -19,9 +16,38 @@ import java.io.StringReader;
  * @date 2023/3/2
  */
 @UtilityClass
+@JsInteropJavaType
 public class ScriptUtils {
-    private static final ScriptEngine ENGINE = new ScriptEngineManager().getEngineByExtension("js");
-    private static final Cache<Object[], Bindings> BINDINGS_CACHE = CaffeineUtils.buildBukkitCache();
+    @Getter private static final Context rhino = Context.enter();
+    @Getter private static final Scriptable scope = rhino.initStandardObjects();
+
+    static {
+        try {
+            setup();
+        } catch (Throwable throwable) {
+            ExceptionUtils.throwRhinoError(throwable);
+        }
+    }
+
+    /**
+     * 初始化。
+     */
+    private static void setup() {
+        rhino.evaluateString(scope, "const Bukkit = Packages.org.bukkit.Bukkit", "RhinoJs", 1, null);
+        rhino.evaluateString(scope, "const Main = Packages.me.twomillions.plugin.advancedwish.Main", "RhinoJs", 1, null);
+        rhino.evaluateString(scope, "const plugin = Packages.me.twomillions.plugin.advancedwish.Main", "RhinoJs", 1, null);
+
+        /*
+         * 获取使用 JsInteropJavaType 注解的 Java 类
+         */
+        for (Class<?> aClass : JsInteropJavaType.Processor.getClasses()) {
+            String simpleName = aClass.getSimpleName();
+            String canonicalName = aClass.getCanonicalName();
+
+            rhino.evaluateString(scope, "const " + simpleName + " = Packages." + canonicalName, "RhinoJs", 1, null);
+            QuickUtils.sendConsoleMessage("&a成功加载 &eJava&a 类: &e" + aClass.getCanonicalName() + "&a，可使用 &e" + simpleName + " &a调用 &eJava&a 类中的 &e方法、函数 &a等。");
+        }
+    }
 
     /**
      * 分析 JavaScript 表达式，返回结果字符串。
@@ -34,24 +60,24 @@ public class ScriptUtils {
     public static String eval(String string, Player player, Object... params) {
         string = QuickUtils.toPapi(QuickUtils.replaceTranslate(string, player), player);
 
-        Bindings bindings = BINDINGS_CACHE.get(params, k -> {
-            Bindings newBindings = ENGINE.createBindings();
+        Scriptable newScope = rhino.newObject(scope);
 
-            newBindings.put("_player_", player);
-            newBindings.put("method", new MethodFunctions(player));
+        newScope.setPrototype(scope);
+        newScope.setParentScope(null);
 
-            for (int i = 0; i < params.length; i += 2) {
-                newBindings.put(params[i].toString(), params[i + 1]);
-            }
+        newScope.put("_player_", newScope, player);
+        newScope.put("method", newScope, new MethodFunctions(player));
 
-            return newBindings;
-        });
+        for (int i = 0; i < params.length; i += 2) {
+            newScope.put(params[i].toString(), newScope, params[i + 1]);
+        }
 
         Object result;
 
         try {
-            result = ENGINE.eval(new StringReader(string), bindings);
-        } catch (ScriptException e) {
+            result = rhino.evaluateString(newScope, string, "RhinoJs", 1, null);
+        } catch (Exception e) {
+            e.printStackTrace();
             return string;
         }
 

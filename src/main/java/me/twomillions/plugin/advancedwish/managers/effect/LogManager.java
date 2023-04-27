@@ -1,5 +1,6 @@
 package me.twomillions.plugin.advancedwish.managers.effect;
 
+import me.twomillions.plugin.advancedwish.annotations.JsInteropJavaType;
 import me.twomillions.plugin.advancedwish.managers.databases.DatabasesManager;
 import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
 
@@ -12,6 +13,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @author 2000000
  * @date 2023/3/26
  */
+@JsInteropJavaType
 public class LogManager {
     /**
      * 添加玩家许愿日志。

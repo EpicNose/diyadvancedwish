@@ -1,6 +1,7 @@
 package me.twomillions.plugin.advancedwish.utils.random;
 
 import lombok.experimental.UtilityClass;
+import me.twomillions.plugin.advancedwish.annotations.JsInteropJavaType;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 
@@ -11,6 +12,7 @@ import org.bukkit.boss.BarStyle;
  * @date 2023/2/8
  */
 @UtilityClass
+@JsInteropJavaType
 public class BossBarRandomUtils {
     /**
      * 随机获取一个 {@link BarColor} 颜色

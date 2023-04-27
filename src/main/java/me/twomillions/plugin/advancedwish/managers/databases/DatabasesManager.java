@@ -1,8 +1,11 @@
 package me.twomillions.plugin.advancedwish.managers.databases;
 
 import de.leonhard.storage.Yaml;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import me.twomillions.plugin.advancedwish.annotations.JsInteropJavaType;
 import me.twomillions.plugin.advancedwish.enums.databases.types.DataStorageType;
 import me.twomillions.plugin.advancedwish.interfaces.DatabasesInterface;
 import me.twomillions.plugin.advancedwish.managers.databases.json.JsonManager;
@@ -21,6 +24,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @author 2000000
  * @date 2023/3/23
  */
+@JsInteropJavaType
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DatabasesManager implements DatabasesInterface {
     /**
      * DataStorageType.
@@ -35,17 +40,17 @@ public class DatabasesManager implements DatabasesInterface {
     /**
      * DatabasesManager.getMongoManager().
      */
-    @Getter @Setter private static MongoManager mongoManager = new MongoManager();
+    @Getter @Setter private static MongoManager mongoManager = MongoManager.getMongoManager();
 
     /**
      * DatabasesManager.getMySQLManager().
      */
-    @Getter @Setter private static MySQLManager mySQLManager = new MySQLManager();
+    @Getter @Setter private static MySQLManager mySQLManager = MySQLManager.getMySQLManager();
 
     /**
      * DatabasesManager.getJsonManager().
      */
-    @Getter @Setter private static JsonManager jsonManager = new JsonManager();
+    @Getter @Setter private static JsonManager jsonManager = JsonManager.getJsonManager();
 
     /**
      * 根据指定的 YAML 配置，初始化数据库连接。

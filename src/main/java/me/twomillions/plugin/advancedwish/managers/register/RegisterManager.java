@@ -82,7 +82,7 @@ public class RegisterManager {
         if (!ConfigManager.getAdvancedWishYaml().getOrDefault("BSTATS", true)) {
             new Metrics(plugin, 16990);
         }
-        
+
         setupPath();
         setupVault();
         setupPlayerPoints();
@@ -112,7 +112,7 @@ public class RegisterManager {
      * 设置路径。
      */
     private static void setupPath() {
-        String pluginPath = Main.getInstance().getDataFolder().toString();
+        String pluginPath = Main.getPluginPath();
 
         Yaml advancedWishYaml = ConfigManager.getAdvancedWishYaml();
 

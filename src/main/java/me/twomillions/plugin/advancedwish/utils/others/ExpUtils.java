@@ -1,6 +1,7 @@
 package me.twomillions.plugin.advancedwish.utils.others;
 
 import lombok.experimental.UtilityClass;
+import me.twomillions.plugin.advancedwish.annotations.JsInteropJavaType;
 import org.bukkit.entity.Player;
 
 /**
@@ -8,6 +9,7 @@ import org.bukkit.entity.Player;
  * 参考实现: <a href="https://gist.github.com/Jikoo/30ec040443a4701b8980">Jikoo</a>
  */
 @UtilityClass
+@JsInteropJavaType
 public final class ExpUtils {
     /**
      * 计算玩家总经验。

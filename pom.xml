@@ -47,11 +47,6 @@
                                 </relocation>
 
                                 <relocation>
-                                    <pattern>com.mongodb</pattern>
-                                    <shadedPattern>me.twomillions.plugin.advancedwish.relocation.mongo</shadedPattern>
-                                </relocation>
-
-                                <relocation>
                                     <pattern>org.bstats</pattern>
                                     <shadedPattern>me.twomillions.plugin.advancedwish.relocation.bstats</shadedPattern>
                                 </relocation>
@@ -100,6 +95,11 @@
             <id>placeholderapi</id>
             <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
+
+        <repository>
+            <id>graalvm-releases</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -124,15 +124,6 @@
             <groupId>com.github.simplix-softworks</groupId>
             <artifactId>simplixstorage</artifactId>
             <version>3.2.5</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <!-- Auth Lib -->
-        <dependency>
-            <groupId>com.mojang</groupId>
-            <artifactId>authlib</artifactId>
-            <version>1.5.21</version>
-            <scope>provided</scope>
         </dependency>
 
         <!-- Particle Lib -->
@@ -217,6 +208,20 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-dbcp2</artifactId>
             <version>2.9.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.reflections/reflections -->
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.10.2</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.mozilla/rhino -->
+        <dependency>
+            <groupId>org.mozilla</groupId>
+            <artifactId>rhino</artifactId>
+            <version>1.7.14</version>
         </dependency>
 
     </dependencies>

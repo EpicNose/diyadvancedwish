@@ -2,6 +2,7 @@ package me.twomillions.plugin.advancedwish.utils.texts;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.twomillions.plugin.advancedwish.Main;
+import me.twomillions.plugin.advancedwish.annotations.JsInteropJavaType;
 import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.register.RegisterManager;
 import me.twomillions.plugin.advancedwish.utils.scripts.ScriptUtils;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
  * @author 2000000
  * @date 2022/11/21 12:39
  */
+@JsInteropJavaType
 @SuppressWarnings({"deprecation", "unused"})
 public class QuickUtils {
     private static final JavaPlugin plugin = Main.getInstance();

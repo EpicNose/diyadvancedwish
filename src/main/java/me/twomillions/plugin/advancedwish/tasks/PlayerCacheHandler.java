@@ -46,7 +46,7 @@ public class PlayerCacheHandler extends TasksAbstract {
         runnable = () -> {
             UUID uuid = player.getUniqueId();
 
-            String normalPath = plugin.getDataFolder() + ConstantsUtils.PLAYER_CACHE;
+            String normalPath = Main.getPluginPath() + ConstantsUtils.PLAYER_CACHE;
             String doListCachePath = Main.getDoListCachePath();
 
             // 遍历缓存文件，判断是否有正常缓存或操作缓存
