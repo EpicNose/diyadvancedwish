@@ -1,4 +1,4 @@
-package me.twomillions.plugin.advancedwish.utils.scripts;
+package me.twomillions.plugin.advancedwish.utils.scripts.other;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

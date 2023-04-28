@@ -21,12 +21,14 @@ public class ConstantsUtils {
     public static final String PLAYER_GUARANTEED = "/PlayerGuaranteed";
     public static final String PLAYER_LOGS = "/PlayerLogs";
     public static final String OTHER_DATA = "/OtherData";
+    public static final String SCRIPT_FILE = "/Scripts";
 
     /**
      * 常用文件扩展名。
      */
     public static final String YAML_FILE_EXTENSION = ".yml";
     public static final String JSON_FILE_EXTENSION = ".json";
+    public static final String JAVA_SCRIPT_FILE_EXTENSION = ".js";
 
     /**
      * 常用数据库通用名称。

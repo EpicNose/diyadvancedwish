@@ -6,7 +6,7 @@
 
     <groupId>me.twomillions.plugin</groupId>
     <artifactId>AdvancedWish</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.5</version>
     <packaging>jar</packaging>
 
     <name>AdvancedWish</name>
@@ -208,6 +208,13 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-dbcp2</artifactId>
             <version>2.9.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.11.0</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.reflections/reflections -->

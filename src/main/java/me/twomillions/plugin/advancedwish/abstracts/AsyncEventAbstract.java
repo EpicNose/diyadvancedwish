@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
 
 /**
  * 该类继承 {@link Event} 实现 {@link Cancellable}，更加快捷的实现异步事件。
@@ -15,7 +14,6 @@ import org.bukkit.event.HandlerList;
 @Getter @Setter
 public abstract class AsyncEventAbstract extends Event implements Cancellable {
     private boolean cancelled = false;
-    private HandlerList handlers = new HandlerList();
 
     /**
      * 构造器，异步事件。

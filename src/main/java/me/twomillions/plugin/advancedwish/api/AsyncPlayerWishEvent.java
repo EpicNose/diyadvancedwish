@@ -5,6 +5,8 @@ import lombok.Getter;
 import me.twomillions.plugin.advancedwish.abstracts.AsyncEventAbstract;
 import me.twomillions.plugin.advancedwish.enums.wish.PlayerWishStatus;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * 该类继承 {@link AsyncEventAbstract} 快捷的异步实现 Advanced Wish 事件。
@@ -19,4 +21,11 @@ public class AsyncPlayerWishEvent extends AsyncEventAbstract {
     private final String wishName;
     private final boolean isForce;
     private final PlayerWishStatus playerWishStatus;
+
+    @Getter private static final HandlerList HandlerList = new HandlerList();
+
+    @Override
+    public @NotNull HandlerList getHandlers() {
+        return HandlerList;
+    }
 }

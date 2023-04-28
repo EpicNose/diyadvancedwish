@@ -15,6 +15,7 @@ import me.twomillions.plugin.advancedwish.tasks.WishLimitResetHandler;
 import me.twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;
 import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
 import me.twomillions.plugin.advancedwish.utils.scripts.ScriptUtils;
+import me.twomillions.plugin.advancedwish.utils.scripts.other.ScriptListener;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -36,11 +37,10 @@ public final class Main extends JavaPlugin {
     @Getter @Setter private volatile static String pluginPath;
 
     @Getter @Setter private volatile static String logsPath;
+    @Getter @Setter private volatile static String scriptPath;
     @Getter @Setter private volatile static String guaranteedPath;
     @Getter @Setter private volatile static String doListCachePath;
     @Getter @Setter private volatile static String otherDataPath;
-
-    @Getter @Setter private volatile static boolean disabled;
 
     @Getter private static final boolean isOfflineMode = Bukkit.getServer().getOnlineMode();
 
@@ -53,8 +53,7 @@ public final class Main extends JavaPlugin {
         long startTime = System.currentTimeMillis();
 
         setInstance(this);
-        setDisabled(false);
-        setPluginPath(getInstance().getDataFolder().toString());
+        setPluginPath(getInstance().getDataFolder().toString().replace("\\", "/"));
 
         /*
          * 获取 -> org.bukkit.craftbukkit.v1_7_R4，分割后为 -> 1_7, 最终为 -> 107
@@ -143,12 +142,14 @@ public final class Main extends JavaPlugin {
         long endTime = System.currentTimeMillis();
         long durationMillis = endTime - startTime;
 
+        ScriptUtils.getRhino();
+
         QuickUtils.sendConsoleMessage("&aAdvanced Wish 插件已成功加载! 版本: &e" + getDescription().getVersion() + "&a, 作者: &e2000000&a。加载用时: &e" + durationMillis + " &ams!");
     }
 
     @Override
     public void onDisable() {
-        setDisabled(true);
+        ScriptUtils.invokeFunctionInAllScripts("onDisable", null);
 
         // 取消任务
         ScheduledTaskHandler.getScheduledTaskHandler().cancelTask();
@@ -167,7 +168,13 @@ public final class Main extends JavaPlugin {
             }
         }
 
-        ScriptUtils.getRhino().close();
+        if (ScriptUtils.getRhino() != null) {
+            ScriptUtils.getRhino().close();
+
+            for (ScriptListener scriptListener : ScriptListener.getScriptListeners()) {
+                scriptListener.unregister();
+            }
+        }
 
         QuickUtils.sendConsoleMessage("&aAdvanced Wish 插件已成功卸载! 感谢您使用此插件! 版本: &e" + getDescription().getVersion() + "&a, 作者: &e2000000&a。");
     }

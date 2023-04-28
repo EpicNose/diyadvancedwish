@@ -98,8 +98,6 @@ public class PlayerListener implements Listener {
      */
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        if (Main.isDisabled()) return;
-
         Player player = event.getPlayer();
 
         Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), () -> WishManager.savePlayerCacheData(player));

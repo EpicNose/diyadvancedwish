@@ -3,6 +3,8 @@ package me.twomillions.plugin.advancedwish.api;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import me.twomillions.plugin.advancedwish.abstracts.AsyncEventAbstract;
+import org.bukkit.event.HandlerList;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * 该类继承 {@link AsyncEventAbstract} 快捷的异步实现 Advanced Wish 事件。
@@ -17,4 +19,11 @@ public class AsyncWishLimitResetEvent extends AsyncEventAbstract {
     private final String storeMode;
     private final boolean isEnabledResetCompleteSend;
     private final boolean isEnabledResetCompleteSendConsole;
+
+    @Getter private static final HandlerList HandlerList = new HandlerList();
+
+    @Override
+    public @NotNull HandlerList getHandlers() {
+        return HandlerList;
+    }
 }
