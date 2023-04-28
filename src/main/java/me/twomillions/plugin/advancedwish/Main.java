@@ -7,6 +7,7 @@ import me.twomillions.plugin.advancedwish.enums.databases.types.DataStorageType;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.databases.DatabasesManager;
+import me.twomillions.plugin.advancedwish.managers.placeholder.PapiManager;
 import me.twomillions.plugin.advancedwish.managers.register.RegisterManager;
 import me.twomillions.plugin.advancedwish.tasks.PlayerCacheHandler;
 import me.twomillions.plugin.advancedwish.tasks.ScheduledTaskHandler;
@@ -15,7 +16,9 @@ import me.twomillions.plugin.advancedwish.tasks.WishLimitResetHandler;
 import me.twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;
 import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
 import me.twomillions.plugin.advancedwish.utils.scripts.ScriptUtils;
-import me.twomillions.plugin.advancedwish.utils.scripts.other.ScriptListener;
+import me.twomillions.plugin.advancedwish.utils.scripts.utils.ScriptListener;
+import me.twomillions.plugin.advancedwish.utils.scripts.utils.ScriptPlaceholder;
+import me.twomillions.plugin.advancedwish.utils.scripts.utils.ScriptScheduler;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -48,7 +51,6 @@ public final class Main extends JavaPlugin {
     @Getter private static final String codeSourceLocation = Main.class.getProtectionDomain().getCodeSource().getLocation().toString();
 
     @Override
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     public void onEnable() {
         long startTime = System.currentTimeMillis();
 
@@ -74,9 +76,6 @@ public final class Main extends JavaPlugin {
         RegisterManager.setupPlugins(true);
         RegisterManager.registerWish();
         RegisterManager.registerCommands();
-
-        // 初始化 Script
-        ScriptUtils.getRhino();
 
         // 设置数据存储
         String dataStorageType = advancedWishYaml.getString("DATA-STORAGE-TYPE").toLowerCase();
@@ -142,9 +141,7 @@ public final class Main extends JavaPlugin {
         long endTime = System.currentTimeMillis();
         long durationMillis = endTime - startTime;
 
-        ScriptUtils.getRhino();
-
-        QuickUtils.sendConsoleMessage("&aAdvanced Wish 插件已成功加载! 版本: &e" + getDescription().getVersion() + "&a, 作者: &e2000000&a。加载用时: &e" + durationMillis + " &ams!");
+        QuickUtils.sendConsoleMessage("&e&lAdvanced Wish&a 插件已成功加载! 版本: &e" + getDescription().getVersion() + "&a, 作者: &e2000000&a。加载用时: &e" + durationMillis + " &ams!");
     }
 
     @Override
@@ -168,14 +165,30 @@ public final class Main extends JavaPlugin {
             }
         }
 
-        if (ScriptUtils.getRhino() != null) {
-            ScriptUtils.getRhino().close();
+        if (RegisterManager.isUsingPapi()) {
+            try {
+                new PapiManager().unregister();
+            } catch (Throwable throwable) {
+                QuickUtils.sendConsoleMessage("&ePlaceholder&c 注销异常，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/placeholderapi.6245/&c，已取消 &ePlaceholder&c 注销。");
+            }
 
-            for (ScriptListener scriptListener : ScriptListener.getScriptListeners()) {
-                scriptListener.unregister();
+            for (ScriptPlaceholder scriptPlaceholder : ScriptPlaceholder.getScriptPlaceholders()) {
+                scriptPlaceholder.unregister();
             }
         }
 
-        QuickUtils.sendConsoleMessage("&aAdvanced Wish 插件已成功卸载! 感谢您使用此插件! 版本: &e" + getDescription().getVersion() + "&a, 作者: &e2000000&a。");
+        for (ScriptScheduler scriptScheduler : ScriptScheduler.getScriptSchedulers()) {
+            scriptScheduler.unregister();
+        }
+
+        for (ScriptListener scriptListener : ScriptListener.getScriptListeners()) {
+            scriptListener.unregister();
+        }
+
+        if (ScriptUtils.getRhino() != null) {
+            ScriptUtils.getRhino().close();
+        }
+
+        QuickUtils.sendConsoleMessage("&e&lAdvanced Wish&a 插件已成功卸载! 感谢您使用此插件! 版本: &e" + getDescription().getVersion() + "&a, 作者: &e2000000&a。");
     }
 }

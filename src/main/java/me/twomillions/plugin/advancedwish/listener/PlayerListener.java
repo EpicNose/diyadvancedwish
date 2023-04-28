@@ -16,6 +16,7 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.UUID;
 
@@ -26,6 +27,7 @@ import java.util.UUID;
  * @date 2022/11/24 16:58
  */
 public class PlayerListener implements Listener {
+    private static final JavaPlugin plugin = Main.getInstance();
     private static final Cache<Player, String> opSentCommand = EffectSendManager.getOpSentCommand();
 
     /**
@@ -65,7 +67,7 @@ public class PlayerListener implements Listener {
         int waitingTime = Integer.parseInt(ConfigManager.getAdvancedWishYaml().getString("WAIT-LOADING"));
 
         // 延时等待玩家缓存写入
-        Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             PlayerCacheHandler.setWaitingLoadingCache(uuid, true);
 
             try {
@@ -100,7 +102,7 @@ public class PlayerListener implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
 
-        Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), () -> WishManager.savePlayerCacheData(player));
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> WishManager.savePlayerCacheData(player));
     }
 
     /**

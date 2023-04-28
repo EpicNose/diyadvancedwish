@@ -1,6 +1,7 @@
 package me.twomillions.plugin.advancedwish.annotations;
 
 import me.twomillions.plugin.advancedwish.Main;
+import me.twomillions.plugin.advancedwish.utils.scripts.ScriptUtils;
 import org.reflections.Reflections;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
@@ -9,11 +10,14 @@ import java.lang.annotation.*;
 import java.util.Set;
 
 /**
+ * JsInteropJavaType 注解。
+ * 用于在 {@link ScriptUtils} 中加载 Java 类到引擎。
+ *
  * @author 2000000
  * @date 2023/4/27
  */
-@Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface JsInteropJavaType {
     class Processor {
         /**

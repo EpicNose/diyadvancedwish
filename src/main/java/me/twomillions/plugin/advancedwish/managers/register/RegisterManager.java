@@ -10,7 +10,12 @@ import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.placeholder.PapiManager;
 import me.twomillions.plugin.advancedwish.tasks.WishLimitResetHandler;
+import me.twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;
 import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
+import me.twomillions.plugin.advancedwish.utils.scripts.ScriptUtils;
+import me.twomillions.plugin.advancedwish.utils.scripts.utils.ScriptListener;
+import me.twomillions.plugin.advancedwish.utils.scripts.utils.ScriptPlaceholder;
+import me.twomillions.plugin.advancedwish.utils.scripts.utils.ScriptScheduler;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import net.milkbowl.vault.economy.Economy;
 import org.black_ixx.playerpoints.PlayerPoints;
@@ -75,6 +80,7 @@ public class RegisterManager {
      *
      * @param registerEvents 是否注册监听器
      */
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void setupPlugins(boolean registerEvents) {
         PluginManager manager = Bukkit.getPluginManager();
 
@@ -105,6 +111,13 @@ public class RegisterManager {
 
         if (registerEvents) {
             manager.registerEvents(new PlayerListener(), plugin);
+        }
+
+        // 初始化 Script
+        try {
+            ScriptUtils.setup();
+        } catch (Throwable throwable) {
+            ExceptionUtils.throwRhinoError(throwable);
         }
     }
 
@@ -202,16 +215,27 @@ public class RegisterManager {
         // 取消任务
         WishLimitResetHandler.cancelAllWishLimitResetTasks();
 
-        // 低版本 Papi 没有 unregister 方法，捕获异常以取消 Papi 重载
-        if (isUsingPapi()) {
-            Bukkit.getScheduler().runTask(plugin, () -> {
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (isUsingPapi()) {
                 try {
                     new PapiManager().unregister();
                 } catch (Throwable throwable) {
                     QuickUtils.sendConsoleMessage("&ePlaceholder&c 重载异常，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/placeholderapi.6245/&c，已取消 &ePlaceholder&c 重载。");
                 }
-            });
-        }
+
+                for (ScriptPlaceholder scriptPlaceholder : ScriptPlaceholder.getScriptPlaceholders()) {
+                    scriptPlaceholder.unregister();
+                }
+            }
+
+            for (ScriptScheduler scriptScheduler : ScriptScheduler.getScriptSchedulers()) {
+                scriptScheduler.unregister();
+            }
+
+            for (ScriptListener scriptListener : ScriptListener.getScriptListeners()) {
+                scriptListener.unregister();
+            }
+        });
 
         setupPlugins(false);
         registerWish();

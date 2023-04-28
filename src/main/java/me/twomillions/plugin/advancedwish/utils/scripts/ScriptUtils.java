@@ -1,14 +1,13 @@
 package me.twomillions.plugin.advancedwish.utils.scripts;
 
-import lombok.Cleanup;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.annotations.JsInteropJavaType;
-import me.twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;
+import me.twomillions.plugin.advancedwish.managers.register.RegisterManager;
 import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
-import me.twomillions.plugin.advancedwish.utils.scripts.other.MethodFunctions;
+import me.twomillions.plugin.advancedwish.utils.scripts.utils.ScriptPlaceholder;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -18,9 +17,7 @@ import org.mozilla.javascript.Scriptable;
 
 import java.io.File;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.Arrays;
 
 /**
@@ -31,24 +28,16 @@ import java.util.Arrays;
  */
 @UtilityClass
 @JsInteropJavaType
+@SuppressWarnings("unused")
 public class ScriptUtils {
     @Getter private static Context rhino;
     @Getter private static Scriptable GLOBAL_SCOPE;
-
-    static {
-        try {
-            setup();
-        } catch (Throwable throwable) {
-            ExceptionUtils.throwRhinoError(throwable);
-        }
-    }
 
     /**
      * 初始化。
      */
     @SneakyThrows
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private static void setup() {
+    public static void setup() {
         rhino = Context.enter();
         GLOBAL_SCOPE = rhino.initStandardObjects();
 
@@ -60,30 +49,21 @@ public class ScriptUtils {
          * 如果不存在则创建文件夹并写入 scriptSetup.js
          */
         if (!scriptsFolder.exists()) {
-            scriptsFolder.mkdir();
+            FileUtils.forceMkdir(scriptsFolder);
 
             File file = new File(scriptsPath + "/scriptSetup.js");
 
-            @Cleanup OutputStream outputStream = Files.newOutputStream(file.toPath());
-            @Cleanup InputStream inputStream = Main.class.getClassLoader().getResourceAsStream("Scripts/scriptSetup.js");
+            InputStream inputStream = Main.class.getClassLoader().getResourceAsStream("Scripts/scriptSetup.js");
 
             if (inputStream != null) {
-                int bytesRead;
-                byte[] buffer = new byte[1024];
-
-                while ((bytesRead = inputStream.read(buffer)) != -1) {
-                    outputStream.write(buffer, 0, bytesRead);
-                }
+                FileUtils.copyInputStreamToFile(inputStream, file);
             }
         }
 
         rhino.evaluateString(GLOBAL_SCOPE, "const Bukkit = Packages.org.bukkit.Bukkit", "RhinoJs", 1, null);
-        rhino.evaluateString(GLOBAL_SCOPE, "const EventListener = Packages.org.bukkit.event.Listener", "RhinoJs", 1, null);
 
         rhino.evaluateString(GLOBAL_SCOPE, "const Main = Packages.me.twomillions.plugin.advancedwish.Main.getInstance()", "RhinoJs", 1, null);
         rhino.evaluateString(GLOBAL_SCOPE, "const plugin = Packages.me.twomillions.plugin.advancedwish.Main.getInstance()", "RhinoJs", 1, null);
-
-        rhino.evaluateString(GLOBAL_SCOPE, "const ScriptListener = Packages.me.twomillions.plugin.advancedwish.utils.scripts.other.ScriptListener", "RhinoJs", 1, null);
 
         /*
          * 获取使用 JsInteropJavaType 注解的 Java 类
@@ -92,8 +72,18 @@ public class ScriptUtils {
             String simpleName = aClass.getSimpleName();
             String canonicalName = aClass.getCanonicalName();
 
+            /*
+             * 如果是 ScriptPlaceholder.class 并且服务器没有 Placeholder API
+             */
+            if (aClass == ScriptPlaceholder.class) {
+                if (!RegisterManager.isUsingPapi()) {
+                    QuickUtils.sendConsoleMessage("&c取消加载 &eJava&c 类: &e" + simpleName + " &7&o(" + canonicalName +  ")&c，因为服务器中没有 &ePlaceholder API&c 插件。");
+                    continue;
+                }
+            }
+
             rhino.evaluateString(GLOBAL_SCOPE, "const " + simpleName + " = Packages." + canonicalName, "RhinoJs", 1, null);
-            QuickUtils.sendConsoleMessage("&a成功加载 &eJava&a 类: &e" + aClass.getCanonicalName() + "&a，可使用 &e" + simpleName + " &a调用 &eJava&a 类中的 &e方法、函数 &a等。");
+            QuickUtils.sendConsoleMessage("&a成功加载 &eJava&a 类: &e" + simpleName + " &7&o(" + canonicalName + ")&a，可使用 &e" + simpleName + " &a调用类中 &e方法、函数 &a等。");
         }
 
         /*
@@ -174,10 +164,10 @@ public class ScriptUtils {
 
                 result = Context.toString(rhino.evaluateString(scope, script + "\n" + functionName + "()", file.getName(), 1, null));
 
-                QuickUtils.sendConsoleMessage("&a成功执行 &eJavaScript &a内函数: &e" + functionName + " &a在文件: &e" + file.getName() + "&a!");
-            } catch (Exception e) {
-                e.printStackTrace();
-                QuickUtils.sendConsoleMessage("&c无法执行 &eJavaScript &c内函数: &e" + functionName + " &c在文件: &e" + file.getName() + "&c!");
+                QuickUtils.sendConsoleMessage("&a成功执行 &eJavaScript &a内函数: &e" + functionName + "&a，文件名: &e" + file.getName() + "&a!");
+            } catch (Exception exception) {
+                exception.printStackTrace();
+                QuickUtils.sendConsoleMessage("&c无法执行 &eJavaScript &c内函数: &e" + functionName + "&a，文件名: &e" + file.getName() + "&c!");
             }
         }
 
