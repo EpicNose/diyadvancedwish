@@ -179,13 +179,11 @@ public class MongoManager implements DatabasesInterface {
      * @param key 查询的 Key
      * @param value 数据值
      * @param databaseCollection 更新的数据集合
-     * @return 是否成功更新
      */
     @Override
-    public boolean update(String uuid, String key, Object value, String databaseCollection) {
+    public void update(String uuid, String key, Object value, String databaseCollection) {
         MongoCollection<Document> collection = getMongoDatabase().getCollection(databaseCollection);
         collection.updateOne(new Document("_id", uuid), new Document("$set", new Document(key, value)), new UpdateOptions().upsert(true));
-        return true;
     }
 
     /**

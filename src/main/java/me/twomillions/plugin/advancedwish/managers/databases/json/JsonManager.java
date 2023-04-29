@@ -72,13 +72,11 @@ public class JsonManager implements DatabasesInterface {
      * @param key 查询的 Key
      * @param value 数据值
      * @param databaseCollection 更新的数据集合
-     * @return 是否成功更新
      */
     @Override
-    public boolean update(String uuid, String key, Object value, String databaseCollection) {
+    public void update(String uuid, String key, Object value, String databaseCollection) {
         String path = getPath(databaseCollection);
         ConfigManager.createJson(uuid, path, true, false).set(key, value);
-        return true;
     }
 
     /**

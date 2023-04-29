@@ -136,19 +136,22 @@ public class DatabasesManager implements DatabasesInterface {
      * @param databaseCollection 更新的数据集合
      */
     @Override
-    public boolean update(String uuid, String key, Object value, String databaseCollection) {
+    public void update(String uuid, String key, Object value, String databaseCollection) {
         switch (getDataStorageType()) {
             case MongoDB:
-                return getMongoManager().update(uuid, key, value, databaseCollection);
+                getMongoManager().update(uuid, key, value, databaseCollection);
+                break;
 
             case MySQL:
-                return getMySQLManager().update(uuid, key, value, databaseCollection);
+                getMySQLManager().update(uuid, key, value, databaseCollection);
+                break;
 
             case Json:
-                return getJsonManager().update(uuid, key, value, databaseCollection);
+                getJsonManager().update(uuid, key, value, databaseCollection);
+                break;
 
             default:
-                return ExceptionUtils.throwUnknownDataStoreType();
+                ExceptionUtils.throwUnknownDataStoreType();
         }
     }
 

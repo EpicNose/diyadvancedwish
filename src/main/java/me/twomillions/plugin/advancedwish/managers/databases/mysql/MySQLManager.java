@@ -1,10 +1,7 @@
 package me.twomillions.plugin.advancedwish.managers.databases.mysql;
 
 import de.leonhard.storage.Yaml;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import me.twomillions.plugin.advancedwish.enums.databases.status.AuthStatus;
 import me.twomillions.plugin.advancedwish.enums.databases.status.ConnectStatus;
 import me.twomillions.plugin.advancedwish.enums.databases.status.CustomUrlStatus;
@@ -16,6 +13,7 @@ import org.bukkit.Bukkit;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 
 /**
  * 该类实现 {@link DatabasesInterface}，处理 MySQL 操作。
@@ -100,31 +98,29 @@ public class MySQLManager implements DatabasesInterface {
      * @return 对应的值
      */
     @Override
+    @SneakyThrows
     public Object getOrDefault(String uuid, String key, Object defaultValue, String databaseCollection) {
-        try (Connection connection = getDataSource().getConnection()) {
-            checkCollectionType(key, databaseCollection);
-            checkColumn(key, databaseCollection);
+        @Cleanup Connection connection = getDataSource().getConnection();
+        
+        checkCollectionType(key, databaseCollection);
+        checkColumn(key, databaseCollection);
 
-            String query = "SELECT COALESCE((SELECT `" + key + "` FROM `" + databaseCollection + "` WHERE uuid = ?), ?)";
+        String query = "SELECT COALESCE((SELECT `" + key + "` FROM `" + databaseCollection + "` WHERE uuid = ?), ?)";
 
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1, uuid);
-            preparedStatement.setObject(2, defaultValue);
+        @Cleanup PreparedStatement preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setString(1, uuid);
+        preparedStatement.setObject(2, defaultValue);
 
-            ResultSet resultSet = preparedStatement.executeQuery();
-            resultSet.next();
-            Object value = resultSet.getObject(1);
+        @Cleanup ResultSet resultSet = preparedStatement.executeQuery();
+        resultSet.next();
+        Object value = resultSet.getObject(1);
 
-            if (value == null) {
-                value = defaultValue;
-                update(uuid, key, defaultValue, databaseCollection);
-            }
-
-            return value;
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-            return defaultValue;
+        if (value == null) {
+            value = defaultValue;
+            update(uuid, key, defaultValue, databaseCollection);
         }
+
+        return value;
     }
 
     /**
@@ -137,31 +133,29 @@ public class MySQLManager implements DatabasesInterface {
      * @return 对应的 List 值
      */
     @Override
+    @SneakyThrows
     public ConcurrentLinkedQueue<String> getOrDefaultList(String uuid, String key, ConcurrentLinkedQueue<String> defaultValue, String databaseCollection) {
-        try (Connection connection = getDataSource().getConnection()) {
-            checkCollectionType(key, databaseCollection);
-            checkColumn(key, databaseCollection);
+        @Cleanup Connection connection = getDataSource().getConnection();
 
-            String query = "SELECT COALESCE((SELECT `" + key + "` FROM `" + databaseCollection + "` WHERE uuid = ?), ?)";
+        checkCollectionType(key, databaseCollection);
+        checkColumn(key, databaseCollection);
 
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1, uuid);
-            preparedStatement.setString(2, String.join(",", defaultValue));
+        String query = "SELECT COALESCE((SELECT `" + key + "` FROM `" + databaseCollection + "` WHERE uuid = ?), ?)";
 
-            ResultSet resultSet = preparedStatement.executeQuery();
-            resultSet.next();
-            String value = resultSet.getString(1);
+        @Cleanup PreparedStatement preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setString(1, uuid);
+        preparedStatement.setString(2, String.join(",", defaultValue));
 
-            if (value == null || value.isEmpty()) {
-                update(uuid, key, defaultValue, databaseCollection);
-                return defaultValue;
-            }
+        @Cleanup ResultSet resultSet = preparedStatement.executeQuery();
+        resultSet.next();
+        String value = resultSet.getString(1);
 
-            return QuickUtils.stringToList(value);
-        } catch (SQLException exception) {
-            exception.printStackTrace();
+        if (value == null || value.isEmpty()) {
+            update(uuid, key, defaultValue, databaseCollection);
             return defaultValue;
         }
+
+        return QuickUtils.stringToList(value);
     }
 
     /**
@@ -171,31 +165,27 @@ public class MySQLManager implements DatabasesInterface {
      * @param key 查询的 Key
      * @param value 数据值
      * @param databaseCollection 更新的数据集合
-     * @return 是否成功更新
      */
     @Override
-    public boolean update(String uuid, String key, Object value, String databaseCollection) {
-        try (Connection connection = getDataSource().getConnection()) {
-            checkCollectionType(key, databaseCollection);
-            checkColumn(key, databaseCollection);
+    @SneakyThrows
+    public void update(String uuid, String key, Object value, String databaseCollection) {
+        @Cleanup Connection connection = getDataSource().getConnection();
 
-            if (value instanceof Collection<?>) {
-                value = QuickUtils.listToString((Collection<?>) value);
-            }
+        checkCollectionType(key, databaseCollection);
+        checkColumn(key, databaseCollection);
 
-            String query = "INSERT INTO `" + databaseCollection + "` (uuid, `" + key + "`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `" + key + "`=?";
-
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1, uuid);
-            preparedStatement.setObject(2, value);
-            preparedStatement.setObject(3, value);
-            preparedStatement.executeUpdate();
-
-            return true;
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-            return false;
+        if (value instanceof Collection<?>) {
+            value = QuickUtils.listToString((Collection<?>) value);
         }
+
+        String query = "INSERT INTO `" + databaseCollection + "` (uuid, `" + key + "`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `" + key + "`=?";
+
+        @Cleanup PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+        preparedStatement.setString(1, uuid);
+        preparedStatement.setObject(2, value);
+        preparedStatement.setObject(3, value);
+        preparedStatement.executeUpdate();
     }
 
     /**
@@ -203,24 +193,20 @@ public class MySQLManager implements DatabasesInterface {
      *
      * @return 包含所有集合名称的字符串列表
      */
+    @SneakyThrows
     public List<String> getAllDatabaseCollectionNames() {
-        try (Connection connection = getDataSource().getConnection()) {
-            DatabaseMetaData metaData = connection.getMetaData();
-            ResultSet tables = metaData.getTables(null, null, null, new String[] { "TABLE" });
+        @Cleanup Connection connection = getDataSource().getConnection();
+        @Cleanup ResultSet tables = connection.getMetaData().getTables(null, null, null, new String[] { "TABLE" });
 
-            List<String> tableNames = new ArrayList<>();
-            while (tables.next()) {
-                String tableName = tables.getString("TABLE_NAME");
-                tableNames.add(tableName);
-            }
+        List<String> tableNames = new ArrayList<>();
 
-            return tableNames;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return Collections.emptyList();
+        while (tables.next()) {
+            String tableName = tables.getString("TABLE_NAME");
+            tableNames.add(tableName);
         }
-    }
 
+        return tableNames;
+    }
 
     /**
      * 获取所有数据集合的所有数据。
@@ -229,69 +215,50 @@ public class MySQLManager implements DatabasesInterface {
      * @return 以 Map 的形式传递，Map Key 为数据集合名，value Map Key 为 UUID，value 是一个包含键值对的 Map
      */
     @Override
+    @SneakyThrows
     public Map<String, Map<String, Object>> getAllData(String databaseCollection) {
-        try (Connection connection = getDataSource().getConnection()) {
-            DatabaseMetaData databaseMetaData = connection.getMetaData();
-            ResultSet columns = databaseMetaData.getColumns(null, null, databaseCollection, null);
+        @Cleanup Connection connection = getDataSource().getConnection();
+        @Cleanup ResultSet columns = connection.getMetaData().getColumns(null, null, databaseCollection, null);
 
-            List<String> columnNames = new ArrayList<>();
-            while (columns.next()) {
-                String columnName = columns.getString("COLUMN_NAME");
-                columnNames.add(columnName);
-            }
+        List<String> columnNames = new ArrayList<>();
 
-            if (columnNames.isEmpty()) {
-                return new HashMap<>();
-            }
+        while (columns.next()) {
+            columnNames.add(columns.getString("COLUMN_NAME"));
+        }
 
-            String query = "SELECT uuid, `" + String.join("`, `", columnNames) + "` FROM `" + databaseCollection + "`";
-
-            PreparedStatement statement = connection.prepareStatement(query);
-            ResultSet resultSet = statement.executeQuery();
-
-            ResultSetMetaData metadata = resultSet.getMetaData();
-            int columnCount = metadata.getColumnCount();
-            List<String> dataColumnNames = new ArrayList<>();
-
-            for (int i = 2; i <= columnCount; i++) {
-                dataColumnNames.add(metadata.getColumnName(i));
-            }
-
-            Map<String, Map<String, Object>> data = new HashMap<>();
-
-            while (resultSet.next()) {
-                String uuid = resultSet.getString("uuid");
-                Map<String, Object> rowData = new HashMap<>();
-
-                for (String columnName : dataColumnNames) {
-                    Object value = resultSet.getObject(columnName);
-                    rowData.put(columnName, value);
-                }
-
-                data.put(uuid, rowData);
-            }
-
-            Map<String, Map<String, Object>> correctedData = new HashMap<>();
-            for (String columnName : dataColumnNames) {
-                if (!columnName.equals("uuid")) {
-                    Map<String, Object> columnData = new HashMap<>();
-
-                    for (String uuid : data.keySet()) {
-                        Object value = data.get(uuid).get(columnName);
-                        if (value != null) {
-                            columnData.put(uuid, value);
-                        }
-                    }
-
-                    correctedData.put(columnName, columnData);
-                }
-            }
-
-            return correctedData;
-        } catch (SQLException exception) {
-            exception.printStackTrace();
+        if (columnNames.isEmpty()) {
             return new HashMap<>();
         }
+
+        String query = "SELECT uuid, `" + String.join("`, `", columnNames) + "` FROM `" + databaseCollection + "`";
+
+        @Cleanup ResultSet resultSet = connection.prepareStatement(query).executeQuery();
+
+        ResultSetMetaData metadata = resultSet.getMetaData();
+
+        List<String> dataColumnNames = new ArrayList<>();
+        for (int i = 2; i <= metadata.getColumnCount(); i++) {
+            dataColumnNames.add(metadata.getColumnName(i));
+        }
+
+        Map<String, Map<String, Object>> data = new HashMap<>();
+
+        while (resultSet.next()) {
+            Map<String, Object> rowData = new HashMap<>();
+
+            for (String columnName : dataColumnNames) {
+                rowData.put(columnName, resultSet.getObject(columnName));
+            }
+
+            data.put(resultSet.getString("uuid"), rowData);
+        }
+
+        return data.entrySet().stream()
+                .filter(entry -> !entry.getKey().equals("uuid"))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey, entry -> entry.getValue().entrySet().stream()
+                                .filter(columnEntry -> columnEntry.getValue() != null)
+                                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))));
     }
 
     /**
@@ -299,16 +266,10 @@ public class MySQLManager implements DatabasesInterface {
      *
      * @param sql 要执行的 SQL 语句。
      */
-    public boolean executeStatement(String sql) {
-        try (Connection connection = getDataSource().getConnection()) {
-            Statement statement = connection.createStatement();
-            statement.executeUpdate(sql);
-
-            return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
+    @SneakyThrows
+    public void executeStatement(String sql) {
+        @Cleanup Statement statement = getDataSource().getConnection().createStatement();
+        statement.executeUpdate(sql);
     }
 
     /**
@@ -318,18 +279,15 @@ public class MySQLManager implements DatabasesInterface {
      * @param key 查询的 Key
      * @param databaseCollection 查询的数据集合
      */
+    @SneakyThrows
     private void checkCollectionType(String key, String databaseCollection) {
-        try (Connection connection = getDataSource().getConnection()) {
-            DatabaseMetaData databaseMetaData = connection.getMetaData();
-            ResultSet tables = databaseMetaData.getTables(null, null, databaseCollection, null);
+        @Cleanup Connection connection = getDataSource().getConnection();
+        @Cleanup ResultSet tables = connection.getMetaData().getTables(null, null, databaseCollection, null);
 
-            if (!tables.next()) {
-                String createTableQuery = "CREATE TABLE `" + databaseCollection + "` (`uuid` VARCHAR(36) NOT NULL, `" + key + "` TEXT DEFAULT NULL, PRIMARY KEY (`uuid`))";
-                PreparedStatement createTableStatement = connection.prepareStatement(createTableQuery);
-                createTableStatement.executeUpdate();
-            }
-        } catch (SQLException exception) {
-            exception.printStackTrace();
+        if (!tables.next()) {
+            String createTableQuery = "CREATE TABLE `" + databaseCollection + "` (`uuid` VARCHAR(36) NOT NULL, `" + key + "` TEXT DEFAULT NULL, PRIMARY KEY (`uuid`))";
+            @Cleanup PreparedStatement createTableStatement = connection.prepareStatement(createTableQuery);
+            createTableStatement.executeUpdate();
         }
     }
 
@@ -339,18 +297,15 @@ public class MySQLManager implements DatabasesInterface {
      * @param key 查询的 Key
      * @param databaseCollection 查询的数据集合
      */
+    @SneakyThrows
     private void checkColumn(String key, String databaseCollection) {
-        try (Connection connection = getDataSource().getConnection()) {
-            DatabaseMetaData databaseMetaData = connection.getMetaData();
-            ResultSet columns = databaseMetaData.getColumns(null, null, databaseCollection, key);
+        @Cleanup Connection connection = getDataSource().getConnection();
+        @Cleanup ResultSet columns = connection.getMetaData().getColumns(null, null, databaseCollection, key);
 
-            if (!columns.next()) {
-                String alterTableQuery = "ALTER TABLE `" + databaseCollection + "` ADD `" + key + "` TEXT DEFAULT NULL";
-                PreparedStatement alterTableStatement = connection.prepareStatement(alterTableQuery);
-                alterTableStatement.executeUpdate();
-            }
-        } catch (SQLException exception) {
-            exception.printStackTrace();
+        if (!columns.next()) {
+            String alterTableQuery = "ALTER TABLE `" + databaseCollection + "` ADD `" + key + "` TEXT DEFAULT NULL";
+            @Cleanup PreparedStatement alterTableStatement = connection.prepareStatement(alterTableQuery);
+            alterTableStatement.executeUpdate();
         }
     }
 }

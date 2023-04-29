@@ -53,9 +53,8 @@ public interface DatabasesInterface {
      * @param key 查询的 Key
      * @param value 数据值
      * @param databaseCollection 更新的数据集合
-     * @return 是否成功更新
      */
-    boolean update(String uuid, String key, Object value, String databaseCollection);
+    void update(String uuid, String key, Object value, String databaseCollection);
 
     /**
      * 获取数据库中的所有数据集合名称。
