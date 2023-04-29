@@ -1,4 +1,4 @@
-package me.twomillions.plugin.advancedwish.utils.scripts.utils;
+package me.twomillions.plugin.advancedwish.utils.scripts.interop;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -6,7 +6,7 @@ import lombok.Setter;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.annotations.JsInteropJavaType;
 import me.twomillions.plugin.advancedwish.enums.scripts.ScriptSchedulerType;
-import me.twomillions.plugin.advancedwish.interfaces.ScriptUtilsInterface;
+import me.twomillions.plugin.advancedwish.interfaces.ScriptInteropInterface;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -14,21 +14,22 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
+ * 允许 JavaScript 使用 Bukkit 线程调度器。
+ *
  * @author 2000000
  * @date 2023/4/28
  */
-@Getter
-@Setter
+@Getter @Setter
 @JsInteropJavaType
 @SuppressWarnings("unused")
 @Builder(setterPrefix = "set")
-public class ScriptScheduler implements ScriptUtilsInterface {
+    public class ScriptTaskScheduler implements ScriptInteropInterface {
     private static final JavaPlugin plugin = Main.getInstance();
 
     /**
      * ScriptSchedulers 列表。
      */
-    @Getter private static final ConcurrentLinkedQueue<ScriptScheduler> scriptSchedulers = new ConcurrentLinkedQueue<>();
+    @Getter private static final ConcurrentLinkedQueue<ScriptTaskScheduler> scriptSchedulers = new ConcurrentLinkedQueue<>();
 
     /**
      * 运行任务前等待的 ticks (20 ticks = 1s)。
@@ -104,6 +105,7 @@ public class ScriptScheduler implements ScriptUtilsInterface {
     public void unregister() {
         if (bukkitTask != null) {
             bukkitTask.cancel();
+            scriptSchedulers.remove(this);
         }
     }
 }

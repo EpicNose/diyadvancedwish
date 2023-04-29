@@ -2,7 +2,7 @@ package me.twomillions.plugin.advancedwish.utils.events;
 
 import lombok.experimental.UtilityClass;
 import me.twomillions.plugin.advancedwish.annotations.JsInteropJavaType;
-import me.twomillions.plugin.advancedwish.api.*;
+import me.twomillions.plugin.advancedwish.events.*;
 import me.twomillions.plugin.advancedwish.enums.wish.PlayerWishStatus;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

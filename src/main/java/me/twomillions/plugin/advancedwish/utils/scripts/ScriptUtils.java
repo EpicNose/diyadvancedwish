@@ -7,7 +7,7 @@ import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.annotations.JsInteropJavaType;
 import me.twomillions.plugin.advancedwish.managers.register.RegisterManager;
 import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
-import me.twomillions.plugin.advancedwish.utils.scripts.utils.ScriptPlaceholder;
+import me.twomillions.plugin.advancedwish.utils.scripts.interop.ScriptPlaceholderExpander;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -73,9 +73,9 @@ public class ScriptUtils {
             String canonicalName = aClass.getCanonicalName();
 
             /*
-             * 如果是 ScriptPlaceholder.class 并且服务器没有 Placeholder API
+             * 如果是 ScriptPlaceholderExpander.class 并且服务器没有 Placeholder API
              */
-            if (aClass == ScriptPlaceholder.class) {
+            if (aClass == ScriptPlaceholderExpander.class) {
                 if (!RegisterManager.isUsingPapi()) {
                     QuickUtils.sendConsoleMessage("&c取消加载 &eJava&c 类: &e" + simpleName + " &7&o(" + canonicalName +  ")&c，因为服务器中没有 &ePlaceholder API&c 插件。");
                     continue;

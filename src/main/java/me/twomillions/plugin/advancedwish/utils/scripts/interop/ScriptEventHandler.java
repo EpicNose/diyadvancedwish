@@ -1,11 +1,11 @@
-package me.twomillions.plugin.advancedwish.utils.scripts.utils;
+package me.twomillions.plugin.advancedwish.utils.scripts.interop;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.annotations.JsInteropJavaType;
-import me.twomillions.plugin.advancedwish.interfaces.ScriptUtilsInterface;
+import me.twomillions.plugin.advancedwish.interfaces.ScriptInteropInterface;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventPriority;
@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 /**
- * 允许使用 JavaScript 注册 Bukkit 事件监听器。
+ * 允许 JavaScript 处理 Bukkit 事件。
  *
  * @author 2000000
  * @date 2023/4/28
@@ -26,13 +26,13 @@ import java.util.function.Consumer;
 @JsInteropJavaType
 @SuppressWarnings("unused")
 @Builder(setterPrefix = "set")
-public class ScriptListener implements ScriptUtilsInterface {
+public class ScriptEventHandler implements ScriptInteropInterface {
     private static final JavaPlugin plugin = Main.getInstance();
 
     /**
-     * ScriptListener 监听器列表。
+     * ScriptEventHandler 监听器列表。
      */
-    @Getter private static final ConcurrentLinkedQueue<ScriptListener> scriptListeners = new ConcurrentLinkedQueue<>();
+    @Getter private static final ConcurrentLinkedQueue<ScriptEventHandler> scriptListeners = new ConcurrentLinkedQueue<>();
 
     /**
      * 是否传递已取消的事件。
@@ -74,7 +74,7 @@ public class ScriptListener implements ScriptUtilsInterface {
      */
     @Override
     public void unregister() {
-        scriptListeners.remove(this);
         HandlerList.unregisterAll(listener);
+        scriptListeners.remove(this);
     }
 }

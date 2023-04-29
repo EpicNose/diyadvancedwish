@@ -1,10 +1,10 @@
-package me.twomillions.plugin.advancedwish.listener;
+package me.twomillions.plugin.advancedwish.listeners;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
-import me.twomillions.plugin.advancedwish.managers.effect.EffectSendManager;
+import me.twomillions.plugin.advancedwish.managers.effects.EffectSendManager;
 import me.twomillions.plugin.advancedwish.tasks.PlayerCacheHandler;
 import me.twomillions.plugin.advancedwish.tasks.UpdateHandler;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;

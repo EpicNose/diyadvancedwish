@@ -3,7 +3,7 @@ package me.twomillions.plugin.advancedwish.utils.scripts;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
-import me.twomillions.plugin.advancedwish.managers.task.ScheduledTaskManager;
+import me.twomillions.plugin.advancedwish.managers.tasks.ScheduledTaskManager;
 import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
 import me.twomillions.plugin.advancedwish.utils.random.RandomGenerator;
 import org.bukkit.entity.Player;

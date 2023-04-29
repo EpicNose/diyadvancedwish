@@ -9,14 +9,17 @@ function scriptSetup() {
 
 /**
  * 使用 ScriptListener 注册监听器。
+ *
+ * 除了监听器之外，我们还支持您创建 Placeholder API 拓展、Bukkit 线程调度、指令与补全等。
+ * 详细内容请查看: https://gitee.com/A2000000/advanced-wish/wikis/%E6%8B%93%E5%B1%95%E5%BC%80%E5%8F%91/JavaScript%20%E8%84%9A%E6%9C%AC/1.%20JavaScript
  */
 function registerListener() {
-    var asyncPlayerWishEventScriptListener = ScriptListener
+    var asyncPlayerWishEventScriptEventHandler = ScriptEventHandler
         .builder()
         /**
          * 设置监听事件。
          */
-        .setEventClass(Packages.me.twomillions.plugin.advancedwish.api.AsyncPlayerWishEvent)
+        .setEventClass(Packages.me.twomillions.plugin.advancedwish.events.AsyncPlayerWishEvent)
         /**
          * 设置监听权重。
          */
@@ -40,7 +43,7 @@ function registerListener() {
     /**
      * 注册。
      */
-    asyncPlayerWishEventScriptListener.register();
+    asyncPlayerWishEventScriptEventHandler.register();
 
     QuickUtils.sendConsoleMessage("&a这里是 &e脚本监听器&a! 已注册 &eAsyncPlayerWishEvent&a 事件监听!" + "&a，您可以在 &e" + Main.getScriptPath()  + " &a文件夹下看到脚本文件!");
 }

@@ -1,11 +1,11 @@
-package me.twomillions.plugin.advancedwish.utils.scripts.utils;
+package me.twomillions.plugin.advancedwish.utils.scripts.interop;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.twomillions.plugin.advancedwish.annotations.JsInteropJavaType;
-import me.twomillions.plugin.advancedwish.interfaces.ScriptUtilsInterface;
+import me.twomillions.plugin.advancedwish.interfaces.ScriptInteropInterface;
 import me.twomillions.plugin.advancedwish.managers.register.RegisterManager;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import org.bukkit.OfflinePlayer;
@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.BiFunction;
 
 /**
- * 允许使用 JavaScript 注册 Placeholder API 拓展。
+ * 允许 JavaScript 使用 Placeholder API 拓展。
  *
  * @author 2000000
  * @date 2023/4/28
@@ -25,11 +25,11 @@ import java.util.function.BiFunction;
 @JsInteropJavaType
 @SuppressWarnings("unused")
 @Builder(setterPrefix = "set")
-public class ScriptPlaceholder implements ScriptUtilsInterface {
+public class ScriptPlaceholderExpander implements ScriptInteropInterface {
     /**
-     * ScriptPlaceholder 占位符列表。
+     * ScriptPlaceholderExpander 占位符列表。
      */
-    @Getter private static final ConcurrentLinkedQueue<ScriptPlaceholder> scriptPlaceholders = new ConcurrentLinkedQueue<>();
+    @Getter private static final ConcurrentLinkedQueue<ScriptPlaceholderExpander> scriptPlaceholders = new ConcurrentLinkedQueue<>();
 
     /**
      * 作者。
@@ -76,15 +76,13 @@ public class ScriptPlaceholder implements ScriptUtilsInterface {
      */
     @Override
     public void unregister() {
-        if (placeholderExpansion == null) {
-            toPlaceholderExpansion();
-        }
-
-        try {
-            placeholderExpansion.unregister();
-            scriptPlaceholders.remove(this);
-        } catch (Throwable throwable) {
-            QuickUtils.sendConsoleMessage("&eScriptPlaceholder&c 注销异常，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/placeholderapi.6245/&c，已取消 &eScriptPlaceholder&c 注销。");
+        if (placeholderExpansion != null) {
+            try {
+                placeholderExpansion.unregister();
+                scriptPlaceholders.remove(this);
+            } catch (Throwable throwable) {
+                QuickUtils.sendConsoleMessage("&eScriptPlaceholder&c 注销异常，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/placeholderapi.6245/&c，已取消 &eScriptPlaceholder&c 注销。");
+            }
         }
     }
 
@@ -95,7 +93,7 @@ public class ScriptPlaceholder implements ScriptUtilsInterface {
      */
     private void toPlaceholderExpansion() {
         if (!RegisterManager.isUsingPapi()) {
-            throw new RuntimeException("You can not use ScriptPlaceholder, because this server isn't using the Placeholder API plugin!");
+            throw new RuntimeException("You can not use ScriptPlaceholderExpander, because this server isn't using the Placeholder API plugin!");
         }
 
         placeholderExpansion = new PlaceholderExpansion() {

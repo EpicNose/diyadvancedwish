@@ -4,18 +4,20 @@ import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import lombok.Setter;
 import me.twomillions.plugin.advancedwish.Main;
-import me.twomillions.plugin.advancedwish.commands.Commands;
-import me.twomillions.plugin.advancedwish.listener.PlayerListener;
+import me.twomillions.plugin.advancedwish.commands.AdvancedWishCommand;
+import me.twomillions.plugin.advancedwish.listeners.PlayerListener;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
+import me.twomillions.plugin.advancedwish.utils.commands.CommandUtils;
 import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.placeholder.PapiManager;
 import me.twomillions.plugin.advancedwish.tasks.WishLimitResetHandler;
 import me.twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;
 import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
 import me.twomillions.plugin.advancedwish.utils.scripts.ScriptUtils;
-import me.twomillions.plugin.advancedwish.utils.scripts.utils.ScriptListener;
-import me.twomillions.plugin.advancedwish.utils.scripts.utils.ScriptPlaceholder;
-import me.twomillions.plugin.advancedwish.utils.scripts.utils.ScriptScheduler;
+import me.twomillions.plugin.advancedwish.utils.scripts.interop.ScriptCommandHandler;
+import me.twomillions.plugin.advancedwish.utils.scripts.interop.ScriptEventHandler;
+import me.twomillions.plugin.advancedwish.utils.scripts.interop.ScriptPlaceholderExpander;
+import me.twomillions.plugin.advancedwish.utils.scripts.interop.ScriptTaskScheduler;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import net.milkbowl.vault.economy.Economy;
 import org.black_ixx.playerpoints.PlayerPoints;
@@ -67,12 +69,8 @@ public class RegisterManager {
     /**
      * 注册指令。
      */
-    @SuppressWarnings("all")
     public static void registerCommands() {
-        Commands commands = new Commands();
-
-        Main.getInstance().getCommand("advancedwish").setExecutor(commands);
-        Main.getInstance().getCommand("advancedwish").setTabCompleter(commands);
+        CommandUtils.registerCommand(AdvancedWishCommand.getAdvancedWishCommand());
     }
 
     /**
@@ -80,7 +78,6 @@ public class RegisterManager {
      *
      * @param registerEvents 是否注册监听器
      */
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void setupPlugins(boolean registerEvents) {
         PluginManager manager = Bukkit.getPluginManager();
 
@@ -127,13 +124,11 @@ public class RegisterManager {
     private static void setupPath() {
         String pluginPath = Main.getPluginPath();
 
-        Yaml advancedWishYaml = ConfigManager.getAdvancedWishYaml();
-
-        String logsConfig = advancedWishYaml.getString("LOGS-PATH");
-        String guaranteedConfig = advancedWishYaml.getString("GUARANTEED-PATH");
-        String doListCacheConfig = advancedWishYaml.getString("DO-LIST-CACHE-PATH");
-        String otherDataConfig = advancedWishYaml.getString("OTHER-DATA-PATH");
-        String scriptConfig = advancedWishYaml.getString("SCRIPT-PATH");
+        String logsConfig = ConfigManager.getAdvancedWishYaml().getString("LOGS-PATH");
+        String guaranteedConfig = ConfigManager.getAdvancedWishYaml().getString("GUARANTEED-PATH");
+        String doListCacheConfig = ConfigManager.getAdvancedWishYaml().getString("DO-LIST-CACHE-PATH");
+        String otherDataConfig = ConfigManager.getAdvancedWishYaml().getString("OTHER-DATA-PATH");
+        String scriptConfig = ConfigManager.getAdvancedWishYaml().getString("SCRIPT-PATH");
 
         Main.setLogsPath(logsConfig.isEmpty() ? pluginPath + ConstantsUtils.PLAYER_LOGS : logsConfig);
         Main.setGuaranteedPath(guaranteedConfig.isEmpty() ? pluginPath + ConstantsUtils.PLAYER_GUARANTEED : guaranteedConfig);
@@ -209,33 +204,56 @@ public class RegisterManager {
     }
 
     /**
+     * 注销所有 JavaScript 互操作内容。
+     */
+    public static void unregisterAllScriptInterop() {
+        /*
+         * ScriptPlaceholderExpander
+         */
+        if (RegisterManager.isUsingPapi()) {
+            for (ScriptPlaceholderExpander scriptPlaceholder : ScriptPlaceholderExpander.getScriptPlaceholders()) {
+                scriptPlaceholder.unregister();
+            }
+        }
+
+        /*
+         * ScriptTaskScheduler
+         */
+        for (ScriptTaskScheduler scriptScheduler : ScriptTaskScheduler.getScriptSchedulers()) {
+            scriptScheduler.unregister();
+        }
+
+        /*
+         * ScriptEventHandler
+         */
+        for (ScriptEventHandler scriptListener : ScriptEventHandler.getScriptListeners()) {
+            scriptListener.unregister();
+        }
+
+        /*
+         * ScriptCommandHandler
+         */
+        for (ScriptCommandHandler scriptCommandHandler : ScriptCommandHandler.getScriptCommandHandler()) {
+            scriptCommandHandler.unregister();
+        }
+    }
+
+    /**
      * Reload 方法。
      */
     public static void reload() {
         // 取消任务
         WishLimitResetHandler.cancelAllWishLimitResetTasks();
 
-        Bukkit.getScheduler().runTask(plugin, () -> {
-            if (isUsingPapi()) {
-                try {
-                    new PapiManager().unregister();
-                } catch (Throwable throwable) {
-                    QuickUtils.sendConsoleMessage("&ePlaceholder&c 重载异常，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/placeholderapi.6245/&c，已取消 &ePlaceholder&c 重载。");
-                }
-
-                for (ScriptPlaceholder scriptPlaceholder : ScriptPlaceholder.getScriptPlaceholders()) {
-                    scriptPlaceholder.unregister();
-                }
+        if (isUsingPapi()) {
+            try {
+                new PapiManager().unregister();
+            } catch (Throwable throwable) {
+                QuickUtils.sendConsoleMessage("&ePlaceholder&c 重载异常，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/placeholderapi.6245/&c，已取消 &ePlaceholder&c 重载。");
             }
+        }
 
-            for (ScriptScheduler scriptScheduler : ScriptScheduler.getScriptSchedulers()) {
-                scriptScheduler.unregister();
-            }
-
-            for (ScriptListener scriptListener : ScriptListener.getScriptListeners()) {
-                scriptListener.unregister();
-            }
-        });
+        RegisterManager.unregisterAllScriptInterop();
 
         setupPlugins(false);
         registerWish();

@@ -6,7 +6,7 @@ package me.twomillions.plugin.advancedwish.interfaces;
  * @author 2000000
  * @date 2023/4/28
  */
-public interface ScriptUtilsInterface {
+public interface ScriptInteropInterface {
     /**
      * 注册。
      */

@@ -1,11 +1,11 @@
 package me.twomillions.plugin.advancedwish.commands;
 
 import com.github.benmanes.caffeine.cache.Cache;
-import de.leonhard.storage.Yaml;
+import lombok.Getter;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
-import me.twomillions.plugin.advancedwish.managers.effect.LogManager;
+import me.twomillions.plugin.advancedwish.managers.logs.LogManager;
 import me.twomillions.plugin.advancedwish.managers.register.RegisterManager;
 import me.twomillions.plugin.advancedwish.utils.others.CaffeineUtils;
 import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
@@ -18,21 +18,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 /**
  * 该类实现 {@link TabExecutor}，通过反射与注解处理指令及 Tab 补全。
@@ -41,22 +38,47 @@ import java.util.stream.Collectors;
  * @date 2023/3/26
  */
 @SuppressWarnings({"unused", "SameParameterValue"})
-public class Commands implements TabExecutor {
+public class AdvancedWishCommand extends Command {
     private static final JavaPlugin plugin = Main.getInstance();
-    private final Cache<String, Method> subCommandMap = CaffeineUtils.buildBukkitCache();
-
-    private static final Yaml messageYaml = ConfigManager.getMessageYaml();
-    private static final Yaml advancedWishYaml = ConfigManager.getAdvancedWishYaml();
 
     /**
-     * 构造器，扫描指令处理方法并缓存
+     * 实例对象变量。
      */
-    public Commands() {
-        for (Method method : getClass().getDeclaredMethods()) {
-            if (method.isAnnotationPresent(SubCommand.class)) {
-                subCommandMap.put(method.getAnnotation(SubCommand.class).value().toLowerCase(), method);
-            }
-        }
+    @Getter private static final AdvancedWishCommand advancedWishCommand = createInstance();
+
+    /**
+     * 获取实例对象。
+     *
+     * @return 实例对象
+     */
+    private static AdvancedWishCommand createInstance() {
+        String name = ConfigManager.getAdvancedWishYaml().getString("COMMAND-NAME");
+        List<String> aliases = ConfigManager.getAdvancedWishYaml().getStringList("ALIASES");
+        String description = ConfigManager.getAdvancedWishYaml().getString("DESCRIPTION");
+
+        name = name.isEmpty() ? "advancedwish" : name;
+        aliases = aliases.isEmpty() ? Collections.singletonList("aw") : aliases;
+        description = description.isEmpty() ? "Advanced Wish 默认命令。" : description;
+
+        return new AdvancedWishCommand(name, aliases, description);
+    }
+
+    /**
+     * 使用 SubCommand 的方法名与方法。
+     */
+    private final Cache<String, Method> subCommandMap = CaffeineUtils.buildBukkitCache();
+
+    /**
+     * 构造器，扫描指令处理方法并缓存。
+     */
+    private AdvancedWishCommand(String name, List<String> aliases, String description) {
+        super(name);
+        setAliases(aliases);
+        setDescription(description);
+
+        Arrays.stream(getClass().getDeclaredMethods())
+                .filter(method -> method.isAnnotationPresent(SubCommand.class))
+                .forEach(method -> subCommandMap.put(method.getAnnotation(SubCommand.class).value().toLowerCase(), method));
     }
 
     @SubCommand("help")
@@ -627,87 +649,39 @@ public class Commands implements TabExecutor {
             return;
         }
 
-        RegisterManager.reload();
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            RegisterManager.reload();
 
-        if (isConsole) {
-            QuickUtils.sendMessage(sender, "DONE");
-        } else {
-            QuickUtils.sendMessage((Player) sender, "DONE");
-        }
+            if (isConsole) {
+                QuickUtils.sendMessage(sender, "DONE");
+            } else {
+                QuickUtils.sendMessage((Player) sender, "DONE");
+            }
+        });
     }
 
-    /**
-     * Executes the given command, returning its success.
-     * <br>
-     * If false is returned, then the "usage" plugin.yml entry for this command
-     * (if defined) will be sent to the player.
-     *
-     * @param sender Source of the command
-     * @param command Command which was executed
-     * @param label Alias of the command which was used
-     * @param args Passed command arguments
-     * @return true if a valid command, otherwise false
-     */
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, @NotNull String[] args) {
         // 异步调用指令处理方法
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            if (args.length == 0) {
-                sender.sendMessage(QuickUtils.translate("&c请输入 /aw help 查看帮助。"));
-                return;
-            }
-
-            // 查找对应的指令处理方法
-            String subCommand = args[0].toLowerCase();
-
-            Method commandMethod = subCommandMap.asMap().get(subCommand);
-
-            if (commandMethod == null) {
-                sender.sendMessage(QuickUtils.translate("&c请输入 /aw help 查看帮助。"));
-                return;
-            }
-
             try {
-                commandMethod.invoke(this, sender, args);
-            } catch (Exception e) {
-                e.printStackTrace();
+                subCommandMap.get(args[0].toLowerCase(), k -> null).invoke(this, sender, args);
+            } catch (NullPointerException | ArrayIndexOutOfBoundsException exception) {
+                QuickUtils.sendMessage(sender, "HELP", "<commandName>", this.getName());
+            } catch (InvocationTargetException | IllegalAccessException | IllegalArgumentException exception) {
+                exception.printStackTrace();
             }
         });
 
         return true;
     }
 
-    /**
-     * Requests a list of possible completions for a command argument.
-     *
-     * @param sender Source of the command.  For players tab-completing a
-     *     command inside a command block, this will be the player, not
-     *     the command block.
-     * @param command Command which was executed
-     * @param alias Alias of the command which was used
-     * @param args The arguments passed to the command, including final
-     *     partial argument to be completed
-     * @return A List of possible completions for the final argument, or null
-     *     to default to the command executor
-     */
-    @Nullable
+    @NotNull
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
+    public List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) throws IllegalArgumentException {
         // 如果没有子指令
         if (args.length == 1) {
-            CompletableFuture<List<String>> future = CompletableFuture.supplyAsync(() ->
-                    Arrays.stream(getClass().getDeclaredMethods())
-                    .filter(method -> method.isAnnotationPresent(SubCommand.class))
-                    .map(method -> method.getAnnotation(SubCommand.class).value())
-                    .parallel()
-                    .collect(Collectors.toList())).thenApply(subCommands -> StringUtil.copyPartialMatches(args[0], subCommands, new ArrayList<>()));
-
-            try {
-                return future.get();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
-            return Collections.emptyList();
+            return new ArrayList<>(subCommandMap.asMap().keySet());
         }
 
         ArrayList<String> tabCompletions = new ArrayList<>(RegisterManager.getRegisterWish());
@@ -762,9 +736,9 @@ public class Commands implements TabExecutor {
 
         Player player = (Player) sender;
 
-        if (!player.hasPermission(advancedWishYaml.getString("ADMIN-PERM"))) {
+        if (!player.hasPermission(ConfigManager.getAdvancedWishYaml().getString("ADMIN-PERM"))) {
             if (sendMessage) {
-                messageYaml.getStringList("NO-PERM").forEach(message -> player.sendMessage(QuickUtils.handleString(message, player)));
+                ConfigManager.getMessageYaml().getStringList("NO-PERM").forEach(message -> player.sendMessage(QuickUtils.handleString(message, player)));
             }
 
             return false;
@@ -781,9 +755,9 @@ public class Commands implements TabExecutor {
      * @return 是否拥有管理员权限
      */
     private static boolean isAdmin(Player player, boolean sendMessage) {
-        if (!player.hasPermission(advancedWishYaml.getString("ADMIN-PERM"))) {
+        if (!player.hasPermission(ConfigManager.getAdvancedWishYaml().getString("ADMIN-PERM"))) {
             if (sendMessage) {
-                messageYaml.getStringList("NO-PERM").forEach(message -> player.sendMessage(QuickUtils.handleString(message, player)));
+                ConfigManager.getMessageYaml().getStringList("NO-PERM").forEach(message -> player.sendMessage(QuickUtils.handleString(message, player)));
             }
 
             return false;
@@ -803,7 +777,7 @@ public class Commands implements TabExecutor {
     private static boolean isPlayerOnline(Player sender, Player targetPlayer, boolean sendMessage) {
         if (targetPlayer == null || !targetPlayer.isOnline()) {
             if (sendMessage) {
-                messageYaml.getStringList("PLAYER-OFFLINE").stream()
+                ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").stream()
                         .map(message -> QuickUtils.handleString(message, sender))
                         .forEach(sender::sendMessage);
             }
@@ -825,7 +799,7 @@ public class Commands implements TabExecutor {
     private static boolean isPlayerOnline(CommandSender sender, Player targetPlayer, boolean sendMessage) {
         if (targetPlayer == null || !targetPlayer.isOnline()) {
             if (sendMessage) {
-                messageYaml.getStringList("PLAYER-OFFLINE").stream()
+                ConfigManager.getMessageYaml().getStringList("PLAYER-OFFLINE").stream()
                         .map(QuickUtils::handleString)
                         .forEach(sender::sendMessage);
             }

@@ -103,3 +103,6 @@ GET-GUARANTEED:
 
 GET-LIMIT-AMOUNT:
   - "&a<player> 的<wish>抽奖限制次数为: <playerLimitAmount>/<limitAmount>"
+
+HELP:
+  - "&c请输入 /<commandName> help 查看帮助。"

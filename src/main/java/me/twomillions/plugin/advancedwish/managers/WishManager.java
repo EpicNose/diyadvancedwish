@@ -10,7 +10,7 @@ import me.twomillions.plugin.advancedwish.enums.wish.PlayerWishStatus;
 import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.databases.DatabasesManager;
 import me.twomillions.plugin.advancedwish.managers.register.RegisterManager;
-import me.twomillions.plugin.advancedwish.managers.task.ScheduledTaskManager;
+import me.twomillions.plugin.advancedwish.managers.tasks.ScheduledTaskManager;
 import me.twomillions.plugin.advancedwish.tasks.PlayerCacheHandler;
 import me.twomillions.plugin.advancedwish.utils.events.EventUtils;
 import me.twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;

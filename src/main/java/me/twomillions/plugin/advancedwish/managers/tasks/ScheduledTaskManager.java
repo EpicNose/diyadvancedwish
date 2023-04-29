@@ -1,4 +1,4 @@
-package me.twomillions.plugin.advancedwish.managers.task;
+package me.twomillions.plugin.advancedwish.managers.tasks;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import me.twomillions.plugin.advancedwish.Main;

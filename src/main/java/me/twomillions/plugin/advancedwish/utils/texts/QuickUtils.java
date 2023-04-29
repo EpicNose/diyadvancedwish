@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"deprecation", "unused"})
 public class QuickUtils {
     private static final JavaPlugin plugin = Main.getInstance();
+
     private static final String CHAT_BAR = ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "------------------------------------------------";
 
     /**

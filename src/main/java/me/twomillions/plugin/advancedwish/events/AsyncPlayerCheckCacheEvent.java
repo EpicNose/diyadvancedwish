@@ -1,4 +1,4 @@
-package me.twomillions.plugin.advancedwish.api;
+package me.twomillions.plugin.advancedwish.events;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -8,7 +8,7 @@ import lombok.Setter;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.abstracts.TasksAbstract;
 import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
-import me.twomillions.plugin.advancedwish.managers.task.ScheduledTaskManager;
+import me.twomillions.plugin.advancedwish.managers.tasks.ScheduledTaskManager;
 import me.twomillions.plugin.advancedwish.utils.events.EventUtils;
 import me.twomillions.plugin.advancedwish.utils.others.CaffeineUtils;
 import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
@@ -34,6 +34,7 @@ public class PlayerCacheHandler extends TasksAbstract {
     private final Runnable runnable;
 
     private static final JavaPlugin plugin = Main.getInstance();
+
     private static final Cache<UUID, Boolean> loadingCache = CaffeineUtils.buildBukkitCache();
     private static final Cache<UUID, Boolean> waitingLoadingCache = CaffeineUtils.buildBukkitCache();
 

@@ -22,6 +22,7 @@ import java.util.Scanner;
 @Getter @Setter
 public class UpdateHandler extends TasksAbstract {
     private final Runnable runnable;
+
     private static final JavaPlugin plugin = Main.getInstance();
 
     @Getter private static boolean isLatestVersion = true;

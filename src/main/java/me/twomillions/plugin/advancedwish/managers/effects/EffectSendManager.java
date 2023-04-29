@@ -1,4 +1,4 @@
-package me.twomillions.plugin.advancedwish.managers.effect;
+package me.twomillions.plugin.advancedwish.managers.effects;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import de.leonhard.storage.Yaml;
@@ -7,6 +7,7 @@ import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.annotations.JsInteropJavaType;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
+import me.twomillions.plugin.advancedwish.managers.logs.LogManager;
 import me.twomillions.plugin.advancedwish.managers.register.RegisterManager;
 import me.twomillions.plugin.advancedwish.utils.events.EventUtils;
 import me.twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;
