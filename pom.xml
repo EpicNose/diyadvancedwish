@@ -6,7 +6,7 @@
 
     <groupId>me.twomillions.plugin</groupId>
     <artifactId>AdvancedWish</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
     <packaging>jar</packaging>
 
     <name>AdvancedWish</name>
