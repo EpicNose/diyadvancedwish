@@ -59,9 +59,9 @@ CONDITION:
   #
   # 例子:
   #  假设我将设置，若此服务器玩家在线数大于等于 50 人，则可以在此奖池许愿，那么可以这样写。
-  #  我们将通过 PlayerList 变量来获取在线玩家数量 (https://github.com/PlaceholderAPI/PlaceholderAPI/wiki/Placeholders#playerlist)
-  #  %playerlist_online,normal,yes,amount% 这将返回目前在线为玩家的数量，返回的内容为 "1" "2" "5" 等等数字。
-  #  我们使用 ">=" 判断，"%playerlist_online,normal,yes,amount% >= 50" 完成。
+  #  我们将通过 Server 占位符来获取在线玩家数量 (https://github.com/PlaceholderAPI/PlaceholderAPI/wiki/Placeholders#server)
+  #  %server_online% 这将返回目前在线为玩家的数量，返回的内容为 "1" "2" "5" 等等数字。
+  #  我们使用 ">=" 判断，"%server_online% >= 50" 完成。
   #
   #  假设还有一个需求，我们不想要 PlayerPoints 的点券来主导一切，我想要 SkillAPI 的技能点扣除。
   #  那么我们只需要这样写一个条件，通过 %skillapi_skill_points_<skillName>% 来获取技能点，并且对其进行判断。
@@ -106,7 +106,7 @@ PRIZE-SET:
 
       # 这里使用二元运算符，若满足前面的条件则返回 ":" 前第一个值，否则第二个。
       # 随机概率会与第一个 if else 进行叠加。
-      - "%playerlist_online,normal,yes,amount% < 50 ? 1 : 2"
+      - "%server_online% < 50 ? 1 : 2"
 
     # A 中奖后的执行节点。
     # 效果只能有一个，若出现多个则按照顺序进行选择。
@@ -379,6 +379,9 @@ ADVANCED-SETTINGS:
 
 # 自定义执行节点
 DO-LIST:
+  # C1 展示的为完整的执行节点，执行节点内的效果不一定全部都要填写
+  # 若您有不使用的节点可直接删除，不会出现任何问题，您可以使用此特性大幅度简化配置文件
+  # 我们并不建议您将这种简化配置文件的手段用到除了执行节点的配置中，或是带到其他的插件中，这可能会出问题
   C1:
     # 给予的药水效果
     # 格式: 药水名称;时间;等级
@@ -390,8 +393,8 @@ DO-LIST:
     # 显示的标题
     # 注意: Title 在 1.7.10 以下无法使用 (因为低版本没有此功能，包括 1.7.10)
     TITLE:
-      MAIN-TITLE: "&6三!" # 主标题
-      SUB-TITLE: "&e此次许愿将在三秒后开奖!" # 副标题
+      MAIN-TITLE: "&6&l&n三!" # 主标题
+      SUB-TITLE: "&e&l&n此次许愿将在三秒后开奖!" # 副标题
       FADE-IN: 20 # 淡入 (单位ticks 20ticks = 1s) - 支持算数
       FADE-OUT: 0 # 淡出 - 支持算数
       STAY: 21 # 显示 (这里我添加了 1ticks 使得衔接更加平滑) - 支持算数
@@ -410,6 +413,7 @@ DO-LIST:
         - ""
 
     # 发送的公告
+    #
     # 注意:
     #  由于公告与信息会进行检查，如果其为空或长度小于等于1则会无视，所以想要发送全空格则多打几个
     #  例子: "   "
@@ -427,22 +431,28 @@ DO-LIST:
     # 显示的粒子效果
     #
     # 格式:
-    #  粒子效果英文;偏移X;偏移Y;偏移Z;数量;显示对象;颜色
-    #   显示对象为: PLAYER - 只显示给目标玩家 / FALSE - 显示给所有玩家
-    #   粒子颜色并非所有粒子都可以自定义，此处需要填写的是 java awr color, 您可以去这里查看颜色列表: https://docs.oracle.com/javase/7/docs/api/java/awt/Color.html
+    #  粒子效果英文;偏移X;偏移Y;偏移Z;数量;显示对象;额外数据
+    #   显示对象为: PLAYER - 只显示给目标玩家 / FALSE - 显示给附近所有的玩家
+    #   额外数据取决于使用的粒子，通常指的是速度 (小数类型)，如果您并不清楚则填写 0
+    PARTICLE:
+      - ""
+
+    # 显示的实体效果
+    # 格式: 实体效果英文
+    #
+    # 使用技巧:
+    #  您可以使用此项展示给玩家一些动画，比如不死图腾的动画: TOTEM_RESURRECT
     #
     # 注意:
-    #  粒子颜色还有需要注意的，即如果您使用的是音符 (NOTE) 那么则不支持自定义颜色
-    #  因为音符如果自定义颜色，则会导致 offset 偏移失效，全部粒子都在一个点上，所以音符为随机颜色
-    #  如果您不想要颜色则填写 FALSE 如: "FLAME;1;1;1;50;PLAYER;FALSE"
-    #  这对于大小写并不敏感，您甚至可以这样写，并不会有问题: FaLsE
-    PARTICLE:
+    #  此效果对附近的所有玩家可见
+    #  如果效果不适用于此类实体则不会播放
+    ENTITY-EFFECT:
       - ""
 
     # 音效
     # 格式: 音效;音量;音高
     SOUNDS:
-      - "ENTITY_PLAYER_LEVELUP;1;1"
+      - "BLOCK_NOTE_BLOCK_BASS;1;5"
 
     # 回复的饱食度与生命值
     HEALTH: 0
@@ -478,513 +488,234 @@ DO-LIST:
       print "This is Kether, based Vulpecula, so cool, right?"
 
   C2:
-    EFFECTS:
-      - ""
     TITLE:
-      MAIN-TITLE: "&6二!"
-      SUB-TITLE: "&e此次许愿将在二秒后开奖!"
+      MAIN-TITLE: "&6&l&n二!"
+      SUB-TITLE: "&e&l&n此次许愿将在二秒后开奖!"
       FADE-IN: 0
       FADE-OUT: 0
       STAY: 21
-    COMMANDS:
-      PLAYER:
-        - ""
-      CONSOLE:
-        - ""
-    ANNOUNCEMENT:
-      - ""
-    MESSAGE:
-      - ""
-    CHAT:
-      - ""
-    PARTICLE:
-      - ""
     SOUNDS:
-      - "ENTITY_PLAYER_LEVELUP;1;1"
-    HEALTH: 0
-    HUNGER: 0
-    EXP: 0
-    ACTION-BAR:
-      TIME: 0
-      MESSAGE: ""
-    BOSS-BAR:
-      TIME: 0
-      MESSAGE: ""
-      COLOR: RANDOM
-      STYLE: RANDOM
-    RECORD: false
-    KETHER: |-
+      - "BLOCK_NOTE_BLOCK_BASS;1;5"
 
   C3:
-    EFFECTS:
-      - ""
     TITLE:
-      MAIN-TITLE: "&6一!"
-      SUB-TITLE: "&e此次许愿将在一秒后开奖!"
+      MAIN-TITLE: "&6&l&n一!"
+      SUB-TITLE: "&e&l&n此次许愿将在一秒后开奖!"
       FADE-IN: 0
       FADE-OUT: 0
       STAY: 21
-    COMMANDS:
-      PLAYER:
-        - ""
-      CONSOLE:
-        - ""
-    ANNOUNCEMENT:
-      - ""
-    MESSAGE:
-      - ""
-    CHAT:
-      - ""
-    PARTICLE:
-      - ""
     SOUNDS:
-      - "ENTITY_PLAYER_LEVELUP;1;1"
-    HEALTH: 0
-    HUNGER: 0
-    EXP: 0
-    ACTION-BAR:
-      TIME: 0
-      MESSAGE: ""
-    BOSS-BAR:
-      TIME: 0
-      MESSAGE: ""
-      COLOR: RANDOM
-      STYLE: RANDOM
-    RECORD: false
-    KETHER: |-
+      - "BLOCK_NOTE_BLOCK_BASS;1;5"
 
   START:
     EFFECTS:
       - "slow;120;5"
       - "blindness;140;5"
     TITLE:
-      MAIN-TITLE: "&7阿门"
-      SUB-TITLE: "&7您虔诚的祈祷..."
+      MAIN-TITLE: "&7&l&n阿门"
+      SUB-TITLE: "&7&l&n您虔诚的祈祷..."
       FADE-IN: 20
       FADE-OUT: 0
       STAY: 20
-    COMMANDS:
-      PLAYER:
-        - ""
-      CONSOLE:
-        - ""
-    ANNOUNCEMENT:
-      - ""
     MESSAGE:
       - "   "
-      - "&7[&e提示&7] &e您在基础许愿池许愿一次..."
       - "&7[我] 万福玛利亚，你充满圣宠，主与你同在，你在妇女中受赞颂。你的圣子耶稣，同受赞颂。天主圣母玛利亚，求你现在和我们临终时，为我们罪人，祈求天主。阿门"
       - "   "
-    CHAT:
-      - ""
-    PARTICLE:
-      - ""
     SOUNDS:
-      - "ENTITY_PLAYER_LEVELUP;1;1"
-    HEALTH: 0
-    HUNGER: 0
-    EXP: 0
+      - "BLOCK_NOTE_BLOCK_BIT;1;1"
     ACTION-BAR:
       TIME: 3
-      MESSAGE: "&7阿门 &7您虔诚的祈祷..."
+      MESSAGE: "&7&l&n您虔诚的祈祷..."
     BOSS-BAR:
       TIME: 4
-      MESSAGE: "&7您虔诚的祈祷..."
+      MESSAGE: "&7&l&n您虔诚的祈祷..."
       COLOR: RANDOM
       STYLE: RANDOM
-    RECORD: false
-    KETHER: |-
 
   A:
     EFFECTS:
       - "slow;20;5"
       - "blindness;40;5"
     TITLE:
-      MAIN-TITLE: "&e这是... 钻石!"
-      SUB-TITLE: "&e恭喜您，您获得了 五个钻石!"
+      MAIN-TITLE: "&6&l&n这是... 钻石!"
+      SUB-TITLE: "&e&l&n恭喜您，您获得了 五个钻石!"
       FADE-IN: 20
       FADE-OUT: 20
       STAY: 20
-    COMMANDS:
-      PLAYER:
-        - ""
-      CONSOLE:
-        - ""
-    ANNOUNCEMENT:
-      - ""
-    MESSAGE:
-      - "   "
-      - "&7[我] &e这是... 钻石!"
-      - "&7[&e提示&7] &e恭喜您，您获得了 五个钻石!"
-      - "   "
-    CHAT:
-      - ""
     PARTICLE:
-      - "FLAME;1;1;1;50;PLAYER;FALSE"
-    SOUNDS:
-      - "ENTITY_PLAYER_LEVELUP;1;1"
-    HEALTH: 0
-    HUNGER: 0
-    EXP: 0
+      - "FLAME;1;1;1;50;PLAYER;0"
+    ENTITY-EFFECT:
+      - "TOTEM_RESURRECT"
     ACTION-BAR:
       TIME: 1
-      MESSAGE: "&e这是... 钻石!"
+      MESSAGE: "&6&l&n这是... 钻石!"
     BOSS-BAR:
       TIME: 3
-      MESSAGE: "&e这是... 钻石!"
+      MESSAGE: "&6&l&n这是... 钻石!"
       COLOR: RANDOM
       STYLE: RANDOM
     RECORD: true
-    KETHER: |-
 
   B:
     EFFECTS:
       - "slow;20;5"
       - "blindness;40;5"
     TITLE:
-      MAIN-TITLE: "&7这是... 铁锭!"
-      SUB-TITLE: "&e恭喜您，您获得了 十个铁锭!"
+      MAIN-TITLE: "&7&l&n这是... 铁锭!"
+      SUB-TITLE: "&e&l&n恭喜您，您获得了 十个铁锭!"
       FADE-IN: 20
       FADE-OUT: 20
       STAY: 20
-    COMMANDS:
-      PLAYER:
-        - ""
-      CONSOLE:
-        - ""
-    ANNOUNCEMENT:
-      - ""
-    MESSAGE:
-      - "   "
-      - "&7[我] &7这是... 铁锭!"
-      - "&7[&e提示&7] &e恭喜您，您获得了 十个铁锭!"
-      - "   "
-    CHAT:
-      - ""
     PARTICLE:
-      - "FLAME;1;1;1;50;PLAYER;FALSE"
-    SOUNDS:
-      - "ENTITY_IRON_GOLEM_DAMAGE;1;1"
-    HEALTH: 0
-    HUNGER: 0
-    EXP: 0
+      - "FLAME;1;1;1;50;PLAYER;0"
+    ENTITY-EFFECT:
+      - "TOTEM_RESURRECT"
     ACTION-BAR:
       TIME: 1
-      MESSAGE: "&7这是... 铁锭!"
+      MESSAGE: "&7&l&n这是... 铁锭!"
     BOSS-BAR:
       TIME: 3
-      MESSAGE: "&7这是... 铁锭!"
+      MESSAGE: "&7&l&n这是... 铁锭!"
       COLOR: RANDOM
       STYLE: RANDOM
     RECORD: true
-    KETHER: |-
 
   C:
     EFFECTS:
       - "slow;20;5"
       - "blindness;40;5"
     TITLE:
-      MAIN-TITLE: "&7这是... 金币!"
-      SUB-TITLE: "&e恭喜您，您获得了 五十金币!"
+      MAIN-TITLE: "&7&l&n这是... 金币!"
+      SUB-TITLE: "&e&l&n您获得了 五十金币!"
       FADE-IN: 20
       FADE-OUT: 20
       STAY: 20
-    COMMANDS:
-      PLAYER:
-        - ""
-      CONSOLE:
-        - ""
-    ANNOUNCEMENT:
-      - ""
-    MESSAGE:
-      - "   "
-      - "&7[我] &7这是... 金币!"
-      - "&7[&e提示&7] &e恭喜您，您获得了 五十金币!"
-      - "   "
-    CHAT:
-      - ""
     PARTICLE:
-      - "FLAME;1;1;1;50;PLAYER;FALSE"
-    SOUNDS:
-      - "ENTITY_IRON_GOLEM_DAMAGE;1;1"
-    HEALTH: 0
-    HUNGER: 0
-    EXP: 0
+      - "FLAME;1;1;1;50;PLAYER;0"
+    ENTITY-EFFECT:
+      - "TOTEM_RESURRECT"
     ACTION-BAR:
       TIME: 1
-      MESSAGE: "&7这是... 金币!"
+      MESSAGE: "&7&l&n这是... 金币!"
     BOSS-BAR:
       TIME: 3
-      MESSAGE: "&7这是... 金币!"
+      MESSAGE: "&7&l&n这是... 金币!"
       COLOR: RANDOM
       STYLE: RANDOM
     RECORD: true
-    KETHER: |-
 
   CANT-WISH:
-    EFFECTS:
-      - ""
     TITLE:
-      MAIN-TITLE: "&7不行..."
-      SUB-TITLE: "&7我没有足够的力量向神明祈祷..."
+      MAIN-TITLE: "&7&l&n不行..."
+      SUB-TITLE: "&7&l&n我没有足够的力量向神明祈祷..."
       FADE-IN: 20
       FADE-OUT: 20
       STAY: 20
-    MESSAGE:
-      - "   "
-      - "&7[我] &7不行... 我没有足够的力量向神明祈祷..."
-      - "&7[&e提示&7] &7您没有达到此许愿池许愿的要求。"
-      - "   "
-    CHAT:
-      - ""
     PARTICLE:
-      - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;FALSE"
-    COMMANDS:
-      PLAYER:
-        - ""
-      CONSOLE:
-        - ""
+      - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;0"
     SOUNDS:
       - "ENTITY_IRON_GOLEM_DAMAGE;1;1"
-    HEALTH: 0
-    HUNGER: 0
-    EXP: 0
     ACTION-BAR:
       TIME: 1
-      MESSAGE: "&7不行..."
+      MESSAGE: "&7&l&n不行..."
     BOSS-BAR:
       TIME: 3
-      MESSAGE: "&7不行..."
+      MESSAGE: "&7&l&n不行..."
       COLOR: RANDOM
       STYLE: RANDOM
-    RECORD: false
-    KETHER: |-
 
   CANT-WISH-AGAIN-EFFECT:
-    EFFECTS:
-      - ""
     TITLE:
-      MAIN-TITLE: "&7虚弱..."
-      SUB-TITLE: "&7我现在无法再次进行许愿..."
+      MAIN-TITLE: "&7&l&n虚弱..."
+      SUB-TITLE: "&7&l&n我现在无法再次进行许愿..."
       FADE-IN: 20
       FADE-OUT: 20
       STAY: 20
-    MESSAGE:
-      - "   "
-      - "&7[我] &7太虚弱了... 我已经耗尽了力量，目前没有办法再次许愿..."
-      - "   "
-    CHAT:
-      - ""
     PARTICLE:
-      - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;FALSE"
-    COMMANDS:
-      PLAYER:
-        - ""
-      CONSOLE:
-        - ""
+      - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;0"
     SOUNDS:
       - "ENTITY_IRON_GOLEM_DAMAGE;1;1"
-    HEALTH: 0
-    HUNGER: 0
-    EXP: 0
     ACTION-BAR:
       TIME: 1
-      MESSAGE: "&7虚弱..."
+      MESSAGE: "&7&l&n虚弱..."
     BOSS-BAR:
       TIME: 3
-      MESSAGE: "&7虚弱..."
+      MESSAGE: "&7&l&n虚弱..."
       COLOR: RANDOM
       STYLE: RANDOM
-    RECORD: false
-    KETHER: |-
 
   CANT-WISH-LOADING-CACHE:
-    EFFECTS:
-      - ""
-    TITLE:
-      MAIN-TITLE: ""
-      SUB-TITLE: ""
-      FADE-IN: 20
-      FADE-OUT: 20
-      STAY: 20
     MESSAGE:
       - "   "
       - "&7[&e提示&7] &7服务器正在加载您的缓存数据，在此期间您无法进行许愿!"
       - "   "
-    CHAT:
-      - ""
-    PARTICLE:
-      - ""
-    COMMANDS:
-      PLAYER:
-        - ""
-      CONSOLE:
-        - ""
-    SOUNDS:
-      - ""
-    HEALTH: 0
-    HUNGER: 0
-    EXP: 0
-    ACTION-BAR:
-      TIME: 1
-      MESSAGE: ""
-    BOSS-BAR:
-      TIME: 3
-      MESSAGE: ""
-      COLOR: RANDOM
-      STYLE: RANDOM
-    RECORD: false
-    KETHER: |-
 
   CANT-WISH-WAITING-LOADING-CACHE:
-    EFFECTS:
-      - ""
-    TITLE:
-      MAIN-TITLE: ""
-      SUB-TITLE: ""
-      FADE-IN: 20
-      FADE-OUT: 20
-      STAY: 20
     MESSAGE:
       - "   "
       - "&7[&e提示&7] &7服务器正在等待加载您的缓存数据，在此期间您无法进行许愿!"
       - "   "
-    CHAT:
-      - ""
-    PARTICLE:
-      - ""
-    COMMANDS:
-      PLAYER:
-        - ""
-      CONSOLE:
-        - ""
-    SOUNDS:
-      - ""
-    HEALTH: 0
-    HUNGER: 0
-    EXP: 0
-    ACTION-BAR:
-      TIME: 1
-      MESSAGE: ""
-    BOSS-BAR:
-      TIME: 3
-      MESSAGE: ""
-      COLOR: RANDOM
-      STYLE: RANDOM
-    RECORD: false
-    KETHER: |-
 
   WISH-CACHE:
-    EFFECTS:
-      - ""
     TITLE:
-      MAIN-TITLE: "&a进度恢复!"
-      SUB-TITLE: "&7服务器将在 2 秒后继续执行上次遗留的许愿任务!"
+      MAIN-TITLE: "&a&l&n进度恢复!"
+      SUB-TITLE: "&7&l&n服务器将在 2 秒后继续执行上次遗留的许愿任务!"
       FADE-IN: 20
       FADE-OUT: 20
       STAY: 20
-    MESSAGE:
-      - "   "
-      - "&7[&e提示&7] &7服务器将在 2 秒后继续执行上次遗留的许愿任务!"
-      - "   "
-    CHAT:
-      - ""
     PARTICLE:
-      - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;FALSE"
-    COMMANDS:
-      PLAYER:
-        - ""
-      CONSOLE:
-        - ""
+      - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;0"
     SOUNDS:
       - "ENTITY_PLAYER_LEVELUP;1;1"
-    HEALTH: 0
-    HUNGER: 0
-    EXP: 0
     ACTION-BAR:
       TIME: 1
-      MESSAGE: "&a奖励补发!"
+      MESSAGE: "&a&l&n奖励补发!"
     BOSS-BAR:
       TIME: 3
-      MESSAGE: "&a奖励补发!"
+      MESSAGE: "&a&l&n奖励补发!"
       COLOR: RANDOM
       STYLE: RANDOM
-    RECORD: false
-    KETHER: |-
 
   REACH-LIMIT:
-    EFFECTS:
-      - ""
     TITLE:
-      MAIN-TITLE: "&7虚弱..."
-      SUB-TITLE: "&7我现在无法再次进行许愿..."
+      MAIN-TITLE: "&7&l&n虚弱..."
+      SUB-TITLE: "&7&l&n我现在无法再次进行许愿..."
       FADE-IN: 20
       FADE-OUT: 20
       STAY: 20
     MESSAGE:
       - "   "
-      - "&7[我] &7太虚弱了... 我已经耗尽了力量，目前没有办法再次许愿..."
       - "&7[&e提示&7] &e您已到达许愿次数限制，您目前无法再次许愿，请稍后重试。"
       - "   "
-    CHAT:
-      - ""
     PARTICLE:
-      - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;FALSE"
-    COMMANDS:
-      PLAYER:
-        - ""
-      CONSOLE:
-        - ""
+      - "CAMPFIRE_COSY_SMOKE;1;1;1;50;ONLINE;0"
     SOUNDS:
       - "ENTITY_IRON_GOLEM_DAMAGE;1;1"
-    HEALTH: 0
-    HUNGER: 0
-    EXP: 0
     ACTION-BAR:
       TIME: 1
-      MESSAGE: "&7虚弱..."
+      MESSAGE: "&7&l&n虚弱..."
     BOSS-BAR:
       TIME: 3
-      MESSAGE: "&7虚弱..."
+      MESSAGE: "&7&l&n虚弱..."
       COLOR: RANDOM
       STYLE: RANDOM
-    RECORD: false
-    KETHER: |-
 
   RESET-COMPLETE:
-    EFFECTS:
-      - ""
     TITLE:
-      MAIN-TITLE: "&6重置次数..!"
-      SUB-TITLE: "&7基础许愿池限制已重置!"
+      MAIN-TITLE: "&6&l&n重置次数..!"
+      SUB-TITLE: "&7&l&n基础许愿池限制已重置!"
       FADE-IN: 20
       FADE-OUT: 20
       STAY: 20
-    MESSAGE:
-      - "   "
-      - "&7[&e提示&7] &e基础许愿池限制已重置! 快来抽奖吧!"
-      - "   "
-    CHAT:
-      - ""
     PARTICLE:
-      - "FLAME;1;1;1;50;PLAYER;FALSE"
-    COMMANDS:
-      PLAYER:
-        - ""
-      CONSOLE:
-        - ""
+      - "FLAME;1;1;1;50;PLAYER;0"
     SOUNDS:
       - "ENTITY_PLAYER_LEVELUP;1;1"
-    HEALTH: 0
-    HUNGER: 0
-    EXP: 0
     ACTION-BAR:
       TIME: 1
-      MESSAGE: "&6重置次数..!"
+      MESSAGE: "&6&l&n重置次数..!"
     BOSS-BAR:
       TIME: 3
-      MESSAGE: "&6重置次数..!"
+      MESSAGE: "&6&l&n重置次数..!"
       COLOR: RANDOM
       STYLE: RANDOM
-    RECORD: false
-    KETHER: |-

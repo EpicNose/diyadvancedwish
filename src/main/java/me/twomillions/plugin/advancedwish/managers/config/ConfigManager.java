@@ -6,7 +6,6 @@ import de.leonhard.storage.Yaml;
 import de.leonhard.storage.internal.settings.ConfigSettings;
 import de.leonhard.storage.internal.settings.DataType;
 import de.leonhard.storage.internal.settings.ReloadSettings;
-import lombok.Getter;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.annotations.JsInteropJavaType;
 import me.twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
@@ -27,8 +26,23 @@ import java.util.stream.Collectors;
  */
 @JsInteropJavaType
 public class ConfigManager {
-    @Getter private static final Yaml messageYaml = createYaml("message", null, false, true);
-    @Getter private static final Yaml advancedWishYaml = createYaml("advancedWish", null, false, true);
+    /**
+     * 获取 advancedWish.yml 配置文件。
+     *
+     * @return advancedWish.yml Yaml 对象
+     */
+    public static Yaml getAdvancedWishYaml() {
+        return createYaml("advancedWish", null, false, true);
+    }
+
+    /**
+     * 获取 message.yml 配置文件。
+     *
+     * @return message.yml Yaml 对象
+     */
+    public static Yaml getMessageYaml() {
+        return createYaml("message", null, false, true);
+    }
 
     /**
      * 获取指定 Yaml 配置文件对象的版本号.

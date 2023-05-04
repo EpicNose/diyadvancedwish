@@ -18,6 +18,8 @@ import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -188,11 +190,25 @@ public class QuickUtils {
      * @return 如果当前服务器已经安装了 PlaceholderAPI 插件，则返回转换后的字符串，否则返回原始字符串。
      */
     public static String toPapi(String string) {
-        if (RegisterManager.isUsingPapi()) {
-            return PlaceholderAPI.setPlaceholders(null, string);
+        Matcher matcher = Pattern.compile("%.*%").matcher(string);
+
+        if (matcher.find() && !RegisterManager.isUsingPapi()) {
+            QuickUtils.sendConsoleMessage("&c尝试解析占位符，但未找到 &ePlaceholder API &c插件，您安装了它吗?");
+            return string;
         }
 
-        return string;
+        if (!RegisterManager.isUsingPapi()) {
+            return string;
+        }
+
+        String result = PlaceholderAPI.setPlaceholders(null, string);
+        Matcher matcherResult = Pattern.compile("%.*%").matcher(result);
+
+        if (matcherResult.find()) {
+            QuickUtils.sendConsoleMessage("&c您安装了 &ePlaceholder API &c插件，但依然存在未正常解析的占位符，您安装了完整的占位符拓展吗?");
+        }
+
+        return result;
     }
 
     /**
@@ -203,11 +219,25 @@ public class QuickUtils {
      * @return 如果当前服务器已经安装了 PlaceholderAPI 插件，则返回转换后的字符串，否则返回原始字符串。
      */
     public static String toPapi(String string, Player player) {
-        if (RegisterManager.isUsingPapi()) {
-            return PlaceholderAPI.setPlaceholders(player, string);
+        Matcher matcher = Pattern.compile("%.*%").matcher(string);
+
+        if (matcher.find() && !RegisterManager.isUsingPapi()) {
+            QuickUtils.sendConsoleMessage("&c尝试解析占位符，但未找到 &ePlaceholder API &c插件，您安装了它吗?");
+            return string;
         }
 
-        return string;
+        if (!RegisterManager.isUsingPapi()) {
+            return string;
+        }
+
+        String result = PlaceholderAPI.setPlaceholders(player, string);
+        Matcher matcherResult = Pattern.compile("%.*%").matcher(result);
+
+        if (matcherResult.find()) {
+            QuickUtils.sendConsoleMessage("&c您安装了 &ePlaceholder API &c插件，但依然存在未正常解析的占位符，您安装了完整的占位符拓展吗?");
+        }
+
+        return result;
     }
 
     /**

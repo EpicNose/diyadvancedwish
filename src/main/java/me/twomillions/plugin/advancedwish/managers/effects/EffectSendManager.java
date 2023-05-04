@@ -5,6 +5,7 @@ import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import me.twomillions.plugin.advancedwish.Main;
 import me.twomillions.plugin.advancedwish.annotations.JsInteropJavaType;
+import me.twomillions.plugin.advancedwish.interfaces.QuadConsumer;
 import me.twomillions.plugin.advancedwish.managers.WishManager;
 import me.twomillions.plugin.advancedwish.managers.config.ConfigManager;
 import me.twomillions.plugin.advancedwish.managers.logs.LogManager;
@@ -18,8 +19,7 @@ import me.twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import me.twomillions.plugin.advancedwish.utils.texts.StringEncrypter;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Bukkit;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
@@ -33,8 +33,8 @@ import top.lanscarlos.vulpecula.utils.ScriptUtilKt;
 import xyz.xenondevs.particle.ParticleBuilder;
 import xyz.xenondevs.particle.ParticleEffect;
 
-import java.awt.*;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -70,23 +70,25 @@ public class EffectSendManager {
         if (EventUtils.callAsyncEffectSendEvent(fileName, player, path, pathPrefix).isCancelled()) return;
 
         // Send
-        try {
-            sendTitle(fileName, player, path, pathPrefix);
-            sendParticle(fileName, player, path, pathPrefix);
-            sendSounds(fileName, player, path, pathPrefix);
-            sendCommands(fileName, player, path, pathPrefix);
-            sendMessage(fileName, player, path, pathPrefix);
-            sendChat(fileName, player, path, pathPrefix);
-            sendAnnouncement(fileName, player, path, pathPrefix);
-            sendPotion(fileName, player, path, pathPrefix);
-            sendHealthAndHunger(fileName, player, path, pathPrefix);
-            sendExp(fileName, player, path, pathPrefix);
-            sendActionBar(fileName, player, path, pathPrefix);
-            sendBossBar(fileName, player, path, pathPrefix);
-            runKether(fileName, player, path, pathPrefix);
-        } catch (Exception exception) {
-            QuickUtils.sendConsoleMessage("&c效果发送错误! 配置是否完整? 奖池配置文件是否错误? 文件名: &e" + fileName + "&c，路径: &e" + path + "&c，节点: &e" + pathPrefix + "&c，目标玩家: &e" + player.getName());
-            return;
+        List<QuadConsumer<String, Player, String, String>> methods = Arrays.asList(
+                EffectSendManager::sendTitle,
+                EffectSendManager::sendParticle,
+                EffectSendManager::sendEntityEffect,
+                EffectSendManager::sendSounds,
+                EffectSendManager::sendCommands,
+                EffectSendManager::sendMessage,
+                EffectSendManager::sendChat,
+                EffectSendManager::sendAnnouncement,
+                EffectSendManager::sendPotion,
+                EffectSendManager::sendHealthAndHunger,
+                EffectSendManager::sendExp,
+                EffectSendManager::sendActionBar,
+                EffectSendManager::sendBossBar,
+                EffectSendManager::runKether
+        );
+
+        for (QuadConsumer<String, Player, String, String> method : methods) {
+            try { method.accept(fileName, player, path, pathPrefix); } catch (Exception ignore) { }
         }
 
         // Logs
@@ -150,7 +152,7 @@ public class EffectSendManager {
          * 1.9 版本及以上使用新的方法，而 1.9 版本以下使用旧的方法
          * Spigot API 提供了这两种方法，不需要使用 NMS
          */
-        if (Main.getServerVersion() == 109) {
+        if (Main.getServerVersion() <= 109) {
             player.sendTitle(mainTitle, subTitle);
         } else {
             player.sendTitle(mainTitle, subTitle, fadeIn, stay, fadeOut);
@@ -173,93 +175,85 @@ public class EffectSendManager {
 
         // 遍历 PARTICLE 列表并发送
         yaml.getStringList("PARTICLE").forEach(particleConfig -> {
-            if (pathPrefix.isEmpty()) return;
+            if (particleConfig.isEmpty()) return;
+
+            Location location = player.getLocation();
 
             // 解析粒子效果配置
             String[] particleConfigSplit = QuickUtils.handleStrings(particleConfig.toUpperCase(Locale.ROOT).split(";"), player);
 
-            ParticleEffect particleEffect;
+            Particle particle;
             String particleString = particleConfigSplit[0];
 
             try {
-                // 将字符串转换为 ParticleEffect 枚举
-                particleEffect = ParticleEffect.valueOf(particleString);
+                // 将字符串转换为 Particle 枚举
+                particle = Particle.valueOf(particleString);
             } catch (Exception exception) {
                 // 粒子效果未知，发送警告信息
                 ExceptionUtils.sendUnknownWarn("粒子效果", fileName, particleString);
                 return;
             }
 
-            // 解析x、y、z、amount参数
+            // 解析参数
             double x = Double.parseDouble(particleConfigSplit[1]);
             double y = Double.parseDouble(particleConfigSplit[2]);
             double z = Double.parseDouble(particleConfigSplit[3]);
             int amount = Integer.parseInt(particleConfigSplit[4]);
-
-            // 是否为 Note 粒子效果，是否对所有玩家生效，是否具有颜色属性
-            boolean isNote = particleEffect == ParticleEffect.NOTE;
             boolean allPlayer = !particleConfigSplit[5].equals("PLAYER");
-            boolean hasColor = !particleConfigSplit[6].equals("FALSE");
+            double extra = Double.parseDouble(particleConfigSplit[6]);
 
-            // 如果是 Note 粒子效果且具有颜色属性，则无法自定义颜色，发送警告信息
-            if (isNote && hasColor) {
-                QuickUtils.sendConsoleMessage("&c请注意，音符 (Note) 粒子效果并不支持自定义颜色! 已自动切换为随机颜色!");
-
+            // 如果版本大于 1.19.4 则使用 Bukkit API 的方法发送
+            if (Main.getServerVersion() > 101904) {
                 if (allPlayer) {
-                    new ParticleBuilder(particleEffect, player.getLocation())
-                            .setOffsetX((float) x)
-                            .setOffsetY((float) y)
-                            .setOffsetZ((float) z)
-                            .setAmount(amount)
-                            .display();
+                    player.getWorld().spawnParticle(particle, location, amount, x, y, z, extra);
                 } else {
-                    new ParticleBuilder(particleEffect, player.getLocation())
-                            .setOffsetX((float) x)
-                            .setOffsetY((float) y)
-                            .setOffsetZ((float) z)
-                            .setAmount(amount)
-                            .display(player);
+                    player.spawnParticle(particle, location, amount, x, y, z, extra);
                 }
+
                 return;
             }
 
-            // 如果具有颜色属性，则设置颜色
-            if (hasColor) {
-                if (allPlayer) {
-                    new ParticleBuilder(particleEffect, player.getLocation())
-                            .setOffsetX((float) x)
-                            .setOffsetY((float) y)
-                            .setOffsetZ((float) z)
-                            .setAmount(amount)
-                            .setColor(Color.getColor(particleConfigSplit[6]))
-                            .display();
-                } else {
-                    new ParticleBuilder(particleEffect, player.getLocation())
-                            .setOffsetX((float) x)
-                            .setOffsetY((float) y)
-                            .setOffsetZ((float) z)
-                            .setAmount(amount)
-                            .setColor(Color.getColor(particleConfigSplit[6]))
-                            .display(player);
-                }
+            // ParticleLib 只支持到 1.19.4
+            new ParticleBuilder(ParticleEffect.valueOf(particleString), player.getLocation())
+                    .setSpeed((float) extra)
+                    .setOffsetX((float) x)
+                    .setOffsetY((float) y)
+                    .setOffsetZ((float) z)
+                    .setAmount(amount)
+                    .display();
+        });
+    }
+
+    /**
+     * 发送实体效果。
+     *
+     * @param fileName 配置文件名
+     * @param player 目标玩家
+     * @param path 配置文件路径
+     * @param pathPrefix 配置文件路径前缀
+     */
+    private static void sendEntityEffect(String fileName, Player player, String path, String pathPrefix) {
+        // 创建配置文件
+        Yaml yaml = ConfigManager.createYaml(fileName, path, true, false);
+        // 设置路径前缀
+        yaml.setPathPrefix(pathPrefix);
+
+        // 遍历 ENTITY-EFFECT 列表并发送
+        yaml.getStringList("ENTITY-EFFECT").forEach(entityEffectConfig -> {
+            if (entityEffectConfig.isEmpty()) return;
+
+            EntityEffect entityEffect;
+
+            try {
+                // 将字符串转换为 EntityEffect 枚举
+                entityEffect = EntityEffect.valueOf(entityEffectConfig);
+            } catch (Exception exception) {
+                // 粒子效果未知，发送警告信息
+                ExceptionUtils.sendUnknownWarn("实体效果", fileName, entityEffectConfig);
                 return;
             }
 
-            if (allPlayer) {
-                new ParticleBuilder(particleEffect, player.getLocation())
-                        .setOffsetX((float) x)
-                        .setOffsetY((float) y)
-                        .setOffsetZ((float) z)
-                        .setAmount(amount)
-                        .display();
-            } else {
-                new ParticleBuilder(particleEffect, player.getLocation())
-                        .setOffsetX((float) x)
-                        .setOffsetY((float) y)
-                        .setOffsetZ((float) z)
-                        .setAmount(amount)
-                        .display(player);
-            }
+            player.playEffect(entityEffect);
         });
     }
 
@@ -330,28 +324,29 @@ public class EffectSendManager {
                 // 去掉 [op]: 前缀后执行指令
                 String finalCommand = commandConfig.replace("[op]:", "");
                 Bukkit.getScheduler().runTask(plugin, () -> player.performCommand(finalCommand));
-            } else {
-                // 处理需要 OP 权限的指令
-                commandConfig = commandConfig.replace("[op]:", "");
+                return;
+            }
 
-                // 为目标玩家赋予临时 OP 权限并执行指令
-                try {
-                    WishManager.setPlayerCacheOpData(player, true);
-                    getOpSentCommand().put(player, commandConfig);
+            // 处理需要 OP 权限的指令
+            commandConfig = commandConfig.replace("[op]:", "");
 
-                    String finalCommand = commandConfig;
-                    Bukkit.getScheduler().runTask(plugin, () -> {
-                        player.setOp(true);
-                        player.performCommand(finalCommand);
-                    });
-                } finally {
-                    // 执行完指令后移除临时 OP 权限
-                    Bukkit.getScheduler().runTask(plugin, () -> player.setOp(false));
+            // 为目标玩家赋予临时 OP 权限并执行指令
+            try {
+                WishManager.setPlayerCacheOpData(player, true);
+                getOpSentCommand().put(player, commandConfig);
 
-                    getOpSentCommand().invalidate(player);
+                String finalCommand = commandConfig;
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    player.setOp(true);
+                    player.performCommand(finalCommand);
+                });
+            } finally {
+                // 执行完指令后移除临时 OP 权限
+                Bukkit.getScheduler().runTask(plugin, () -> player.setOp(false));
 
-                    WishManager.setPlayerCacheOpData(player, false);
-                }
+                getOpSentCommand().invalidate(player);
+
+                WishManager.setPlayerCacheOpData(player, false);
             }
         });
 

@@ -154,7 +154,7 @@ public class RegisterManager {
         try {
             setEconomy(rsp.getProvider());
             QuickUtils.sendConsoleMessage("&a检查到服务器存在 &eVault&a，已成功设置 &eVault&a。");
-        } catch (Throwable e) {
+        } catch (Throwable exception) {
             QuickUtils.sendConsoleMessage("&c检查到服务器存在 &eVault&c，但 &eVault&c 设置错误，这是最新版吗? 请尝试更新它: &ehttps://www.spigotmc.org/resources/vault.34315/&c，服务器即将关闭。");
             Bukkit.shutdown();
         }

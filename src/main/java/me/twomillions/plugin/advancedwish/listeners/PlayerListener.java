@@ -64,15 +64,13 @@ public class PlayerListener implements Listener {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
 
-        int waitingTime = Integer.parseInt(ConfigManager.getAdvancedWishYaml().getString("WAIT-LOADING"));
-
         // 延时等待玩家缓存写入
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             PlayerCacheHandler.setWaitingLoadingCache(uuid, true);
 
             try {
-                Thread.sleep(waitingTime * 1000L);
-            } catch (Exception ignored) { }
+                Thread.sleep(ConfigManager.getAdvancedWishYaml().getLong("WAIT-LOADING") * 1000L);
+            } catch (Exception ignore) { }
 
             // 玩家已经离线，取消等待
             if (!player.isOnline()) {
@@ -88,7 +86,7 @@ public class PlayerListener implements Listener {
         // 发送版本更新提示
         if (!UpdateHandler.isLatestVersion() && player.isOp()) {
             player.sendMessage(QuickUtils.translate(
-                    "&7[&6&lAdvanced Wish&7] &c您正在使用过时版本的 Advanced Wish！请下载最新版本以避免出现未知问题！下载链接：https://gitee.com/A2000000/advanced-wish/releases"
+                    "&7[&6&lAdvanced Wish&7] &c您正在使用过时版本的 &eAdvanced Wish&c! 请下载最新版本以避免出现未知问题! 下载链接：&ehttps://gitee.com/A2000000/advanced-wish/releases"
             ));
         }
     }

@@ -277,6 +277,7 @@ public class WishManager {
             double addGuaranteed = addGuaranteedList.stream()
                     .mapToDouble(s -> QuickUtils.handleDouble(s, player))
                     .sum();
+
             boolean clearGuaranteed = clearGuaranteedList.stream()
                     .map(s -> QuickUtils.handleBoolean(s, player))
                     .findFirst()

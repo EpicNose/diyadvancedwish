@@ -363,7 +363,7 @@ public class AdvancedWishCommand extends Command {
 
         try {
             amount = Integer.parseInt(args[3]);
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException exception) {
             if (isConsole) {
                 QuickUtils.sendMessage(sender, "MUST-NUMBER");
             } else {
@@ -413,7 +413,7 @@ public class AdvancedWishCommand extends Command {
 
         try {
             guaranteed = Double.parseDouble(args[3]);
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException exception) {
             if (isConsole) {
                 QuickUtils.sendMessage(sender, "MUST-NUMBER");
             } else {
@@ -463,7 +463,7 @@ public class AdvancedWishCommand extends Command {
 
         try {
             limitAmount = Integer.parseInt(args[3]);
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException exception) {
             if (isConsole) {
                 QuickUtils.sendMessage(sender, "MUST-NUMBER");
             } else {

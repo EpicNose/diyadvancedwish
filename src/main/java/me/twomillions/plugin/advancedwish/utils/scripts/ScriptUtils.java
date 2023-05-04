@@ -132,11 +132,11 @@ public class ScriptUtils {
 
         try {
             result = Context.toString(rhino.evaluateString(scope, string, "RhinoJs", 1, null));
-        } catch (Exception e) {
+        } catch (Exception exception) {
             return string;
         }
 
-        if (result == null || result.equals("undefined")) {
+        if (result == null || result.equals("undefined") || result.equals("null")) {
             return "";
         }
 

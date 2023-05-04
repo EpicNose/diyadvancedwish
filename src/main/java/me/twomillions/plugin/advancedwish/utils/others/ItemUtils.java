@@ -28,7 +28,7 @@ public class ItemUtils {
     public static Material materialValueOf(String materialString, String fileName) throws NullPointerException {
         try {
             return Material.valueOf(materialString.toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException exception) {
             ExceptionUtils.sendUnknownWarn("物品", fileName, materialString);
             return Material.AIR;
         }
@@ -44,7 +44,7 @@ public class ItemUtils {
     public static Material materialValueOf(String materialString) throws NullPointerException {
         try {
             return Material.valueOf(materialString.toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException exception) {
             return Material.AIR;
         }
     }
