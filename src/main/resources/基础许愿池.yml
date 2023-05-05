@@ -13,17 +13,11 @@ CONFIG-VERSION: 67
 #  其中有: Normal / SecureRandom / MonteCarlo / Shuffle / Gaussian / MersenneTwister / XORShift
 #
 #  Normal: 使用普通的伪随机数生成器 (PRNG)，效率较高，随机性也不错。适合用于一般场合。
-#
 #  SecureRandom: 使用安全的随机数生成器，能够生成高质量的随机数。适合用于需要高度安全性和随机性的场合。
-#
 #  MonteCarlo: 使用蒙特卡罗方法，能够处理大量的对象和概率，性能较低，生成的结果更加公平。适合用于需要高度公平的场合。
-#
 #  Shuffle: 进行打乱，可以生成相对均匀的分布，效率较低，随机性高，不太公平。适合用于需要高度随机性的场合。
-#
 #  Gaussian: 使用高斯分布，高斯分布会将随机结果偏向均值，可以在一定程度上避免随机数集中在中间值的问题。适合用于需要正态分布随机数的场合。
-#
 #  MersenneTwister: 使用 Mersenne Twister 随机数生成器，具有良好的随机性和速度。适合用于需要高质量随机数的场合。
-#
 #  XORShift: 使用 XORShift 随机数生成器，速度较快。适合用于需要高效率并且对于随机性要求不高的场合。
 GET-RESULT-TYPE: "Normal"
 

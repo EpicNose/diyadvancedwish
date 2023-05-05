@@ -3,10 +3,12 @@ package me.twomillions.plugin.advancedwish.utils.commands;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
+import me.twomillions.plugin.advancedwish.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
@@ -64,9 +66,15 @@ public class CommandUtils {
     @SneakyThrows
     @SuppressWarnings("unchecked")
     public static Map<String, Command> getKnownCommands(CommandMap commandMap) {
-        Method method = commandMap.getClass().getDeclaredMethod("getKnownCommands");
-        method.setAccessible(true);
-        return (Map<String, Command>) method.invoke(commandMap);
+        if (Main.getServerVersion() >= 1013) {
+            Method method = commandMap.getClass().getDeclaredMethod("getKnownCommands");
+            method.setAccessible(true);
+            return (Map<String, Command>) method.invoke(commandMap);
+        }
+
+        Field field = commandMap.getClass().getDeclaredField("knownCommands");
+        field.setAccessible(true);
+        return (Map<String, Command>) field.get(commandMap);
     }
 }
 
