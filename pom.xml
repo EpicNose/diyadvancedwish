@@ -50,6 +50,11 @@
                                     <pattern>org.bstats</pattern>
                                     <shadedPattern>me.twomillions.plugin.advancedwish.relocation.bstats</shadedPattern>
                                 </relocation>
+
+                                <relocation>
+                                    <pattern>org.reflections</pattern>
+                                    <shadedPattern>me.twomillions.plugin.advancedwish.relocation.reflections</shadedPattern>
+                                </relocation>
                             </relocations>
                         </configuration>
                     </execution>
