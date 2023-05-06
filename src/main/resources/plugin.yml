@@ -1,6 +1,6 @@
 name: AdvancedWish
 version: '${project.version}'
-main: me.twomillions.plugin.advancedwish.Main
+main: twomillions.plugin.advancedwish.Main
 api-version: 1.13
 authors: [ TwoMillions ]
 softdepend: [ Vault, PlayerPoints, PlaceholderAPI, Vulpecula ]
