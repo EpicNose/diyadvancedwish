@@ -2,6 +2,9 @@ package twomillions.plugin.advancedwish;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import twomillions.plugin.advancedwish.commands.AdvancedWishCommand;
 import twomillions.plugin.advancedwish.enums.databases.types.DataStorageType;
 import twomillions.plugin.advancedwish.managers.WishManager;
@@ -15,12 +18,8 @@ import twomillions.plugin.advancedwish.tasks.UpdateHandler;
 import twomillions.plugin.advancedwish.tasks.WishLimitResetHandler;
 import twomillions.plugin.advancedwish.utils.commands.CommandUtils;
 import twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;
-import twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
 import twomillions.plugin.advancedwish.utils.scripts.ScriptUtils;
 import twomillions.plugin.advancedwish.utils.texts.QuickUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -62,67 +61,65 @@ public final class Main extends JavaPlugin {
         setServerVersion(Double.parseDouble(Arrays.toString(org.apache.commons.lang.StringUtils.substringsBetween(getServer().getClass().getPackage().getName(), ".v", "_R"))
                 .replace("_", "0").replace("[", "").replace("]", "")));
 
-        // 版本检查
+        /*
+         * 版本检查
+         */
         if (!ConfigManager.checkLastVersion(ConfigManager.getMessageYaml()) || !ConfigManager.checkLastVersion(ConfigManager.getAdvancedWishYaml())) {
             return;
         }
 
-        // 注册
-        RegisterManager.setupPlugins(true);
+        /*
+         * 设置路径
+         */
+        RegisterManager.setupPath();
+
+        // 初始化 Script
+        try {
+            ScriptUtils.setup();
+        } catch (Throwable throwable) {
+            ExceptionUtils.throwRhinoError(throwable);
+        }
+
+        /*
+         * 注册
+         */
+        RegisterManager.setupBstats();
+        RegisterManager.setupVault();
+        RegisterManager.setupPlayerPoints();
+        RegisterManager.setupVulpecula();
+        RegisterManager.setupPlaceholderAPI();
+
         RegisterManager.registerWish();
         RegisterManager.registerCommands();
+        RegisterManager.registerListener();
 
-        // 设置数据存储
+        /*
+         * 设置数据存储
+         */
         String dataStorageType = ConfigManager.getAdvancedWishYaml().getString("DATA-STORAGE-TYPE").toLowerCase();
 
-        if (dataStorageType.contains(":")) {
-            String[] dataStorageTypeSplit = dataStorageType.split(":");
-
-            if (dataStorageTypeSplit.length > 2) {
-                ExceptionUtils.throwUnknownDataStoreType();
-                return;
-            }
-
-            DataStorageType type = DataStorageType.valueOfIgnoreCase(dataStorageTypeSplit[0]);
-            DataStorageType type1 = DataStorageType.valueOfIgnoreCase(dataStorageTypeSplit[1]);
-
-            if (type == type1) {
-                QuickUtils.sendConsoleMessage("&a原存储类型与新存储类型相同，请检查配置文件是否正确! 即将关闭服务器!");
-                Bukkit.shutdown();
-                return;
-            }
-
-            if (DatabasesManager.dataMigration(ConfigManager.getAdvancedWishYaml(), type, type1)) {
-                QuickUtils.sendConsoleMessage("&a数据迁移完成! 即将关闭服务器!");
-            } else {
-                QuickUtils.sendConsoleMessage("&c数据迁移出错，没有可迁移数据? 迁移或初始化错误? 即将关闭服务器!");
-            }
-
-            Bukkit.shutdown();
+        /*
+         * 数据迁移
+         */
+        if (RegisterManager.dataMigration(dataStorageType)) {
             return;
         }
 
-        switch (dataStorageType) {
-            case ConstantsUtils.MYSQL_DB_TYPE:
-                DatabasesManager.setDataStorageType(DataStorageType.MySQL);
-                DatabasesManager.getDatabasesManager().setup(ConfigManager.getAdvancedWishYaml());
-                break;
-
-            case ConstantsUtils.MONGODB_DB_TYPE:
-                DatabasesManager.setDataStorageType(DataStorageType.MongoDB);
-                DatabasesManager.getDatabasesManager().setup(ConfigManager.getAdvancedWishYaml());
-                break;
-
-            case ConstantsUtils.JSON_DB_TYPE:
-                DatabasesManager.setDataStorageType(DataStorageType.Json);
-                break;
-
-            default:
-                ExceptionUtils.throwUnknownDataStoreType();
-                return;
+        /*
+         * 选择数据存储
+         */
+        if (!RegisterManager.selectDataStorageType(dataStorageType)) {
+            return;
         }
 
-        // 任务处理
+        /*
+         * 解析 scriptSetup 函数
+         */
+        ScriptUtils.invokeFunctionInAllScripts("scriptSetup", null);
+
+        /*
+         * 任务处理
+         */
         ScheduledTaskHandler.getScheduledTaskHandler().startTask();
         UpdateHandler.getUpdateHandler().startTask();
 
@@ -133,9 +130,7 @@ public final class Main extends JavaPlugin {
             Bukkit.getOnlinePlayers().forEach(player -> new PlayerCacheHandler(player).startTask());
         }
 
-        long endTime = System.currentTimeMillis();
-        long durationMillis = endTime - startTime;
-
+        long durationMillis = System.currentTimeMillis() - startTime;
         QuickUtils.sendConsoleMessage("&e&lAdvanced Wish&a 插件已成功加载! 版本: &e" + getDescription().getVersion() + "&a, 作者: &e2000000&a。加载用时: &e" + durationMillis + " &ams!");
     }
 

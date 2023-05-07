@@ -46,11 +46,11 @@ public class UpdateHandler extends TasksAbstract {
             if (urlString.contains(plugin.getDescription().getVersion())) {
                 isLatestVersion = true;
 
-                QuickUtils.sendConsoleMessage("&a自动更新检查完成，您目前正在使用最新版的 Advanced Wish! 版本: " + plugin.getDescription().getVersion());
+                QuickUtils.sendConsoleMessage("&a自动更新检查完成，您目前正在使用最新版的 &eAdvanced Wish&a! 版本: &e" + plugin.getDescription().getVersion());
             } else if (!urlString.isEmpty()) {
                 isLatestVersion = false;
 
-                QuickUtils.sendConsoleMessage("&c您目前正在使用过时的 Advanced Wish! 请更新以避免服务器出现问题! 下载链接: https://gitee.com/A2000000/advanced-wish/releases/");
+                QuickUtils.sendConsoleMessage("&c您目前正在使用过时的 &eAdvanced Wish&c! 请更新以避免服务器出现问题! 下载链接: &ehttps://gitee.com/A2000000/advanced-wish/releases/");
             }
         };
     }

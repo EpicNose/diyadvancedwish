@@ -3,5 +3,7 @@ version: '${project.version}'
 main: twomillions.plugin.advancedwish.Main
 api-version: 1.13
 authors: [ TwoMillions ]
+load: STARTUP
 softdepend: [ Vault, PlayerPoints, PlaceholderAPI, Vulpecula ]
+loadbefore: [ Multiverse-Core ]
 description: 一个简单且高度可定制的许愿(抽奖)插件!

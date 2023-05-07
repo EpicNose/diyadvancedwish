@@ -3,21 +3,6 @@ package twomillions.plugin.advancedwish.managers.register;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
 import lombok.Setter;
-import twomillions.plugin.advancedwish.Main;
-import twomillions.plugin.advancedwish.commands.AdvancedWishCommand;
-import twomillions.plugin.advancedwish.listeners.PlayerListener;
-import twomillions.plugin.advancedwish.managers.WishManager;
-import twomillions.plugin.advancedwish.managers.config.ConfigManager;
-import twomillions.plugin.advancedwish.managers.placeholder.PapiManager;
-import twomillions.plugin.advancedwish.tasks.WishLimitResetHandler;
-import twomillions.plugin.advancedwish.utils.commands.CommandUtils;
-import twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
-import twomillions.plugin.advancedwish.utils.scripts.ScriptUtils;
-import twomillions.plugin.advancedwish.utils.scripts.interop.ScriptCommandHandler;
-import twomillions.plugin.advancedwish.utils.scripts.interop.ScriptEventHandler;
-import twomillions.plugin.advancedwish.utils.scripts.interop.ScriptPlaceholderExpander;
-import twomillions.plugin.advancedwish.utils.scripts.interop.ScriptTaskScheduler;
-import twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import net.milkbowl.vault.economy.Economy;
 import org.black_ixx.playerpoints.PlayerPoints;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
@@ -27,6 +12,23 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import twomillions.plugin.advancedwish.Main;
+import twomillions.plugin.advancedwish.commands.AdvancedWishCommand;
+import twomillions.plugin.advancedwish.enums.databases.types.DataStorageType;
+import twomillions.plugin.advancedwish.listeners.PlayerListener;
+import twomillions.plugin.advancedwish.managers.WishManager;
+import twomillions.plugin.advancedwish.managers.config.ConfigManager;
+import twomillions.plugin.advancedwish.managers.databases.DatabasesManager;
+import twomillions.plugin.advancedwish.managers.placeholder.PapiManager;
+import twomillions.plugin.advancedwish.tasks.WishLimitResetHandler;
+import twomillions.plugin.advancedwish.utils.commands.CommandUtils;
+import twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;
+import twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
+import twomillions.plugin.advancedwish.utils.scripts.interop.ScriptCommandHandler;
+import twomillions.plugin.advancedwish.utils.scripts.interop.ScriptEventHandler;
+import twomillions.plugin.advancedwish.utils.scripts.interop.ScriptPlaceholderExpander;
+import twomillions.plugin.advancedwish.utils.scripts.interop.ScriptTaskScheduler;
+import twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -66,6 +68,71 @@ public class RegisterManager {
     @Getter @Setter private volatile static PlayerPointsAPI playerPointsAPI;
 
     /**
+     * 数据迁移检查。
+     *
+     * @param dataStorageType DATA-STORAGE-TYPE
+     * @return 是否开启了迁移
+     */
+    public static boolean dataMigration(String dataStorageType) {
+        if (!dataStorageType.contains(":")) {
+            return false;
+        }
+
+        String[] dataStorageTypeSplit = dataStorageType.split(":");
+
+        if (dataStorageTypeSplit.length > 2) {
+            ExceptionUtils.throwUnknownDataStoreType();
+            return true;
+        }
+
+        DataStorageType from = DataStorageType.valueOfIgnoreCase(dataStorageTypeSplit[0]);
+        DataStorageType to = DataStorageType.valueOfIgnoreCase(dataStorageTypeSplit[1]);
+
+        if (from == to) {
+            QuickUtils.sendConsoleMessage("&a原存储类型与新存储类型相同，请检查配置文件是否正确! 即将关闭服务器!");
+            Bukkit.shutdown();
+            return true;
+        }
+
+        if (DatabasesManager.dataMigration(ConfigManager.getAdvancedWishYaml(), from, to)) {
+            QuickUtils.sendConsoleMessage("&a数据迁移完成! 即将关闭服务器!");
+        } else {
+            QuickUtils.sendConsoleMessage("&c数据迁移出错，没有可迁移数据? 迁移或初始化错误? 即将关闭服务器!");
+        }
+
+        Bukkit.shutdown();
+        return true;
+    }
+
+    /**
+     * 选择数据存储方式。
+     *
+     * @param dataStorageType DATA-STORAGE-TYPE
+     * @return 若选择的方式无法找到则返回 false，否则初始化完成返回 true
+     */
+    public static boolean selectDataStorageType(String dataStorageType) {
+        switch (dataStorageType) {
+            case ConstantsUtils.MYSQL_DB_TYPE:
+                DatabasesManager.setDataStorageType(DataStorageType.MySQL);
+                DatabasesManager.getDatabasesManager().setup(ConfigManager.getAdvancedWishYaml());
+                return true;
+
+            case ConstantsUtils.MONGODB_DB_TYPE:
+                DatabasesManager.setDataStorageType(DataStorageType.MongoDB);
+                DatabasesManager.getDatabasesManager().setup(ConfigManager.getAdvancedWishYaml());
+                return true;
+
+            case ConstantsUtils.JSON_DB_TYPE:
+                DatabasesManager.setDataStorageType(DataStorageType.Json);
+                return true;
+
+            default:
+                ExceptionUtils.throwUnknownDataStoreType();
+                return false;
+        }
+    }
+
+    /**
      * 注册指令。
      */
     public static void registerCommands() {
@@ -73,55 +140,17 @@ public class RegisterManager {
     }
 
     /**
-     * 设置 Vault 和 PlayerPoints 注册监听器等等。
-     *
-     * @param registerEvents 是否注册监听器
+     * 注册监听器。
      */
-    public static void setupPlugins(boolean registerEvents) {
+    public static void registerListener() {
         PluginManager manager = Bukkit.getPluginManager();
-
-        // bStats
-        if (!ConfigManager.getAdvancedWishYaml().getOrDefault("BSTATS", true)) {
-            new Metrics(plugin, 16990);
-        }
-
-        setupPath();
-        setupVault();
-        setupPlayerPoints();
-
-        // PlaceholderAPI
-        if (manager.isPluginEnabled("PlaceholderAPI")) {
-            setUsingPapi(true);
-
-            Bukkit.getScheduler().runTask(plugin, () -> new PapiManager().register());
-
-            QuickUtils.sendConsoleMessage("&a检查到服务器存在 &ePlaceholderAPI&a，已注册 &ePlaceholderAPI&a 变量。");
-        }
-
-        // Vulpecula - Kether
-        if (manager.isPluginEnabled("Vulpecula")) {
-            setUsingVulpecula(true);
-
-            QuickUtils.sendConsoleMessage("&a检查到服务器存在 &eVulpecula&a，已支持使用 &eKether&a 脚本。");
-        }
-
-        if (registerEvents) {
-            manager.registerEvents(new PlayerListener(), plugin);
-        }
-
-        // 初始化 Script
-        try {
-            ScriptUtils.setup();
-        } catch (Throwable throwable) {
-//            ExceptionUtils.throwRhinoError(throwable);
-            throwable.printStackTrace();
-        }
+        manager.registerEvents(new PlayerListener(), plugin);
     }
 
     /**
      * 设置路径。
      */
-    private static void setupPath() {
+    public static void setupPath() {
         String pluginPath = Main.getPluginPath();
 
         String logsConfig = ConfigManager.getAdvancedWishYaml().getString("LOGS-PATH");
@@ -138,11 +167,55 @@ public class RegisterManager {
     }
 
     /**
+     * 设置 Placeholder API.
+     */
+    public static void setupPlaceholderAPI() {
+        Plugin vulpecula = Bukkit.getPluginManager().getPlugin("PlaceholderAPI");
+
+        if (vulpecula == null) {
+            return;
+        }
+
+        setUsingPapi(true);
+
+        Bukkit.getScheduler().runTask(plugin, () -> new PapiManager().register());
+
+        QuickUtils.sendConsoleMessage("&a检查到服务器存在 &ePlaceholderAPI&a，已注册 &ePlaceholderAPI&a 变量。");
+    }
+
+    /**
+     * 设置 Vulpecula.
+     */
+    public static void setupVulpecula() {
+        Plugin vulpecula = Bukkit.getPluginManager().getPlugin("Vulpecula");
+
+        if (vulpecula == null) {
+            return;
+        }
+
+        setUsingVulpecula(true);
+
+        QuickUtils.sendConsoleMessage("&a检查到服务器存在 &eVulpecula&a，已支持使用 &eKether&a 脚本。");
+    }
+
+    /**
+     * 设置 bStats.
+     */
+    public static void setupBstats() {
+        if (!ConfigManager.getAdvancedWishYaml().getOrDefault("BSTATS", true)) {
+            new Metrics(plugin, 16990);
+        }
+    }
+
+    /**
      * 设置 Vault.
      */
-    private static void setupVault() {
+    public static void setupVault() {
         Plugin vault = Bukkit.getPluginManager().getPlugin("Vault");
-        if (vault == null) return;
+
+        if (vault == null) {
+            return;
+        }
 
         RegisteredServiceProvider<Economy> rsp = Bukkit.getServicesManager().getRegistration(Economy.class);
 
@@ -163,10 +236,12 @@ public class RegisterManager {
     /**
      * 设置 PlayerPoints.
      */
-    private static void setupPlayerPoints() {
+    public static void setupPlayerPoints() {
         Plugin playerPoints = Bukkit.getPluginManager().getPlugin("PlayerPoints");
 
-        if (playerPoints == null) return;
+        if (playerPoints == null) {
+            return;
+        }
 
         try {
             setPlayerPointsAPI(((PlayerPoints) playerPoints).getAPI());
@@ -253,9 +328,13 @@ public class RegisterManager {
             }
         }
 
-        RegisterManager.unregisterAllScriptInterop();
+        unregisterAllScriptInterop();
 
-        setupPlugins(false);
+        setupVault();
+        setupPlayerPoints();
+        setupVulpecula();
+        setupPlaceholderAPI();
+
         registerWish();
     }
 }

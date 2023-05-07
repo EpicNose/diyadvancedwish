@@ -34,7 +34,7 @@ public class ScriptUtils {
     @Getter private static Scriptable GLOBAL_SCOPE;
 
     /**
-     * 初始化。
+     * 初始化，加载默认脚本文件，加载 Java 类。
      */
     @SneakyThrows
     public static void setup() {
@@ -85,11 +85,6 @@ public class ScriptUtils {
             rhino.evaluateString(GLOBAL_SCOPE, "const " + simpleName + " = Packages." + canonicalName, "RhinoJs", 1, null);
             QuickUtils.sendConsoleMessage("&a成功加载 &eJava&a 类: &e" + simpleName + " &7&o(" + canonicalName + ")&a，可使用 &e" + simpleName + " &a调用类中 &e方法、函数 &a等。");
         }
-
-        /*
-         * 解析 scriptSetup 函数
-         */
-        invokeFunctionInAllScripts("scriptSetup", null);
     }
 
     /**
@@ -167,7 +162,7 @@ public class ScriptUtils {
                 QuickUtils.sendConsoleMessage("&a成功执行 &eJavaScript &a内函数: &e" + functionName + "&a，文件名: &e" + file.getName() + "&a!");
             } catch (Exception exception) {
                 exception.printStackTrace();
-                QuickUtils.sendConsoleMessage("&c无法执行 &eJavaScript &c内函数: &e" + functionName + "&a，文件名: &e" + file.getName() + "&c!");
+                QuickUtils.sendConsoleMessage("&c无法执行 &eJavaScript &c内函数: &e" + functionName + "&c，文件名: &e" + file.getName() + "&c!");
             }
         }
 
