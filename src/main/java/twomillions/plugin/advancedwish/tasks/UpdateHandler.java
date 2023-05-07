@@ -41,7 +41,7 @@ public class UpdateHandler extends TasksAbstract {
                 return;
             }
 
-            String urlString = getURLString();
+            String urlString = getURLString().replaceAll(" ", "");
 
             if (urlString.equals(plugin.getDescription().getVersion())) {
                 isLatestVersion = true;
