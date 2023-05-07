@@ -43,7 +43,7 @@ public class UpdateHandler extends TasksAbstract {
 
             String urlString = getURLString();
 
-            if (urlString.contains(plugin.getDescription().getVersion())) {
+            if (urlString.equals(plugin.getDescription().getVersion())) {
                 isLatestVersion = true;
 
                 QuickUtils.sendConsoleMessage("&a自动更新检查完成，您目前正在使用最新版的 &eAdvanced Wish&a! 版本: &e" + plugin.getDescription().getVersion());
