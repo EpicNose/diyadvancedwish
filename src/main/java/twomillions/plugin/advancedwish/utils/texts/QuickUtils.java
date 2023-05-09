@@ -500,7 +500,7 @@ public class QuickUtils {
      * @param collection 集合
      * @return 字符串
      */
-    public static String listToString(Collection<?> collection) {
+    public static <T> String listToString(Collection<T> collection) {
         return collection.stream()
                 .map(Object::toString)
                 .collect(Collectors.joining(","));
