@@ -69,9 +69,14 @@ public final class Main extends JavaPlugin {
         }
 
         /*
-         * 设置路径
+         * 各种设置
          */
         RegisterManager.setupPath();
+        RegisterManager.setupBstats();
+        RegisterManager.setupVault();
+        RegisterManager.setupPlayerPoints();
+        RegisterManager.setupVulpecula();
+        RegisterManager.setupPlaceholderAPI();
 
         // 初始化 Script
         try {
@@ -79,15 +84,6 @@ public final class Main extends JavaPlugin {
         } catch (Throwable throwable) {
             ExceptionUtils.throwRhinoError(throwable);
         }
-
-        /*
-         * 注册
-         */
-        RegisterManager.setupBstats();
-        RegisterManager.setupVault();
-        RegisterManager.setupPlayerPoints();
-        RegisterManager.setupVulpecula();
-        RegisterManager.setupPlaceholderAPI();
 
         RegisterManager.registerWish();
         RegisterManager.registerCommands();
@@ -164,10 +160,6 @@ public final class Main extends JavaPlugin {
         }
 
         RegisterManager.unregisterAllScriptInterop();
-
-        if (ScriptUtils.getRhino() != null) {
-            ScriptUtils.getRhino().close();
-        }
 
         CommandUtils.unregister(AdvancedWishCommand.getAdvancedWishCommand());
 

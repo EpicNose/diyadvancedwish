@@ -24,6 +24,7 @@ import twomillions.plugin.advancedwish.tasks.WishLimitResetHandler;
 import twomillions.plugin.advancedwish.utils.commands.CommandUtils;
 import twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;
 import twomillions.plugin.advancedwish.utils.others.ConstantsUtils;
+import twomillions.plugin.advancedwish.utils.scripts.ScriptUtils;
 import twomillions.plugin.advancedwish.utils.scripts.interop.ScriptCommandHandler;
 import twomillions.plugin.advancedwish.utils.scripts.interop.ScriptEventHandler;
 import twomillions.plugin.advancedwish.utils.scripts.interop.ScriptPlaceholderExpander;
@@ -264,7 +265,9 @@ public class RegisterManager {
 
             Yaml yaml = ConfigManager.createYaml(wishName, ConstantsUtils.WISH, false, true);
 
-            if (!ConfigManager.checkLastVersion(yaml)) continue;
+            if (!ConfigManager.checkLastVersion(yaml)) {
+                continue;
+            }
 
             registerWish.add(wishName);
 
@@ -311,6 +314,10 @@ public class RegisterManager {
         for (ScriptCommandHandler scriptCommandHandler : ScriptCommandHandler.getScriptCommandHandler()) {
             scriptCommandHandler.unregister();
         }
+
+        if (ScriptUtils.getRhino() != null) {
+            ScriptUtils.getRhino().close();
+        }
     }
 
     /**
@@ -334,6 +341,13 @@ public class RegisterManager {
         setupPlayerPoints();
         setupVulpecula();
         setupPlaceholderAPI();
+
+        // 初始化 Script
+        try {
+            ScriptUtils.setup();
+        } catch (Throwable throwable) {
+            ExceptionUtils.throwRhinoError(throwable);
+        }
 
         registerWish();
     }
