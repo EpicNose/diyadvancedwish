@@ -434,12 +434,13 @@ public class QuickUtils {
      * 判断输入字符串是否为 long 类型。
      *
      * @param string 待检查的字符串
-     * @return 如果字符串为long类型且值大于 Integer.MAX_VALUE，则返回 true，否则返回 false。如果输入字符串不能被解析为数字，则返回 false。
+     * @return 如果字符串为 long 类型，则返回 true，否则返回 false。
      */
     public static boolean isLong(String string) {
         try {
-            return string.matches("^-?\\d+$") && Long.parseLong(string) > Integer.MAX_VALUE;
-        } catch (NumberFormatException e) {
+            Long.parseLong(string);
+            return true;
+        } catch (NumberFormatException exception) {
             return false;
         }
     }
@@ -451,7 +452,12 @@ public class QuickUtils {
      * @return 如果字符串为 int 类型，则返回 true，否则返回 false。
      */
     public static boolean isInt(String string) {
-        return string.matches("^-?\\d+$") && !isLong(string);
+        try {
+            BigDecimal num = new BigDecimal(string);
+            return num.stripTrailingZeros().scale() <= 0 && num.compareTo(BigDecimal.valueOf(Integer.MIN_VALUE)) >= 0 && num.compareTo(BigDecimal.valueOf(Integer.MAX_VALUE)) <= 0;
+        } catch (NumberFormatException exception) {
+            return false;
+        }
     }
 
     /**
@@ -461,7 +467,7 @@ public class QuickUtils {
      * @return 如果字符串为 double 类型，则返回 true，否则返回 false。
      */
     public static boolean isDouble(String string) {
-        return string.matches("^-?\\d+(\\.\\d+)?$");
+        return string.matches("^-?\\d+\\.\\d*[1-9]+$|^(-?\\d+)\\.\\d+$");
     }
 
     /**
