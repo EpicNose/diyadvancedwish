@@ -63,8 +63,7 @@ public class RandomGenerator<T> {
                 throw new IllegalArgumentException("Probability value for object " + values[i] + " is not an integer.");
             }
 
-            int probability = (int) probabilityValue;
-            addRandomObject(object, probability);
+            addRandomObject(object, (int) Double.parseDouble(probabilityValue.toString()));
         }
     }
 
