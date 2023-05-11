@@ -97,6 +97,7 @@ public class WishLimitResetHandler extends TasksAbstract {
     public static void cancelAllWishLimitResetTasks() {
         for (BukkitTask bukkitTask : wishLimitResetTaskList) {
             bukkitTask.cancel();
+            wishLimitResetTaskList.remove(bukkitTask);
         }
     }
 }

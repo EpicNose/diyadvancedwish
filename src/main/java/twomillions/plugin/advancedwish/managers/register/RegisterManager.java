@@ -275,8 +275,10 @@ public class RegisterManager {
 
             // 许愿限制
             if (WishManager.isEnabledWishLimit(wishName)) {
-                new WishLimitResetHandler(wishName).startTask();
-                QuickUtils.sendConsoleMessage("&a检查到许愿池启用了许愿限制，已成功创建对应异步计划任务! 许愿池文件名称: &e" + wishName);
+                if (WishLimitResetHandler.getWishLimitResetTaskList().isEmpty()) {
+                    new WishLimitResetHandler(wishName).startTask();
+                    QuickUtils.sendConsoleMessage("&a检查到许愿池启用了许愿限制，已成功创建对应异步计划任务! 许愿池文件名称: &e" + wishName);
+                }
             }
         }
     }
@@ -325,7 +327,9 @@ public class RegisterManager {
      */
     public static void reload() {
         // 取消任务
-        WishLimitResetHandler.cancelAllWishLimitResetTasks();
+        if (ConfigManager.getAdvancedWishYaml().getBoolean("WISH-LIMIT-TASK-RESTART")) {
+            WishLimitResetHandler.cancelAllWishLimitResetTasks();
+        }
 
         if (isUsingPapi()) {
             try {

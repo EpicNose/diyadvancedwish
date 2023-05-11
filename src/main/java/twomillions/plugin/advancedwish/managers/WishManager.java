@@ -5,6 +5,14 @@ import com.mongodb.client.model.Filters;
 import de.leonhard.storage.Json;
 import de.leonhard.storage.Yaml;
 import lombok.Getter;
+import net.milkbowl.vault.economy.Economy;
+import org.black_ixx.playerpoints.PlayerPointsAPI;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffectType;
 import twomillions.plugin.advancedwish.Main;
 import twomillions.plugin.advancedwish.enums.wish.PlayerWishStatus;
 import twomillions.plugin.advancedwish.managers.config.ConfigManager;
@@ -20,20 +28,11 @@ import twomillions.plugin.advancedwish.utils.others.ItemUtils;
 import twomillions.plugin.advancedwish.utils.random.RandomGenerator;
 import twomillions.plugin.advancedwish.utils.texts.QuickUtils;
 import twomillions.plugin.advancedwish.utils.texts.StringEncrypter;
-import net.milkbowl.vault.economy.Economy;
-import org.black_ixx.playerpoints.PlayerPointsAPI;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.potion.PotionEffectType;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 许愿管理器，提供许愿功能相关的方法
@@ -693,23 +692,29 @@ public class WishManager {
      * @param wishName wishName
      * @return PlayerWishStatus
      */
-    @SuppressWarnings("all")
     public static PlayerWishStatus canPlayerWish(Player player, String wishName) {
         UUID uuid = player.getUniqueId();
 
         // 检查玩家是否正在许愿
-        if (isPlayerInWishList(player)) return PlayerWishStatus.InProgress;
+        if (isPlayerInWishList(player)) {
+            return PlayerWishStatus.InProgress;
+        }
 
         // 检查玩家是否正在处理缓存
-        if (PlayerCacheHandler.isLoadingCache(uuid)) return PlayerWishStatus.LoadingCache;
+        if (PlayerCacheHandler.isLoadingCache(uuid)) {
+            return PlayerWishStatus.LoadingCache;
+        }
 
         // 检查玩家是否正在等待处理缓存
-        if (PlayerCacheHandler.isWaitingLoadingCache(uuid)) return PlayerWishStatus.WaitingLoadingCache;
+        if (PlayerCacheHandler.isWaitingLoadingCache(uuid)) {
+            return PlayerWishStatus.WaitingLoadingCache;
+        }
 
         Yaml yaml = ConfigManager.createYaml(wishName, ConstantsUtils.WISH, false, false);
         yaml.setPathPrefix("CONDITION");
 
         String permission = QuickUtils.handleString(yaml.getString("PERM"), player);
+
         int level = QuickUtils.handleInt(yaml.getString("LEVEL"), player);
         int point = QuickUtils.handleInt(yaml.getString("POINT"), player);
         double money = QuickUtils.handleDouble(yaml.getString("MONEY"));
@@ -720,62 +725,39 @@ public class WishManager {
         yaml.setPathPrefix("ADVANCED-SETTINGS");
 
         for (String coupon : yaml.getStringList("COUPON")) {
-            if (coupon.isEmpty()) break;
+            if (coupon.isEmpty()) {
+                break;
+            }
 
             String[] couponSplit = QuickUtils.stripColor(QuickUtils.handleStrings(coupon.split(";"), player));
 
             int removeAmount = Integer.parseInt(couponSplit[0]);
             String itemLoreContains = couponSplit[1];
 
-            ConcurrentLinkedQueue<ItemStack> toRemove = new ConcurrentLinkedQueue<>();
-
-            for (ItemStack itemStack : player.getInventory().getContents()) {
-                if (itemStack == null || itemStack.getType() == Material.AIR) continue;
-
-                ItemMeta itemMeta = itemStack.getItemMeta();
-
-                if (itemMeta == null) continue;
-
-                // 包含文本匹配
-                if (!itemLoreContains.isEmpty()) {
-                    List<String> lore = itemMeta.getLore();
-                    if (lore == null || lore.stream().noneMatch(line -> QuickUtils.stripColor(line).contains(itemLoreContains))) {
-                        continue;
-                    }
-                }
-
-                toRemove.add(itemStack);
-            }
-
-            if (toRemove.size() == 0) break;
+            ConcurrentLinkedQueue<ItemStack> toRemove = Arrays.stream(player.getInventory().getContents())
+                    .filter(itemStack -> itemStack != null && itemStack.getType() != Material.AIR)
+                    .filter(itemStack -> {
+                        ItemMeta itemMeta = itemStack.getItemMeta();
+                        if (itemMeta == null) return false;
+                        List<String> lore = itemMeta.getLore();
+                        return itemLoreContains.isEmpty() || (lore != null && lore.stream().anyMatch(line -> QuickUtils.stripColor(line).contains(itemLoreContains)));
+                    })
+                    .collect(Collectors.toCollection(ConcurrentLinkedQueue::new));
 
             // 数量检查
-            int itemAmount = toRemove.stream().mapToInt(ItemStack::getAmount).sum();
-
-            if (itemAmount < removeAmount) break;
+            if (toRemove.isEmpty() || toRemove.stream().mapToInt(ItemStack::getAmount).sum() < removeAmount) {
+                break;
+            }
 
             // 限制检查
-            if (isEnabledWishLimit(wishName) && isEnabledCouponLimit && !handleWishIncreasedAmount(wishName, player)) return PlayerWishStatus.ReachLimit;
+            if (isEnabledWishLimit(wishName) && isEnabledCouponLimit && !handleWishIncreasedAmount(wishName, player)) {
+                return PlayerWishStatus.ReachLimit;
+            }
 
             // 物品移除
             if (removeAmount > 0) {
-                int removedAmount = 0;
-
-                for (ItemStack item : toRemove) {
-                    if (removedAmount >= removeAmount) break;
-
-                    int amountToRemove = Math.min(item.getAmount(), removeAmount - removedAmount);
-
-                    if (amountToRemove <= 0) continue;
-
-                    item.setAmount(item.getAmount() - amountToRemove);
-
-                    if (item.getAmount() <= 0) player.getInventory().removeItem(item);
-
-                    removedAmount += amountToRemove;
-                }
-
-                if (removedAmount >= removeAmount) {
+                if (toRemove.stream()
+                        .anyMatch(itemStack -> ItemUtils.removeItems(player, itemStack, removeAmount))) {
                     return PlayerWishStatus.Allow;
                 }
             }
@@ -784,60 +766,66 @@ public class WishManager {
         yaml.setPathPrefix("CONDITION");
 
         // 权限检查
-        if (!permission.isEmpty() && !player.hasPermission(permission)) return PlayerWishStatus.RequirementsNotMet;
+        if (!permission.isEmpty() && !player.hasPermission(permission)) {
+            return PlayerWishStatus.RequirementsNotMet;
+        }
 
         // 等级检查
-        if (player.getLevel() < level) return PlayerWishStatus.RequirementsNotMet;
+        if (player.getLevel() < level) {
+            return PlayerWishStatus.RequirementsNotMet;
+        }
 
         // 如果开启了许愿次数限制
-        if (isEnabledWishLimit(wishName) && !handleWishIncreasedAmount(wishName, player)) return PlayerWishStatus.ReachLimit;
+        if (isEnabledWishLimit(wishName) && !handleWishIncreasedAmount(wishName, player)) {
+            return PlayerWishStatus.ReachLimit;
+        }
 
         // 背包物品检查
+        Cache<ItemStack, Integer> inventoryHaveRemovedItems = CaffeineUtils.buildBukkitCache();
+
         for (String configInventoryHave : yaml.getStringList("INVENTORY-HAVE")) {
-            if (configInventoryHave.isEmpty()) continue;
+            if (configInventoryHave.isEmpty()) {
+                continue;
+            }
 
-            String[] configInventoryHaveSplit = QuickUtils.stripColor(QuickUtils.handleStrings(configInventoryHave.split(";"), player));
+            String[] configInventoryHaveCustomSplit = QuickUtils.stripColor(QuickUtils.handleStrings(configInventoryHave.split(";"), player));
 
-            int checkAmount = Integer.parseInt(configInventoryHaveSplit[1]);
-            int removeAmount = Integer.parseInt(configInventoryHaveSplit[2]);
+            int checkAmount = Integer.parseInt(configInventoryHaveCustomSplit[1]);
+            int removeAmount = Integer.parseInt(configInventoryHaveCustomSplit[2]);
+            Material material = ItemUtils.materialValueOf(configInventoryHaveCustomSplit[0], wishName);
 
-            Material material = ItemUtils.materialValueOf(configInventoryHaveSplit[0], wishName);
+            // 物品数据
+            ConcurrentLinkedQueue<ItemStack> toRemove = Arrays.stream(player.getInventory().getContents())
+                    .filter(Objects::nonNull)
+                    .filter(itemStack -> itemStack.getType() == material)
+                    .collect(Collectors.toCollection(ConcurrentLinkedQueue::new));
 
-            // 数量检查
-            int itemAmount = player.getInventory().all(material).values().stream()
-                    .filter(itemStack -> itemStack != null && itemStack.getType() == material)
-                    .mapToInt(ItemStack::getAmount).sum();
-
-            if (checkAmount > itemAmount || removeAmount > itemAmount) return PlayerWishStatus.RequirementsNotMet;
+            if (toRemove.isEmpty() || toRemove.stream().mapToInt(ItemStack::getAmount).sum() < checkAmount) {
+                return PlayerWishStatus.RequirementsNotMet;
+            }
 
             // 物品移除
             if (removeAmount > 0) {
-                int removedAmount = 0;
-
-                ItemStack[] toRemove = player.getInventory().all(material).values().toArray(new ItemStack[0]);
-
-                for (ItemStack item : toRemove) {
-                    if (removedAmount >= removeAmount) break;
-
-                    int itemToRemove = Math.min(item.getAmount(), removeAmount - removedAmount);
-                    removedAmount += itemToRemove;
-
-                    if (item.getAmount() == itemToRemove) {
-                        player.getInventory().removeItem(item);
-                    } else {
-                        item.setAmount(item.getAmount() - itemToRemove);
-                    }
-                }
+                int removedAmount = toRemove.stream()
+                        .limit(removeAmount)
+                        .mapToInt(ItemStack::getAmount)
+                        .sum();
 
                 if (removedAmount < removeAmount) {
                     return PlayerWishStatus.RequirementsNotMet;
                 }
+
+                toRemove.forEach(item -> inventoryHaveRemovedItems.put(item, removeAmount));
             }
         }
 
         // 背包物品检查 - 自定义物品
+        Cache<ItemStack, Integer> inventoryHaveCustomRemovedItems = CaffeineUtils.buildBukkitCache();
+
         for (String configInventoryHaveCustom : yaml.getStringList("INVENTORY-HAVE-CUSTOM")) {
-            if (configInventoryHaveCustom.isEmpty()) continue;
+            if (configInventoryHaveCustom.isEmpty()) {
+                continue;
+            }
 
             String[] configInventoryHaveCustomSplit = QuickUtils.stripColor(QuickUtils.handleStrings(configInventoryHaveCustom.split(";"), player));
 
@@ -847,99 +835,91 @@ public class WishManager {
             int removeAmount = Integer.parseInt(configInventoryHaveCustomSplit[3]);
 
             // 物品数据
-            ConcurrentLinkedQueue<ItemStack> toRemove = new ConcurrentLinkedQueue<>();
+            ConcurrentLinkedQueue<ItemStack> toRemove = Arrays.stream(player.getInventory().getContents())
+                    .filter(Objects::nonNull)
+                    .filter(itemStack -> {
+                        ItemMeta itemMeta = itemStack.getItemMeta();
 
-            for (ItemStack itemStack : player.getInventory().getContents()) {
-                if (itemStack == null) continue;
+                        return itemMeta != null && itemMeta.hasDisplayName() && QuickUtils.stripColor(itemMeta.getDisplayName()).equals(itemName)
+                                && (itemLoreContains.isEmpty() || Optional.ofNullable(itemMeta.getLore())
+                                .map(lore -> lore.stream().anyMatch(line -> QuickUtils.stripColor(line).contains(itemLoreContains)))
+                                .orElse(false));
+                    })
+                    .collect(Collectors.toCollection(ConcurrentLinkedQueue::new));
 
-                ItemMeta itemMeta = itemStack.getItemMeta();
-
-                if (itemMeta == null) continue;
-
-                // 物品名称匹配
-                if (!itemMeta.hasDisplayName() || !QuickUtils.stripColor(itemMeta.getDisplayName()).equals(itemName)) {
-                    continue;
-                }
-
-                // 包含文本匹配
-                if (!itemLoreContains.isEmpty()) {
-                    List<String> lore = itemMeta.getLore();
-                    if (lore == null || lore.stream().noneMatch(line -> QuickUtils.stripColor(line).contains(itemLoreContains))) {
-                        continue;
-                    }
-                }
-
-                toRemove.add(itemStack);
-            }
-
-            if (toRemove.size() == 0) {
-                return PlayerWishStatus.RequirementsNotMet;
-            }
-
-            // 数量检查
-            int itemAmount = toRemove.stream().mapToInt(ItemStack::getAmount).sum();
-
-            if (itemAmount < checkAmount) {
+            if (toRemove.isEmpty() || toRemove.stream().mapToInt(ItemStack::getAmount).sum() < checkAmount) {
                 return PlayerWishStatus.RequirementsNotMet;
             }
 
             // 物品移除
             if (removeAmount > 0) {
-                int removedAmount = 0;
-
-                for (ItemStack item : toRemove) {
-                    if (removedAmount >= removeAmount) break;
-
-                    int amountToRemove = Math.min(item.getAmount(), removeAmount - removedAmount);
-
-                    if (amountToRemove <= 0) continue;
-
-                    item.setAmount(item.getAmount() - amountToRemove);
-
-                    if (item.getAmount() <= 0) player.getInventory().removeItem(item);
-
-                    removedAmount += amountToRemove;
-                }
+                int removedAmount = toRemove.stream()
+                        .limit(removeAmount)
+                        .mapToInt(ItemStack::getAmount)
+                        .sum();
 
                 if (removedAmount < removeAmount) {
                     return PlayerWishStatus.RequirementsNotMet;
                 }
+
+                toRemove.stream()
+                        .limit(removeAmount)
+                        .forEach(item -> inventoryHaveCustomRemovedItems.put(item, removedAmount - removeAmount));
             }
         }
 
         // 检查玩家是否拥有指定的药水效果
-        for (String effect : yaml.getStringList("PLAYER-HAVE-EFFECTS")) {
-            if (effect.isEmpty()) continue;
+        if (yaml.getStringList("PLAYER-HAVE-EFFECTS").stream()
+                .filter(effect -> !effect.isEmpty())
+                .map(effect -> QuickUtils.handleStrings(effect.split(";"), player))
+                .map(effectInfo -> {
+                    String effectType = effectInfo[0].toUpperCase(Locale.ROOT);
+                    PotionEffectType potionEffectType = PotionEffectType.getByName(effectType);
 
-            String[] effectInfo = QuickUtils.handleStrings(effect.split(";"), player);
-            String effectType = effectInfo[0].toUpperCase(Locale.ROOT);
-            PotionEffectType potionEffectType = PotionEffectType.getByName(effectType);
-            int effectAmplifier = Integer.parseInt(effectInfo[1]);
+                    int effectAmplifier = Integer.parseInt(effectInfo[1]);
 
-            if (potionEffectType == null) {
-                ExceptionUtils.sendUnknownWarn("药水效果", wishName, effectType);
-                return PlayerWishStatus.RequirementsNotMet;
-            }
+                    if (potionEffectType == null) {
+                        ExceptionUtils.sendUnknownWarn("药水效果", wishName, effectType);
+                        return false;
+                    }
 
-            if (!player.hasPotionEffect(potionEffectType) || player.getPotionEffect(potionEffectType).getAmplifier() < effectAmplifier) return PlayerWishStatus.RequirementsNotMet;
+                    return player.hasPotionEffect(potionEffectType) && player.getPotionEffect(potionEffectType).getAmplifier() >= effectAmplifier;
+                })
+                .anyMatch(hasEffect -> !hasEffect)) {
+            return PlayerWishStatus.RequirementsNotMet;
         }
 
         // 检查自定义条件
-        for (String custom : yaml.getStringList("CUSTOM")) {
-            if (custom.isEmpty()) continue;
-
-            if (!QuickUtils.handleBoolean(custom)) return PlayerWishStatus.RequirementsNotMet;
+        List<String> configCustomConditions = yaml.getStringList("CUSTOM");
+        if (!configCustomConditions.isEmpty() && configCustomConditions.stream()
+                .anyMatch(condition -> !condition.isEmpty() && !QuickUtils.handleBoolean(condition, player))) {
+            return PlayerWishStatus.RequirementsNotMet;
         }
 
         // 扣除
         Economy economy = RegisterManager.getEconomy();
         PlayerPointsAPI playerPointsAPI = RegisterManager.getPlayerPointsAPI();
 
-        if (economy != null && money > 0 && !economy.has(player, money)) return PlayerWishStatus.RequirementsNotMet;
-        if (playerPointsAPI != null && point > 0 && playerPointsAPI.look(player.getUniqueId()) < point) return PlayerWishStatus.RequirementsNotMet;
+        if (economy != null && money > 0 && !economy.has(player, money)) {
+            return PlayerWishStatus.RequirementsNotMet;
+        }
 
-        if (economy != null && money > 0) economy.withdrawPlayer(player, money);
-        if (playerPointsAPI != null && point > 0) playerPointsAPI.take(player.getUniqueId(), point);
+        if (playerPointsAPI != null && point > 0 && playerPointsAPI.look(player.getUniqueId()) < point) {
+            return PlayerWishStatus.RequirementsNotMet;
+        }
+
+        if (economy != null && money > 0) {
+            economy.withdrawPlayer(player, money);
+        }
+
+        if (playerPointsAPI != null && point > 0) {
+            playerPointsAPI.take(player.getUniqueId(), point);
+        }
+
+        if (!Stream.concat(inventoryHaveRemovedItems.asMap().entrySet().stream(), inventoryHaveCustomRemovedItems.asMap().entrySet().stream())
+                .allMatch(entry -> ItemUtils.removeItems(player, entry.getKey(), entry.getValue()))) {
+            return PlayerWishStatus.RequirementsNotMet;
+        }
 
         return PlayerWishStatus.Allow;
     }

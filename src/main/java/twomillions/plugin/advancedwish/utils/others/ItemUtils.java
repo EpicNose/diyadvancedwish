@@ -1,11 +1,17 @@
 package twomillions.plugin.advancedwish.utils.others;
 
 import lombok.experimental.UtilityClass;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import twomillions.plugin.advancedwish.annotations.JsInteropJavaType;
 import twomillions.plugin.advancedwish.utils.exceptions.ExceptionUtils;
-import org.bukkit.Material;
 
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 
 /**
  * 物品工具类，提供了一些有关物品的静态方法。
@@ -47,5 +53,56 @@ public class ItemUtils {
         } catch (IllegalArgumentException exception) {
             return Material.AIR;
         }
+    }
+
+    /**
+     * 从玩家背包中移除指定的物品数量。
+     *
+     * @param player 要移除物品的玩家
+     * @param itemStack 要移除的物品 ItemStack
+     * @param removeAmount 要移除的数量
+     * @return 是否成功移除了指定的数量的物品
+     */
+    public static boolean removeItems(Player player, ItemStack itemStack, int removeAmount) {
+        ConcurrentLinkedQueue<ItemStack> toRemove = Arrays.stream(player.getInventory().getContents())
+                .filter(Objects::nonNull)
+                .filter(is -> is.isSimilar(itemStack))
+                .collect(Collectors.toCollection(ConcurrentLinkedQueue::new));
+
+        /*
+         * 背包中没有足够的物品
+         */
+        if (toRemove.isEmpty() || toRemove.stream().mapToInt(ItemStack::getAmount).sum() < removeAmount) {
+            return false;
+        }
+
+        int removedAmount = toRemove.stream()
+                .limit(removeAmount)
+                .mapToInt(ItemStack::getAmount)
+                .sum();
+
+        /*
+         * 背包中没有足够的物品
+         */
+        if (removedAmount < removeAmount) {
+            return false;
+        }
+
+        for (ItemStack stack : toRemove) {
+            int amount = Math.min(stack.getAmount(), removeAmount);
+
+            stack.setAmount(stack.getAmount() - amount);
+            removeAmount -= amount;
+
+            if (stack.getAmount() <= 0) {
+                player.getInventory().remove(stack);
+            }
+
+            if (removeAmount <= 0) {
+                break;
+            }
+        }
+
+        return true;
     }
 }
