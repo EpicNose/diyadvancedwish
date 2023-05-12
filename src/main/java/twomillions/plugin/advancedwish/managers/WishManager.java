@@ -864,7 +864,7 @@ public class WishManager {
 
                 toRemove.stream()
                         .limit(removeAmount)
-                        .forEach(item -> inventoryHaveCustomRemovedItems.put(item, removedAmount - removeAmount));
+                        .forEach(item -> inventoryHaveCustomRemovedItems.put(item, removeAmount));
             }
         }
 
