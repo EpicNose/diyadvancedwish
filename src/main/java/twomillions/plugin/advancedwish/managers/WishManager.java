@@ -273,20 +273,20 @@ public class WishManager {
 
             if (guaranteed != playerWishGuaranteed) continue;
 
-            double addGuaranteed = addGuaranteedList.stream()
-                    .mapToDouble(s -> QuickUtils.handleDouble(s, player))
-                    .sum();
-
-            boolean clearGuaranteed = clearGuaranteedList.stream()
-                    .map(s -> QuickUtils.handleBoolean(s, player))
-                    .findFirst()
-                    .orElse(false);
-
             String effect = effectList.stream()
-                    .map(s -> QuickUtils.handleString(s, player))
+                    .map(s -> QuickUtils.handleString(s, player, "_guaranteed_", guaranteed))
                     .filter(s -> !s.isEmpty())
                     .findFirst()
                     .orElse("");
+
+            double addGuaranteed = addGuaranteedList.stream()
+                    .mapToDouble(s -> QuickUtils.handleDouble(s, player, "_guaranteed_", guaranteed, "_effect_", effect))
+                    .sum();
+
+            boolean clearGuaranteed = clearGuaranteedList.stream()
+                    .map(s -> QuickUtils.handleBoolean(s, player, "_guaranteed_", guaranteed, "_effect_", effect, "_addGuaranteed_", addGuaranteed))
+                    .findFirst()
+                    .orElse(false);
 
             if (!effect.isEmpty()) {
                 String guaranteedString = guaranteed + ";" + effect + ";" + addGuaranteed + ";" + clearGuaranteed;
@@ -314,19 +314,21 @@ public class WishManager {
             int probability = probabilityList.stream()
                     .mapToInt(s -> QuickUtils.handleInt(s, player))
                     .sum();
-            double addGuaranteed = addGuaranteedList.stream()
-                    .mapToDouble(s -> QuickUtils.handleDouble(s, player))
-                    .sum();
-            boolean clearGuaranteed = clearGuaranteedList.stream()
-                    .map(s -> QuickUtils.handleBoolean(s, player))
-                    .findFirst()
-                    .orElse(false);
 
             String effect = effectList.stream()
-                    .map(s -> QuickUtils.handleString(s, player))
+                    .map(s -> QuickUtils.handleString(s, player, "_probability_", probability))
                     .filter(s -> !s.isEmpty())
                     .findFirst()
                     .orElse("");
+
+            double addGuaranteed = addGuaranteedList.stream()
+                    .mapToDouble(s -> QuickUtils.handleDouble(s, player, "_probability_", probability, "_effect_", effect))
+                    .sum();
+
+            boolean clearGuaranteed = clearGuaranteedList.stream()
+                    .map(s -> QuickUtils.handleBoolean(s, player, "_probability_", probability, "_effect_", effect, "_addGuaranteed_", addGuaranteed))
+                    .findFirst()
+                    .orElse(false);
 
             if (!effect.isEmpty()) {
                 String prizeSetString = probability + ";" + effect + ";" + addGuaranteed + ";" + clearGuaranteed;

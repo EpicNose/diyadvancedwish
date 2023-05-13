@@ -499,6 +499,165 @@ public class AdvancedWishCommand extends Command {
         }
     }
 
+    @SubCommand("addAmount")
+    public void handleAddAmountCommand(CommandSender sender, String[] args) {
+        boolean isConsole = isConsole(sender, false);
+
+        if (!isAdmin(sender, true)) {
+            return;
+        }
+
+        if (args.length < 4) {
+            if (isConsole) {
+                QuickUtils.sendMessage(sender, "COMMAND-ERROR");
+            } else {
+                QuickUtils.sendMessage((Player) sender, "COMMAND-ERROR");
+            }
+            return;
+        }
+
+        String wishName = args[1];
+        String playerName = args[2];
+        int amount;
+
+        try {
+            amount = Integer.parseInt(args[3]);
+        } catch (NumberFormatException exception) {
+            if (isConsole) {
+                QuickUtils.sendMessage(sender, "MUST-NUMBER");
+            } else {
+                QuickUtils.sendMessage((Player) sender, "MUST-NUMBER");
+            }
+            return;
+        }
+
+        if (!WishManager.hasWish(wishName)) {
+            if (isConsole) {
+                QuickUtils.sendMessage(sender, "WISH-NOT-HAVE");
+            } else {
+                QuickUtils.sendMessage((Player) sender, "WISH-NOT-HAVE");
+            }
+            return;
+        }
+
+        WishManager.setPlayerWishAmount(playerName, wishName, WishManager.getPlayerWishAmount(playerName, wishName) + amount);
+
+        if (isConsole) {
+            QuickUtils.sendMessage(sender, "DONE");
+        } else {
+            QuickUtils.sendMessage((Player) sender, "DONE");
+        }
+    }
+
+    @SubCommand("addGuaranteed")
+    public void handleAddGuaranteedCommand(CommandSender sender, String[] args) {
+        boolean isConsole = isConsole(sender, false);
+
+        if (!isAdmin(sender, true)) {
+            return;
+        }
+
+        if (args.length < 4) {
+            if (isConsole) {
+                QuickUtils.sendMessage(sender, "COMMAND-ERROR");
+            } else {
+                QuickUtils.sendMessage((Player) sender, "COMMAND-ERROR");
+            }
+            return;
+        }
+
+        String wishName = args[1];
+        String playerName = args[2];
+        double guaranteed;
+
+        try {
+            guaranteed = Double.parseDouble(args[3]);
+        } catch (NumberFormatException exception) {
+            if (isConsole) {
+                QuickUtils.sendMessage(sender, "MUST-NUMBER");
+            } else {
+                QuickUtils.sendMessage((Player) sender, "MUST-NUMBER");
+            }
+            return;
+        }
+
+        if (!WishManager.hasWish(wishName)) {
+            if (isConsole) {
+                QuickUtils.sendMessage(sender, "WISH-NOT-HAVE");
+            } else {
+                QuickUtils.sendMessage((Player) sender, "WISH-NOT-HAVE");
+            }
+            return;
+        }
+
+        WishManager.setPlayerWishGuaranteed(playerName, wishName, WishManager.getPlayerWishGuaranteed(playerName, wishName) + guaranteed);
+
+        if (isConsole) {
+            QuickUtils.sendMessage(sender, "DONE");
+        } else {
+            QuickUtils.sendMessage((Player) sender, "DONE");
+        }
+    }
+
+    @SubCommand("addLimitAmount")
+    public void handleAddLimitAmountCommand(CommandSender sender, String[] args) {
+        boolean isConsole = isConsole(sender, false);
+
+        if (!isAdmin(sender, true)) {
+            return;
+        }
+
+        if (args.length < 4) {
+            if (isConsole) {
+                QuickUtils.sendMessage(sender, "COMMAND-ERROR");
+            } else {
+                QuickUtils.sendMessage((Player) sender, "COMMAND-ERROR");
+            }
+            return;
+        }
+
+        String wishName = args[1];
+        String playerName = args[2];
+        int limitAmount;
+
+        try {
+            limitAmount = Integer.parseInt(args[3]);
+        } catch (NumberFormatException exception) {
+            if (isConsole) {
+                QuickUtils.sendMessage(sender, "MUST-NUMBER");
+            } else {
+                QuickUtils.sendMessage((Player) sender, "MUST-NUMBER");
+            }
+            return;
+        }
+
+        if (!WishManager.hasWish(wishName)) {
+            if (isConsole) {
+                QuickUtils.sendMessage(sender, "WISH-NOT-HAVE");
+            } else {
+                QuickUtils.sendMessage((Player) sender, "WISH-NOT-HAVE");
+            }
+            return;
+        }
+
+        if (!WishManager.isEnabledWishLimit(wishName)) {
+            if (isConsole) {
+                QuickUtils.sendMessage(sender, "WISH-NOT-ENABLED-LIMIT");
+            } else {
+                QuickUtils.sendMessage((Player) sender, "WISH-NOT-ENABLED-LIMIT");
+            }
+            return;
+        }
+
+        WishManager.setPlayerWishLimitAmount(playerName, wishName, WishManager.getPlayerWishLimitAmount(playerName, wishName) + limitAmount);
+
+        if (isConsole) {
+            QuickUtils.sendMessage(sender, "DONE");
+        } else {
+            QuickUtils.sendMessage((Player) sender, "DONE");
+        }
+    }
+
     @SubCommand("resetLimitAmount")
     public void handleResetLimitAmountCommand(CommandSender sender, String[] args) {
         boolean isConsole = isConsole(sender, false);

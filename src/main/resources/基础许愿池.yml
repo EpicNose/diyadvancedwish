@@ -1,5 +1,5 @@
 # 配置版本 请不要擅自更改，插件将在启动时检查配置文件版本，并告诉您您是否应该重新生成来防止错误。
-CONFIG-VERSION: 68
+CONFIG-VERSION: 69
 
 # 自动重载:
 #  除了 ADVANCED-SETTINGS WISH-LIMIT 以外，
@@ -8,7 +8,10 @@ CONFIG-VERSION: 68
 # 注意:
 #  本插件本体不提供任何 Gui 界面。
 #  您需要使用其他菜单自行制作 Gui 界面以供玩家更好地许愿，当然您也可以选择使用指令进行许愿。
-
+#
+# 全局占位符:
+#  "_pluginPath_" - 解析为插件 plugins 文件夹的完整路径，例: D:\MinecraftTestServers\测试群组\1.12.2 - Sevrer3\plugins
+#
 # 随机结果获取方式:
 #  其中有: Normal / SecureRandom / MonteCarlo / Shuffle / Gaussian / MersenneTwister / XORShift
 #
@@ -104,16 +107,28 @@ PRIZE-SET:
 
     # A 中奖后的执行节点。
     # 效果只能有一个，若出现多个则按照顺序进行选择。
+    #
+    #  可用占位符:
+    #   "_probability_" - PROBABILITY 解析后的内容。
     EFFECT:
       - "DO-LIST.A"
 
     # A 中奖后增加的保底率。 (先检查是否清除，后进行增加)
     # 多条增加的报保底率将会叠加。
+    #
+    #  可用占位符:
+    #   "_probability_" - PROBABILITY 解析后的内容。
+    #   "_effect_" - EFFECT 解析后的内容。
     ADD-GUARANTEED:
       - "0"
 
     # A 中奖后是否清除保底率。 (先检查是否清除，后进行增加)
     # 只能有一个 true 或一个 false，若出现多个则按照顺序进行选择。
+    #
+    #  可用占位符:
+    #   "_probability_" - PROBABILITY 解析后的内容。
+    #   "_effect_" - EFFECT 解析后的内容。
+    #   "_addGuaranteed_" - ADD-GUARANTEED 解析后的内容。
     CLEAR-GUARANTEED:
       - "true"
 
@@ -170,16 +185,28 @@ GUARANTEED:
     # 若返回为空则会判定为此保底无法被触发，则会检查下一个保底，若没有可用保底则进行正常抽奖随机。
     # 此处 DO-LIST.B 使用双引号进行包裹是因为此处使用特殊的语句，既二元运算符，需要返回固定类型，若不进行包裹则会视为特殊语句进行解析并出现错误。
     # 下方的保底不使用双引号进行包裹是因为其没有使用特殊语句，将会被直接当作字符串进行返回。
+    #
+    #  可用占位符:
+    #   "_guaranteed_" - GUARANTEED 解析后的内容。
     EFFECT:
       - "%aw_amount_基础许愿池% == 0 ? \"DO-LIST.B\" : null"
 
     # 此保底增加的保底率。 (先检查是否清除，后进行增加)
     # 多条增加的报保底率将会叠加。
+    #
+    #  可用占位符:
+    #   "_guaranteed_" - GUARANTEED 解析后的内容。
+    #   "_effect_" - EFFECT 解析后的内容。
     ADD-GUARANTEED:
       - "0"
 
     # 此保底触发后是否清除保底率。 (先检查是否清除，后进行增加)
     # 只能有一个 true 或一个 false，若出现多个则按照顺序进行选择。
+    #
+    #  可用占位符:
+    #   "_guaranteed_" - GUARANTEED 解析后的内容。
+    #   "_effect_" - EFFECT 解析后的内容。
+    #   "_addGuaranteed_" - ADD-GUARANTEED 解析后的内容。
     CLEAR-GUARANTEED:
       - "true"
 
@@ -227,18 +254,24 @@ GUARANTEED:
       - "method.randomSentence(\"DO-LIST.A\", 5, \"DO-LIST.B\", 5)"
 
     # 此保底增加的保底率。 (先检查是否清除，后进行增加)
+    #
+    # 解析:
+    #  此处由于有两个返回 DO-LIST.A / DO-LIST.B，我们希望如果是 A 则不添加，B 则添加 1 点保底率。
+    #  我们可以使用 _effect_ 占位符来获取 EFFECT 解析后的内容，既到底是 A 还是 B，进行简单的判断。
+    #  这样写比较复杂，除此之外您还可以在 A 的执行效果中使用指令进行添加，B 中则不添加，在此设置为 0 即可。
+    #
+    #  在 1.1.1 版本过后，我们添加了 addAmount / addGuaranteed / addLimitAmount 指令。
     ADD-GUARANTEED:
-      - "0"
+      - "if (_effect_ === \"DO-LIST.A\") { 0 } else { 1 }"
 
     # 此保底触发后是否清除保底率。 (先检查是否清除，后进行增加)
     CLEAR-GUARANTEED:
-      - "false"
+      - "if (_effect_ === \"DO-LIST.A\") { true } else { false }"
 
 # 我们应该怎么样写等待时间，这里将以秒为单位 (此任务支持跨服执行)
 #
-# 占位符:
+# 可用占位符:
 #  "_node_" - 解析为此次抽奖的执行结果。
-#  "_pluginPath_" - 解析为插件 plugins 文件夹的完整路径，例: D:\MinecraftTestServers\测试群组\1.12.2 - Sevrer3\plugins
 #
 # 使用技巧:
 #  这里可以延迟玩家的许愿时间，比如玩家需要等待十分钟，亦或者是五分钟才可以拿到最终地许愿奖品。
